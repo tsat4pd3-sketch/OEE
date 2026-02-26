@@ -755,7 +755,7 @@ function rDefPart(){
 }
 
 function rRemarks(){
-  const rows=[...FD].sort((a,b)=>b.date-a.date).filter(d=>d.remark||d.commentBoss||d.dtTypes.length||d.defTypes.length).slice(0,50);
+  const rows=[...FD].sort((a,b)=>b.date-a.date).filter(d=>d.oee>0&&(d.remark||d.commentBoss||d.dtTypes.length||d.defTypes.length)).slice(0,50);
   document.getElementById("rem-tb").innerHTML=rows.map(d=>{
     const dtTags=d.dtTypes.slice(0,3).map(t=>`<span class="tag tag-dt">${t.type} ${t.val}m</span>`).join("");
     const defTags=d.defTypes.slice(0,2).map(t=>`<span class="tag tag-q">${t.type}</span>`).join("");
