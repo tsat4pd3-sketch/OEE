@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep Analysis PD4</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090f;--bg2:#0d1117;--bg3:#13192a;--card:#0f1520;--border:#1c2640;--border2:#243050;
+  --gold:#f59e0b;--cyan:#38bdf8;--green:#22c55e;--red:#f43f5e;--purple:#a855f7;
+  --text:#dce4f0;--muted:#526080;--sidebar:252px;
+  --font-body:'IBM Plex Sans Thai',sans-serif;--font-display:'Space Grotesk',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -20%,#f59e0b06 0%,transparent 60%);pointer-events:none;z-index:0}
+#sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100}
+.logo{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
+.logo-tag{font-family:var(--font-display);font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:5px}
+.logo h1{font-family:var(--font-display);font-size:20px;font-weight:700;color:#fff;line-height:1.1}
+.logo-sub{font-size:10px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:6px}
+.badge{padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700}
+.bl{background:#22c55e;color:#000}.bc{background:#f59e0b;color:#000}.bx{background:#526080;color:#fff}
+.nav-links{padding:10px 12px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--border)}
+.nav-btn{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:7px;font-size:11px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .2s;background:none;width:100%;text-align:left;font-family:var(--font-body)}
+.nav-btn:hover,.nav-btn.active{background:#f59e0b12;border-color:#f59e0b33;color:var(--gold)}
+.ss{padding:10px 14px 4px}
+.ss-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.ss input,.ss select{width:100%;padding:7px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--font-body);font-size:12px;margin-bottom:6px;outline:none}
+.ss input:focus,.ss select:focus{border-color:var(--gold)}
+.part-list{max-height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.pcb{display:flex;align-items:center;gap:6px;padding:4px 7px;border-radius:5px;cursor:pointer;font-size:11px}
+.pcb:hover{background:var(--bg3)}
+.pcb input{accent-color:var(--gold);width:12px;height:12px}
+.btn-row{display:flex;gap:5px;margin-bottom:6px}
+.btn-xs{flex:1;padding:4px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);border-radius:5px;cursor:pointer;font-size:10px;font-family:var(--font-body)}
+.btn-xs:hover{border-color:var(--gold);color:var(--gold)}
+.btn-refresh{margin:8px 14px 2px;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--cyan);font-family:var(--font-body);font-size:12px;cursor:pointer;width:calc(100% - 28px)}
+.auto-info{font-size:9px;color:var(--muted);text-align:center;padding:4px 12px 12px;line-height:1.5}
+#main{flex:1;padding:24px 26px 40px;overflow-y:auto;position:relative;z-index:1}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+.topbar h2{font-family:var(--font-display);font-size:18px;font-weight:700;color:#fff}
+.topbar p{font-size:11px;color:var(--muted);margin-top:3px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 15px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.k0::after{background:linear-gradient(90deg,#f43f5e,#f59e0b)}.k1::after{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.k2::after{background:linear-gradient(90deg,#a855f7,#c084fc)}.k3::after{background:linear-gradient(90deg,#22c55e,#4ade80)}
+.k4::after{background:linear-gradient(90deg,#f43f5e,#f87171)}
+.kpi-lbl{font-size:10px;color:var(--muted);letter-spacing:.3px;margin-bottom:5px}
+.kpi-val{font-family:var(--font-display);font-size:22px;font-weight:700}.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px;margin-bottom:15px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.card-hdr h3{font-family:var(--font-display);font-size:12px;font-weight:600;color:#fff;display:flex;align-items:center;gap:6px}
+.card-hdr em{font-style:normal;font-size:10px;color:var(--muted)}
+.row{display:grid;gap:15px;margin-bottom:15px}.r2{grid-template-columns:1fr 1fr}
+@media(max-width:900px){.r2{grid-template-columns:1fr}}
+.ch{position:relative}
+.par-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.par-row:last-child{border-bottom:none}
+.par-label{flex:0 0 155px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.par-bar-bg{flex:1;background:var(--bg3);border-radius:3px;height:6px;overflow:hidden}
+.par-bar-fill{height:100%;border-radius:3px;transition:width .5s}
+.par-pct{flex:0 0 38px;text-align:right;font-size:11px;font-weight:700;color:var(--gold)}
+.par-val{flex:0 0 60px;text-align:right;font-size:10px;color:var(--muted)}
+.par-cum{flex:0 0 42px;text-align:right;font-size:9px;color:#334155}
+.tbl-wrap{overflow-x:auto;max-height:300px;overflow-y:auto}
+.dt-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:600;padding:7px 9px;text-align:left;font-size:10px;position:sticky;top:0}
+.dt-tbl td{padding:7px 9px;border-bottom:1px solid var(--border)}
+.dt-tbl tr:hover td{background:#ffffff04}
+.bar-bg{background:var(--bg3);border-radius:3px;height:6px;overflow:hidden}.bar-fill{height:100%;border-radius:3px;transition:width .5s}
+.heat-cell{border-radius:3px;display:flex;align-items:center;justify-content:center;cursor:default;font-size:8px}
+.heat-cell:hover{transform:scale(1.1);z-index:5}
+/* AI */
+.ai-wrap{background:linear-gradient(135deg,#080f1e,#0f0d1e);border:1px solid #2a1f5e;border-radius:11px;padding:18px;margin-bottom:15px}
+.ai-hdr{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.ai-orb{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#7c3aed,var(--cyan));display:flex;align-items:center;justify-content:center;font-size:17px}
+.ai-hdr h3{font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--cyan);letter-spacing:.5px}
+.ai-hdr span{font-size:10px;color:var(--muted)}
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:800px){.ai-grid{grid-template-columns:1fr}}
+.ai-sec h4{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.ai-sec ul{list-style:none;display:flex;flex-direction:column;gap:4px}
+.ai-sec li{font-size:12px;color:#cbd5e1;padding:7px 10px;border-radius:6px;line-height:1.6;border-left:2px solid var(--border)}
+.ai-sec li.w{border-left-color:var(--red);background:#f43f5e06}
+.ai-sec li.y{border-left-color:var(--gold);background:#f59e0b06}
+.ai-sec li.g{border-left-color:var(--green);background:#22c55e06}
+.act-item{display:flex;gap:10px;align-items:flex-start;border-radius:7px;padding:8px 12px;margin-bottom:5px;border:1px solid}
+.act-pri{flex:0 0 36px;font-size:10px;font-weight:700;padding-top:1px}
+.act-title{font-size:12px;font-weight:600}.act-res{font-size:11px;color:var(--muted);margin-top:2px}
+.st-bar{border-left:3px solid;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:12px}
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+#loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;transition:opacity .5s}
+.ld-ring{width:42px;height:42px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="loading">
+  <div class="ld-ring"></div>
+  <div style="font-family:var(--font-display);font-size:14px;color:var(--gold);letter-spacing:3px">PD4 DEEP ANALYSIS</div>
+  <p id="ldmsg" style="font-size:11px;color:var(--muted)">กำลังโหลดข้อมูล...</p>
+</div>
+
+<aside id="sidebar">
+  <div class="logo">
+    <div class="logo-tag">Deep Analysis — PD4</div>
+    <h1>DOWNTIME<br>&amp; QUALITY</h1>
+    <div class="logo-sub">
+      <span id="src-badge" class="badge bx">...</span>
+      <span id="last-update" style="font-size:9px;color:var(--muted)"></span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-btn" href="oee_dashboard_final.html">📊 PD3 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd3.html">🔍 Deep Analysis PD3</a>
+    <a class="nav-btn" href="oee_pd4.html">🏭 PD4 Overview</a>
+    <a class="nav-btn active">🔎 Deep Analysis PD4</a>
+  </div>
+  <div class="ss">
+    <div class="ss-label">📅 ช่วงวันที่</div>
+    <input type="date" id="date-from">
+    <input type="date" id="date-to">
+  </div>
+  <div class="ss">
+    <div class="ss-label">กะ</div>
+    <select id="shift-sel">
+      <option value="all">ทุกกะ</option>
+      <option value="กลางวัน">กลางวัน</option>
+      <option value="กลางคืน">กลางคืน</option>
+    </select>
+  </div>
+  <div class="ss">
+    <div class="ss-label">ชิ้นงาน</div>
+    <div class="btn-row">
+      <button class="btn-xs" onclick="selectAll(true)">✅ ทั้งหมด</button>
+      <button class="btn-xs" onclick="selectAll(false)">❌ ล้าง</button>
+    </div>
+    <div class="part-list" id="part-list"></div>
+  </div>
+  <button class="btn-refresh" onclick="refreshLive()">🌐 ดึงข้อมูลใหม่</button>
+  <div class="auto-info">🔄 Auto-refresh ทุก 1 ชม.<br>ครั้งถัดไป: <span id="next-refresh">—</span></div>
+</aside>
+
+<main id="main">
+  <div class="topbar">
+    <div>
+      <h2>🔎 Deep Analysis — PD4</h2>
+      <p id="range-lbl">—</p>
+    </div>
+    <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi k0"><div class="kpi-lbl">Total Downtime</div><div class="kpi-val" id="kdt">—</div><div class="kpi-sub" id="kdt-s"></div></div>
+    <div class="kpi k1"><div class="kpi-lbl">DT สาเหตุหลัก</div><div class="kpi-val" id="kdtmax" style="font-size:16px">—</div><div class="kpi-sub" id="kdtmax-s"></div></div>
+    <div class="kpi k2"><div class="kpi-lbl">Total Defect</div><div class="kpi-val" id="kdef">—</div><div class="kpi-sub" id="kdef-s"></div></div>
+    <div class="kpi k3"><div class="kpi-lbl">PPM สูงสุด</div><div class="kpi-val" id="kppm">—</div><div class="kpi-sub" id="kppm-s"></div></div>
+    <div class="kpi k4"><div class="kpi-lbl">วัน DT สูงสุด</div><div class="kpi-val" id="kworst" style="font-size:16px">—</div><div class="kpi-sub" id="kworst-s"></div></div>
+  </div>
+
+  <div class="row r2">
+    <div class="card"><div class="card-hdr"><h3>📊 Pareto DT Type<em>นาที / % สะสม</em></h3></div><div id="dt-pareto"></div></div>
+    <div class="card"><div class="card-hdr"><h3>📊 Pareto งานเสีย<em>ชิ้น / % สะสม</em></h3></div><div id="def-pareto"></div></div>
+  </div>
+
+  <div class="row r2">
+    <div class="card"><div class="card-hdr"><h3>📈 Downtime Trend<em>60 วัน / นาที</em></h3></div><div class="ch" style="height:210px"><canvas id="c-dt-trend"></canvas></div></div>
+    <div class="card"><div class="card-hdr"><h3>📈 PPM Trend + 7-day MA</h3></div><div class="ch" style="height:210px"><canvas id="c-ppm-trend"></canvas></div></div>
+  </div>
+
+  <div class="card"><div class="card-hdr"><h3>🔥 Heatmap DT<em>30 วัน × DT Type</em></h3></div><div id="dt-heat" style="overflow-x:auto"></div></div>
+  <div class="card"><div class="card-hdr"><h3>🔥 Heatmap PPM<em>30 วัน × ชิ้นงาน</em></h3></div><div id="ppm-heat" style="overflow-x:auto"></div></div>
+
+  <div class="card">
+    <div class="card-hdr"><h3>📊 DT แยกชิ้นงาน + DT Type<em>stacked</em></h3></div>
+    <div class="ch" style="height:230px"><canvas id="c-dt-line"></canvas></div>
+  </div>
+
+  <div class="card"><div class="card-hdr"><h3>📋 รายละเอียด Downtime รายวัน<em>50 วันล่าสุด</em></h3></div>
+    <div class="tbl-wrap"><table class="dt-tbl"><thead><tr id="dt-th"></tr></thead><tbody id="dt-tb"></tbody></table></div>
+  </div>
+
+  <div class="ai-wrap">
+    <div class="ai-hdr">
+      <div class="ai-orb">🤖</div>
+      <div><h3>AI DEEP ANALYSIS — PD4</h3><span>วิเคราะห์ DT Type, ประเภทงานเสีย, หมายเหตุ, เทรนด์</span></div>
+    </div>
+    <div id="ai-out"><p class="pulse" style="color:var(--muted);font-size:12px">กำลังรอข้อมูล...</p></div>
+  </div>
+</main>
+
+<script>
+const PD4_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSs034o0M970g62tL1jkU4CU6HpAbVkER87uw3OzI97ueA6xXdBdwXd1Gcd0GrgaKOuIrTl-F75q3nz/pub?gid=122174819&single=true&output=csv";
+let ALL=[],FD=[],PARTS=[],CH={};
+const DT_COLORS=["#f43f5e","#f59e0b","#a855f7","#38bdf8","#22c55e","#fb923c","#60a5fa","#e879f9","#34d399","#fbbf24"];
+
+function csvLine(l){const r=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(c);c="";}else c+=ch;}r.push(c);return r;}
+function parseThaiDate(s){if(!s)return null;s=s.trim().split(" ")[0];const p=s.split("/");if(p.length!==3)return null;const d=+p[0],m=+p[1]-1,y=+p[2];return new Date(y>2400?y-543:y,m,d);}
+function fmtDate(d){if(!d)return"—";return`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;}
+function fmtIso(d){return d.toISOString().split("T")[0];}
+
+function csvParse(text){
+  const lines=text.split("\n").filter(l=>l.trim());if(lines.length<2)return[];
+  const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
+  const g=(row,i)=>row[i]!==undefined?String(row[i]).trim():"";
+  const n=v=>{if(!v)return 0;const x=parseFloat(v.replace('%','').replace(/,/g,''));return isNaN(x)?0:x;};
+  const rows=[];
+  for(let r=1;r<lines.length;r++){
+    const row=csvLine(lines[r]);if(row.length<10)continue;
+    const date=parseThaiDate(g(row,59)||g(row,0));if(!date)continue;
+    const dtTypes=[];
+    for(let i=0;i<7;i++){const flag=g(row,21+i*3).toUpperCase();const type=g(row,22+i*3);const val=n(g(row,23+i*3));if((flag==="TRUE"||flag==="1")&&type&&val>0)dtTypes.push({type,val});}
+    const defTypes=[];
+    for(let i=0;i<3;i++){const flag=g(row,7+i*4).toUpperCase();const type=g(row,8+i*4);const qty=n(g(row,9+i*4));if((flag==="TRUE"||flag==="1")&&type&&qty>0)defTypes.push({type,qty});}
+    const totalDefect=defTypes.reduce((s,d)=>s+d.qty,0);
+    const totalDTMin=Math.round(n(g(row,74))*60);
+    rows.push({date,dateStr:fmtDate(date),part:g(row,1),suffix:g(row,2),shift:g(row,5),
+      total:n(g(row,6)),defect:totalDefect,defTypes,dtMin:totalDTMin,dtTypes,
+      avail:n(g(row,77)),perf:n(g(row,80)),qual:n(g(row,82)),oee:n(g(row,83)),
+      remark:g(row,51),commentBoss:g(row,55)});
+  }return rows;
+}
+
+async function loadData(){
+  setMsg("📡 กำลังดึงข้อมูล PD4...");
+  try{
+    const res=await fetch(PD4_URL+"&t="+Date.now(),{cache:"no-store",mode:"cors"});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const csv=await res.text();if(!csv||csv.length<100)throw new Error("ว่าง");
+    ALL=csvParse(csv);if(ALL.length<2)throw new Error("rows: "+ALL.length);
+    setBadge("● LIVE","bl");setUpdate("Live "+ALL.length+" rows");boot();
+  }catch(e){
+    document.getElementById("loading").innerHTML=`<div style="text-align:center;padding:28px;font-family:var(--font-body);max-width:420px;margin:0 auto">
+      <div style="font-size:40px;margin-bottom:10px">⚠️</div>
+      <h2 style="color:var(--red);font-family:var(--font-display);font-size:16px;margin-bottom:8px">โหลดไม่ได้: ${e.message}</h2>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:16px">ต้องเปิดจาก Web Server (GitHub Pages) — ไม่รองรับ local file</p>
+      <button onclick="loadData()" style="padding:9px 20px;background:var(--gold);border:none;border-radius:8px;color:#000;cursor:pointer;font-weight:700;font-size:12px">🔄 ลองใหม่</button>
+    </div>`;
+  }
+}
+async function refreshLive(){
+  setBadge("...","bx");
+  try{const res=await fetch(PD4_URL+"&t="+Date.now(),{cache:"no-store",mode:"cors"});
+    if(!res.ok)throw new Error(res.status);const csv=await res.text();
+    const parsed=csvParse(csv);if(parsed.length<2)throw new Error("rows น้อย");
+    ALL=parsed;setBadge("● LIVE","bl");setUpdate("Live "+ALL.length+" rows");
+    PARTS=[...new Set(ALL.map(d=>d.part))].filter(Boolean).sort();initParts();applyFilter();
+  }catch(e){setBadge("● ERR","bx");}
+}
+function boot(){PARTS=[...new Set(ALL.map(d=>d.part))].filter(Boolean).sort();initParts();setDefaultDates();
+  document.getElementById("date-from").addEventListener("change",applyFilter);
+  document.getElementById("date-to").addEventListener("change",applyFilter);
+  document.getElementById("shift-sel").addEventListener("change",applyFilter);
+  applyFilter();hideLd();startAutoRefresh();}
+let arTimer=null;
+function startAutoRefresh(){if(arTimer)clearInterval(arTimer);updateNextLabel();arTimer=setInterval(()=>refreshLive(),3600000);}
+function updateNextLabel(){const el=document.getElementById("next-refresh");if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})+" น.";}
+function setMsg(t){const p=document.getElementById("ldmsg");if(p)p.textContent=t;}
+function setBadge(t,cls){const b=document.getElementById("src-badge");if(b){b.textContent=t;b.className="badge "+cls;}}
+function setUpdate(t){document.getElementById("last-update").textContent=t;}
+function hideLd(){const el=document.getElementById("loading");el.style.opacity="0";setTimeout(()=>el.style.display="none",500);}
+function initParts(){document.getElementById("part-list").innerHTML=PARTS.map(p=>`<label class="pcb"><input type="checkbox" value="${p}" checked class="pci" onchange="applyFilter()"><span>${p}</span></label>`).join("");}
+function setDefaultDates(){const today=new Date(),minD=new Date(today);minD.setDate(minD.getDate()-180);document.getElementById("date-from").value=fmtIso(minD);document.getElementById("date-to").value=fmtIso(today);}
+function selectAll(v){document.querySelectorAll(".pci").forEach(c=>c.checked=v);applyFilter();}
+function applyFilter(){
+  const from=new Date(document.getElementById("date-from").value);
+  const to=new Date(document.getElementById("date-to").value);to.setHours(23,59,59);
+  const sel=[...document.querySelectorAll(".pci:checked")].map(c=>c.value);
+  const sh=document.getElementById("shift-sel").value;
+  FD=ALL.filter(d=>d.date>=from&&d.date<=to&&sel.includes(d.part)&&(sh==="all"||d.shift===sh));
+  document.getElementById("range-lbl").textContent=`${document.getElementById("date-from").value} — ${document.getElementById("date-to").value}`;
+  document.getElementById("rec-count").textContent=`${FD.length.toLocaleString()} records`;
+  render();
+}
+const dch=id=>{if(CH[id]){CH[id].destroy();delete CH[id];}};
+const avg=arr=>{const v=arr.filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;};
+function lbl2(s){const p=s.split("-");return p.length>=3?`${p[1]}/${p[2]}`:s;}
+
+function render(){rKPI();rDTPareto();rDefPareto();rDTTrend();rPPMTrend();rDTHeat();rPPMHeat();rDTByPart();rDTTable();runAI();}
+
+function rKPI(){
+  if(!FD.length)return;
+  const totDT=FD.reduce((s,d)=>s+(d.dtMin||0),0);
+  const dtSums={};FD.forEach(d=>d.dtTypes.forEach(t=>{dtSums[t.type]=(dtSums[t.type]||0)+t.val;}));
+  const topDT=Object.entries(dtSums).sort((a,b)=>b[1]-a[1])[0]||["—",0];
+  const totDef=FD.reduce((s,d)=>s+d.defect,0),totProd=FD.reduce((s,d)=>s+d.total,0);
+  const ppm=totProd>0?Math.round((totDef/totProd)*1e6):0;
+  const pm={};FD.forEach(d=>{if(!pm[d.part])pm[d.part]={d:0,t:0};pm[d.part].d+=d.defect;pm[d.part].t+=d.total;});
+  const worstPart=Object.entries(pm).map(([l,v])=>({l,ppm:v.t>0?Math.round((v.d/v.t)*1e6):0})).sort((a,b)=>b.ppm-a.ppm)[0]||{l:"—",ppm:0};
+  const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]=0;bdd[k]+=(d.dtMin||0);});
+  const worstDay=Object.entries(bdd).sort((a,b)=>b[1]-a[1])[0]||["—",0];
+  document.getElementById("kdt").textContent=(totDT/60).toFixed(1)+" ชม.";
+  document.getElementById("kdt-s").textContent=totDT.toLocaleString()+" นาที";
+  document.getElementById("kdtmax").textContent=topDT[0];
+  document.getElementById("kdtmax-s").textContent=topDT[1].toLocaleString()+" นาที";
+  document.getElementById("kdef").textContent=totDef.toLocaleString();
+  document.getElementById("kdef-s").textContent="PPM: "+ppm.toLocaleString();
+  document.getElementById("kppm").textContent=worstPart.ppm.toLocaleString();
+  document.getElementById("kppm-s").textContent=worstPart.l;
+  document.getElementById("kworst").textContent=worstDay[0].slice(5)||"—";
+  document.getElementById("kworst-s").textContent=worstDay[1]+" m";
+}
+
+const copts=(extra={})=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#0d1117",titleColor:"#dce4f0",bodyColor:"#526080",borderColor:"#1c2640",borderWidth:1}},scales:{x:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9},maxRotation:45,maxTicksLimit:14}},y:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9}},...(extra.y||{})}}});
+
+function rDTPareto(){
+  const sums={};FD.forEach(d=>d.dtTypes.forEach(t=>{sums[t.type]=(sums[t.type]||0)+t.val;}));
+  const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]);
+  const total=sorted.reduce((s,[,v])=>s+v,0)||1;let cum=0;
+  document.getElementById("dt-pareto").innerHTML=sorted.slice(0,10).map(([l,v],i)=>{
+    cum+=v;const pct=(v/total*100).toFixed(1);const cumPct=(cum/total*100).toFixed(1);
+    return`<div class="par-row"><div class="par-label" title="${l}">${l}</div><div class="par-bar-bg"><div class="par-bar-fill" style="width:${(v/total*100).toFixed(0)}%;background:${DT_COLORS[i]||'#526080'}"></div></div><div class="par-pct">${pct}%</div><div class="par-val">${v}m</div><div class="par-cum">∑${cumPct}%</div></div>`;
+  }).join("")||'<p style="color:var(--muted);font-size:12px;padding:10px">ไม่มีข้อมูล</p>';
+}
+
+function rDefPareto(){
+  const sums={};FD.forEach(d=>d.defTypes.forEach(t=>{sums[t.type]=(sums[t.type]||0)+t.qty;}));
+  const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]);
+  const total=sorted.reduce((s,[,v])=>s+v,0)||1;let cum=0;
+  const cols=["#f59e0b","#f43f5e","#38bdf8","#a855f7","#22c55e","#fb923c"];
+  document.getElementById("def-pareto").innerHTML=sorted.slice(0,8).map(([l,v],i)=>{
+    cum+=v;const pct=(v/total*100).toFixed(1);const cumPct=(cum/total*100).toFixed(1);
+    return`<div class="par-row"><div class="par-label" title="${l}">${l}</div><div class="par-bar-bg"><div class="par-bar-fill" style="width:${(v/total*100).toFixed(0)}%;background:${cols[i]||'#526080'}"></div></div><div class="par-pct">${pct}%</div><div class="par-val">${v} ชิ้น</div><div class="par-cum">∑${cumPct}%</div></div>`;
+  }).join("")||'<p style="color:var(--muted);font-size:12px;padding:10px">ไม่มีข้อมูล</p>';
+}
+
+function rDTTrend(){
+  const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]=0;bdd[k]+=(d.dtMin||0);});
+  const dates=Object.keys(bdd).sort().slice(-60);
+  dch("c-dt-trend");CH["c-dt-trend"]=new Chart(document.getElementById("c-dt-trend"),{type:"line",
+    data:{labels:dates.map(lbl2),datasets:[{data:dates.map(d=>bdd[d]),borderColor:"#f43f5e",backgroundColor:"#f43f5e12",fill:true,tension:.3,pointRadius:1.5,borderWidth:2}]},
+    options:copts({y:{ticks:{callback:v=>v+"m"}}})});
+}
+
+function rPPMTrend(){
+  const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]={d:0,t:0};bdd[k].d+=d.defect;bdd[k].t+=d.total;});
+  const dates=Object.keys(bdd).sort().slice(-60);
+  const raw=dates.map(d=>bdd[d].t>0?Math.round((bdd[d].d/bdd[d].t)*1e6):0);
+  const ma=raw.map((v,i)=>{const sl=raw.slice(Math.max(0,i-6),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
+  dch("c-ppm-trend");CH["c-ppm-trend"]=new Chart(document.getElementById("c-ppm-trend"),{type:"line",
+    data:{labels:dates.map(lbl2),datasets:[
+      {data:raw,label:"PPM",borderColor:"#f59e0b44",backgroundColor:"transparent",tension:.2,pointRadius:0,fill:false},
+      {data:ma,label:"7-day MA",borderColor:"#f59e0b",backgroundColor:"transparent",tension:.4,pointRadius:0,borderWidth:2,fill:false}]},
+    options:{...copts(),plugins:{legend:{display:true,position:"top",labels:{color:"#526080",font:{size:9},boxWidth:10}},tooltip:{backgroundColor:"#0d1117",titleColor:"#dce4f0",bodyColor:"#526080",borderColor:"#1c2640",borderWidth:1}}}});
+}
+
+function rDTHeat(){
+  const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]=[];bdd[k].push(d);});
+  const dates=Object.keys(bdd).sort().slice(-30);
+  const allTypes=[...new Set(FD.flatMap(d=>d.dtTypes.map(t=>t.type)))].slice(0,9);
+  const grid=dates.map(date=>allTypes.map(type=>bdd[date].reduce((s,r)=>s+((r.dtTypes||[]).find(t=>t.type===type)?.val||0),0)));
+  const maxV=Math.max(...grid.flat())||1;
+  const hdr=`<div style="display:grid;grid-template-columns:68px repeat(${allTypes.length},1fr);gap:2px;margin-bottom:3px"><div></div>${allTypes.map(t=>`<div style="font-size:7px;color:var(--muted);text-align:center;writing-mode:vertical-lr;transform:rotate(180deg);height:52px">${t}</div>`).join("")}</div>`;
+  const rows=dates.map((d,i)=>`<div style="display:grid;grid-template-columns:68px repeat(${allTypes.length},1fr);gap:2px;margin-bottom:2px"><div style="font-size:8px;color:var(--muted);padding-top:4px">${d.slice(5)}</div>${grid[i].map((v,j)=>{const a=(v/maxV*.8+.04).toFixed(2);const bg=v>0?`rgba(244,63,94,${a})`:"rgba(28,38,64,.3)";return`<div class="heat-cell" title="${allTypes[j]}: ${v}m" style="height:19px;background:${bg};color:${v>maxV*.4?"#fff":"#526080"}">${v>0?v:""}</div>`;}).join("")}</div>`).join("");
+  document.getElementById("dt-heat").innerHTML=hdr+rows;
+}
+
+function rPPMHeat(){
+  const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]=[];bdd[k].push(d);});
+  const dates=Object.keys(bdd).sort().slice(-30);
+  const parts=PARTS.slice(0,10);
+  const grid=dates.map(date=>parts.map(p=>{const recs=(bdd[date]||[]).filter(r=>r.part===p);const t=recs.reduce((s,r)=>s+r.total,0);const d=recs.reduce((s,r)=>s+r.defect,0);return t>0?Math.round((d/t)*1e6):0;}));
+  const maxV=Math.max(...grid.flat())||1;
+  const hdr=`<div style="display:grid;grid-template-columns:68px repeat(${parts.length},1fr);gap:2px;margin-bottom:3px"><div></div>${parts.map(p=>`<div style="font-size:7px;color:var(--muted);text-align:center;writing-mode:vertical-lr;transform:rotate(180deg);height:52px">${p}</div>`).join("")}</div>`;
+  const rows=dates.map((d,i)=>`<div style="display:grid;grid-template-columns:68px repeat(${parts.length},1fr);gap:2px;margin-bottom:2px"><div style="font-size:8px;color:var(--muted);padding-top:4px">${d.slice(5)}</div>${grid[i].map((v,j)=>{const a=(v/maxV*.8+.04).toFixed(2);const bg=v>0?`rgba(245,158,11,${a})`:"rgba(28,38,64,.3)";return`<div class="heat-cell" title="${parts[j]}: ${v.toLocaleString()} PPM" style="height:19px;background:${bg};color:${v>maxV*.4?"#000":"#526080"}">${v>1000?Math.round(v/1000)+"k":v||""}</div>`;}).join("")}</div>`).join("");
+  document.getElementById("ppm-heat").innerHTML=hdr+rows;
+}
+
+function rDTByPart(){
+  const allTypes=[...new Set(FD.flatMap(d=>d.dtTypes.map(t=>t.type)))].slice(0,8);
+  const parts=[...new Set(FD.map(d=>d.part))].sort();
+  const ds=allTypes.map((type,i)=>({label:type,stack:"dt",
+    data:parts.map(p=>FD.filter(d=>d.part===p).reduce((s,r)=>s+((r.dtTypes||[]).find(t=>t.type===type)?.val||0),0)),
+    backgroundColor:DT_COLORS[i]+"55",borderColor:DT_COLORS[i],borderWidth:1,borderRadius:2}));
+  dch("c-dt-line");CH["c-dt-line"]=new Chart(document.getElementById("c-dt-line"),{type:"bar",data:{labels:parts,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{color:"#526080",font:{size:9},boxWidth:10,padding:4}},tooltip:{backgroundColor:"#0d1117",titleColor:"#dce4f0",bodyColor:"#526080",borderColor:"#1c2640",borderWidth:1}},
+      scales:{x:{stacked:true,grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9},maxRotation:45}},y:{stacked:true,grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9},callback:v=>v+"m"}}}}});
+}
+
+function rDTTable(){
+  const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]=[];bdd[k].push(d);});
+  const dates=Object.keys(bdd).sort().reverse().slice(0,50);
+  const allTypes=[...new Set(FD.flatMap(d=>d.dtTypes.map(t=>t.type)))].slice(0,7);
+  const maxTot=Math.max(...dates.map(d=>bdd[d].reduce((s,r)=>s+(r.dtMin||0),0)))||1;
+  document.getElementById("dt-th").innerHTML=`<th>วันที่</th>${allTypes.map(t=>`<th style="font-size:9px">${t}</th>`).join("")}<th>รวม</th><th>OEE avg</th>`;
+  document.getElementById("dt-tb").innerHTML=dates.map(date=>{
+    const recs=bdd[date];
+    const cols=allTypes.map((type,i)=>{const v=recs.reduce((s,r)=>s+((r.dtTypes||[]).find(t=>t.type===type)?.val||0),0);const w=Math.round(v/maxTot*70);
+      return`<td><div class="bar-bg"><div class="bar-fill" style="width:${w}%;background:${DT_COLORS[i]}"></div></div><span style="font-size:9px">${v>0?v+"m":"—"}</span></td>`;
+    });
+    const tot=recs.reduce((s,r)=>s+(r.dtMin||0),0);
+    const oeeAvg=avg(recs.map(r=>r.oee));
+    return`<tr><td><b style="font-size:10px">${date.slice(5)}</b></td>${cols.join("")}<td><b>${tot?tot+"m":"—"}</b></td><td style="color:${oeeAvg>=85?"var(--green)":oeeAvg>=70?"var(--gold)":"var(--red)"};font-weight:700">${oeeAvg>0?oeeAvg.toFixed(1)+"%":"—"}</td></tr>`;
+  }).join("")||'<tr><td colspan="20" style="text-align:center;padding:16px;color:var(--muted)">ไม่มีข้อมูล</td></tr>';
+}
+
+async function runAI(){
+  if(!FD.length)return;
+  document.getElementById("ai-out").innerHTML='<p class="pulse" style="color:var(--muted);font-size:12px">🤖 AI กำลังวิเคราะห์...</p>';
+  const totDT=FD.reduce((s,d)=>s+(d.dtMin||0),0);
+  const oee=avg(FD.map(d=>d.oee)),a=avg(FD.map(d=>d.avail)),q=avg(FD.map(d=>d.qual));
+  const totDef=FD.reduce((s,d)=>s+d.defect,0),totProd=FD.reduce((s,d)=>s+d.total,0);
+  const ppm=totProd>0?Math.round((totDef/totProd)*1e6):0;
+  const dtSums={};FD.forEach(d=>d.dtTypes.forEach(t=>{dtSums[t.type]=(dtSums[t.type]||0)+t.val;}));
+  const topDT=Object.entries(dtSums).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const defSums={};FD.forEach(d=>d.defTypes.forEach(t=>{defSums[t.type]=(defSums[t.type]||0)+t.qty;}));
+  const topDef=Object.entries(defSums).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const pm={};FD.forEach(d=>{if(!pm[d.part])pm[d.part]={oee:[],dt:0};pm[d.part].oee.push(d.oee);pm[d.part].dt+=(d.dtMin||0);});
+  const partStats=Object.entries(pm).map(([p,v])=>({p,oee:avg(v.oee).toFixed(1),dt:v.dt})).sort((a,b)=>a.oee-b.oee);
+  const last4w=FD.filter(d=>d.date>=new Date(Date.now()-28*86400000));
+  const prev4w=FD.filter(d=>d.date<new Date(Date.now()-28*86400000)&&d.date>=new Date(Date.now()-56*86400000));
+  const remarks=FD.filter(d=>d.remark).slice(0,15).map(d=>`[${d.dateStr}] ${d.part}: ${d.remark}`).join("; ");
+
+  const prompt=`OEE Expert วิเคราะห์ข้อมูล PD4 แล้วตอบ JSON เท่านั้น:
+OEE: ${oee.toFixed(1)}% | A: ${a.toFixed(1)}% | Q: ${q.toFixed(1)}% | PPM: ${ppm.toLocaleString()} | DT: ${totDT}m
+4W OEE: ${avg(last4w.map(d=>d.oee)).toFixed(1)}% vs prev: ${avg(prev4w.map(d=>d.oee)).toFixed(1)}%
+Top DT: ${topDT.map(([k,v])=>k+":"+v+"m").join(", ")}
+Top Defect: ${topDef.map(([k,v])=>k+":"+v).join(", ")}
+ชิ้นงาน OEE ต่ำ: ${partStats.slice(0,3).map(x=>x.p+"("+x.oee+"%)").join(", ")}
+หมายเหตุ: ${remarks.slice(0,400)||"ไม่มี"}
+
+{"summary":"สรุป 2 ประโยค","dt_issues":["3 issues"],"quality_issues":["2 issues"],"actions":[{"pri":"HIGH|MED|LOW","action":"action","result":"expected"},{"pri":"HIGH|MED|LOW","action":"action","result":"expected"},{"pri":"HIGH|MED|LOW","action":"action","result":"expected"}],"status":"good|warning|critical"}`;
+
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const data=await r.json();const txt=data.content?.map(c=>c.text||"").join("").replace(/```json|```/g,"").trim();
+    let ai;try{ai=JSON.parse(txt);}catch{ai=null;}
+    ai?renderAI(ai):fallbackAI(oee,totDT,ppm,topDT,partStats);
+  }catch(e){fallbackAI(oee,totDT,ppm,topDT,partStats);}
+}
+
+function renderAI(a){
+  const sc={good:"#22c55e",warning:"#f59e0b",critical:"#f43f5e"};
+  const st={good:"✅ สถานะดี",warning:"⚠️ ต้องปรับปรุง",critical:"🔴 วิกฤต"};
+  const pc={HIGH:"#f43f5e",MED:"#f59e0b",LOW:"#22c55e"};
+  const col=sc[a.status]||"#f59e0b";
+  const acts=(a.actions||[]).map(item=>`<div class="act-item" style="background:${pc[item.pri]||'#526080'}10;border-color:${pc[item.pri]||'#526080'}30">
+    <span class="act-pri" style="color:${pc[item.pri]||'#526080'}">${item.pri}</span>
+    <div><div class="act-title">${item.action}</div><div class="act-res">→ ${item.result}</div></div></div>`).join("");
+  document.getElementById("ai-out").innerHTML=`
+    <div class="st-bar" style="background:${col}12;border-left-color:${col}">
+      <span style="font-size:11px;color:${col};font-weight:700">${st[a.status]||"—"}</span>
+      <p style="color:#cbd5e1;font-size:12px;margin-top:4px;line-height:1.7">${a.summary||""}</p>
+    </div>
+    <div class="ai-grid">
+      <div class="ai-sec"><h4>🔧 Downtime Issues</h4><ul>${(a.dt_issues||[]).map((x,i)=>`<li class="${i===0?"w":"y"}">${x}</li>`).join("")}</ul></div>
+      <div class="ai-sec"><h4>⚠️ Quality Issues</h4><ul>${(a.quality_issues||[]).map((x,i)=>`<li class="${i===0?"w":"y"}">${x}</li>`).join("")}</ul></div>
+      <div class="ai-sec" style="grid-column:1/-1"><h4>✅ Action Items</h4>${acts}</div>
+    </div>`;
+}
+
+function fallbackAI(oee,totDT,ppm,topDT,partStats){
+  const col=oee>=85?"#22c55e":oee>=70?"#f59e0b":"#f43f5e";
+  document.getElementById("ai-out").innerHTML=`
+    <div class="st-bar" style="background:${col}12;border-left-color:${col}">
+      <p style="color:#cbd5e1;font-size:12px;line-height:1.7">OEE ${oee.toFixed(1)}% | DT ${totDT}m | PPM ${ppm.toLocaleString()}</p>
+    </div>
+    <div class="ai-grid">
+      <div class="ai-sec"><h4>🔧 Top DT Causes</h4><ul>${topDT.map(([k,v],i)=>`<li class="${i===0?"w":"y"}">${k}: ${v}m</li>`).join("")}</ul></div>
+      <div class="ai-sec"><h4>🏭 ชิ้นงาน OEE ต่ำ</h4><ul>${partStats.slice(0,3).map(x=>`<li class="w">${x.p}: OEE ${x.oee}%, DT ${x.dt}m</li>`).join("")}</ul></div>
+    </div>`;
+}
+
+loadData();
+</script>
+</body>
+</html>
