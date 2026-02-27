@@ -175,8 +175,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="card"><div class="card-hdr"><h3>📈 PPM Trend + 7-day MA</h3></div><div class="ch" style="height:210px"><canvas id="c-ppm-trend"></canvas></div></div>
   </div>
 
-  <div class="card"><div class="card-hdr"><h3>🔥 Heatmap DT<em>30 วัน × DT Type</em></h3></div><div id="dt-heat" style="overflow-x:auto"></div></div>
-  <div class="card"><div class="card-hdr"><h3>🔥 Heatmap PPM<em>30 วัน × ชิ้นงาน</em></h3></div><div id="ppm-heat" style="overflow-x:auto"></div></div>
+  <div class="card"><div class="card-hdr"><h3>🔥 Heatmap DT<em>ไลน์/ชิ้นงาน × ประเภท Downtime</em></h3></div><div id="dt-heat"></div></div>
+  <div class="card"><div class="card-hdr"><h3>🔥 Heatmap คุณภาพ<em>ไลน์/ชิ้นงาน × ประเภทงานเสีย</em></h3></div><div id="ppm-heat"></div></div>
 
   <div class="card">
     <div class="card-hdr"><h3>📊 DT แยกชิ้นงาน + DT Type<em>stacked</em></h3></div>
@@ -194,6 +194,81 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
     <div id="ai-out"><p class="pulse" style="color:var(--muted);font-size:12px">กำลังรอข้อมูล...</p></div>
   </div>
+  <!-- ─── MO REPAIR ANALYSIS SECTION ─── -->
+  <div class="card" style="border-color:#2a1f5e">
+    <div class="card-hdr">
+      <h3 style="color:#c4b5fd">🔬 MO Repair Intelligence<em>จาก Maintenance Order Sheet</em></h3>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span id="mo-badge" class="badge bx">...</span>
+        <button onclick="loadMO()" style="padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:10px;cursor:pointer;font-family:var(--font-body)">🔄 โหลดใหม่</button>
+      </div>
+    </div>
+    <div id="mo-status" style="color:var(--muted);font-size:12px;margin-bottom:12px">กำลังโหลด MO data...</div>
+
+    <!-- KPI row -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px" id="mo-kpi"></div>
+
+    <!-- Problem Recurrence -->
+    <div style="margin-bottom:16px">
+      <h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🔄 Problem Recurrence — ปัญหาซ้ำ vs หายขาด</h4>
+      <div id="mo-recurrence"></div>
+    </div>
+
+    <!-- Top Problem Types Pareto -->
+    <div class="row r2" style="margin-bottom:16px">
+      <div>
+        <h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📊 Top Problem Types</h4>
+        <div id="mo-prob-pareto"></div>
+      </div>
+      <div>
+        <h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚡ Top Mc No. (ซ่อมบ่อยสุด)</h4>
+        <div id="mo-mc-pareto"></div>
+      </div>
+    </div>
+
+    <!-- TTR Distribution Chart -->
+    <div class="row r2" style="margin-bottom:16px">
+      <div>
+        <h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⏱️ TTR Distribution (นาที)</h4>
+        <div class="ch" style="height:160px"><canvas id="c-ttr"></canvas></div>
+      </div>
+      <div>
+        <h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📈 MO Frequency รายสัปดาห์</h4>
+        <div class="ch" style="height:160px"><canvas id="c-mo-freq"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Predictive Maintenance Alerts -->
+    <div style="margin-bottom:16px">
+      <h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🔮 Predictive Maintenance Alerts</h4>
+      <div id="pm-alerts"></div>
+    </div>
+
+    <!-- MO Detail Table -->
+    <div>
+      <h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📋 รายละเอียด MO ล่าสุด</h4>
+      <div class="tbl-wrap">
+        <table class="dt-tbl">
+          <thead><tr><th>เปิด MO</th><th>ไลน์</th><th>Mc No.</th><th>Problem Type</th><th>Details</th><th>TTR(m)</th><th>ช่าง</th><th>สถานะ</th></tr></thead>
+          <tbody id="mo-tb"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MO AI ANALYSIS ─── -->
+  <div class="ai-wrap" style="border-color:#1a3a1a">
+    <div class="ai-hdr">
+      <div class="ai-orb" style="background:linear-gradient(135deg,#166534,#22c55e)">🔧</div>
+      <div>
+        <h3 style="color:#4ade80">AI MAINTENANCE INTELLIGENCE</h3>
+        <span>Root Cause, แนวทางแก้ไขที่ Effective, Predictive Maintenance</span>
+      </div>
+      <button onclick="runMOAI()" style="margin-left:auto;padding:6px 14px;background:linear-gradient(135deg,#166534,#22c55e);border:none;border-radius:7px;color:#fff;font-size:11px;cursor:pointer;font-family:var(--font-body)">🤖 วิเคราะห์ใหม่</button>
+    </div>
+    <div id="mo-ai-out"><p class="pulse" style="color:var(--muted);font-size:12px">กำลังรอข้อมูล MO...</p></div>
+  </div>
+
 </main>
 
 <script>
@@ -283,6 +358,148 @@ const dch=id=>{if(CH[id]){CH[id].destroy();delete CH[id];}};
 const avg=arr=>{const v=arr.filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;};
 function lbl2(s){const p=s.split("-");return p.length>=3?`${p[1]}/${p[2]}`:s;}
 
+function rDTHeat(){
+  // Axis: rows = ไลน์/part, cols = DT Type
+  const parts=[...new Set(FD.map(d=>d.part))].sort();
+  const allTypes=[...new Set(FD.flatMap(d=>d.dtTypes.map(t=>t.type)))].sort();
+  if(!parts.length||!allTypes.length){document.getElementById("dt-heat").innerHTML='<p style="color:var(--muted);font-size:12px;padding:8px">ไม่มีข้อมูล</p>';return;}
+  // Build matrix: [part][type] = total minutes
+  const mat={};parts.forEach(p=>{mat[p]={};allTypes.forEach(t=>{mat[p][t]=0;});});
+  FD.forEach(d=>(d.dtTypes||[]).forEach(t=>{if(mat[d.part])mat[d.part][t.type]=(mat[d.part][t.type]||0)+t.val;}));
+  const allVals=parts.flatMap(p=>allTypes.map(t=>mat[p][t]));
+  const maxV=Math.max(...allVals)||1;
+  // Color scale: 0→transparent, low→#1e3a5f, med→#f59e0b, high→#f43f5e
+  function heatColor(v,max){
+    if(v===0)return"rgba(28,38,64,0.25)";
+    const r=v/max;
+    if(r<0.33)return`rgba(59,130,246,${(r/0.33*0.7+0.15).toFixed(2)})`;
+    if(r<0.66)return`rgba(245,158,11,${((r-0.33)/0.33*0.6+0.4).toFixed(2)})`;
+    return`rgba(244,63,94,${((r-0.66)/0.34*0.5+0.6).toFixed(2)})`;
+  }
+  function textColor(v,max){return v/max>0.5?"#fff":"#94a3b8";}
+  // Header row: DT Types (columns)
+  const colW=`repeat(${allTypes.length},minmax(60px,1fr))`;
+  const hdr=`<div style="display:grid;grid-template-columns:130px ${colW};gap:2px;margin-bottom:4px;position:sticky;top:0;background:var(--bg3);z-index:2;padding:4px 0">
+    <div style="font-size:9px;color:var(--muted);padding:4px 6px">ไลน์ / DT Type</div>
+    ${allTypes.map(t=>`<div style="font-size:8px;color:var(--muted);text-align:center;padding:3px 2px;writing-mode:vertical-lr;transform:rotate(180deg);height:56px;display:flex;align-items:center;justify-content:center">${t}</div>`).join("")}
+  </div>`;
+  // Row totals for sorting
+  const rowTotals=parts.map(p=>({p,total:allTypes.reduce((s,t)=>s+mat[p][t],0)})).sort((a,b)=>b.total-a.total);
+  const rows=rowTotals.map(({p,total})=>{
+    const cells=allTypes.map(t=>{
+      const v=mat[p][t];
+      return`<div class="heat-cell" title="${p} | ${t}: ${v} m" style="height:28px;background:${heatColor(v,maxV)};color:${textColor(v,maxV)};font-size:9px;font-weight:${v>0?"700":"400"}">${v>0?v:""}</div>`;
+    }).join("");
+    const pct=(total/allVals.reduce((s,v)=>s+v,0)*100).toFixed(0);
+    return`<div style="display:grid;grid-template-columns:130px ${colW};gap:2px;margin-bottom:2px">
+      <div style="font-size:10px;color:var(--text);padding:6px 8px;background:var(--bg3);border-radius:4px;display:flex;align-items:center;justify-content:space-between">
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px" title="${p}">${p}</span>
+        <span style="color:${total>0?"#f59e0b":"var(--muted)"};font-size:9px;font-weight:700;flex-shrink:0;margin-left:4px">${total>0?total+"m":""}</span>
+      </div>${cells}
+    </div>`;
+  }).join("");
+  // Legend
+  const legend=`<div style="display:flex;align-items:center;gap:12px;margin-top:10px;padding:6px 0;border-top:1px solid var(--border)">
+    <span style="font-size:9px;color:var(--muted)">ระดับ DT:</span>
+    <span style="display:flex;align-items:center;gap:4px;font-size:9px;color:#60a5fa">■ ต่ำ</span>
+    <span style="display:flex;align-items:center;gap:4px;font-size:9px;color:#f59e0b">■ กลาง</span>
+    <span style="display:flex;align-items:center;gap:4px;font-size:9px;color:#f43f5e">■ สูง</span>
+    <span style="font-size:9px;color:var(--muted);margin-left:auto">เซลล์แสดงนาที | เรียงตามDTรวมมากสุด</span>
+  </div>`;
+  document.getElementById("dt-heat").innerHTML=`<div style="overflow-x:auto"><div style="min-width:${130+allTypes.length*62}px">${hdr+rows}</div></div>${legend}`;
+}
+
+function rPPMHeat(){
+  // Axis: rows = ไลน์/part, cols = ประเภทงานเสีย (defect type)
+  const parts=[...new Set(FD.map(d=>d.part))].sort();
+  // For PD3 defTypes is just [{type:"งานเสีย",qty}], for PD4 it's varied
+  const allDefTypes=[...new Set(FD.flatMap(d=>(d.defTypes||[]).map(t=>t.type)))].filter(Boolean);
+  const useDefTypes=allDefTypes.length>1;
+  if(!parts.length){document.getElementById("ppm-heat").innerHTML='<p style="color:var(--muted);font-size:12px;padding:8px">ไม่มีข้อมูล</p>';return;}
+
+  if(!useDefTypes){
+    // PD3: single defect type → show PPM per line (rows=lines, 1 col = PPM)
+    const lineStats=parts.map(p=>{
+      const recs=FD.filter(d=>d.part===p);
+      const tot=recs.reduce((s,r)=>s+r.total,0);
+      const def=recs.reduce((s,r)=>s+r.defect,0);
+      const ppm=tot>0?Math.round((def/tot)*1e6):0;
+      return{p,tot,def,ppm};
+    }).sort((a,b)=>b.ppm-a.ppm);
+    const maxPPM=Math.max(...lineStats.map(x=>x.ppm))||1;
+    function ppmColor(v,max){
+      if(v===0)return"rgba(28,38,64,0.25)";
+      const r=v/max;
+      if(r<0.33)return`rgba(34,197,94,${(r/0.33*0.5+0.2).toFixed(2)})`;
+      if(r<0.66)return`rgba(245,158,11,${((r-0.33)/0.33*0.5+0.4).toFixed(2)})`;
+      return`rgba(244,63,94,${((r-0.66)/0.34*0.5+0.6).toFixed(2)})`;
+    }
+    const rows=lineStats.map(({p,tot,def,ppm})=>{
+      const w=Math.round(ppm/maxPPM*100);
+      return`<div style="display:grid;grid-template-columns:130px 1fr 80px 80px 80px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${p}">${p}</div>
+        <div style="background:var(--bg3);border-radius:4px;height:8px;overflow:hidden"><div style="width:${w}%;height:100%;background:${ppmColor(ppm,maxPPM)};border-radius:4px;transition:width .5s"></div></div>
+        <div style="font-size:11px;font-weight:700;color:${ppmColor(ppm,maxPPM)};text-align:right">${ppm.toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--muted);text-align:right">${def.toLocaleString()} ชิ้น</div>
+        <div style="font-size:10px;color:var(--muted);text-align:right">${tot.toLocaleString()} ผลิต</div>
+      </div>`;
+    }).join("");
+    const hdr=`<div style="display:grid;grid-template-columns:130px 1fr 80px 80px 80px;gap:8px;padding:5px 0;border-bottom:1px solid var(--border2)">
+      <div style="font-size:9px;color:var(--muted)">ไลน์การผลิต</div>
+      <div style="font-size:9px;color:var(--muted)">PPM Intensity</div>
+      <div style="font-size:9px;color:var(--muted);text-align:right">PPM</div>
+      <div style="font-size:9px;color:var(--muted);text-align:right">งานเสีย</div>
+      <div style="font-size:9px;color:var(--muted);text-align:right">ยอดผลิต</div>
+    </div>`;
+    document.getElementById("ppm-heat").innerHTML=hdr+rows;
+    return;
+  }
+
+  // PD4: multiple defect types → full heatmap
+  const mat={};parts.forEach(p=>{mat[p]={};allDefTypes.forEach(t=>{mat[p][t]=0;});});
+  FD.forEach(d=>(d.defTypes||[]).forEach(t=>{
+    const recs=FD.filter(r=>r.part===d.part);const tot=recs.reduce((s,r)=>s+r.total,0);
+    if(mat[d.part]&&tot>0)mat[d.part][t.type]=(mat[d.part][t.type]||0)+(t.qty/tot*1e6);
+  }));
+  // Average PPM per part×defect
+  const partCount={};FD.forEach(d=>{partCount[d.part]=(partCount[d.part]||0)+1;});
+  parts.forEach(p=>allDefTypes.forEach(t=>{if(partCount[p])mat[p][t]/=partCount[p];}));
+  const allVals=parts.flatMap(p=>allDefTypes.map(t=>mat[p][t]));
+  const maxV=Math.max(...allVals)||1;
+  function heatColor(v,max){
+    if(v===0)return"rgba(28,38,64,0.25)";const r=v/max;
+    if(r<0.33)return`rgba(34,197,94,${(r/0.33*0.5+0.2).toFixed(2)})`;
+    if(r<0.66)return`rgba(245,158,11,${((r-0.33)/0.33*0.5+0.4).toFixed(2)})`;
+    return`rgba(244,63,94,${((r-0.66)/0.34*0.5+0.6).toFixed(2)})`;
+  }
+  function textColor(v,max){return v/max>0.5?"#fff":"#94a3b8";}
+  const colW=`repeat(${allDefTypes.length},minmax(70px,1fr))`;
+  const hdr=`<div style="display:grid;grid-template-columns:130px ${colW};gap:2px;margin-bottom:4px">
+    <div style="font-size:9px;color:var(--muted);padding:4px 6px">ไลน์ / ประเภทงานเสีย</div>
+    ${allDefTypes.map(t=>`<div style="font-size:8px;color:var(--muted);text-align:center;writing-mode:vertical-lr;transform:rotate(180deg);height:56px;display:flex;align-items:center;justify-content:center">${t}</div>`).join("")}
+  </div>`;
+  const rowTotals=parts.map(p=>({p,total:allDefTypes.reduce((s,t)=>s+mat[p][t],0)})).sort((a,b)=>b.total-a.total);
+  const rows=rowTotals.map(({p,total})=>{
+    const cells=allDefTypes.map(t=>{
+      const v=Math.round(mat[p][t]);
+      return`<div class="heat-cell" title="${p} | ${t}: ${v.toLocaleString()} PPM" style="height:28px;background:${heatColor(v,maxV)};color:${textColor(v,maxV)};font-size:9px;font-weight:${v>0?"700":"400"}">${v>999?Math.round(v/1000)+"k":v||""}</div>`;
+    }).join("");
+    return`<div style="display:grid;grid-template-columns:130px ${colW};gap:2px;margin-bottom:2px">
+      <div style="font-size:10px;color:var(--text);padding:6px 8px;background:var(--bg3);border-radius:4px;display:flex;align-items:center;justify-content:space-between">
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px" title="${p}">${p}</span>
+        <span style="color:var(--muted);font-size:9px;flex-shrink:0;margin-left:4px">${Math.round(total)}</span>
+      </div>${cells}
+    </div>`;
+  }).join("");
+  const legend=`<div style="display:flex;align-items:center;gap:12px;margin-top:10px;padding:6px 0;border-top:1px solid var(--border)">
+    <span style="font-size:9px;color:var(--muted)">PPM:</span>
+    <span style="font-size:9px;color:#22c55e">■ ต่ำ</span>
+    <span style="font-size:9px;color:#f59e0b">■ กลาง</span>
+    <span style="font-size:9px;color:#f43f5e">■ สูง</span>
+    <span style="font-size:9px;color:var(--muted);margin-left:auto">เรียงตาม PPM รวมมากสุด</span>
+  </div>`;
+  document.getElementById("ppm-heat").innerHTML=`<div style="overflow-x:auto"><div style="min-width:${130+allDefTypes.length*72}px">${hdr+rows}</div></div>${legend}`;
+}
 function render(){rKPI();rDTPareto();rDefPareto();rDTTrend();rPPMTrend();rDTHeat();rPPMHeat();rDTByPart();rDTTable();runAI();}
 
 function rKPI(){
@@ -351,27 +568,9 @@ function rPPMTrend(){
     options:{...copts(),plugins:{legend:{display:true,position:"top",labels:{color:"#526080",font:{size:9},boxWidth:10}},tooltip:{backgroundColor:"#0d1117",titleColor:"#dce4f0",bodyColor:"#526080",borderColor:"#1c2640",borderWidth:1}}}});
 }
 
-function rDTHeat(){
-  const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]=[];bdd[k].push(d);});
-  const dates=Object.keys(bdd).sort().slice(-30);
-  const allTypes=[...new Set(FD.flatMap(d=>d.dtTypes.map(t=>t.type)))].slice(0,9);
-  const grid=dates.map(date=>allTypes.map(type=>bdd[date].reduce((s,r)=>s+((r.dtTypes||[]).find(t=>t.type===type)?.val||0),0)));
-  const maxV=Math.max(...grid.flat())||1;
-  const hdr=`<div style="display:grid;grid-template-columns:68px repeat(${allTypes.length},1fr);gap:2px;margin-bottom:3px"><div></div>${allTypes.map(t=>`<div style="font-size:7px;color:var(--muted);text-align:center;writing-mode:vertical-lr;transform:rotate(180deg);height:52px">${t}</div>`).join("")}</div>`;
-  const rows=dates.map((d,i)=>`<div style="display:grid;grid-template-columns:68px repeat(${allTypes.length},1fr);gap:2px;margin-bottom:2px"><div style="font-size:8px;color:var(--muted);padding-top:4px">${d.slice(5)}</div>${grid[i].map((v,j)=>{const a=(v/maxV*.8+.04).toFixed(2);const bg=v>0?`rgba(244,63,94,${a})`:"rgba(28,38,64,.3)";return`<div class="heat-cell" title="${allTypes[j]}: ${v}m" style="height:19px;background:${bg};color:${v>maxV*.4?"#fff":"#526080"}">${v>0?v:""}</div>`;}).join("")}</div>`).join("");
-  document.getElementById("dt-heat").innerHTML=hdr+rows;
-}
 
-function rPPMHeat(){
-  const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]=[];bdd[k].push(d);});
-  const dates=Object.keys(bdd).sort().slice(-30);
-  const parts=PARTS.slice(0,10);
-  const grid=dates.map(date=>parts.map(p=>{const recs=(bdd[date]||[]).filter(r=>r.part===p);const t=recs.reduce((s,r)=>s+r.total,0);const d=recs.reduce((s,r)=>s+r.defect,0);return t>0?Math.round((d/t)*1e6):0;}));
-  const maxV=Math.max(...grid.flat())||1;
-  const hdr=`<div style="display:grid;grid-template-columns:68px repeat(${parts.length},1fr);gap:2px;margin-bottom:3px"><div></div>${parts.map(p=>`<div style="font-size:7px;color:var(--muted);text-align:center;writing-mode:vertical-lr;transform:rotate(180deg);height:52px">${p}</div>`).join("")}</div>`;
-  const rows=dates.map((d,i)=>`<div style="display:grid;grid-template-columns:68px repeat(${parts.length},1fr);gap:2px;margin-bottom:2px"><div style="font-size:8px;color:var(--muted);padding-top:4px">${d.slice(5)}</div>${grid[i].map((v,j)=>{const a=(v/maxV*.8+.04).toFixed(2);const bg=v>0?`rgba(245,158,11,${a})`:"rgba(28,38,64,.3)";return`<div class="heat-cell" title="${parts[j]}: ${v.toLocaleString()} PPM" style="height:19px;background:${bg};color:${v>maxV*.4?"#000":"#526080"}">${v>1000?Math.round(v/1000)+"k":v||""}</div>`;}).join("")}</div>`).join("");
-  document.getElementById("ppm-heat").innerHTML=hdr+rows;
-}
+
+
 
 function rDTByPart(){
   const allTypes=[...new Set(FD.flatMap(d=>d.dtTypes.map(t=>t.type)))].slice(0,8);
@@ -469,6 +668,520 @@ function fallbackAI(oee,totDT,ppm,topDT,partStats){
 }
 
 loadData();
+
+
+// ══════════════════════════════════════════════════════
+// MO REPAIR INTELLIGENCE MODULE
+// ══════════════════════════════════════════════════════
+const MO_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSVDNHyOb2LrXosMZG09quorOkfI9aLs8Hg_6ek8glxEQRQYL6F1rWl_cZ12A_f7SC2yDkyWroXHtM1/pub?gid=785568377&single=true&output=csv";
+let MO_ALL = [], MO_LOADED = false;
+
+// Parse thai buddhist date "30/10/2568 11:36:21" → JS Date
+function parseMODate(s) {
+  if (!s) return null;
+  s = s.trim();
+  const parts = s.split(" ");
+  const dp = parts[0].split("/");
+  if (dp.length !== 3) return null;
+  const d = +dp[0], m = +dp[1] - 1, y = +dp[2];
+  const ce = y > 2400 ? y - 543 : y;
+  return new Date(ce, m, d, ...((parts[1] || "00:00:00").split(":").map(Number)));
+}
+
+function csvLineMO(l) {
+  const r = []; let c = "", q = false;
+  for (let i = 0; i < l.length; i++) {
+    const ch = l[i];
+    if (ch === '"') { if (q && l[i+1] === '"') { c += '"'; i++; } else q = !q; }
+    else if (ch === ',' && !q) { r.push(c); c = ""; }
+    else c += ch;
+  }
+  r.push(c); return r;
+}
+
+function parseMOCSV(text) {
+  const lines = text.split("\n").filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const hdr = csvLineMO(lines[0]);
+  const idx = {}; hdr.forEach((h, i) => idx[h.trim()] = i);
+  const g = (row, name) => { const i = idx[name]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim() : ""; };
+  const n = v => { if (!v) return 0; const x = parseFloat(v.replace(/,/g, "")); return isNaN(x) ? 0 : x; };
+  const rows = [];
+  for (let r = 1; r < lines.length; r++) {
+    const row = csvLineMO(lines[r]);
+    if (row.length < 8) continue;
+    const dateOpen = parseMODate(g(row, "เวลาเปิด MO"));
+    if (!dateOpen) continue;
+    rows.push({
+      date: dateOpen,
+      dateStr: fmtDate ? fmtDate(dateOpen) : dateOpen.toLocaleDateString("th-TH"),
+      line: g(row, "Line การผลิต"),
+      mcType: g(row, "Mc Type"),
+      mcNo: g(row, "Mc No."),
+      probType: g(row, "Problem Type"),
+      details: g(row, "Details"),
+      ttr: n(g(row, "TTR")),           // minutes
+      moWait: n(g(row, "MO รอการแก้ไข")),
+      tech: g(row, "ช่างที่รับการแก้ไข"),
+      onOff: g(row, "Online/Offline"),
+      repairTime: n(g(row, "ระยะเวลาในการซ่อมงาน")),
+    });
+  }
+  return rows;
+}
+
+async function loadMO() {
+  document.getElementById("mo-status").textContent = "📡 กำลังโหลด MO data...";
+  document.getElementById("mo-badge").textContent = "...";
+  document.getElementById("mo-badge").className = "badge bx";
+  try {
+    const res = await fetch(MO_URL + "&t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const csv = await res.text();
+    MO_ALL = parseMOCSV(csv);
+    if (MO_ALL.length < 2) throw new Error("rows น้อย: " + MO_ALL.length);
+    MO_LOADED = true;
+    document.getElementById("mo-badge").textContent = "● LIVE " + MO_ALL.length + " MO";
+    document.getElementById("mo-badge").className = "badge bl";
+    document.getElementById("mo-status").textContent = "";
+    renderMO();
+    runMOAI();
+  } catch (e) {
+    document.getElementById("mo-badge").textContent = "● ERR";
+    document.getElementById("mo-badge").className = "badge bx";
+    document.getElementById("mo-status").innerHTML = `<span style="color:var(--red)">โหลดไม่ได้: ${e.message} — ต้องเปิดจาก Web Server</span>`;
+  }
+}
+
+function getMOFiltered() {
+  // Filter by date range from main filter
+  const from = new Date(document.getElementById("date-from").value);
+  const to = new Date(document.getElementById("date-to").value); to.setHours(23,59,59);
+  return MO_ALL.filter(d => d.date >= from && d.date <= to);
+}
+
+function renderMO() {
+  if (!MO_LOADED) return;
+  const mo = getMOFiltered();
+  if (!mo.length) { document.getElementById("mo-status").textContent = "ไม่มีข้อมูล MO ในช่วงวันที่เลือก"; return; }
+  rMOKPI(mo);
+  rMORecurrence(mo);
+  rMOProbPareto(mo);
+  rMOMcPareto(mo);
+  rTTRDist(mo);
+  rMOFreq(mo);
+  rPMAlerts(mo);
+  rMOTable(mo);
+}
+
+function rMOKPI(mo) {
+  const totalMO = mo.length;
+  const avgTTR = (mo.reduce((s, d) => s + d.ttr, 0) / mo.length).toFixed(1);
+  const uniqMc = new Set(mo.map(d => d.mcNo)).size;
+  // recurring = mc appears >1 time with same problem
+  const mcProb = {}; mo.forEach(d => { const k = d.mcNo + "|" + d.probType; if (!mcProb[k]) mcProb[k] = 0; mcProb[k]++; });
+  const recurring = Object.values(mcProb).filter(v => v > 1).length;
+  const highTTR = mo.filter(d => d.ttr > 60).length;
+  document.getElementById("mo-kpi").innerHTML = [
+    { l: "MO ทั้งหมด", v: totalMO.toLocaleString(), c: "#38bdf8", u: "รายการ" },
+    { l: "Avg TTR", v: avgTTR, c: "#f59e0b", u: "นาที" },
+    { l: "เครื่องที่ซ่อม", v: uniqMc, c: "#a855f7", u: "เครื่อง" },
+    { l: "ปัญหาซ้ำ", v: recurring, c: "#f43f5e", u: "กรณี" },
+    { l: "TTR > 60m", v: highTTR, c: "#f43f5e", u: "รายการ" },
+  ].map(k => `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:12px 14px;border-bottom:2px solid ${k.c}">
+    <div style="font-size:10px;color:var(--muted);margin-bottom:5px">${k.l}</div>
+    <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:${k.c}">${k.v}</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:2px">${k.u}</div>
+  </div>`).join("");
+}
+
+function rMORecurrence(mo) {
+  // Group by Mc No. + Problem Type → count occurrences
+  const mcMap = {};
+  mo.forEach(d => {
+    const key = d.mcNo;
+    if (!mcMap[key]) mcMap[key] = { mc: d.mcNo, mcType: d.mcType, line: d.line, events: [] };
+    mcMap[key].events.push({ date: d.date, prob: d.probType, detail: d.details, ttr: d.ttr });
+  });
+  const sorted = Object.values(mcMap).sort((a, b) => b.events.length - a.events.length).slice(0, 10);
+  const maxC = sorted[0]?.events.length || 1;
+  const rows = sorted.map(mc => {
+    // Analyze if problem resolved or recurring
+    const probCounts = {};
+    mc.events.forEach(e => { probCounts[e.prob] = (probCounts[e.prob] || 0) + 1; });
+    const topProb = Object.entries(probCounts).sort((a, b) => b[1] - a[1])[0];
+    const isRecurring = topProb && topProb[1] > 1;
+    const avgTTR = (mc.events.reduce((s, e) => s + e.ttr, 0) / mc.events.length).toFixed(1);
+    const lastDate = new Date(Math.max(...mc.events.map(e => e.date)));
+    const daysSince = Math.floor((Date.now() - lastDate) / 86400000);
+    const tag = isRecurring
+      ? `<span style="background:#f43f5e22;color:#f43f5e;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700">🔄 RECURRING</span>`
+      : `<span style="background:#22c55e22;color:#22c55e;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700">✅ RESOLVED</span>`;
+    const w = Math.round(mc.events.length / maxC * 100);
+    return `<div style="display:grid;grid-template-columns:160px 1fr 90px 70px 70px 80px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${mc.mc}">${mc.mc}</div>
+      <div style="background:var(--bg3);border-radius:3px;height:6px;overflow:hidden"><div style="width:${w}%;height:100%;background:${isRecurring?"#f43f5e":"#22c55e"};border-radius:3px"></div></div>
+      <div style="font-size:11px;color:${isRecurring?"#f43f5e":"#22c55e"};font-weight:700;text-align:center">${mc.events.length} ครั้ง</div>
+      <div style="font-size:10px;color:var(--muted)">${avgTTR}m avg</div>
+      <div style="font-size:10px;color:var(--muted)">${daysSince}d ago</div>
+      <div>${tag}</div>
+    </div>`;
+  });
+  document.getElementById("mo-recurrence").innerHTML = `
+    <div style="display:grid;grid-template-columns:160px 1fr 90px 70px 70px 80px;gap:8px;padding:5px 0;border-bottom:1px solid var(--border2)">
+      <div style="font-size:9px;color:var(--muted)">Mc No.</div><div style="font-size:9px;color:var(--muted)">ความถี่</div>
+      <div style="font-size:9px;color:var(--muted);text-align:center">จำนวน</div>
+      <div style="font-size:9px;color:var(--muted)">TTR avg</div>
+      <div style="font-size:9px;color:var(--muted)">ซ่อมล่าสุด</div>
+      <div style="font-size:9px;color:var(--muted)">สถานะ</div>
+    </div>
+    ${rows.join("")}`;
+}
+
+const MO_COLORS = ["#f43f5e","#f59e0b","#38bdf8","#a855f7","#22c55e","#fb923c","#60a5fa","#e879f9","#34d399","#fbbf24"];
+
+function rMOProbPareto(mo) {
+  const sums = {}; mo.forEach(d => { sums[d.probType] = (sums[d.probType] || 0) + 1; });
+  const sorted = Object.entries(sums).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const total = sorted.reduce((s, [, v]) => s + v, 0) || 1; let cum = 0;
+  document.getElementById("mo-prob-pareto").innerHTML = sorted.map(([l, v], i) => {
+    cum += v; const pct = (v / total * 100).toFixed(1); const cumPct = (cum / total * 100).toFixed(1);
+    return `<div class="par-row"><div class="par-label" title="${l}" style="flex:0 0 145px">${l}</div>
+      <div class="par-bar-bg"><div class="par-bar-fill" style="width:${(v/total*100).toFixed(0)}%;background:${MO_COLORS[i]}"></div></div>
+      <div class="par-pct">${pct}%</div><div class="par-val">${v} MO</div><div class="par-cum">∑${cumPct}%</div></div>`;
+  }).join("") || '<p style="color:var(--muted);font-size:12px">ไม่มีข้อมูล</p>';
+}
+
+function rMOMcPareto(mo) {
+  const sums = {}; mo.forEach(d => { sums[d.mcNo] = (sums[d.mcNo] || 0) + 1; });
+  const sorted = Object.entries(sums).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const total = sorted.reduce((s, [, v]) => s + v, 0) || 1; let cum = 0;
+  document.getElementById("mo-mc-pareto").innerHTML = sorted.map(([l, v], i) => {
+    cum += v; const pct = (v / total * 100).toFixed(1); const cumPct = (cum / total * 100).toFixed(1);
+    return `<div class="par-row"><div class="par-label" title="${l}" style="flex:0 0 145px;font-size:10px">${l}</div>
+      <div class="par-bar-bg"><div class="par-bar-fill" style="width:${(v/total*100).toFixed(0)}%;background:${MO_COLORS[i]}"></div></div>
+      <div class="par-pct">${pct}%</div><div class="par-val">${v} ครั้ง</div><div class="par-cum">∑${cumPct}%</div></div>`;
+  }).join("") || '<p style="color:var(--muted);font-size:12px">ไม่มีข้อมูล</p>';
+}
+
+function rTTRDist(mo) {
+  // Bucket TTR into ranges
+  const buckets = { "0-5m": 0, "5-15m": 0, "15-30m": 0, "30-60m": 0, "1-2h": 0, ">2h": 0 };
+  mo.forEach(d => {
+    const t = d.ttr;
+    if (t <= 5) buckets["0-5m"]++;
+    else if (t <= 15) buckets["5-15m"]++;
+    else if (t <= 30) buckets["15-30m"]++;
+    else if (t <= 60) buckets["30-60m"]++;
+    else if (t <= 120) buckets["1-2h"]++;
+    else buckets[">2h"]++;
+  });
+  dch("c-ttr");
+  CH["c-ttr"] = new Chart(document.getElementById("c-ttr"), {
+    type: "bar",
+    data: { labels: Object.keys(buckets), datasets: [{ data: Object.values(buckets), backgroundColor: MO_COLORS.map(c => c + "88"), borderColor: MO_COLORS, borderWidth: 1, borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: "#0d1117", titleColor: "#dce4f0", bodyColor: "#526080", borderColor: "#1c2640", borderWidth: 1 } }, scales: { x: { grid: { color: "rgba(28,38,64,.4)" }, ticks: { color: "#526080", font: { size: 9 } } }, y: { grid: { color: "rgba(28,38,64,.4)" }, ticks: { color: "#526080", font: { size: 9 } } } } }
+  });
+}
+
+function rMOFreq(mo) {
+  // Count MO per week
+  const wk = {};
+  mo.forEach(d => {
+    const dt = new Date(d.date); dt.setDate(dt.getDate() - dt.getDay());
+    const key = dt.toISOString().split("T")[0];
+    wk[key] = (wk[key] || 0) + 1;
+  });
+  const weeks = Object.keys(wk).sort().slice(-20);
+  dch("c-mo-freq");
+  CH["c-mo-freq"] = new Chart(document.getElementById("c-mo-freq"), {
+    type: "bar",
+    data: { labels: weeks.map(w => w.slice(5)), datasets: [{ data: weeks.map(w => wk[w]), backgroundColor: "#38bdf844", borderColor: "#38bdf8", borderWidth: 1, borderRadius: 3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: "#0d1117", titleColor: "#dce4f0", bodyColor: "#526080", borderColor: "#1c2640", borderWidth: 1 } }, scales: { x: { grid: { color: "rgba(28,38,64,.4)" }, ticks: { color: "#526080", font: { size: 9 }, maxRotation: 45 } }, y: { grid: { color: "rgba(28,38,64,.4)" }, ticks: { color: "#526080", font: { size: 9 } } } } }
+  });
+}
+
+function rPMAlerts(mo) {
+  // For each Mc No, calculate: avg interval between breakdowns, last breakdown date
+  // → predict next breakdown
+  // Also combine with production volume from OEE FD if available
+  const mcMap = {};
+  mo.forEach(d => {
+    if (!mcMap[d.mcNo]) mcMap[d.mcNo] = { mc: d.mcNo, mcType: d.mcType, line: d.line, events: [], totalTTR: 0 };
+    mcMap[d.mcNo].events.push(d.date);
+    mcMap[d.mcNo].totalTTR += d.ttr;
+  });
+
+  const alerts = [];
+  Object.values(mcMap).forEach(mc => {
+    if (mc.events.length < 2) return; // need at least 2 events
+    const sorted = [...mc.events].sort((a, b) => a - b);
+    // Calculate intervals between events (days)
+    const intervals = [];
+    for (let i = 1; i < sorted.length; i++) {
+      intervals.push((sorted[i] - sorted[i-1]) / 86400000);
+    }
+    const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const lastBreakdown = sorted[sorted.length - 1];
+    const daysSince = (Date.now() - lastBreakdown) / 86400000;
+    const daysUntilNext = avgInterval - daysSince;
+    const avgTTR = (mc.totalTTR / mc.events.length).toFixed(1);
+
+    // Calculate production units since last breakdown (from OEE FD)
+    let prodSinceBreakdown = 0;
+    if (typeof FD !== 'undefined' && FD.length) {
+      FD.forEach(d => {
+        if (d.date >= lastBreakdown && (d.part === mc.line || d.line === mc.line)) {
+          prodSinceBreakdown += d.total || 0;
+        }
+      });
+    }
+
+    // Compute risk score
+    let risk = "LOW", riskColor = "#22c55e";
+    if (daysUntilNext <= 3) { risk = "CRITICAL"; riskColor = "#f43f5e"; }
+    else if (daysUntilNext <= 7) { risk = "HIGH"; riskColor = "#f87171"; }
+    else if (daysUntilNext <= 14) { risk = "MEDIUM"; riskColor = "#f59e0b"; }
+
+    alerts.push({ mc: mc.mc, mcType: mc.mcType, line: mc.line, count: mc.events.length, avgInterval: avgInterval.toFixed(1), daysSince: daysSince.toFixed(0), daysUntilNext: daysUntilNext.toFixed(0), avgTTR, prodSince: prodSinceBreakdown, risk, riskColor });
+  });
+
+  // Sort by risk (critical first, then by daysUntilNext asc)
+  const riskOrder = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+  alerts.sort((a, b) => (riskOrder[a.risk] - riskOrder[b.risk]) || (a.daysUntilNext - b.daysUntilNext));
+
+  if (!alerts.length) {
+    document.getElementById("pm-alerts").innerHTML = '<p style="color:var(--muted);font-size:12px">ต้องมีข้อมูล MO อย่างน้อย 2 รายการต่อเครื่องเพื่อคาดการณ์ได้</p>';
+    return;
+  }
+
+  document.getElementById("pm-alerts").innerHTML = alerts.slice(0, 15).map(a => {
+    const nextLabel = +a.daysUntilNext <= 0 ? `⚠️ เกินกำหนดแล้ว ${Math.abs(+a.daysUntilNext)} วัน` : `อีก ${a.daysUntilNext} วัน`;
+    const prodInfo = a.prodSince > 0 ? `<span style="color:#a78bfa;font-size:10px">ผลิต ${a.prodSince.toLocaleString()} ชิ้นหลังซ่อม</span>` : "";
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${a.riskColor}10;border:1px solid ${a.riskColor}30;border-radius:8px;margin-bottom:6px;flex-wrap:wrap">
+      <span style="flex:0 0 70px;font-size:10px;font-weight:700;padding:3px 8px;background:${a.riskColor}25;color:${a.riskColor};border-radius:20px;text-align:center">${a.risk}</span>
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:12px;font-weight:700;color:var(--text)">${a.mc}</div>
+        <div style="font-size:10px;color:var(--muted)">${a.mcType} | ${a.line} | ซ่อมแล้ว ${a.count} ครั้ง | interval เฉลี่ย ${a.avgInterval} วัน</div>
+        ${prodInfo}
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;font-weight:700;color:${a.riskColor}">${nextLabel}</div>
+        <div style="font-size:10px;color:var(--muted)">TTR avg ${a.avgTTR}m | ซ่อมล่าสุด ${a.daysSince}d ago</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function rMOTable(mo) {
+  const rows = [...mo].sort((a, b) => b.date - a.date).slice(0, 80);
+  document.getElementById("mo-tb").innerHTML = rows.map(d => {
+    const risk = d.ttr > 60 ? `<span style="background:#f43f5e22;color:#f43f5e;padding:2px 7px;border-radius:20px;font-size:9px">HIGH TTR</span>` :
+      d.ttr > 30 ? `<span style="background:#f59e0b22;color:#f59e0b;padding:2px 7px;border-radius:20px;font-size:9px">MED</span>` :
+      `<span style="background:#22c55e22;color:#22c55e;padding:2px 7px;border-radius:20px;font-size:9px">OK</span>`;
+    const onOff = d.onOff === "ซ่อมในไลน์" ? `<span style="background:#38bdf822;color:#38bdf8;padding:2px 6px;border-radius:10px;font-size:9px">IN</span>` :
+      `<span style="background:#a855f722;color:#a855f7;padding:2px 6px;border-radius:10px;font-size:9px">OUT</span>`;
+    return `<tr>
+      <td style="white-space:nowrap;font-size:10px">${d.dateStr}</td>
+      <td style="font-size:10px">${d.line}</td>
+      <td style="font-size:10px;white-space:nowrap">${d.mcNo}</td>
+      <td style="font-size:11px">${d.probType}</td>
+      <td style="font-size:10px;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.details}">${d.details}</td>
+      <td style="font-weight:700;color:${d.ttr>60?"var(--red)":d.ttr>30?"var(--gold)":"var(--green)"}">${d.ttr}</td>
+      <td style="font-size:10px;color:var(--muted)">${d.tech.split(" ").slice(0,2).join(" ")}</td>
+      <td>${onOff}</td>
+    </tr>`;
+  }).join("") || '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted)">ไม่มีข้อมูล</td></tr>';
+}
+
+// ─── MO AI ANALYSIS ───
+async function runMOAI() {
+  if (!MO_LOADED || !MO_ALL.length) {
+    document.getElementById("mo-ai-out").innerHTML = '<p style="color:var(--muted);font-size:12px">กรุณาโหลด MO data ก่อน</p>';
+    return;
+  }
+  document.getElementById("mo-ai-out").innerHTML = '<p class="pulse" style="color:#4ade80;font-size:12px">🔧 AI กำลังวิเคราะห์ Maintenance data...</p>';
+  const mo = getMOFiltered();
+  if (!mo.length) { document.getElementById("mo-ai-out").innerHTML = '<p style="color:var(--muted)">ไม่มีข้อมูลในช่วงที่เลือก</p>'; return; }
+
+  // Prepare stats
+  const totalMO = mo.length;
+  const avgTTR = (mo.reduce((s, d) => s + d.ttr, 0) / mo.length).toFixed(1);
+
+  // Problem frequency
+  const probSums = {}; mo.forEach(d => { probSums[d.probType] = (probSums[d.probType] || 0) + 1; });
+  const topProbs = Object.entries(probSums).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+  // Mc No frequency + recurrence
+  const mcMap = {};
+  mo.forEach(d => {
+    if (!mcMap[d.mcNo]) mcMap[d.mcNo] = { mc: d.mcNo, mcType: d.mcType, line: d.line, events: [], totalTTR: 0, probs: {} };
+    mcMap[d.mcNo].events.push(d.date);
+    mcMap[d.mcNo].totalTTR += d.ttr;
+    mcMap[d.mcNo].probs[d.probType] = (mcMap[d.mcNo].probs[d.probType] || 0) + 1;
+  });
+  const topMcs = Object.values(mcMap).sort((a, b) => b.events.length - a.events.length).slice(0, 6);
+
+  // Recurring problems
+  const recurring = topMcs.filter(mc => mc.events.length >= 3)
+    .map(mc => {
+      const topProb = Object.entries(mc.probs).sort((a, b) => b[1] - a[1])[0];
+      const sorted = [...mc.events].sort((a, b) => a - b);
+      const intervals = [];
+      for (let i = 1; i < sorted.length; i++) intervals.push(Math.round((sorted[i] - sorted[i-1]) / 86400000));
+      const avgInt = Math.round(intervals.reduce((a, b) => a + b, 0) / intervals.length);
+      return `${mc.mc}(${mc.mcType}): ซ่อม${mc.events.length}ครั้ง, ปัญหาหลัก="${topProb[0]}"${topProb[1]}ครั้ง, interval เฉลี่ย${avgInt}วัน, TTRavg${(mc.totalTTR/mc.events.length).toFixed(1)}m`;
+    });
+
+  // High TTR details
+  const highTTR = mo.filter(d => d.ttr > 60).sort((a, b) => b.ttr - a.ttr).slice(0, 5)
+    .map(d => `${d.mcNo}(${d.mcType}): "${d.probType}" TTR=${d.ttr}m, details="${d.details}"`);
+
+  // Tech performance
+  const techMap = {}; mo.forEach(d => { if (!techMap[d.tech]) techMap[d.tech] = { count: 0, totalTTR: 0 }; techMap[d.tech].count++; techMap[d.tech].totalTTR += d.ttr; });
+  const topTechs = Object.entries(techMap).map(([n, v]) => ({ n, count: v.count, avgTTR: (v.totalTTR / v.count).toFixed(1) })).sort((a, b) => b.count - a.count).slice(0, 4);
+
+  // Sample details for context
+  const sampleDetails = mo.filter(d => d.details).slice(0, 20).map(d => `[${d.mcNo}|${d.probType}]: ${d.details}`).join("; ");
+
+  const prompt = `คุณเป็น Maintenance Expert และ Reliability Engineer ระดับสูง วิเคราะห์ข้อมูล Maintenance Order ต่อไปนี้อย่างละเอียด แล้วตอบเป็น JSON เท่านั้น:
+
+**MO Summary (${totalMO} รายการ, Avg TTR: ${avgTTR}m)**
+
+**Top Problem Types:**
+${topProbs.map(([k, v], i) => `${i+1}. ${k}: ${v} ครั้ง (${(v/totalMO*100).toFixed(1)}%)`).join("\n")}
+
+**เครื่องที่ซ่อมบ่อย (Recurring):**
+${recurring.slice(0, 6).join("\n") || "ไม่มีข้อมูลเพียงพอ"}
+
+**High TTR Cases (ซ่อมนาน >60m):**
+${highTTR.join("\n") || "ไม่มี"}
+
+**Top Technicians:**
+${topTechs.map(t => `${t.n}: ${t.count}งาน, avgTTR ${t.avgTTR}m`).join("; ")}
+
+**ตัวอย่าง Details:**
+${sampleDetails.slice(0, 600)}
+
+วิเคราะห์และตอบ JSON:
+{
+  "root_causes": [
+    {"rank":1,"problem":"ชื่อปัญหา","frequency":"จำนวนครั้ง","root_cause":"สาเหตุรากของปัญหา","evidence":"หลักฐานจากข้อมูล"}
+  ],
+  "effective_solutions": [
+    {"problem":"ชื่อปัญหา","solution":"วิธีแก้ไขที่ได้ผลดีที่สุด","effectiveness":"HIGH|MEDIUM","why":"เหตุผล"}
+  ],
+  "resolved_patterns": [
+    {"mc_or_prob":"ชื่อ","status":"RESOLVED|RECURRING","pattern":"รูปแบบ","recommendation":"คำแนะนำ"}
+  ],
+  "predictive_rules": [
+    {"trigger":"เงื่อนไขที่ต้องเฝ้าระวัง","action":"สิ่งที่ต้องทำ","urgency":"HIGH|MED"}
+  ],
+  "tech_insights": "วิเคราะห์ประสิทธิภาพช่างและข้อเสนอแนะ 2-3 ประโยค",
+  "summary": "สรุปภาพรวม 2-3 ประโยค",
+  "critical_actions": [
+    {"priority":"1","action":"action ด่วน","impact":"ผลที่คาดหวัง"}
+  ]
+}`;
+
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 2000, messages: [{ role: "user", content: prompt }] })
+    });
+    const data = await r.json();
+    const txt = data.content?.map(c => c.text || "").join("").replace(/```json|```/g, "").trim();
+    let ai; try { ai = JSON.parse(txt); } catch { ai = null; }
+    ai ? renderMOAI(ai) : fallbackMOAI(topProbs, recurring, highTTR, avgTTR);
+  } catch (e) { fallbackMOAI(topProbs, recurring, highTTR, avgTTR); }
+}
+
+function renderMOAI(a) {
+  const eff = { HIGH: "#22c55e", MEDIUM: "#f59e0b" };
+  const urg = { HIGH: "#f43f5e", MED: "#f59e0b" };
+  const sta = { RESOLVED: "#22c55e", RECURRING: "#f43f5e" };
+
+  const rcHtml = (a.root_causes || []).map((rc, i) => `
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #f43f5e">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-family:var(--font-display);font-size:18px;font-weight:700;color:#f43f5e;opacity:.6">${String(rc.rank||i+1).padStart(2,"0")}</span>
+        <span style="font-size:12px;font-weight:700;color:var(--text)">${rc.problem}</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--muted);background:var(--bg);padding:2px 8px;border-radius:20px">${rc.frequency||""}</span>
+      </div>
+      <div style="font-size:11px;color:#cbd5e1;line-height:1.6"><b style="color:#f59e0b">Root Cause:</b> ${rc.root_cause}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;font-style:italic">📎 ${rc.evidence}</div>
+    </div>`).join("");
+
+  const solHtml = (a.effective_solutions || []).map(s => `
+    <div style="display:flex;gap:10px;align-items:flex-start;background:${eff[s.effectiveness]||'#22c55e'}10;border:1px solid ${eff[s.effectiveness]||'#22c55e'}30;border-radius:8px;padding:10px 12px;margin-bottom:6px">
+      <span style="flex:0 0 50px;font-size:9px;font-weight:700;color:${eff[s.effectiveness]||'#22c55e'};padding:2px 6px;background:${eff[s.effectiveness]||'#22c55e'}20;border-radius:20px;text-align:center;margin-top:1px">${s.effectiveness}</span>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px">${s.problem}</div>
+        <div style="font-size:12px;color:#4ade80">✓ ${s.solution}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">→ ${s.why}</div>
+      </div>
+    </div>`).join("");
+
+  const patHtml = (a.resolved_patterns || []).map(p => `
+    <div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:0 0 70px;font-size:9px;font-weight:700;padding:2px 6px;background:${sta[p.status]||'#526080'}22;color:${sta[p.status]||'#526080'};border-radius:20px;text-align:center">${p.status}</span>
+      <div><div style="font-size:11px;font-weight:700">${p.mc_or_prob}</div><div style="font-size:11px;color:var(--muted)">${p.pattern}</div><div style="font-size:10px;color:#60a5fa;margin-top:2px">→ ${p.recommendation}</div></div>
+    </div>`).join("");
+
+  const predHtml = (a.predictive_rules || []).map(p => `
+    <div style="display:flex;gap:10px;align-items:flex-start;background:${urg[p.urgency]||'#526080'}10;border:1px solid ${urg[p.urgency]||'#526080'}30;border-radius:8px;padding:9px 12px;margin-bottom:5px">
+      <span style="font-size:9px;font-weight:700;color:${urg[p.urgency]||'#526080'};flex:0 0 36px">🔮 ${p.urgency}</span>
+      <div><div style="font-size:11px;font-weight:600;color:var(--text)">${p.trigger}</div><div style="font-size:11px;color:#60a5fa;margin-top:2px">→ ${p.action}</div></div>
+    </div>`).join("");
+
+  const actHtml = (a.critical_actions || []).map(ac => `
+    <div style="display:flex;gap:10px;align-items:flex-start;background:#f43f5e08;border:1px solid #f43f5e30;border-radius:8px;padding:9px 12px;margin-bottom:5px">
+      <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:#f43f5e;opacity:.5;flex:0 0 24px">${ac.priority}</span>
+      <div><div style="font-size:12px;font-weight:700;color:var(--text)">${ac.action}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">→ ${ac.impact}</div></div>
+    </div>`).join("");
+
+  document.getElementById("mo-ai-out").innerHTML = `
+    <div style="background:#22c55e12;border-left:3px solid #22c55e;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px">
+      <p style="color:#4ade80;font-size:13px;font-weight:700;margin-bottom:4px">📋 สรุปภาพรวม</p>
+      <p style="color:#cbd5e1;font-size:12px;line-height:1.7">${a.summary||""}</p>
+    </div>
+    <div class="ai-grid" style="margin-bottom:16px">
+      <div><h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔴 Root Causes</h4>${rcHtml}</div>
+      <div>
+        <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">✅ Effective Solutions</h4>${solHtml}
+        <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">🔄 Resolved / Recurring Patterns</h4>${patHtml}
+        <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">👨‍🔧 Tech Insights</h4>
+        <p style="font-size:12px;color:#cbd5e1;line-height:1.7">${a.tech_insights||""}</p>
+      </div>
+    </div>
+    <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔮 Predictive Maintenance Rules</h4>
+    ${predHtml}
+    <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">🚨 Critical Actions ด่วน</h4>
+    ${actHtml}`;
+}
+
+function fallbackMOAI(topProbs, recurring, highTTR, avgTTR) {
+  document.getElementById("mo-ai-out").innerHTML = `
+    <div style="background:#f59e0b12;border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:14px">
+      <p style="color:#fcd34d;font-size:12px">วิเคราะห์จากข้อมูลพื้นฐาน (AI API ไม่พร้อมใช้งาน)</p>
+    </div>
+    <div class="ai-grid">
+      <div class="ai-sec"><h4>🔴 Top Problems</h4><ul>${topProbs.map(([k,v],i)=>`<li class="${i===0?"w":"y"}">${k}: ${v} ครั้ง</li>`).join("")}</ul></div>
+      <div class="ai-sec"><h4>🔄 Recurring Machines</h4><ul>${recurring.slice(0,4).map((r,i)=>`<li class="${i===0?"w":"y"}">${r}</li>`).join("")||'<li>ไม่มีข้อมูลเพียงพอ</li>'}</ul></div>
+      <div class="ai-sec" style="grid-column:1/-1"><h4>⏱️ High TTR Cases</h4><ul>${highTTR.map((r,i)=>`<li class="${i===0?"w":"y"}">${r}</li>`).join("")||'<li>ไม่มี</li>'}</ul></div>
+    </div>`;
+}
+
+// ── Hook into existing applyFilter ──
+const _origApplyFilter = applyFilter;
+function applyFilter() {
+  _origApplyFilter();
+  if (MO_LOADED) renderMO();
+}
+
+
+// Auto-load MO on page ready
+window.addEventListener("load",()=>setTimeout(loadMO, 2000));
 </script>
 </body>
 </html>
