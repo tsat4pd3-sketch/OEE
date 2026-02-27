@@ -368,6 +368,7 @@ function applyFilter(){
   document.getElementById("range-lbl").textContent=`${document.getElementById("date-from").value} — ${document.getElementById("date-to").value}`;
   document.getElementById("rec-count").textContent=`${FD.length.toLocaleString()} records`;
   render();
+  if(typeof MO_LOADED!=='undefined'&&MO_LOADED)renderMO();
 }
 const dch=id=>{if(CH[id]){CH[id].destroy();delete CH[id];}};
 const avg=arr=>{const v=arr.filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;};
@@ -1187,12 +1188,7 @@ function fallbackMOAI(topProbs, recurring, highTTR, avgTTR) {
     </div>`;
 }
 
-// ── Hook into existing applyFilter ──
-const _origApplyFilter = applyFilter;
-function applyFilter() {
-  _origApplyFilter();
-  if (MO_LOADED) renderMO();
-}
+// MO renders via applyFilter → renderMO() called at end of applyFilter
 
 
 // Auto-load MO on page ready
