@@ -62,16 +62,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .ch{position:relative}
 .par-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
 .par-row:last-child{border-bottom:none}
-.par-label{flex:0 0 155px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.par-label{flex:0 0 155px;font-size:12px;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .par-bar-bg{flex:1;background:var(--bg3);border-radius:3px;height:6px;overflow:hidden}
 .par-bar-fill{height:100%;border-radius:3px;transition:width .5s}
-.par-pct{flex:0 0 38px;text-align:right;font-size:11px;font-weight:700;color:var(--gold)}
-.par-val{flex:0 0 60px;text-align:right;font-size:10px;color:var(--muted)}
+.par-pct{flex:0 0 40px;text-align:right;font-size:12px;font-weight:700;color:var(--gold)}
+.par-val{flex:0 0 65px;text-align:right;font-size:11px;color:#94a3b8}
 .par-cum{flex:0 0 42px;text-align:right;font-size:9px;color:#334155}
 .tbl-wrap{overflow-x:auto;max-height:300px;overflow-y:auto}
 .dt-tbl{width:100%;border-collapse:collapse;font-size:11px}
-.dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:600;padding:7px 9px;text-align:left;font-size:10px;position:sticky;top:0}
-.dt-tbl td{padding:7px 9px;border-bottom:1px solid var(--border)}
+.dt-tbl th{background:#1a2235;color:#94a3b8;font-weight:700;padding:9px 11px;text-align:left;font-size:11px;position:sticky;top:0;letter-spacing:.3px;border-bottom:1px solid var(--border2)}
+.dt-tbl td{padding:9px 11px;border-bottom:1px solid var(--border);color:#dce4f0}
 .dt-tbl tr:hover td{background:#ffffff04}
 .bar-bg{background:var(--bg3);border-radius:3px;height:6px;overflow:hidden}.bar-fill{height:100%;border-radius:3px;transition:width .5s}
 .heat-cell{border-radius:3px;display:flex;align-items:center;justify-content:center;cursor:default;font-size:8px}
@@ -86,7 +86,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 @media(max-width:800px){.ai-grid{grid-template-columns:1fr}}
 .ai-sec h4{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .ai-sec ul{list-style:none;display:flex;flex-direction:column;gap:4px}
-.ai-sec li{font-size:12px;color:#cbd5e1;padding:7px 10px;border-radius:6px;line-height:1.6;border-left:2px solid var(--border)}
+.ai-sec li{font-size:13px;color:#dce4f0;padding:8px 11px;border-radius:6px;line-height:1.7;border-left:2px solid var(--border)}
 .ai-sec li.w{border-left-color:var(--red);background:#f43f5e06}
 .ai-sec li.y{border-left-color:var(--gold);background:#00d4ff06}
 .ai-sec li.g{border-left-color:var(--green);background:#22c55e06}
@@ -105,7 +105,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <body>
 <div id="loading">
   <div class="ld-ring"></div>
-  <div style="font-family:var(--font-display);font-size:14px;color:var(--gold);letter-spacing:3px">PD3 DEEP ANALYSIS</div>
+  <div style="font-family:var(--font-display);font-size:14px;color:var(--gold);letter-spacing:3px">PD4 DEEP ANALYSIS</div>
   <p id="ldmsg" style="font-size:11px;color:var(--muted)">กำลังโหลดข้อมูล...</p>
 </div>
 
@@ -250,7 +250,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📋 รายละเอียด MO ล่าสุด</h4>
       <div class="tbl-wrap">
         <table class="dt-tbl">
-          <thead><tr><th>เปิด MO</th><th>ไลน์</th><th>Mc No.</th><th>Problem Type</th><th>Details</th><th>TTR(m)</th><th>ช่าง</th><th>สถานะ</th></tr></thead>
+          <thead><tr><th>เปิด MO</th><th>ไลน์</th><th>Mc No.</th><th>Problem Type</th><th>แนวทางการแก้ไข</th><th>TTR(m)</th><th>ช่าง</th><th>สถานะ MO</th></tr></thead>
           <tbody id="mo-tb"></tbody>
         </table>
       </div>
@@ -719,8 +719,8 @@ function parseMOCSV(text) {
   const lines = text.split("\n").filter(l => l.trim());
   if (lines.length < 2) return [];
   const hdr = csvLineMO(lines[0]);
-  const idx = {}; hdr.forEach((h, i) => idx[h.trim()] = i);
-  const g = (row, name) => { const i = idx[name]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim() : ""; };
+  const idx = {}; hdr.forEach((h, i) => idx[h.trim().replace(/\r/g,"")] = i);
+  const g = (row, name) => { const i = idx[name]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim().replace(/\r/g,"") : ""; };
   const n = v => { if (!v) return 0; const x = parseFloat(v.replace(/,/g, "")); return isNaN(x) ? 0 : x; };
   const rows = [];
   for (let r = 1; r < lines.length; r++) {
@@ -728,19 +728,31 @@ function parseMOCSV(text) {
     if (row.length < 8) continue;
     const dateOpen = parseMODate(g(row, "เวลาเปิด MO"));
     if (!dateOpen) continue;
+    // Filter by แผนก — only load rows matching this dashboard's dept
+    const dept = g(row, "แผนก");
+    if (dept && !dept.toUpperCase().includes("PD3")) continue;
+    const dateClose = parseMODate(g(row, "เวลาซ่อมเสร็จ"));
+    const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
+    const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
     rows.push({
       date: dateOpen,
+      dateClose: dateClose,
       dateStr: fmtDate ? fmtDate(dateOpen) : dateOpen.toLocaleDateString("th-TH"),
       line: g(row, "Line การผลิต"),
       mcType: g(row, "Mc Type"),
       mcNo: g(row, "Mc No."),
       probType: g(row, "Problem Type"),
-      details: g(row, "Details"),
-      ttr: n(g(row, "TTR")),           // minutes
+      symptom: g(row, "อาการ/สาเหตุ"),        // col 9 — symptom
+      solution: g(row, "แนวทางการแก้ไข"),      // col 15 — fix method
+      ttr: n(g(row, "TTR")),
       moWait: n(g(row, "MO รอการแก้ไข")),
       tech: g(row, "ช่างที่รับการแก้ไข"),
       onOff: g(row, "Online/Offline"),
       repairTime: n(g(row, "ระยะเวลาในการซ่อมงาน")),
+      responseTime: n(g(row, "ระยะเวลาเข้าดำเนินการ")),
+      dept: g(row, "แผนก"),
+      statusMO: statusMO,
+      isClosed: isClosed,
     });
   }
   return rows;
@@ -770,10 +782,20 @@ async function loadMO() {
 }
 
 function getMOFiltered() {
-  // Filter by date range from main filter
   const from = new Date(document.getElementById("date-from").value);
   const to = new Date(document.getElementById("date-to").value); to.setHours(23,59,59);
-  return MO_ALL.filter(d => d.date >= from && d.date <= to);
+  // date-from may be CE year — MO dates are also CE after parsing, should match
+  const filtered = MO_ALL.filter(d => d.date >= from && d.date <= to);
+  // Debug: if empty, show range info
+  if (!filtered.length && MO_ALL.length > 0) {
+    const moMin = new Date(Math.min(...MO_ALL.map(d=>d.date)));
+    const moMax = new Date(Math.max(...MO_ALL.map(d=>d.date)));
+    document.getElementById("mo-status").textContent =
+      `ไม่มี MO ในช่วงนี้ (MO data: ${moMin.toLocaleDateString("th-TH")} ถึง ${moMax.toLocaleDateString("th-TH")}, กรอง: ${from.toLocaleDateString("th-TH")} – ${to.toLocaleDateString("th-TH")})`;
+  } else {
+    document.getElementById("mo-status").textContent = "";
+  }
+  return filtered;
 }
 
 function renderMO() {
@@ -792,22 +814,38 @@ function renderMO() {
 
 function rMOKPI(mo) {
   const totalMO = mo.length;
-  const avgTTR = (mo.reduce((s, d) => s + d.ttr, 0) / mo.length).toFixed(1);
+  const closedMO = mo.filter(d => d.isClosed);
+  const closedCount = closedMO.length;
+  const openCount = totalMO - closedCount;
+
+  // MTTR = Mean Time To Repair = avg TTR of CLOSED MOs (minutes)
+  const mttr = closedCount > 0 ? (closedMO.reduce((s,d)=>s+d.ttr,0)/closedCount).toFixed(1) : "—";
+
+  // MTBF = Mean Time Between Failures per Mc (avg days between breakdowns)
+  const mcMap = {}; mo.forEach(d => { if(!mcMap[d.mcNo])mcMap[d.mcNo]=[]; mcMap[d.mcNo].push(d.date); });
+  const intervals = [];
+  Object.values(mcMap).forEach(evts => {
+    const sorted = [...evts].sort((a,b)=>a-b);
+    for(let i=1;i<sorted.length;i++) intervals.push((sorted[i]-sorted[i-1])/3600000); // hours
+  });
+  const mtbf = intervals.length ? (intervals.reduce((a,b)=>a+b,0)/intervals.length).toFixed(1) : "—";
+
   const uniqMc = new Set(mo.map(d => d.mcNo)).size;
-  // recurring = mc appears >1 time with same problem
-  const mcProb = {}; mo.forEach(d => { const k = d.mcNo + "|" + d.probType; if (!mcProb[k]) mcProb[k] = 0; mcProb[k]++; });
+  const mcProb = {}; mo.forEach(d => { const k = d.mcNo+"|"+d.probType; if(!mcProb[k])mcProb[k]=0; mcProb[k]++; });
   const recurring = Object.values(mcProb).filter(v => v > 1).length;
   const highTTR = mo.filter(d => d.ttr > 60).length;
+  const closedPct = totalMO>0?Math.round(closedCount/totalMO*100):0;
+
   document.getElementById("mo-kpi").innerHTML = [
-    { l: "MO ทั้งหมด", v: totalMO.toLocaleString(), c: "#38bdf8", u: "รายการ" },
-    { l: "Avg TTR", v: avgTTR, c: "#f59e0b", u: "นาที" },
+    { l: "MO ทั้งหมด", v: totalMO.toLocaleString(), c: "#38bdf8", u: `ปิดแล้ว ${closedCount} (${closedPct}%) | ค้าง ${openCount}` },
+    { l: "MTTR", v: mttr, c: "#f59e0b", u: "นาที (Mean Time To Repair)" },
+    { l: "MTBF", v: mtbf, c: "#22c55e", u: "ชั่วโมง (Mean Time Between Failures)" },
     { l: "เครื่องที่ซ่อม", v: uniqMc, c: "#a855f7", u: "เครื่อง" },
-    { l: "ปัญหาซ้ำ", v: recurring, c: "#f43f5e", u: "กรณี" },
-    { l: "TTR > 60m", v: highTTR, c: "#f43f5e", u: "รายการ" },
-  ].map(k => `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:12px 14px;border-bottom:2px solid ${k.c}">
-    <div style="font-size:10px;color:var(--muted);margin-bottom:5px">${k.l}</div>
-    <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:${k.c}">${k.v}</div>
-    <div style="font-size:10px;color:var(--muted);margin-top:2px">${k.u}</div>
+    { l: "ปัญหาซ้ำ", v: recurring, c: "#f43f5e", u: "กรณี | TTR>60m: "+highTTR },
+  ].map(k => `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:13px 15px;border-bottom:2px solid ${k.c}">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.3px">${k.l}</div>
+    <div style="font-family:var(--font-display);font-size:24px;font-weight:700;color:${k.c}">${k.v}</div>
+    <div style="font-size:11px;color:#7a8faa;margin-top:4px">${k.u}</div>
   </div>`).join("");
 }
 
@@ -971,41 +1009,77 @@ function rPMAlerts(mo) {
     return;
   }
 
-  document.getElementById("pm-alerts").innerHTML = alerts.slice(0, 15).map(a => {
-    const nextLabel = +a.daysUntilNext <= 0 ? `⚠️ เกินกำหนดแล้ว ${Math.abs(+a.daysUntilNext)} วัน` : `อีก ${a.daysUntilNext} วัน`;
-    const prodInfo = a.prodSince > 0 ? `<span style="color:#a78bfa;font-size:10px">ผลิต ${a.prodSince.toLocaleString()} ชิ้นหลังซ่อม</span>` : "";
-    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${a.riskColor}10;border:1px solid ${a.riskColor}30;border-radius:8px;margin-bottom:6px;flex-wrap:wrap">
-      <span style="flex:0 0 70px;font-size:10px;font-weight:700;padding:3px 8px;background:${a.riskColor}25;color:${a.riskColor};border-radius:20px;text-align:center">${a.risk}</span>
-      <div style="flex:1;min-width:200px">
-        <div style="font-size:12px;font-weight:700;color:var(--text)">${a.mc}</div>
-        <div style="font-size:10px;color:var(--muted)">${a.mcType} | ${a.line} | ซ่อมแล้ว ${a.count} ครั้ง | interval เฉลี่ย ${a.avgInterval} วัน</div>
+  // Separate frequent (interval ≤ 3d) vs rare (interval > 14d)
+  const frequent = alerts.filter(a => +a.avgInterval <= 3);
+  const rare = alerts.filter(a => +a.avgInterval > 14);
+  const normal = alerts.filter(a => +a.avgInterval > 3 && +a.avgInterval <= 14);
+
+  function alertCard(a) {
+    const nextLabel = +a.daysUntilNext <= 0
+      ? `<span style="color:#f87171;font-weight:700">⚠️ เกินกำหนด ${Math.abs(+a.daysUntilNext)} วัน</span>`
+      : `<span style="color:${a.riskColor};font-weight:700">อีก ~${a.daysUntilNext} วัน</span>`;
+    const prodInfo = a.prodSince > 0
+      ? `<div style="font-size:11px;color:#c4b5fd;margin-top:3px">🏭 ผลิตไป <b style="color:#ddd8fe">${a.prodSince.toLocaleString()}</b> ชิ้น หลังซ่อมครั้งล่าสุด</div>` : "";
+    const freqTag = +a.avgInterval <= 3
+      ? `<span style="background:#f43f5e30;color:#f87171;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">🔴 เสียบ่อยทุก ${a.avgInterval}d</span>`
+      : +a.avgInterval > 14
+        ? `<span style="background:#22c55e25;color:#4ade80;padding:2px 8px;border-radius:20px;font-size:10px">🟢 นานๆครั้ง ${a.avgInterval}d</span>`
+        : `<span style="background:#f59e0b25;color:#fbbf24;padding:2px 8px;border-radius:20px;font-size:10px">🟡 ปกติ ${a.avgInterval}d</span>`;
+    return `<div style="display:grid;grid-template-columns:80px 1fr auto;gap:10px;align-items:start;padding:11px 14px;background:${a.riskColor}10;border:1px solid ${a.riskColor}35;border-radius:9px;margin-bottom:7px">
+      <div>
+        <div style="font-size:11px;font-weight:700;padding:3px 0;color:${a.riskColor};text-align:center">${a.risk}</div>
+        ${freqTag}
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#f1f5f9">${a.mc}</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px">${a.mcType} | ${a.line} | ซ่อม ${a.count} ครั้ง</div>
         ${prodInfo}
       </div>
-      <div style="text-align:right">
-        <div style="font-size:12px;font-weight:700;color:${a.riskColor}">${nextLabel}</div>
-        <div style="font-size:10px;color:var(--muted)">TTR avg ${a.avgTTR}m | ซ่อมล่าสุด ${a.daysSince}d ago</div>
+      <div style="text-align:right;min-width:120px">
+        <div style="font-size:12px">${nextLabel}</div>
+        <div style="font-size:11px;color:#7a8faa;margin-top:3px">MTTR avg ${a.avgTTR}m</div>
+        <div style="font-size:11px;color:#7a8faa">ซ่อมล่าสุด ${a.daysSince}d ago</div>
       </div>
     </div>`;
-  }).join("");
+  }
+
+  let html2 = "";
+  if (frequent.length) {
+    html2 += `<div style="font-size:11px;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px;padding:6px 10px;background:#f43f5e15;border-radius:6px;border-left:3px solid #f43f5e">🔴 เสียบ่อย — ต้องวาง PM ด่วน (${frequent.length} เครื่อง)</div>`;
+    html2 += frequent.sort((a,b)=>riskOrder[a.risk]-riskOrder[b.risk]).map(alertCard).join("");
+  }
+  if (normal.length) {
+    html2 += `<div style="font-size:11px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px;padding:6px 10px;background:#f59e0b15;border-radius:6px;border-left:3px solid #f59e0b">🟡 ปกติ — ติดตามสม่ำเสมอ (${normal.length} เครื่อง)</div>`;
+    html2 += normal.sort((a,b)=>riskOrder[a.risk]-riskOrder[b.risk]).map(alertCard).join("");
+  }
+  if (rare.length) {
+    html2 += `<div style="font-size:11px;font-weight:700;color:#4ade80;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px;padding:6px 10px;background:#22c55e15;border-radius:6px;border-left:3px solid #22c55e">🟢 นานๆครั้ง — เฝ้าระวังตามแผน (${rare.length} เครื่อง)</div>`;
+    html2 += rare.sort((a,b)=>riskOrder[a.risk]-riskOrder[b.risk]).map(alertCard).join("");
+  }
+  if(!html2) html2 = '<p style="color:var(--muted);font-size:12px">ไม่มีข้อมูลเพียงพอ (ต้องซ่อม ≥2 ครั้งต่อเครื่อง)</p>';
+  document.getElementById("pm-alerts").innerHTML = html2;
 }
 
 function rMOTable(mo) {
   const rows = [...mo].sort((a, b) => b.date - a.date).slice(0, 80);
   document.getElementById("mo-tb").innerHTML = rows.map(d => {
-    const risk = d.ttr > 60 ? `<span style="background:#f43f5e22;color:#f43f5e;padding:2px 7px;border-radius:20px;font-size:9px">HIGH TTR</span>` :
-      d.ttr > 30 ? `<span style="background:#f59e0b22;color:#f59e0b;padding:2px 7px;border-radius:20px;font-size:9px">MED</span>` :
-      `<span style="background:#22c55e22;color:#22c55e;padding:2px 7px;border-radius:20px;font-size:9px">OK</span>`;
-    const onOff = d.onOff === "ซ่อมในไลน์" ? `<span style="background:#38bdf822;color:#38bdf8;padding:2px 6px;border-radius:10px;font-size:9px">IN</span>` :
-      `<span style="background:#a855f722;color:#a855f7;padding:2px 6px;border-radius:10px;font-size:9px">OUT</span>`;
+    const ttrColor = d.ttr>60?"#f87171":d.ttr>30?"#fbbf24":"#4ade80";
+    const ttrBadge = d.ttr>60?`<span style="background:#f43f5e25;color:#f87171;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700">HIGH</span>`:
+      d.ttr>30?`<span style="background:#f59e0b25;color:#fbbf24;padding:2px 7px;border-radius:20px;font-size:10px">MED</span>`:
+      `<span style="background:#22c55e25;color:#4ade80;padding:2px 7px;border-radius:20px;font-size:10px">OK</span>`;
+    const statusBadge = d.isClosed
+      ? `<span style="background:#22c55e25;color:#4ade80;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600">✓ ปิด</span>`
+      : `<span style="background:#f43f5e25;color:#f87171;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600">⏳ ค้าง</span>`;
+    const solText = d.solution || d.symptom || "—";
     return `<tr>
-      <td style="white-space:nowrap;font-size:10px">${d.dateStr}</td>
-      <td style="font-size:10px">${d.line}</td>
-      <td style="font-size:10px;white-space:nowrap">${d.mcNo}</td>
-      <td style="font-size:11px">${d.probType}</td>
-      <td style="font-size:10px;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.details}">${d.details}</td>
-      <td style="font-weight:700;color:${d.ttr>60?"var(--red)":d.ttr>30?"var(--gold)":"var(--green)"}">${d.ttr}</td>
-      <td style="font-size:10px;color:var(--muted)">${d.tech.split(" ").slice(0,2).join(" ")}</td>
-      <td>${onOff}</td>
+      <td style="white-space:nowrap;font-size:11px;color:#cbd5e1">${d.dateStr}</td>
+      <td style="font-size:11px;color:#e2e8f0;font-weight:600">${d.line}</td>
+      <td style="font-size:11px;color:#e2e8f0;white-space:nowrap;font-weight:600">${d.mcNo}</td>
+      <td style="font-size:12px;color:#f1f5f9">${d.probType}</td>
+      <td style="font-size:11px;color:#94a3b8;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${solText}">${solText}</td>
+      <td style="font-weight:700;font-size:13px;color:${ttrColor}">${d.ttr} ${ttrBadge}</td>
+      <td style="font-size:11px;color:#94a3b8">${d.tech.split(" ").slice(0,2).join(" ")}</td>
+      <td>${statusBadge}</td>
     </tr>`;
   }).join("") || '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted)">ไม่มีข้อมูล</td></tr>';
 }
@@ -1058,7 +1132,7 @@ async function runMOAI() {
   const topTechs = Object.entries(techMap).map(([n, v]) => ({ n, count: v.count, avgTTR: (v.totalTTR / v.count).toFixed(1) })).sort((a, b) => b.count - a.count).slice(0, 4);
 
   // Sample details for context
-  const sampleDetails = mo.filter(d => d.details).slice(0, 20).map(d => `[${d.mcNo}|${d.probType}]: ${d.details}`).join("; ");
+  const sampleDetails = mo.filter(d => d.solution||d.symptom).slice(0, 20).map(d => `[${d.mcNo}|${d.probType}] อาการ:"${d.symptom}" แก้ไข:"${d.solution}"`).join("; ");
 
   const prompt = `คุณเป็น Maintenance Expert และ Reliability Engineer ระดับสูง วิเคราะห์ข้อมูล Maintenance Order ต่อไปนี้อย่างละเอียด แล้วตอบเป็น JSON เท่านั้น:
 
@@ -1076,8 +1150,8 @@ ${highTTR.join("\n") || "ไม่มี"}
 **Top Technicians:**
 ${topTechs.map(t => `${t.n}: ${t.count}งาน, avgTTR ${t.avgTTR}m`).join("; ")}
 
-**ตัวอย่าง Details:**
-${sampleDetails.slice(0, 600)}
+**อาการและวิธีแก้ไข (แนวทางการแก้ไข):**
+${sampleDetails.slice(0, 700)}
 
 วิเคราะห์และตอบ JSON:
 {
