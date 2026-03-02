@@ -885,6 +885,7 @@ function renderMO() {
   rMOFreq(mo);
   rPMAlerts(mo);
   rMOTable(mo);
+  initGeminiProbs();
 }
 
 function rMOKPI(mo) {
@@ -1703,12 +1704,7 @@ function renderGeminiRaw(txt, query, sources) {
     </div>`;
 }
 
-// Call initGeminiKey + initGeminiProbs after MO loads
-const _origRenderMO = renderMO;
-function renderMO() {
-  _origRenderMO();
-  initGeminiProbs();
-}
+// initGeminiProbs called directly from renderMO
 
 // Init on load
 window.addEventListener("load", () => { initGeminiKey(); });
