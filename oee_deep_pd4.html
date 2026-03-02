@@ -312,38 +312,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div id="mo-ai-out"><p class="pulse" style="color:var(--muted);font-size:12px">กำลังรอข้อมูล MO...</p></div>
   </div>
 
-
-  <!-- ─── GEMINI EXTERNAL SEARCH ─── -->
-  <div class="gemini-wrap">
-    <div class="gemini-hdr">
-      <div class="gemini-orb">✦</div>
-      <div>
-        <h3>EXTERNAL KNOWLEDGE SEARCH</h3>
-        <span>ค้นหาแนวทางแก้ไขจากโลกภายนอก ด้วย Gemini + Google Search</span>
-      </div>
-    </div>
-
-    <!-- API Key input -->
-    <div class="gemini-key-row">
-      <span class="gemini-key-lbl">🔑 Gemini API Key:</span>
-      <input class="gemini-key-inp" id="gemini-key" type="password" placeholder="AIza... (รับฟรีที่ aistudio.google.com)" autocomplete="off">
-      <button onclick="saveGeminiKey()" style="padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:10px;cursor:pointer;font-family:var(--font-body)">💾 บันทึก</button>
-      <span id="gemini-key-status" style="font-size:10px;color:var(--muted)"></span>
-    </div>
-
-    <!-- Search bar -->
-    <div class="search-bar">
-      <select class="search-sel" id="gemini-prob-sel">
-        <option value="">— เลือกปัญหาจาก MO data —</option>
-      </select>
-      <input class="search-inp" id="gemini-custom" placeholder="หรือพิมพ์อาการ/ปัญหาเพิ่มเติม เช่น cylinder แกนงอ ลมรั่ว">
-      <button class="btn-gemini" id="btn-gemini-search" onclick="searchGemini()">✦ ค้นหา</button>
-    </div>
-    <p class="gemini-api-note">💡 Gemini ค้นหาจาก Google + วิเคราะห์ผลเพื่อแนะนำวิธีแก้ไขจากมาตรฐานอุตสาหกรรม, forum ช่าง, manuals</p>
-
-    <div id="gemini-out"><p style="color:var(--muted);font-size:12px">เลือกปัญหาหรือพิมพ์อาการ แล้วกด ✦ ค้นหา</p></div>
-  </div>
-
 </main>
 
 <script>
