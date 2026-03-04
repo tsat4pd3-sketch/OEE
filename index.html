@@ -315,7 +315,7 @@ function csvLine(line){
     else c+=ch;
   }r.push(c);return r;
 }
-function fmtIso(d){return d.toISOString().split("T")[0];}
+function fmtIso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
 function fmtDate(d){if(!d)return"—";return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;}
 function parsePD3Date(s){
   if(!s)return null;s=s.trim().replace(/"/g,"");
@@ -452,8 +452,8 @@ function setDefaultDates(){
 }
 function selectAll(v){document.querySelectorAll(".pci").forEach(c=>c.checked=v);applyFilter();}
 function applyFilter(){
-  const from=new Date(document.getElementById("date-from").value);
-  const to=new Date(document.getElementById("date-to").value);to.setHours(23,59,59);
+  const _f=document.getElementById("date-from").value.split("-");const from=new Date(+_f[0],+_f[1]-1,+_f[2]);
+  const _t=document.getElementById("date-to").value.split("-");const to=new Date(+_t[0],+_t[1]-1,+_t[2],23,59,59);
   const sel=[...document.querySelectorAll(".pci:checked")].map(c=>c.value);
   const sh=document.getElementById("shift-sel").value;
   FD=ALL.filter(d=>d.date>=from&&d.date<=to&&sel.includes(d.part)&&(sh==="all"||d.shift===sh));
@@ -638,6 +638,7 @@ function makeForecastChart(canvasId, historicLabels, historicData, forecastLabel
 }
 
 
+
 function buildTrendForecast(getVal, color, unit, canvasId, legendId){
   const mode = window.CHART_VIEW || 'monthly';
   const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -646,17 +647,16 @@ function buildTrendForecast(getVal, color, unit, canvasId, legendId){
   if(mode==='daily'){
     const wm=byDay(getVal);
     const keys=Object.keys(wm).sort().slice(-60);
-    histKeys=keys;
+    if(!keys.length)return;
     histVals=keys.map(k=>avg(wm[k]));
     if(histVals.length<3)return;
     bands=histVals.map(v=>({low:v*0.92,med:v,high:v*1.08}));
     const{slope,intercept}=linearForecast(histVals);
     const n=histVals.length;
     for(let i=1;i<=7;i++){
-      const last=new Date(histKeys[histKeys.length-1]+'T00:00:00');
+      const last=new Date(keys[keys.length-1]+'T00:00:00');
       last.setDate(last.getDate()+i);
-      const lbl=`${last.getDate()} ${MN[last.getMonth()]} ${String(last.getFullYear()).slice(2)}`;
-      fcLabels.push(lbl);
+      fcLabels.push(`${last.getDate()} ${MN[last.getMonth()]} ${String(last.getFullYear()).slice(2)}`);
       fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
     }
     histKeys=keys.map(k=>{const[yr,mo,dd]=k.split('-');return `${parseInt(dd)} ${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
@@ -664,6 +664,7 @@ function buildTrendForecast(getVal, color, unit, canvasId, legendId){
   } else if(mode==='monthly'){
     const wm=byMonth(getVal);
     const months=Object.keys(wm).sort();
+    if(!months.length)return;
     const monthVals=months.map(m=>avg(wm[m]));
     if(months.length<3)return;
     const hm=months.slice(-12), hv=monthVals.slice(-12);
@@ -678,11 +679,12 @@ function buildTrendForecast(getVal, color, unit, canvasId, legendId){
     }
     histKeys=hm.map(m=>{const[yr,mo]=m.split('-');return `${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
 
-  } else { // yearly
+  } else {
     const wm=byYear(getVal);
     const keys=Object.keys(wm).sort();
+    if(!keys.length)return;
     histVals=keys.map(k=>avg(wm[k]));
-    if(keys.length<2)return;
+    if(histVals.length<2)return;
     bands=histVals.map(v=>({low:v*0.92,med:v,high:v*1.08}));
     const{slope,intercept}=linearForecast(histVals);
     const n=histVals.length;
@@ -694,22 +696,16 @@ function buildTrendForecast(getVal, color, unit, canvasId, legendId){
     histKeys=[...keys];
   }
 
+  if(!histVals.length)return;
   makeForecastChart(canvasId, histKeys, histVals, fcLabels, fcVals, bands, color, unit, legendId);
-
-  const lgEl=document.getElementById(legendId);
-  if(lgEl)lgEl.innerHTML=`
-    <div class="fc-item"><div class="fc-dot" style="background:${color}"></div>Actual</div>
-    <div class="fc-item"><div class="fc-dot" style="background:${color}99;border-top:2px dashed ${color}99"></div>Forecast</div>
-    <div class="fc-item"><div class="fc-dot" style="background:${color}18;height:8px;border-radius:2px"></div>P10–P90 Band</div>
-    <div class="fc-item"><div class="fc-dot" style="background:${color}88;border-top:1px dashed ${color}88"></div>Median</div>
-  `;
-
   return {slope, avg12m:avg(histVals), forecastEnd:fcVals[fcVals.length-1]};
 }
 
 
+
 function rOEETrend(){buildTrendForecast(d=>d.oee,"#e8b84b","%","c-oee","oee-legend");}
 function rDTForecast(){buildTrendForecast(d=>d.dtMin,"#f43f5e"," m","c-dt-fc","dt-legend");}
+
 
 function rPPMForecast(){
   const mode = window.CHART_VIEW || 'monthly';
@@ -729,20 +725,20 @@ function rPPMForecast(){
 
   if(mode==='daily'){
     const{keys,vals}=buildPPMSeries(dt=>fmtIso(dt),60);
-    histVals=vals; bands=vals.map(v=>({low:v*0.8,med:v,high:v*1.2}));
+    if(!keys.length)return;
     const ma=vals.map((v,i)=>{const sl=vals.slice(Math.max(0,i-6),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
     const{slope,intercept}=linearForecast(ma); const n=ma.length;
-    histVals=ma;
+    histVals=ma; bands=ma.map(v=>({low:v*0.8,med:v,high:v*1.2}));
     for(let i=1;i<=7;i++){
       const last=new Date(keys[keys.length-1]+'T00:00:00'); last.setDate(last.getDate()+i);
       fcLabels.push(`${last.getDate()} ${MN[last.getMonth()]} ${String(last.getFullYear()).slice(2)}`);
       fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
     }
     histKeys=keys.map(k=>{const[yr,mo,dd]=k.split('-');return `${parseInt(dd)} ${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
-    bands=ma.map(v=>({low:v*0.8,med:v,high:v*1.2}));
 
   } else if(mode==='monthly'){
     const{keys,vals}=buildPPMSeries(dt=>`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`,12);
+    if(!keys.length)return;
     const ma=vals.map((v,i)=>{const sl=vals.slice(Math.max(0,i-2),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
     histVals=ma; bands=ma.map(v=>({low:v*0.8,med:v,high:v*1.2}));
     const{slope,intercept}=linearForecast(ma); const n=ma.length;
@@ -754,8 +750,9 @@ function rPPMForecast(){
     }
     histKeys=keys.map(k=>{const[yr,mo]=k.split('-');return `${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
 
-  } else { // yearly
+  } else {
     const{keys,vals}=buildPPMSeries(dt=>String(dt.getFullYear()),20);
+    if(!keys.length)return;
     histVals=vals; bands=vals.map(v=>({low:v*0.8,med:v,high:v*1.2}));
     const{slope,intercept}=linearForecast(vals); const n=vals.length;
     const lastYr=parseInt(keys[keys.length-1]);
@@ -769,6 +766,7 @@ function rPPMForecast(){
   if(histVals.length<2)return;
   makeForecastChart("c-ppm-fc",histKeys,histVals,fcLabels,fcVals,bands,"#a855f7"," PPM","ppm-legend");
 }
+
 
 
 function rDTPareto(){

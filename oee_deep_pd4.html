@@ -313,7 +313,7 @@ const DT_COLORS=["#f43f5e","#f59e0b","#a855f7","#38bdf8","#22c55e","#fb923c","#6
 function csvLine(l){const r=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(c);c="";}else c+=ch;}r.push(c);return r;}
 function parseThaiDate(s){if(!s)return null;s=s.trim().split(" ")[0];const p=s.split("/");if(p.length!==3)return null;const d=+p[0],m=+p[1]-1,y=+p[2];return new Date(y>2400?y-543:y,m,d);}
 function fmtDate(d){if(!d)return"—";return`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;}
-function fmtIso(d){return d.toISOString().split("T")[0];}
+function fmtIso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
 
 function csvParse(text){
   const lines=text.split("\n").filter(l=>l.trim());if(lines.length<2)return[];
@@ -379,8 +379,8 @@ function initParts(){document.getElementById("part-list").innerHTML=PARTS.map(p=
 function setDefaultDates(){const today=new Date(),minD=new Date(today);minD.setDate(minD.getDate()-180);document.getElementById("date-from").value=fmtIso(minD);document.getElementById("date-to").value=fmtIso(today);}
 function selectAll(v){document.querySelectorAll(".pci").forEach(c=>c.checked=v);applyFilter();}
 function applyFilter(){
-  const from=new Date(document.getElementById("date-from").value);
-  const to=new Date(document.getElementById("date-to").value);to.setHours(23,59,59);
+  const _f=document.getElementById("date-from").value.split("-");const from=new Date(+_f[0],+_f[1]-1,+_f[2]);
+  const _t=document.getElementById("date-to").value.split("-");const to=new Date(+_t[0],+_t[1]-1,+_t[2],23,59,59);
   const sel=[...document.querySelectorAll(".pci:checked")].map(c=>c.value);
   const sh=document.getElementById("shift-sel").value;
   FD=ALL.filter(d=>d.date>=from&&d.date<=to&&sel.includes(d.part)&&(sh==="all"||d.shift===sh));
@@ -914,8 +914,8 @@ async function loadMO() {
 }
 
 function getMOFiltered() {
-  const from = new Date(document.getElementById("date-from").value);
-  const to = new Date(document.getElementById("date-to").value); to.setHours(23,59,59);
+  const _f2=document.getElementById("date-from").value.split("-");const from = new Date(+_f2[0],+_f2[1]-1,+_f2[2]);
+  const _t2=document.getElementById("date-to").value.split("-");const to = new Date(+_t2[0],+_t2[1]-1,+_t2[2],23,59,59);
   // date-from may be CE year — MO dates are also CE after parsing, should match
   const filtered = MO_ALL.filter(d => d.date >= from && d.date <= to);
   // Debug: if empty, show range info
