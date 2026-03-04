@@ -232,7 +232,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <!-- OEE TREND + FORECAST -->
   <div class="card">
     <div class="card-hdr">
-      <h3>📈 OEE Trend + Forecast 6 เดือน<em>Low / Median / High + Linear Forecast</em></h3>
+      <h3>📈 OEE Trend + Forecast 3 เดือน<em>Low / Median / High + Linear Forecast</em></h3>
     </div>
     <div class="ch" style="height:300px"><canvas id="c-oee"></canvas></div>
     <div class="fc-legend" id="oee-legend"></div>
@@ -554,7 +554,7 @@ function makeForecastChart(canvasId, historicLabels, historicData, forecastLabel
       // actual
       {label:"Actual",data:[...historicData,...Array(forecastLabels.length).fill(null)],borderColor:color,backgroundColor:color+"22",borderWidth:2,pointRadius:1.5,pointHoverRadius:4,tension:.3,fill:false},
       // forecast
-      {label:"Forecast 12M",data:fcLine,borderColor:color+"99",borderWidth:2,borderDash:[6,4],backgroundColor:"transparent",pointRadius:0,tension:.3,fill:false},
+      {label:"Forecast 3M",data:fcLine,borderColor:color+"99",borderWidth:2,borderDash:[6,4],backgroundColor:"transparent",pointRadius:0,tension:.3,fill:false},
     ]},
     options:{
       responsive:true,maintainAspectRatio:false,
@@ -566,7 +566,7 @@ function makeForecastChart(canvasId, historicLabels, historicData, forecastLabel
         annotation:{annotations:{
           fcStart:{type:"line",xMin:historicLabels.length-0.5,xMax:historicLabels.length-0.5,
             borderColor:"#526080",borderWidth:1,borderDash:[3,3],
-            label:{content:"Forecast 12M →",display:true,color:"#526080",font:{size:9},position:"start"}}
+            label:{content:"Forecast 3M →",display:true,color:"#526080",font:{size:9},position:"start"}}
         }}
       },
       scales:{
@@ -580,7 +580,7 @@ function makeForecastChart(canvasId, historicLabels, historicData, forecastLabel
   const lgEl=document.getElementById(legendId);
   if(lgEl)lgEl.innerHTML=`
     <div class="fc-item"><div class="fc-dot" style="background:${color}"></div>Actual</div>
-    <div class="fc-item"><div class="fc-dot" style="background:${color}99;border-top:2px dashed ${color}99"></div>Forecast 12M</div>
+    <div class="fc-item"><div class="fc-dot" style="background:${color}99;border-top:2px dashed ${color}99"></div>Forecast 3M</div>
     <div class="fc-item"><div class="fc-dot" style="background:${color}18;height:8px;border-radius:2px"></div>P10–P90 Band</div>
     <div class="fc-item"><div class="fc-dot" style="background:${color}88;border-top:1px dashed ${color}88"></div>Median</div>
   `;
@@ -604,7 +604,7 @@ function buildTrendForecast(getVal, color, unit, canvasId, legendId){
   const n=histVals.length;
   // forecast 12 months ahead
   const fcMonths=[], fcVals=[];
-  for(let i=1;i<=12;i++){
+  for(let i=1;i<=3;i++){
     const [yr,mo]=histMonths[histMonths.length-1].split('-').map(Number);
     const d=new Date(yr,mo-1+i,1);
     fcMonths.push(`${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear().toString().slice(2)}`);
@@ -639,7 +639,7 @@ function rPPMForecast(){
   const {slope,intercept}=linearForecast(ma);
   const n=ma.length;
   const fcMonths=[],fcVals=[];
-  for(let i=1;i<=12;i++){
+  for(let i=1;i<=3;i++){
     const [yr,mo]=months[months.length-1].split('-').map(Number);
     const d=new Date(yr,mo-1+i,1);
     fcMonths.push(`${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear().toString().slice(2)}`);
@@ -845,7 +845,7 @@ function fallbackInsights(oee,totDT,ppm,topDT,topDef,partStats,oeeRecent,oeePrev
       body:`ชิ้นงานที่มี OEE ต่ำที่สุดคือ "${partStats[0]?.p||"—"}" (OEE ${partStats[0]?.oee||0}%) มี DT ${partStats[0]?.dt||0} นาที และ PPM ${partStats[0]?.ppm?.toLocaleString()||0}`,
       action:"ทำ Line Balance Study และ Setup Time Reduction บนชิ้นงานนี้"},
     {icon:"📈",title:"Forecast Trend",severity:"medium",
-      body:`จากการ Forecast 6 เดือนข้างหน้า OEE มีแนวโน้ม${oeeRecent>oeePrev?"ดีขึ้น หากรักษา Momentum":"แย่ลง หากไม่ดำเนินการแก้ไข"} ควรจับตา DT Type หลักและคุณภาพอย่างต่อเนื่อง`,
+      body:`จากการ Forecast 3 เดือนข้างหน้า OEE มีแนวโน้ม${oeeRecent>oeePrev?"ดีขึ้น หากรักษา Momentum":"แย่ลง หากไม่ดำเนินการแก้ไข"} ควรจับตา DT Type หลักและคุณภาพอย่างต่อเนื่อง`,
       action:"ทำ Monthly OEE Review และ Update Action Plan ทุกเดือน"},
   ];
   renderInsights(insights);

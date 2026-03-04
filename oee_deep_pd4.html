@@ -159,6 +159,19 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
   </div>
 
+
+  <div class="card">
+    <div class="card-hdr">
+      <h3>📦 Daily Output<em>ยอดผลิตรวม / งานดี / งานเสีย — 31 วันล่าสุด</em></h3>
+    </div>
+    <div class="ch" style="height:240px"><canvas id="c-daily-output"></canvas></div>
+    <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+      <span style="font-size:10px;color:#38bdf8">■ ยอดผลิตรวม</span>
+      <span style="font-size:10px;color:#22c55e">■ งานดี</span>
+      <span style="font-size:10px;color:#f43f5e">■ งานเสีย</span>
+    </div>
+  </div>
+
   <div class="kpi-grid">
     <div class="kpi k0"><div class="kpi-lbl">Total Downtime</div><div class="kpi-val" id="kdt">—</div><div class="kpi-sub" id="kdt-s"></div></div>
     <div class="kpi k1"><div class="kpi-lbl">DT สาเหตุหลัก</div><div class="kpi-val" id="kdtmax" style="font-size:16px">—</div><div class="kpi-sub" id="kdtmax-s"></div></div>
@@ -515,7 +528,51 @@ function rPPMHeat(){
   </div>`;
   document.getElementById("ppm-heat").innerHTML=`<div style="overflow-x:auto"><div style="min-width:${130+allDefTypes.length*72}px">${hdr+rows}</div></div>${legend}`;
 }
-function render(){rKPI();rDTPareto();rDefPareto();rDTTrend();rPPMTrend();rDTHeat();rPPMHeat();rDTByPart();rDTTable();runAI();}
+
+function rDailyOutput(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const days=[];
+  for(let i=30;i>=0;i--){
+    const d=new Date(today); d.setDate(d.getDate()-i);
+    days.push(d);
+  }
+  const labels=days.map(d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`);
+  const totals=days.map(d=>{
+    const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const recs=FD.filter(r=>r.dateStr===iso);
+    return recs.reduce((s,r)=>s+r.total,0)||null;
+  });
+  const defects=days.map(d=>{
+    const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const recs=FD.filter(r=>r.dateStr===iso);
+    return recs.reduce((s,r)=>s+r.defect,0)||null;
+  });
+  const goods=totals.map((t,i)=>t===null?null:t-(defects[i]||0));
+  const ctx=document.getElementById('c-daily-output');
+  if(!ctx)return;
+  if(ctx._chart)ctx._chart.destroy();
+  ctx._chart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'ยอดผลิตรวม',data:totals,backgroundColor:'#38bdf844',borderColor:'#38bdf8',borderWidth:1.5,borderRadius:2},
+        {label:'งานดี',data:goods,backgroundColor:'#22c55e44',borderColor:'#22c55e',borderWidth:1.5,borderRadius:2},
+        {label:'งานเสีย',data:defects,backgroundColor:'#f43f5e99',borderColor:'#f43f5e',borderWidth:1.5,borderRadius:2}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,
+        callbacks:{label:ctx=>` ${ctx.dataset.label}: ${(ctx.raw||0).toLocaleString()} ชิ้น`}}},
+      scales:{
+        x:{ticks:{color:'#7a8aaa',font:{size:9}},grid:{color:'#1c2640'}},
+        y:{ticks:{color:'#7a8aaa',font:{size:9},callback:v=>v.toLocaleString()},grid:{color:'#1c2640'}}
+      }
+    }
+  });
+}
+function render(){rKPI();rDailyOutput();rDTPareto();rDefPareto();rDTTrend();rPPMTrend();rDTHeat();rPPMHeat();rDTByPart();rDTTable();runAI();}
 
 function rKPI(){
   if(!FD.length)return;
