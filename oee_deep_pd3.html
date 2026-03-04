@@ -236,7 +236,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="ch" style="height:160px"><canvas id="c-ttr"></canvas></div>
       </div>
       <div>
-        <h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📈 MO Frequency รายสัปดาห์</h4>
+        <h4 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📈 MO Frequency รายเดือน</h4>
         <div class="ch" style="height:160px"><canvas id="c-mo-freq"></canvas></div>
       </div>
     </div>
@@ -953,18 +953,19 @@ function rTTRDist(mo) {
 }
 
 function rMOFreq(mo) {
-  // Count MO per week
+  // Count MO per month
   const wk = {};
   mo.forEach(d => {
-    const dt = new Date(d.date); dt.setDate(dt.getDate() - dt.getDay());
-    const key = dt.toISOString().split("T")[0];
+    const dt = new Date(d.date);
+    const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
     wk[key] = (wk[key] || 0) + 1;
   });
-  const weeks = Object.keys(wk).sort().slice(-20);
+  const months = Object.keys(wk).sort().slice(-12);
+  const labels = months.map(m => { const [yr,mo] = m.split('-'); return `${mo}/${yr.slice(2)}`; });
   dch("c-mo-freq");
   CH["c-mo-freq"] = new Chart(document.getElementById("c-mo-freq"), {
     type: "bar",
-    data: { labels: weeks.map(w => w.slice(5)), datasets: [{ data: weeks.map(w => wk[w]), backgroundColor: "#38bdf844", borderColor: "#38bdf8", borderWidth: 1, borderRadius: 3 }] },
+    data: { labels: labels, datasets: [{ data: months.map(m => wk[m]), backgroundColor: "#38bdf844", borderColor: "#38bdf8", borderWidth: 1, borderRadius: 3 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: "#0d1117", titleColor: "#dce4f0", bodyColor: "#526080", borderColor: "#1c2640", borderWidth: 1 } }, scales: { x: { grid: { color: "rgba(28,38,64,.4)" }, ticks: { color: "#526080", font: { size: 9 }, maxRotation: 45 } }, y: { grid: { color: "rgba(28,38,64,.4)" }, ticks: { color: "#526080", font: { size: 9 } } } } }
   });
 }
