@@ -315,7 +315,7 @@ function csvLine(line){
     else c+=ch;
   }r.push(c);return r;
 }
-function fmtIso(d){return d.toISOString().split("T")[0];}
+function fmtIso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
 function fmtDate(d){if(!d)return"—";return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;}
 function parsePD3Date(s){
   if(!s)return null;s=s.trim().replace(/"/g,"");
@@ -452,8 +452,8 @@ function setDefaultDates(){
 }
 function selectAll(v){document.querySelectorAll(".pci").forEach(c=>c.checked=v);applyFilter();}
 function applyFilter(){
-  const from=new Date(document.getElementById("date-from").value);
-  const to=new Date(document.getElementById("date-to").value);to.setHours(23,59,59);
+  const _f=document.getElementById("date-from").value.split("-");const from=new Date(+_f[0],+_f[1]-1,+_f[2]);
+  const _t=document.getElementById("date-to").value.split("-");const to=new Date(+_t[0],+_t[1]-1,+_t[2],23,59,59);
   const sel=[...document.querySelectorAll(".pci:checked")].map(c=>c.value);
   const sh=document.getElementById("shift-sel").value;
   FD=ALL.filter(d=>d.date>=from&&d.date<=to&&sel.includes(d.part)&&(sh==="all"||d.shift===sh));
@@ -698,7 +698,6 @@ function buildTrendForecast(getVal, color, unit, canvasId, legendId){
 
   if(!histVals.length)return;
   makeForecastChart(canvasId, histKeys, histVals, fcLabels, fcVals, bands, color, unit, legendId);
-  return {slope, avg12m:avg(histVals), forecastEnd:fcVals[fcVals.length-1]};
 }
 
 
