@@ -554,12 +554,12 @@ function rDailyOutput(){
   const labels=days.map(d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`);
   const totals=days.map(d=>{
     const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const recs=FD.filter(r=>r.dateStr===iso);
+    const recs=FD.filter(r=>fmtIso(r.date)===iso);
     return recs.reduce((s,r)=>s+r.total,0)||null;
   });
   const defects=days.map(d=>{
     const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const recs=FD.filter(r=>r.dateStr===iso);
+    const recs=FD.filter(r=>fmtIso(r.date)===iso);
     return recs.reduce((s,r)=>s+r.defect,0)||null;
   });
   const goods=totals.map((t,i)=>t===null?null:t-(defects[i]||0));
