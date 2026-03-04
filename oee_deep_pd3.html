@@ -102,6 +102,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
 
+
+/* Chart view toggle */
+.chart-toggle{display:flex;gap:3px;background:#0d1117;border:1px solid #1c2640;border-radius:6px;padding:2px}
+.chart-toggle button{background:transparent;border:none;color:#526080;font-size:9px;font-weight:600;padding:3px 8px;border-radius:4px;cursor:pointer;transition:all .15s}
+.chart-toggle button.active{background:#1c2640;color:#dce4f0}
+.chart-toggle button:hover:not(.active){color:#a0aec0}
+
 </style>
 </head>
 <body>
@@ -163,7 +170,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
   <div class="card">
     <div class="card-hdr">
-      <h3>📦 Daily Output<em>ยอดผลิตรวม / งานดี / งานเสีย — 31 วันล่าสุด</em></h3>
+      <h3>📦 Daily Output<em>ยอดผลิตรวม / งานดี / งานเสีย</em></h3><div class="chart-toggle" id="tgl-main"><button class="active" onclick="setChartView('daily',this)">รายวัน</button><button onclick="setChartView('monthly',this)">รายเดือน</button><button onclick="setChartView('yearly',this)">รายปี</button></div>
     </div>
     <div class="ch" style="height:240px"><canvas id="c-daily-output"></canvas></div>
     <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
@@ -544,24 +551,50 @@ function rPPMHeat(){
   document.getElementById("ppm-heat").innerHTML=`<div style="overflow-x:auto"><div style="min-width:${130+allDefTypes.length*72}px">${hdr+rows}</div></div>${legend}`;
 }
 
+
 function rDailyOutput(){
-  const today=new Date(); today.setHours(0,0,0,0);
-  const days=[];
-  for(let i=30;i>=0;i--){
-    const d=new Date(today); d.setDate(d.getDate()-i);
-    days.push(d);
+  const mode = window.CHART_VIEW || 'daily';
+  const MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  let labels=[], totals=[], defects=[];
+
+  if(mode==='daily'){
+    const today=new Date(); today.setHours(0,0,0,0);
+    const days=[];
+    for(let i=30;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);days.push(d);}
+    labels=days.map(d=>`${String(d.getDate()).padStart(2,'0')} ${MN[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`);
+    totals=days.map(d=>{
+      const iso=fmtIso(d);
+      return FD.filter(r=>fmtIso(r.date)===iso).reduce((s,r)=>s+r.total,0)||null;
+    });
+    defects=days.map(d=>{
+      const iso=fmtIso(d);
+      return FD.filter(r=>fmtIso(r.date)===iso).reduce((s,r)=>s+r.defect,0)||null;
+    });
+  } else if(mode==='monthly'){
+    const mk={};
+    FD.forEach(d=>{
+      const k=`${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;
+      if(!mk[k])mk[k]={t:0,def:0};
+      mk[k].t+=d.total; mk[k].def+=d.defect;
+    });
+    const keys=Object.keys(mk).sort().slice(-12);
+    labels=keys.map(k=>{const[yr,mo]=k.split('-');return `${MN[+mo-1]} ${yr.slice(2)}`;});
+    totals=keys.map(k=>mk[k].t||null);
+    defects=keys.map(k=>mk[k].def||null);
+  } else { // yearly
+    const yk={};
+    FD.forEach(d=>{
+      const k=String(d.date.getFullYear());
+      if(!yk[k])yk[k]={t:0,def:0};
+      yk[k].t+=d.total; yk[k].def+=d.defect;
+    });
+    const keys=Object.keys(yk).sort();
+    labels=keys.map(k=>`${k}`);
+    totals=keys.map(k=>yk[k].t||null);
+    defects=keys.map(k=>yk[k].def||null);
   }
-  const labels=days.map(d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`);
-  const totals=days.map(d=>{
-    const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const recs=FD.filter(r=>fmtIso(r.date)===iso);
-    return recs.reduce((s,r)=>s+r.total,0)||null;
-  });
-  const defects=days.map(d=>{
-    const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const recs=FD.filter(r=>fmtIso(r.date)===iso);
-    return recs.reduce((s,r)=>s+r.defect,0)||null;
-  });
+
   const goods=totals.map((t,i)=>t===null?null:t-(defects[i]||0));
   const ctx=document.getElementById('c-daily-output');
   if(!ctx)return;
@@ -579,13 +612,20 @@ function rDailyOutput(){
     options:{
       responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,
-        callbacks:{label:ctx=>` ${ctx.dataset.label}: ${(ctx.raw||0).toLocaleString()} ชิ้น`}}},
+        callbacks:{label:c=>` ${c.dataset.label}: ${(c.raw||0).toLocaleString()} ชิ้น`}}},
       scales:{
-        x:{ticks:{color:'#7a8aaa',font:{size:9}},grid:{color:'#1c2640'}},
+        x:{ticks:{color:'#7a8aaa',font:{size:9},maxRotation:45},grid:{color:'#1c2640'}},
         y:{ticks:{color:'#7a8aaa',font:{size:9},callback:v=>v.toLocaleString()},grid:{color:'#1c2640'}}
       }
     }
   });
+}
+window.CHART_VIEW = 'daily';
+function setChartView(mode, btn){
+  window.CHART_VIEW = mode;
+  document.querySelectorAll('.chart-toggle button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.chart-toggle button').forEach(b=>{if(b.textContent===btn.textContent)b.classList.add('active');});
+  rDailyOutput(); rDTTrend(); rPPMTrend();
 }
 function render(){rKPI();rDailyOutput();rDTPareto();rDefPareto();rDTTrend();rPPMTrend();rDTHeat();rPPMHeat();rDTByPart();rDTTable();runAI();}
 
@@ -635,23 +675,59 @@ function rDefPareto(){
   }).join("")||'<p style="color:var(--muted);font-size:12px;padding:10px">ไม่มีข้อมูล</p>';
 }
 
+
 function rDTTrend(){
-  const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]=0;bdd[k]+=(d.dtMin||0);});
-  const dates=Object.keys(bdd).sort().slice(-60);
+  const mode = window.CHART_VIEW || 'daily';
+  const MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let labels=[], vals=[];
+
+  if(mode==='daily'){
+    const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]=0;bdd[k]+=(d.dtMin||0);});
+    const dates=Object.keys(bdd).sort().slice(-60);
+    labels=dates.map(s=>{const[yr,mo,dd]=s.split('-');return `${dd} ${MN[+mo-1]} ${yr.slice(2)}`;});
+    vals=dates.map(d=>bdd[d]);
+  } else if(mode==='monthly'){
+    const mk={};FD.forEach(d=>{const k=`${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;if(!mk[k])mk[k]=0;mk[k]+=(d.dtMin||0);});
+    const keys=Object.keys(mk).sort().slice(-24);
+    labels=keys.map(k=>{const[yr,mo]=k.split('-');return `${MN[+mo-1]} ${yr.slice(2)}`;});
+    vals=keys.map(k=>mk[k]);
+  } else {
+    const yk={};FD.forEach(d=>{const k=String(d.date.getFullYear());if(!yk[k])yk[k]=0;yk[k]+=(d.dtMin||0);});
+    const keys=Object.keys(yk).sort();
+    labels=keys; vals=keys.map(k=>yk[k]);
+  }
   dch("c-dt-trend");CH["c-dt-trend"]=new Chart(document.getElementById("c-dt-trend"),{type:"line",
-    data:{labels:dates.map(lbl2),datasets:[{data:dates.map(d=>bdd[d]),borderColor:"#f43f5e",backgroundColor:"#f43f5e12",fill:true,tension:.3,pointRadius:1.5,borderWidth:2}]},
+    data:{labels,datasets:[{data:vals,borderColor:"#f43f5e",backgroundColor:"#f43f5e12",fill:true,tension:.3,pointRadius:1.5,borderWidth:2}]},
     options:copts({y:{ticks:{callback:v=>v+"m"}}})});
 }
 
+
 function rPPMTrend(){
-  const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]={d:0,t:0};bdd[k].d+=d.defect;bdd[k].t+=d.total;});
-  const dates=Object.keys(bdd).sort().slice(-60);
-  const raw=dates.map(d=>bdd[d].t>0?Math.round((bdd[d].d/bdd[d].t)*1e6):0);
+  const mode = window.CHART_VIEW || 'daily';
+  const MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let labels=[], raw=[];
+
+  if(mode==='daily'){
+    const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]={d:0,t:0};bdd[k].d+=d.defect;bdd[k].t+=d.total;});
+    const dates=Object.keys(bdd).sort().slice(-60);
+    labels=dates.map(s=>{const[yr,mo,dd]=s.split('-');return `${dd} ${MN[+mo-1]} ${yr.slice(2)}`;});
+    raw=dates.map(d=>bdd[d].t>0?Math.round((bdd[d].d/bdd[d].t)*1e6):0);
+  } else if(mode==='monthly'){
+    const mk={};FD.forEach(d=>{const k=`${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;if(!mk[k])mk[k]={d:0,t:0};mk[k].d+=d.defect;mk[k].t+=d.total;});
+    const keys=Object.keys(mk).sort().slice(-24);
+    labels=keys.map(k=>{const[yr,mo]=k.split('-');return `${MN[+mo-1]} ${yr.slice(2)}`;});
+    raw=keys.map(k=>mk[k].t>0?Math.round((mk[k].d/mk[k].t)*1e6):0);
+  } else {
+    const yk={};FD.forEach(d=>{const k=String(d.date.getFullYear());if(!yk[k])yk[k]={d:0,t:0};yk[k].d+=d.defect;yk[k].t+=d.total;});
+    const keys=Object.keys(yk).sort();
+    labels=keys;
+    raw=keys.map(k=>yk[k].t>0?Math.round((yk[k].d/yk[k].t)*1e6):0);
+  }
   const ma=raw.map((v,i)=>{const sl=raw.slice(Math.max(0,i-6),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
   dch("c-ppm-trend");CH["c-ppm-trend"]=new Chart(document.getElementById("c-ppm-trend"),{type:"line",
-    data:{labels:dates.map(lbl2),datasets:[
+    data:{labels,datasets:[
       {data:raw,label:"PPM",borderColor:"#f59e0b44",backgroundColor:"transparent",tension:.2,pointRadius:0,fill:false},
-      {data:ma,label:"7-day MA",borderColor:"#f59e0b",backgroundColor:"transparent",tension:.4,pointRadius:0,borderWidth:2,fill:false}]},
+      {data:ma,label:"MA",borderColor:"#f59e0b",backgroundColor:"transparent",tension:.4,pointRadius:0,borderWidth:2,fill:false}]},
     options:{...copts(),plugins:{legend:{display:true,position:"top",labels:{color:"#526080",font:{size:9},boxWidth:10}},tooltip:{backgroundColor:"#0d1117",titleColor:"#dce4f0",bodyColor:"#526080",borderColor:"#1c2640",borderWidth:1}}}});
 }
 

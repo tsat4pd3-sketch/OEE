@@ -146,6 +146,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* Chart view toggle */
+.chart-toggle{display:flex;gap:3px;background:#0d1117;border:1px solid #1c2640;border-radius:6px;padding:2px}
+.chart-toggle button{background:transparent;border:none;color:#526080;font-size:9px;font-weight:600;padding:3px 8px;border-radius:4px;cursor:pointer;transition:all .15s}
+.chart-toggle button.active{background:#1c2640;color:#dce4f0}
+.chart-toggle button:hover:not(.active){color:#a0aec0}
+
 </style>
 </head>
 <body>
@@ -232,7 +239,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <!-- OEE TREND + FORECAST -->
   <div class="card">
     <div class="card-hdr">
-      <h3>📈 OEE Trend + Forecast 3 เดือน<em>Low / Median / High + Linear Forecast</em></h3>
+      <h3>📈 OEE Trend + Forecast<em>Low / Median / High + Linear Forecast</em></h3><div class="chart-toggle"><button onclick="setChartView('daily',this)">รายวัน</button><button class="active" onclick="setChartView('monthly',this)">รายเดือน</button><button onclick="setChartView('yearly',this)">รายปี</button></div>
     </div>
     <div class="ch" style="height:300px"><canvas id="c-oee"></canvas></div>
     <div class="fc-legend" id="oee-legend"></div>
@@ -241,13 +248,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="row r2">
     <!-- DOWNTIME TREND + FORECAST -->
     <div class="card">
-      <div class="card-hdr"><h3>🔧 Downtime Trend + Forecast<em>นาที/วัน</em></h3></div>
+      <div class="card-hdr"><h3>🔧 Downtime Trend + Forecast<em>นาที/วัน</em></h3><div class="chart-toggle"><button onclick="setChartView('daily',this)">รายวัน</button><button class="active" onclick="setChartView('monthly',this)">รายเดือน</button><button onclick="setChartView('yearly',this)">รายปี</button></div></div>
       <div class="ch" style="height:240px"><canvas id="c-dt-fc"></canvas></div>
       <div class="fc-legend" id="dt-legend"></div>
     </div>
     <!-- PPM TREND + FORECAST -->
     <div class="card">
-      <div class="card-hdr"><h3>⚠️ Defect PPM Trend + Forecast<em>7-day MA</em></h3></div>
+      <div class="card-hdr"><h3>⚠️ Defect PPM Trend + Forecast<em>3M MA</em></h3><div class="chart-toggle"><button onclick="setChartView('daily',this)">รายวัน</button><button class="active" onclick="setChartView('monthly',this)">รายเดือน</button><button onclick="setChartView('yearly',this)">รายปี</button></div></div>
       <div class="ch" style="height:240px"><canvas id="c-ppm-fc"></canvas></div>
       <div class="fc-legend" id="ppm-legend"></div>
     </div>
@@ -458,6 +465,18 @@ function applyFilter(){
 const dch=id=>{if(CH[id]){CH[id].destroy();delete CH[id];}};
 const avg=arr=>{const v=arr.filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;};
 
+
+window.CHART_VIEW = 'monthly';
+function setChartView(mode, btn){
+  window.CHART_VIEW = mode;
+  document.querySelectorAll('.chart-toggle button').forEach(b=>b.classList.remove('active'));
+  // activate all buttons with same text
+  document.querySelectorAll('.chart-toggle button').forEach(b=>{
+    if(b.textContent===btn.textContent) b.classList.add('active');
+  });
+  rOEETrend(); rDTForecast(); rPPMForecast();
+}
+
 // ─── RENDER ───
 function render(){rKPI();rOEETrend();rDTForecast();rPPMForecast();rDTPareto();rDefPareto();rDTPart();rDefPart();rRemarks();runAI();}
 
@@ -515,6 +534,38 @@ function linearForecast(data){
   const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx)||0;
   const intercept=(sy-slope*sx)/n;
   return{slope,intercept};
+}
+
+
+function byDay(field){
+  const m={};
+  FD.forEach(d=>{
+    const k=fmtIso(d.date);
+    if(!m[k])m[k]=[];
+    m[k].push(field(d));
+  });
+  return m;
+}
+function byYear(field){
+  const m={};
+  FD.forEach(d=>{
+    const k=String(d.date.getFullYear());
+    if(!m[k])m[k]=[];
+    m[k].push(field(d));
+  });
+  return m;
+}
+function fmtLabel(key, mode){
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(mode==='daily'){
+    const[yr,mo,dd]=key.split('-');
+    return `${parseInt(dd)} ${MN[parseInt(mo)-1]} ${yr.slice(2)}`;
+  } else if(mode==='monthly'){
+    const[yr,mo]=key.split('-');
+    return `${MN[parseInt(mo)-1]} ${yr.slice(2)}`;
+  } else {
+    return key;
+  }
 }
 
 // Aggregate FD by month for trend charts
@@ -586,68 +637,139 @@ function makeForecastChart(canvasId, historicLabels, historicData, forecastLabel
   `;
 }
 
+
 function buildTrendForecast(getVal, color, unit, canvasId, legendId){
-  // Group by month
-  const wm=byMonth(getVal);
-  const months=Object.keys(wm).sort();
-  const monthVals=months.map(m=>avg(wm[m]));
-  if(months.length<3)return;
+  const mode = window.CHART_VIEW || 'monthly';
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let histKeys=[], histVals=[], fcLabels=[], fcVals=[], bands=[];
 
-  // last 12 months of history
-  const histMonths=months.slice(-12), histVals=monthVals.slice(-12);
+  if(mode==='daily'){
+    const wm=byDay(getVal);
+    const keys=Object.keys(wm).sort().slice(-60);
+    histKeys=keys;
+    histVals=keys.map(k=>avg(wm[k]));
+    if(histVals.length<3)return;
+    bands=histVals.map(v=>({low:v*0.92,med:v,high:v*1.08}));
+    const{slope,intercept}=linearForecast(histVals);
+    const n=histVals.length;
+    for(let i=1;i<=7;i++){
+      const last=new Date(histKeys[histKeys.length-1]+'T00:00:00');
+      last.setDate(last.getDate()+i);
+      const lbl=`${last.getDate()} ${MN[last.getMonth()]} ${String(last.getFullYear()).slice(2)}`;
+      fcLabels.push(lbl);
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=keys.map(k=>{const[yr,mo,dd]=k.split('-');return `${parseInt(dd)} ${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
 
-  // band: compute per-month stats
-  const bands=histVals.map(v=>({low:v*0.92,med:v,high:v*1.08}));
+  } else if(mode==='monthly'){
+    const wm=byMonth(getVal);
+    const months=Object.keys(wm).sort();
+    const monthVals=months.map(m=>avg(wm[m]));
+    if(months.length<3)return;
+    const hm=months.slice(-12), hv=monthVals.slice(-12);
+    histVals=hv; bands=hv.map(v=>({low:v*0.92,med:v,high:v*1.08}));
+    const{slope,intercept}=linearForecast(hv);
+    const n=hv.length;
+    for(let i=1;i<=3;i++){
+      const[yr,mo]=hm[hm.length-1].split('-').map(Number);
+      const d=new Date(yr,mo-1+i,1);
+      fcLabels.push(`${MN[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`);
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=hm.map(m=>{const[yr,mo]=m.split('-');return `${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
 
-  // forecast: linear regression on last 12M
-  const {slope,intercept}=linearForecast(histVals);
-  const n=histVals.length;
-  // forecast 12 months ahead
-  const fcMonths=[], fcVals=[];
-  for(let i=1;i<=3;i++){
-    const [yr,mo]=histMonths[histMonths.length-1].split('-').map(Number);
-    const d=new Date(yr,mo-1+i,1);
-    fcMonths.push(`${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear().toString().slice(2)}`);
-    const pred=intercept+slope*(n+i-1);
-    fcVals.push(Math.max(0,pred));
+  } else { // yearly
+    const wm=byYear(getVal);
+    const keys=Object.keys(wm).sort();
+    histVals=keys.map(k=>avg(wm[k]));
+    if(keys.length<2)return;
+    bands=histVals.map(v=>({low:v*0.92,med:v,high:v*1.08}));
+    const{slope,intercept}=linearForecast(histVals);
+    const n=histVals.length;
+    const lastYr=parseInt(keys[keys.length-1]);
+    for(let i=1;i<=3;i++){
+      fcLabels.push(String(lastYr+i));
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=[...keys];
   }
 
-  const dispHist=histMonths.map(m=>{const [yr,mo]=m.split('-');return `${mo}/${yr.slice(2)}`;});
-  makeForecastChart(canvasId, dispHist, histVals, fcMonths, fcVals, bands, color, unit, legendId);
+  makeForecastChart(canvasId, histKeys, histVals, fcLabels, fcVals, bands, color, unit, legendId);
+
+  const lgEl=document.getElementById(legendId);
+  if(lgEl)lgEl.innerHTML=`
+    <div class="fc-item"><div class="fc-dot" style="background:${color}"></div>Actual</div>
+    <div class="fc-item"><div class="fc-dot" style="background:${color}99;border-top:2px dashed ${color}99"></div>Forecast</div>
+    <div class="fc-item"><div class="fc-dot" style="background:${color}18;height:8px;border-radius:2px"></div>P10–P90 Band</div>
+    <div class="fc-item"><div class="fc-dot" style="background:${color}88;border-top:1px dashed ${color}88"></div>Median</div>
+  `;
 
   return {slope, avg12m:avg(histVals), forecastEnd:fcVals[fcVals.length-1]};
 }
 
+
 function rOEETrend(){buildTrendForecast(d=>d.oee,"#e8b84b","%","c-oee","oee-legend");}
 function rDTForecast(){buildTrendForecast(d=>d.dtMin,"#f43f5e"," m","c-dt-fc","dt-legend");}
-function rPPMForecast(){
-  // group PPM by month
-  const wm={};
-  FD.forEach(d=>{
-    const dt=d.date;
-    const key=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
-    if(!wm[key])wm[key]={def:0,tot:0};
-    wm[key].def+=d.defect;wm[key].tot+=d.total;
-  });
-  const months=Object.keys(wm).sort().slice(-12);
-  const monthVals=months.map(m=>wm[m].tot>0?Math.round((wm[m].def/wm[m].tot)*1e6):0);
-  if(months.length<3)return;
 
-  // 3-month MA
-  const ma=monthVals.map((v,i)=>{const sl=monthVals.slice(Math.max(0,i-2),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
-  const bands=ma.map(v=>({low:v*0.8,med:v,high:v*1.2}));
-  const {slope,intercept}=linearForecast(ma);
-  const n=ma.length;
-  const fcMonths=[],fcVals=[];
-  for(let i=1;i<=3;i++){
-    const [yr,mo]=months[months.length-1].split('-').map(Number);
-    const d=new Date(yr,mo-1+i,1);
-    fcMonths.push(`${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear().toString().slice(2)}`);
-    fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+function rPPMForecast(){
+  const mode = window.CHART_VIEW || 'monthly';
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let histKeys=[], histVals=[], fcLabels=[], fcVals=[], bands=[];
+
+  function buildPPMSeries(groupFn, sliceN){
+    const bdd={};
+    FD.forEach(d=>{
+      const k=groupFn(d.date);
+      if(!bdd[k])bdd[k]={def:0,tot:0};
+      bdd[k].def+=d.defect; bdd[k].tot+=d.total;
+    });
+    const keys=Object.keys(bdd).sort().slice(-sliceN);
+    return{keys, vals:keys.map(k=>bdd[k].tot>0?Math.round((bdd[k].def/bdd[k].tot)*1e6):0)};
   }
-  const dispHist=months.map(m=>{const [yr,mo]=m.split('-');return `${mo}/${yr.slice(2)}`;});
-  makeForecastChart("c-ppm-fc",dispHist,ma,fcMonths,fcVals,bands,"#a855f7"," PPM","ppm-legend");
+
+  if(mode==='daily'){
+    const{keys,vals}=buildPPMSeries(dt=>fmtIso(dt),60);
+    histVals=vals; bands=vals.map(v=>({low:v*0.8,med:v,high:v*1.2}));
+    const ma=vals.map((v,i)=>{const sl=vals.slice(Math.max(0,i-6),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
+    const{slope,intercept}=linearForecast(ma); const n=ma.length;
+    histVals=ma;
+    for(let i=1;i<=7;i++){
+      const last=new Date(keys[keys.length-1]+'T00:00:00'); last.setDate(last.getDate()+i);
+      fcLabels.push(`${last.getDate()} ${MN[last.getMonth()]} ${String(last.getFullYear()).slice(2)}`);
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=keys.map(k=>{const[yr,mo,dd]=k.split('-');return `${parseInt(dd)} ${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
+    bands=ma.map(v=>({low:v*0.8,med:v,high:v*1.2}));
+
+  } else if(mode==='monthly'){
+    const{keys,vals}=buildPPMSeries(dt=>`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`,12);
+    const ma=vals.map((v,i)=>{const sl=vals.slice(Math.max(0,i-2),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
+    histVals=ma; bands=ma.map(v=>({low:v*0.8,med:v,high:v*1.2}));
+    const{slope,intercept}=linearForecast(ma); const n=ma.length;
+    for(let i=1;i<=3;i++){
+      const[yr,mo]=keys[keys.length-1].split('-').map(Number);
+      const d=new Date(yr,mo-1+i,1);
+      fcLabels.push(`${MN[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`);
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=keys.map(k=>{const[yr,mo]=k.split('-');return `${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
+
+  } else { // yearly
+    const{keys,vals}=buildPPMSeries(dt=>String(dt.getFullYear()),20);
+    histVals=vals; bands=vals.map(v=>({low:v*0.8,med:v,high:v*1.2}));
+    const{slope,intercept}=linearForecast(vals); const n=vals.length;
+    const lastYr=parseInt(keys[keys.length-1]);
+    for(let i=1;i<=3;i++){
+      fcLabels.push(String(lastYr+i));
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=[...keys];
+  }
+
+  if(histVals.length<2)return;
+  makeForecastChart("c-ppm-fc",histKeys,histVals,fcLabels,fcVals,bands,"#a855f7"," PPM","ppm-legend");
 }
+
 
 function rDTPareto(){
   const sums={};
