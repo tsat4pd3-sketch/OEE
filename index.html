@@ -517,13 +517,13 @@ function linearForecast(data){
   return{slope,intercept};
 }
 
-// Aggregate FD by week for trend charts
-function byWeek(field){
+// Aggregate FD by Month for trend charts
+function byMonth(field){
   const m={};
   FD.forEach(d=>{
     const dt=d.date, mon=dt.getDay();
-    const weekStart=new Date(dt);weekStart.setDate(dt.getDate()-mon);
-    const key=fmtIso(weekStart);
+    const MonthStart=new Date(dt);MonthStart.setDate(dt.getDate()-mon);
+    const key=fmtIso(MonthStart);
     if(!m[key])m[key]=[];
     m[key].push(field(d));
   });
@@ -588,33 +588,33 @@ function makeForecastChart(canvasId, historicLabels, historicData, forecastLabel
 }
 
 function buildTrendForecast(getVal, color, unit, canvasId, legendId){
-  // Group by week
-  const wm=byWeek(getVal);
-  const weeks=Object.keys(wm).sort();
-  const weekVals=weeks.map(w=>avg(wm[w]));
-  if(weeks.length<4)return;
+  // Group by Month
+  const wm=byMonth(getVal);
+  const Months=Object.keys(wm).sort();
+  const MonthVals=Months.map(w=>avg(wm[w]));
+  if(Months.length<4)return;
 
-  // last 6 months (approx 26 weeks) of history
-  const histWeeks=weeks.slice(-26), histVals=weekVals.slice(-26);
+  // last 6 months (approx 26 Months) of history
+  const histMonths=Months.slice(-26), histVals=MonthVals.slice(-26);
 
-  // band: compute per-week stats
+  // band: compute per-Month stats
   const bands=histVals.map(v=>({low:v*0.92,med:v,high:v*1.08}));
 
   // forecast: linear regression on last 6M
   const {slope,intercept}=linearForecast(histVals);
   const n=histVals.length;
-  // forecast 26 weeks ahead
-  const fcWeeks=[], fcVals=[];
+  // forecast 26 Months ahead
+  const fcMonths=[], fcVals=[];
   for(let i=1;i<=26;i++){
-    const lastDate=new Date(histWeeks[histWeeks.length-1]);
+    const lastDate=new Date(histMonths[histMonths.length-1]);
     lastDate.setDate(lastDate.getDate()+i*7);
-    fcWeeks.push(fmtIso(lastDate).slice(5)); // mm-dd
+    fcMonths.push(fmtIso(lastDate).slice(5)); // mm-dd
     const pred=intercept+slope*(n+i-1);
     fcVals.push(Math.max(0,pred));
   }
 
-  const dispHist=histWeeks.map(w=>w.slice(5));
-  makeForecastChart(canvasId, dispHist, histVals, fcWeeks, fcVals, bands, color, unit, legendId);
+  const dispHist=histMonths.map(w=>w.slice(5));
+  makeForecastChart(canvasId, dispHist, histVals, fcMonths, fcVals, bands, color, unit, legendId);
 
   return {slope, avg6m:avg(histVals), forecastEnd:fcVals[fcVals.length-1]};
 }
@@ -626,27 +626,27 @@ function rPPMForecast(){
   const wm={};
   FD.forEach(d=>{
     const dt=d.date;
-    const weekStart=new Date(dt);weekStart.setDate(dt.getDate()-dt.getDay());
-    const key=fmtIso(weekStart);
+    const MonthStart=new Date(dt);MonthStart.setDate(dt.getDate()-dt.getDay());
+    const key=fmtIso(MonthStart);
     if(!wm[key])wm[key]={def:0,tot:0};
     wm[key].def+=d.defect;wm[key].tot+=d.total;
   });
-  const weeks=Object.keys(wm).sort().slice(-26);
-  const weekVals=weeks.map(w=>wm[w].tot>0?Math.round((wm[w].def/wm[w].tot)*1e6):0);
-  if(weeks.length<4)return;
+  const Months=Object.keys(wm).sort().slice(-26);
+  const MonthVals=Months.map(w=>wm[w].tot>0?Math.round((wm[w].def/wm[w].tot)*1e6):0);
+  if(Months.length<4)return;
 
-  // 7-week MA
-  const ma=weekVals.map((v,i)=>{const sl=weekVals.slice(Math.max(0,i-6),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
+  // 7-Month MA
+  const ma=MonthVals.map((v,i)=>{const sl=MonthVals.slice(Math.max(0,i-6),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
   const bands=ma.map(v=>({low:v*0.8,med:v,high:v*1.2}));
   const {slope,intercept}=linearForecast(ma);
   const n=ma.length;
-  const fcWeeks=[],fcVals=[];
+  const fcMonths=[],fcVals=[];
   for(let i=1;i<=26;i++){
-    const lastDate=new Date(weeks[weeks.length-1]);lastDate.setDate(lastDate.getDate()+i*7);
-    fcWeeks.push(fmtIso(lastDate).slice(5));
+    const lastDate=new Date(Months[Months.length-1]);lastDate.setDate(lastDate.getDate()+i*7);
+    fcMonths.push(fmtIso(lastDate).slice(5));
     fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
   }
-  makeForecastChart("c-ppm-fc",weeks.map(w=>w.slice(5)),ma,fcWeeks,fcVals,bands,"#a855f7"," PPM","ppm-legend");
+  makeForecastChart("c-ppm-fc",Months.map(w=>w.slice(5)),ma,fcMonths,fcVals,bands,"#a855f7"," PPM","ppm-legend");
 }
 
 function rDTPareto(){
@@ -764,7 +764,7 @@ async function runAI(){
   const partStats=Object.entries(pm).map(([p,v])=>({p,oee:avg(v.oee).toFixed(1),dt:v.dt,ppm:v.tot>0?Math.round((v.def/v.tot)*1e6):0}))
     .sort((a,b)=>a.oee-b.oee);
 
-  // Trend (last 4 weeks vs prev 4 weeks)
+  // Trend (last 4 Months vs prev 4 Months)
   const sorted=[...FD].sort((a,b)=>a.date-b.date);
   const last4w=sorted.filter(d=>d.date>=new Date(Date.now()-28*86400000));
   const prev4w=sorted.filter(d=>d.date<new Date(Date.now()-28*86400000)&&d.date>=new Date(Date.now()-56*86400000));
