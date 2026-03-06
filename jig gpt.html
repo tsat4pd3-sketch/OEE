@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PD4 OEE Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090f;--bg2:#0d1117;--bg3:#13192a;--card:#0f1520;
+  --border:#1c2640;--border2:#243050;
+  --gold:#e8b84b;--gold2:#f5d07a;--gold-dim:#e8b84b22;
+  --cyan:#38bdf8;--green:#22c55e;--red:#f43f5e;--purple:#a855f7;
+  --text:#dce4f0;--muted:#526080;--sidebar:256px;
+  --font-body:'IBM Plex Sans Thai',sans-serif;
+  --font-display:'Space Grotesk',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -20%,#e8b84b08 0%,transparent 60%);pointer-events:none;z-index:0}
+
+/* ─── SIDEBAR ─── */
+#sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100}
+.logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.logo-tag{font-family:var(--font-display);font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:6px}
+.logo h1{font-family:var(--font-display);font-size:26px;font-weight:700;color:#fff;line-height:1}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:8px}
+.badge{padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:1px}
+.bl{background:#22c55e;color:#000}.bc{background:#e8b84b;color:#000}.bx{background:#526080;color:#fff}
+.nav-links{padding:12px 14px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--border)}
+.nav-btn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:12px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .2s;cursor:pointer;background:none;width:100%;text-align:left;font-family:var(--font-body)}
+.nav-btn:hover,.nav-btn.active{background:var(--gold-dim);border-color:#e8b84b40;color:var(--gold)}
+.nav-btn .ic{width:18px;text-align:center}
+.ss{padding:12px 16px 4px}
+.ss-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.ss input,.ss select{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;
+  color:var(--text);font-family:var(--font-body);font-size:12px;margin-bottom:7px;outline:none;transition:border-color .2s}
+.ss input:focus,.ss select:focus{border-color:var(--gold)}
+.part-list{max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding-right:2px}
+.pcb{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;cursor:pointer;transition:background .15s;user-select:none;font-size:11px}
+.pcb:hover{background:var(--bg3)}
+.pcb input{accent-color:var(--gold);width:13px;height:13px}
+.btn-row{display:flex;gap:5px;margin-bottom:8px}
+.btn-xs{flex:1;padding:5px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;font-size:10px;transition:all .15s;font-family:var(--font-body)}
+.btn-xs:hover{border-color:var(--gold);color:var(--gold)}
+.btn-refresh{margin:10px 16px 4px;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  color:var(--cyan);font-family:var(--font-body);font-size:12px;cursor:pointer;transition:all .2s;width:calc(100%-32px)}
+.btn-refresh:hover{border-color:var(--cyan)}
+.auto-info{font-size:9px;color:var(--muted);text-align:center;padding:4px 16px 14px;line-height:1.6}
+
+/* ─── MAIN ─── */
+#main{flex:1;padding:28px 28px 40px;overflow-y:auto;position:relative;z-index:1}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+.topbar-left h2{font-family:var(--font-display);font-size:20px;font-weight:700;color:#fff;letter-spacing:.5px}
+.topbar-left p{font-size:11px;color:var(--muted);margin-top:4px}
+.topbar-right{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted)}
+
+/* ─── KPI ─── */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s}
+.kpi:hover{border-color:var(--border2)}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.k0::after{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.k1::after{background:linear-gradient(90deg,var(--cyan),#7dd3fc)}
+.k2::after{background:linear-gradient(90deg,var(--purple),#c084fc)}
+.k3::after{background:linear-gradient(90deg,var(--green),#4ade80)}
+.k4::after{background:linear-gradient(90deg,var(--red),#fb7185)}
+.kpi-lbl{font-size:10px;color:var(--muted);letter-spacing:.5px;margin-bottom:8px}
+.kpi-val{font-family:var(--font-display);font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+.kpi-sub{font-size:11px;color:var(--muted)}
+.kpi-trend{font-size:11px;margin-top:5px;font-weight:600}
+.up{color:var(--green)}.dn{color:var(--red)}.flat{color:var(--muted)}
+
+/* ─── CARDS ─── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:18px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-hdr h3{font-family:var(--font-display);font-size:13px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px}
+.card-hdr em{font-style:normal;font-size:10px;color:var(--muted);font-family:var(--font-body)}
+.row{display:grid;gap:18px;margin-bottom:18px}
+.r2{grid-template-columns:1fr 1fr}
+.r3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:1100px){.r3{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.r2,.r3{grid-template-columns:1fr}}
+.ch{position:relative}
+
+/* ─── FORECAST LEGEND ─── */
+.fc-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+.fc-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.fc-dot{width:24px;height:3px;border-radius:2px}
+
+/* ─── INSIGHT CARDS ─── */
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:18px}
+.ins{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;transition:all .25s}
+.ins:hover{border-color:var(--border2);transform:translateY(-2px)}
+.ins-num{font-family:var(--font-display);font-size:32px;font-weight:700;color:var(--border2);position:absolute;top:10px;right:14px;line-height:1}
+.ins-icon{font-size:22px;margin-bottom:8px}
+.ins-title{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.ins-body{font-size:12px;color:#94a3b8;line-height:1.7}
+.ins-badge{display:inline-block;margin-top:8px;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700}
+.sev-h{background:#f43f5e22;color:#f43f5e;border:1px solid #f43f5e40}
+.sev-m{background:#e8b84b22;color:#e8b84b;border:1px solid #e8b84b40}
+.sev-l{background:#22c55e22;color:#22c55e;border:1px solid #22c55e40}
+
+/* ─── PARETO ─── */
+.par-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)}
+.par-row:last-child{border-bottom:none}
+.par-label{flex:0 0 180px;font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.par-bar-bg{flex:1;background:var(--bg3);border-radius:3px;height:7px;overflow:hidden}
+.par-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.par-pct{flex:0 0 40px;text-align:right;font-size:11px;font-weight:700;color:var(--gold)}
+.par-val{flex:0 0 55px;text-align:right;font-size:10px;color:var(--muted)}
+.par-cum{flex:0 0 45px;text-align:right;font-size:9px;color:#334155}
+
+/* ─── AI BOX ─── */
+.ai-wrap{background:linear-gradient(135deg,#080f1e,#0f0d1e);border:1px solid #2a1f5e;border-radius:14px;padding:22px;margin-bottom:18px}
+.ai-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ai-orb{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ai-hdr-text h3{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--cyan);letter-spacing:.5px}
+.ai-hdr-text p{font-size:10px;color:var(--muted);margin-top:2px}
+.ai-loading{color:var(--muted);font-size:13px;padding:12px 0}
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* ─── REMARK TABLE ─── */
+.rem-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.rem-tbl th{background:var(--bg3);color:var(--muted);font-weight:600;padding:7px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0}
+.rem-tbl td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5}
+.rem-tbl tr:hover td{background:#ffffff04}
+.tbl-wrap{overflow-x:auto;max-height:320px;overflow-y:auto}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9px;font-weight:700;margin:1px}
+.tag-dt{background:#f43f5e22;color:#f43f5e}
+.tag-q{background:#f59e0b22;color:#f59e0b}
+.tag-ok{background:#22c55e22;color:#22c55e}
+
+/* ─── LOADING ─── */
+#loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .5s}
+.ld-ring{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* Chart view toggle */
+.chart-toggle{display:flex;gap:3px;background:#0d1117;border:1px solid #1c2640;border-radius:6px;padding:2px}
+.chart-toggle button{background:transparent;border:none;color:#526080;font-size:9px;font-weight:600;padding:3px 8px;border-radius:4px;cursor:pointer;transition:all .15s}
+.chart-toggle button.active{background:#1c2640;color:#dce4f0}
+.chart-toggle button:hover:not(.active){color:#a0aec0}
+
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="ld-ring"></div>
+  <div style="font-family:var(--font-display);font-size:16px;color:var(--gold);letter-spacing:3px">PD4 LOADING</div>
+  <p id="ldmsg" style="font-size:11px;color:var(--muted)">กำลังโหลดข้อมูล...</p>
+</div>
+
+<aside id="sidebar">
+  <div class="logo">
+    <div class="logo-tag">แผนก PD4</div>
+    <h1>OEE<br>OVERVIEW</h1>
+    <div class="logo-sub">
+      <span id="src-badge" class="badge bx">...</span>
+      <span id="last-update">—</span>
+    </div>
+  </div>
+
+  <div class="nav-links">
+    <a class="nav-btn" href="index.html"><span class="ic">📊</span> PD3 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd3.html"><span class="ic">🔎</span> Deep Analysis PD3</a>
+    <a class="nav-btn active"><span class="ic">🏭</span> PD4 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd4.html"><span class="ic">🔍</span> Deep Analysis PD4</a>
+  </div>
+
+  <div class="ss">
+    <div class="ss-label">📅 ช่วงวันที่</div>
+    <input type="date" id="date-from">
+    <input type="date" id="date-to">
+  </div>
+  <div class="ss">
+    <div class="ss-label">กะการทำงาน</div>
+    <select id="shift-sel">
+      <option value="all">ทุกกะ</option>
+      <option value="กลางวัน">กลางวัน</option>
+      <option value="กลางคืน">กลางคืน</option>
+    </select>
+  </div>
+  <div class="ss">
+    <div class="ss-label">ชิ้นงาน</div>
+    <div class="btn-row">
+      <button class="btn-xs" onclick="selectAll(true)">✅ ทั้งหมด</button>
+      <button class="btn-xs" onclick="selectAll(false)">❌ ล้าง</button>
+    </div>
+    <div class="part-list" id="part-list"></div>
+  </div>
+
+  <button class="btn-refresh" onclick="refreshLive()">🌐 ดึงข้อมูลใหม่</button>
+  <div class="auto-info">🔄 Auto-refresh ทุก 1 ชั่วโมง<br>ครั้งถัดไป: <span id="next-refresh">—</span></div>
+</aside>
+
+<main id="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h2>🏭 PD4 Production Overview</h2>
+      <p id="range-lbl">—</p>
+    </div>
+    <div class="topbar-right" id="rec-count">—</div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi k0"><div class="kpi-lbl">OEE เฉลี่ย</div><div class="kpi-val" id="kv0" style="color:var(--gold)">—</div><div class="kpi-sub" id="ks0"></div><div class="kpi-trend" id="kt0"></div></div>
+    <div class="kpi k1"><div class="kpi-lbl">Availability (A)</div><div class="kpi-val" id="kv1" style="color:var(--cyan)">—</div><div class="kpi-sub" id="ks1"></div><div class="kpi-trend" id="kt1"></div></div>
+    <div class="kpi k2"><div class="kpi-lbl">Performance (P)</div><div class="kpi-val" id="kv2" style="color:var(--purple)">—</div><div class="kpi-sub" id="ks2"></div><div class="kpi-trend" id="kt2"></div></div>
+    <div class="kpi k3"><div class="kpi-lbl">Quality (Q)</div><div class="kpi-val" id="kv3" style="color:var(--green)">—</div><div class="kpi-sub" id="ks3"></div><div class="kpi-trend" id="kt3"></div></div>
+    <div class="kpi k4"><div class="kpi-lbl">Total Downtime</div><div class="kpi-val" id="kv4" style="color:var(--red);font-size:22px">—</div><div class="kpi-sub" id="ks4"></div><div class="kpi-trend" id="kt4"></div></div>
+  </div>
+
+  <!-- AI INSIGHTS -->
+  <div class="ai-wrap">
+    <div class="ai-hdr">
+      <div class="ai-orb">🤖</div>
+      <div class="ai-hdr-text">
+        <h3>AI INSIGHTS — 5 ประเด็นสำคัญ</h3>
+        <p>วิเคราะห์เชิงลึกจาก DT Type, ประเภทงานเสีย, หมายเหตุ และเทรนด์</p>
+      </div>
+    </div>
+    <div id="ai-insights"><p class="ai-loading pulse">🤖 AI กำลังวิเคราะห์ข้อมูล...</p></div>
+  </div>
+
+  <!-- OEE TREND + FORECAST -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>📈 OEE Trend + Forecast<em>Low / Median / High + Linear Forecast</em></h3><div class="chart-toggle"><button onclick="setChartView('daily',this)">รายวัน</button><button class="active" onclick="setChartView('monthly',this)">รายเดือน</button><button onclick="setChartView('yearly',this)">รายปี</button></div>
+    </div>
+    <div class="ch" style="height:300px"><canvas id="c-oee"></canvas></div>
+    <div class="fc-legend" id="oee-legend"></div>
+  </div>
+
+  <div class="row r2">
+    <!-- DOWNTIME TREND + FORECAST -->
+    <div class="card">
+      <div class="card-hdr"><h3>🔧 Downtime Trend + Forecast<em>นาที/วัน</em></h3><div class="chart-toggle"><button onclick="setChartView('daily',this)">รายวัน</button><button class="active" onclick="setChartView('monthly',this)">รายเดือน</button><button onclick="setChartView('yearly',this)">รายปี</button></div></div>
+      <div class="ch" style="height:240px"><canvas id="c-dt-fc"></canvas></div>
+      <div class="fc-legend" id="dt-legend"></div>
+    </div>
+    <!-- PPM TREND + FORECAST -->
+    <div class="card">
+      <div class="card-hdr"><h3>⚠️ Defect PPM Trend + Forecast<em>3M MA</em></h3><div class="chart-toggle"><button onclick="setChartView('daily',this)">รายวัน</button><button class="active" onclick="setChartView('monthly',this)">รายเดือน</button><button onclick="setChartView('yearly',this)">รายปี</button></div></div>
+      <div class="ch" style="height:240px"><canvas id="c-ppm-fc"></canvas></div>
+      <div class="fc-legend" id="ppm-legend"></div>
+    </div>
+  </div>
+
+  <!-- DT PARETO -->
+  <div class="row r2">
+    <div class="card">
+      <div class="card-hdr"><h3>📊 Pareto — DT Type<em>สาเหตุ Downtime</em></h3></div>
+      <div id="dt-pareto"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>📊 Pareto — ประเภทงานเสีย<em>Defect Type</em></h3></div>
+      <div id="def-pareto"></div>
+    </div>
+  </div>
+
+  <!-- DT by Part + Defect by Part -->
+  <div class="row r2">
+    <div class="card">
+      <div class="card-hdr"><h3>🏭 Downtime แยกชิ้นงาน<em>นาที</em></h3></div>
+      <div class="ch" style="height:230px"><canvas id="c-dt-part"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>🏭 Defect แยกชิ้นงาน<em>PPM</em></h3></div>
+      <div class="ch" style="height:230px"><canvas id="c-def-part"></canvas></div>
+    </div>
+  </div>
+
+  <!-- REMARKS TABLE -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>📝 หมายเหตุ / Comment<em>ล่าสุด 50 รายการ</em></h3>
+    </div>
+    <div class="tbl-wrap">
+      <table class="rem-tbl">
+        <thead><tr><th>วันที่</th><th>ชิ้นงาน</th><th>กะ</th><th>OEE</th><th>DT Types</th><th>หมายเหตุ</th><th>Comment หัวหน้า</th></tr></thead>
+        <tbody id="rem-tb"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const PD4_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSs034o0M970g62tL1jkU4CU6HpAbVkER87uw3OzI97ueA6xXdBdwXd1Gcd0GrgaKOuIrTl-F75q3nz/pub?gid=122174819&single=true&output=csv";
+let ALL=[], FD=[], PARTS=[], CH={};
+
+// ─── PARSE THAI DATE (dd/mm/25xx → JS Date) ───
+function parseThaiDate(s){
+  if(!s)return null;
+  s=s.trim().split(" ")[0]; // strip time
+  const p=s.split("/");
+  if(p.length!==3)return null;
+  const d=+p[0], m=+p[1]-1, y=+p[2];
+  // Buddhist Era: if year > 2400, subtract 543
+  const ce = y > 2400 ? y - 543 : y;
+  return new Date(ce, m, d);
+}
+function fmtDate(d){if(!d)return"—";return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;}
+function fmtIso(d){return d.toISOString().split("T")[0];}
+
+// ─── CSV PARSER ───
+function csvLine(line){
+  const r=[];let c="",q=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){if(q&&line[i+1]==='"'){c+='"';i++;}else q=!q;}
+    else if(ch===','&&!q){r.push(c);c="";}
+    else c+=ch;
+  }r.push(c);return r;
+}
+function csvParse(text){
+  const lines=text.split("\n").filter(l=>l.trim());
+  if(lines.length<2)return[];
+  const hdr=csvLine(lines[0]);
+  const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
+  const g=(row,i)=>row[i]!==undefined?String(row[i]).trim():"";
+  const n=v=>{if(!v)return 0;const x=parseFloat(v.replace('%','').replace(/,/g,''));return isNaN(x)?0:x;};
+  const rows=[];
+  for(let r=1;r<lines.length;r++){
+    const row=csvLine(lines[r]);
+    if(row.length<10)continue;
+    const date=parseThaiDate(g(row,59)||g(row,0));
+    if(!date)continue;
+
+    // collect DT types (up to 7)
+    const dtTypes=[];
+    for(let i=0;i<7;i++){
+      const flag=g(row,21+i*3).toUpperCase();
+      const type=g(row,22+i*3);
+      const val=n(g(row,23+i*3));
+      if((flag==="TRUE"||flag==="1")&&type&&val>0)dtTypes.push({type,val});
+    }
+    // collect defect types (up to 3)
+    const defTypes=[];
+    for(let i=0;i<3;i++){
+      const flag=g(row,7+i*4).toUpperCase();
+      const type=g(row,8+i*4);
+      const qty=n(g(row,9+i*4));
+      if((flag==="TRUE"||flag==="1")&&type&&qty>0)defTypes.push({type,qty});
+    }
+    const totalDefect=defTypes.reduce((s,d)=>s+d.qty,0);
+    const totalDT=n(g(row,74)); // Total DT column (hours)
+    const totalDTMin=Math.round(totalDT*60);
+
+    rows.push({
+      date, dateStr:fmtDate(date),
+      part:g(row,1), suffix:g(row,2), shift:g(row,5),
+      total:n(g(row,6)),
+      goodPart:n(g(row,81)),
+      defect:totalDefect,
+      defTypes,
+      dtMin:totalDTMin,
+      dtTypes,
+      avail:n(g(row,77)),
+      perf:n(g(row,80)),
+      qual:n(g(row,82)),
+      oee:n(g(row,83)),
+      remark:g(row,51),
+      commentBoss:g(row,55),
+      commentEng:g(row,58),
+    });
+  }return rows;
+}
+
+// ─── LOAD ───
+async function loadData(){
+  setMsg("📡 กำลังดึงข้อมูล PD4...");
+  // Try multiple CORS strategies
+  const urls=[
+    PD4_URL+"&t="+Date.now(),
+    PD4_URL.replace("pub?","pub?") +"&t="+Date.now(),
+  ];
+  let lastErr="";
+  for(const url of urls){
+    try{
+      const res=await fetch(url,{
+        method:"GET",
+        cache:"no-store",
+        mode:"cors",
+        headers:{"Accept":"text/csv,*/*"}
+      });
+      if(!res.ok)throw new Error("HTTP "+res.status);
+      const csv=await res.text();
+      if(!csv||csv.length<100)throw new Error("ข้อมูลว่างเปล่า");
+      ALL=csvParse(csv);
+      if(ALL.length<2)throw new Error("parse ได้ "+ALL.length+" rows");
+      setBadge("● LIVE","bl");
+      setUpdate("อัปเดต: "+new Date().toLocaleTimeString("th-TH"));
+      boot();
+      return;
+    }catch(e){lastErr=e.message;console.warn("Fetch attempt failed:",e.message);}
+  }
+  // Show friendly error with manual instructions
+  document.getElementById("loading").innerHTML=`<div style="text-align:center;padding:32px;font-family:var(--font-body);max-width:480px;margin:0 auto">
+    <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+    <h2 style="color:var(--red);margin-bottom:10px;font-family:var(--font-display)">ดึงข้อมูลไม่ได้</h2>
+    <p style="color:var(--muted);margin-bottom:8px;font-size:13px">${lastErr}</p>
+    <p style="color:#526080;font-size:12px;margin-bottom:20px">กรุณาเปิดไฟล์นี้ผ่าน Web Server (GitHub Pages / Netlify) แทนการเปิดจาก local file เพื่อหลีกเลี่ยง CORS restriction</p>
+    <button onclick="loadData()" style="padding:10px 24px;background:linear-gradient(135deg,#7c3aed,var(--gold));border:none;border-radius:8px;color:#fff;cursor:pointer;font-size:13px;margin-right:8px">🔄 ลองใหม่</button>
+    <button onclick="manualPaste()" style="padding:10px 24px;background:var(--bg3);border:1px solid var(--border);color:var(--text);cursor:pointer;font-size:13px;border-radius:8px">📋 วาง CSV</button>
+    <div id="paste-area" style="display:none;margin-top:16px">
+      <p style="color:var(--muted);font-size:11px;margin-bottom:8px">วาง CSV จาก Google Sheets ด้านล่าง:</p>
+      <textarea id="csv-paste" style="width:100%;height:100px;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px;font-size:10px;resize:vertical" placeholder="วาง CSV text ที่นี่..."></textarea>
+      <button onclick="loadFromPaste()" style="margin-top:8px;padding:8px 20px;background:var(--gold);border:none;border-radius:8px;color:#000;cursor:pointer;font-weight:700;font-size:13px">โหลด</button>
+    </div>
+  </div>`;
+}
+
+function manualPaste(){
+  const a=document.getElementById("paste-area");
+  if(a)a.style.display="block";
+}
+function loadFromPaste(){
+  const csv=document.getElementById("csv-paste")?.value||"";
+  if(!csv.trim()){alert("กรุณาวาง CSV ก่อน");return;}
+  ALL=csvParse(csv);
+  if(ALL.length<2){alert("ไม่พบข้อมูล กรุณาตรวจสอบ CSV อีกครั้ง (rows: "+ALL.length+")");return;}
+  setBadge("● PASTE","bc");
+  setUpdate("โหลดจาก Paste: "+ALL.length+" rows");
+  document.getElementById("loading").style.display="none";
+  boot();
+}
+async function refreshLive(){
+  setBadge("...","bx");setUpdate("กำลังดึงข้อมูล...");
+  try{
+    const res=await fetch(PD4_URL+"&t="+Date.now(),{cache:"no-store",mode:"cors"});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const csv=await res.text();
+    if(!csv||csv.length<100)throw new Error("ข้อมูลว่างเปล่า");
+    const parsed=csvParse(csv);
+    if(parsed.length<2)throw new Error("parse ได้แค่ "+parsed.length+" rows");
+    ALL=parsed;
+    setBadge("● LIVE","bl");setUpdate("อัปเดต: "+new Date().toLocaleTimeString("th-TH")+" ("+ALL.length+" rows)");
+    PARTS=[...new Set(ALL.map(d=>d.part))].filter(Boolean).sort();
+    initParts();applyFilter();
+  }catch(e){setBadge("● ERR","bx");setUpdate("❌ "+e.message);console.error("refreshLive error:",e);}
+}
+function boot(){
+  PARTS=[...new Set(ALL.map(d=>d.part))].filter(Boolean).sort();
+  initParts();setDefaultDates();
+  document.getElementById("date-from").addEventListener("change",applyFilter);
+  document.getElementById("date-to").addEventListener("change",applyFilter);
+  document.getElementById("shift-sel").addEventListener("change",applyFilter);
+  applyFilter();hideLd();startAutoRefresh();
+}
+let arTimer=null;
+function startAutoRefresh(){
+  if(arTimer)clearInterval(arTimer);
+  updateNextLabel();
+  arTimer=setInterval(async()=>{await refreshLive();updateNextLabel();},3600000);
+}
+function updateNextLabel(){
+  const el=document.getElementById("next-refresh");
+  if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})+" น.";
+}
+function setMsg(t){const p=document.getElementById("ldmsg");if(p)p.textContent=t;}
+function setBadge(t,cls){const b=document.getElementById("src-badge");if(b){b.textContent=t;b.className="badge "+cls;}}
+function setUpdate(t){const el=document.getElementById("last-update");if(el)el.textContent=t;}
+function hideLd(){const el=document.getElementById("loading");el.style.opacity="0";setTimeout(()=>el.style.display="none",500);}
+function initParts(){
+  document.getElementById("part-list").innerHTML=
+    PARTS.map(p=>`<label class="pcb"><input type="checkbox" value="${p}" checked class="pci" onchange="applyFilter()"><span>${p}</span></label>`).join("");
+}
+function setDefaultDates(){
+  const today=new Date(), minD=new Date(today);minD.setDate(minD.getDate()-180);
+  document.getElementById("date-from").value=fmtIso(minD);
+  document.getElementById("date-to").value=fmtIso(today);
+}
+function selectAll(v){document.querySelectorAll(".pci").forEach(c=>c.checked=v);applyFilter();}
+function applyFilter(){
+  const from=new Date(document.getElementById("date-from").value);
+  const to=new Date(document.getElementById("date-to").value);to.setHours(23,59,59);
+  const sel=[...document.querySelectorAll(".pci:checked")].map(c=>c.value);
+  const sh=document.getElementById("shift-sel").value;
+  FD=ALL.filter(d=>d.date>=from&&d.date<=to&&sel.includes(d.part)&&(sh==="all"||d.shift===sh));
+  document.getElementById("range-lbl").textContent=
+    `${document.getElementById("date-from").value} — ${document.getElementById("date-to").value}`;
+  document.getElementById("rec-count").textContent=`${FD.length.toLocaleString()} records`;
+  render();
+}
+const dch=id=>{if(CH[id]){CH[id].destroy();delete CH[id];}};
+const avg=arr=>{const v=arr.filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;};
+
+
+window.CHART_VIEW = 'monthly';
+function setChartView(mode, btn){
+  window.CHART_VIEW = mode;
+  document.querySelectorAll('.chart-toggle button').forEach(b=>b.classList.remove('active'));
+  // activate all buttons with same text
+  document.querySelectorAll('.chart-toggle button').forEach(b=>{
+    if(b.textContent===btn.textContent) b.classList.add('active');
+  });
+  rOEETrend(); rDTForecast(); rPPMForecast();
+}
+
+// ─── RENDER ───
+function render(){rKPI();rOEETrend();rDTForecast();rPPMForecast();rDTPareto();rDefPareto();rDTPart();rDefPart();rRemarks();runAI();}
+
+// ─── KPI ───
+function rKPI(){
+  if(!FD.length)return;
+  const half=Math.floor(FD.length/2);
+  const first=FD.slice(0,half), second=FD.slice(half);
+  const trend=(cur,prev)=>{
+    if(!prev||prev===0)return'<span class="flat">—</span>';
+    const d=((cur-prev)/prev*100);
+    return d>0.5?`<span class="up">↑ ${d.toFixed(1)}%</span>`:d<-0.5?`<span class="dn">↓ ${Math.abs(d).toFixed(1)}%</span>`:'<span class="flat">≈ คงที่</span>';
+  };
+  const oee=avg(FD.map(d=>d.oee)), oeeP=avg(first.map(d=>d.oee)), oeeC=avg(second.map(d=>d.oee));
+  const a=avg(FD.map(d=>d.avail)), aP=avg(first.map(d=>d.avail)), aC=avg(second.map(d=>d.avail));
+  const p=avg(FD.map(d=>d.perf)), pP=avg(first.map(d=>d.perf)), pC=avg(second.map(d=>d.perf));
+  const q=avg(FD.map(d=>d.qual)), qP=avg(first.map(d=>d.qual)), qC=avg(second.map(d=>d.qual));
+  const totDT=FD.reduce((s,d)=>s+d.dtMin,0), dtP=first.reduce((s,d)=>s+d.dtMin,0)/first.length||0, dtC=second.reduce((s,d)=>s+d.dtMin,0)/second.length||0;
+
+  document.getElementById("kv0").textContent=oee.toFixed(1)+"%";
+  document.getElementById("ks0").textContent=`A:${a.toFixed(1)} P:${p.toFixed(1)} Q:${q.toFixed(1)}`;
+  document.getElementById("kt0").innerHTML=trend(oeeC,oeeP);
+  document.getElementById("kv1").textContent=a.toFixed(1)+"%";
+  document.getElementById("ks1").textContent=a>=85?"World Class ✅":a>=70?"ต้องปรับปรุง":"วิกฤต";
+  document.getElementById("kt1").innerHTML=trend(aC,aP);
+  document.getElementById("kv2").textContent=p.toFixed(1)+"%";
+  document.getElementById("ks2").textContent=p>=85?"World Class ✅":p>=70?"ต้องปรับปรุง":"วิกฤต";
+  document.getElementById("kt2").innerHTML=trend(pC,pP);
+  document.getElementById("kv3").textContent=q.toFixed(1)+"%";
+  document.getElementById("ks3").textContent=q>=99?"เยี่ยม ✅":q>=95?"ปกติ":"ต้องปรับปรุง";
+  document.getElementById("kt3").innerHTML=trend(qC,qP);
+  document.getElementById("kv4").textContent=(totDT/60).toFixed(1)+" ชม.";
+  document.getElementById("ks4").textContent=`${totDT.toLocaleString()} นาที รวม`;
+  document.getElementById("kt4").innerHTML=trend(dtC,dtP).replace("↑","↑ DT เพิ่ม").replace("↓","↓ DT ลด");
+}
+
+// ─── STATS for BAND (low/median/high) ───
+function computeBand(vals){
+  const s=[...vals].sort((a,b)=>a-b);
+  const n=s.length;
+  if(!n)return{low:0,med:0,high:0};
+  const med=n%2===0?(s[n/2-1]+s[n/2])/2:s[Math.floor(n/2)];
+  const q1=s[Math.floor(n*0.1)];
+  const q3=s[Math.floor(n*0.9)];
+  return{low:q1||0,med,high:q3||0};
+}
+
+// ─── LINEAR FORECAST ───
+function linearForecast(data){
+  // simple linear regression on index
+  const n=data.length;
+  if(n<3)return{slope:0,intercept:data[0]||0};
+  let sx=0,sy=0,sxy=0,sxx=0;
+  data.forEach((y,x)=>{sx+=x;sy+=y;sxy+=x*y;sxx+=x*x;});
+  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx)||0;
+  const intercept=(sy-slope*sx)/n;
+  return{slope,intercept};
+}
+
+
+function byDay(field){
+  const m={};
+  FD.forEach(d=>{
+    const k=fmtIso(d.date);
+    if(!m[k])m[k]=[];
+    m[k].push(field(d));
+  });
+  return m;
+}
+function byYear(field){
+  const m={};
+  FD.forEach(d=>{
+    const k=String(d.date.getFullYear());
+    if(!m[k])m[k]=[];
+    m[k].push(field(d));
+  });
+  return m;
+}
+function fmtLabel(key, mode){
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(mode==='daily'){
+    const[yr,mo,dd]=key.split('-');
+    return `${parseInt(dd)} ${MN[parseInt(mo)-1]} ${yr.slice(2)}`;
+  } else if(mode==='monthly'){
+    const[yr,mo]=key.split('-');
+    return `${MN[parseInt(mo)-1]} ${yr.slice(2)}`;
+  } else {
+    return key;
+  }
+}
+
+// Aggregate FD by month for trend charts
+function byMonth(field){
+  const m={};
+  FD.forEach(d=>{
+    const dt=d.date;
+    const key=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+    if(!m[key])m[key]=[];
+    m[key].push(field(d));
+  });
+  return m;
+}
+
+function makeForecastChart(canvasId, historicLabels, historicData, forecastLabels, forecastData, bandData, color, unit, legendId){
+  dch(canvasId);
+  const n=historicData.length;
+  // band datasets (P10-P90 area)
+  const allLabels=[...historicLabels,...forecastLabels];
+  const medLine=[...bandData.map(b=>b.med),...Array(forecastLabels.length).fill(null)];
+  const highLine=[...bandData.map(b=>b.high),...Array(forecastLabels.length).fill(null)];
+  const lowLine=[...bandData.map(b=>b.low),...Array(forecastLabels.length).fill(null)];
+  // build forecast full line (last historic point → future)
+  const fcLine=[...Array(historicLabels.length).fill(null)];
+  fcLine[historicLabels.length-1]=historicData[historicData.length-1]; // connect
+  fcLine.push(...forecastData);
+
+  CH[canvasId]=new Chart(document.getElementById(canvasId),{
+    type:"line",
+    data:{labels:allLabels,datasets:[
+      // high band fill
+      {label:"High (P90)",data:highLine,borderColor:"transparent",backgroundColor:color+"18",fill:"+1",pointRadius:0,tension:.4},
+      // low band fill
+      {label:"Low (P10)",data:lowLine,borderColor:"transparent",backgroundColor:"transparent",fill:false,pointRadius:0,tension:.4},
+      // median
+      {label:"Median",data:medLine,borderColor:color+"88",borderWidth:1.5,borderDash:[4,3],backgroundColor:"transparent",pointRadius:0,tension:.4,fill:false},
+      // actual
+      {label:"Actual",data:[...historicData,...Array(forecastLabels.length).fill(null)],borderColor:color,backgroundColor:color+"22",borderWidth:2,pointRadius:1.5,pointHoverRadius:4,tension:.3,fill:false},
+      // forecast
+      {label:"Forecast 3M",data:fcLine,borderColor:color+"99",borderWidth:2,borderDash:[6,4],backgroundColor:"transparent",pointRadius:0,tension:.3,fill:false},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:"#0d1117",titleColor:"#dce4f0",bodyColor:"#526080",borderColor:"#1c2640",borderWidth:1,
+          callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw!==null?ctx.raw.toFixed(1)+unit:"—"}`}
+        },
+        annotation:{annotations:{
+          fcStart:{type:"line",xMin:historicLabels.length-0.5,xMax:historicLabels.length-0.5,
+            borderColor:"#526080",borderWidth:1,borderDash:[3,3],
+            label:{content:"Forecast 3M →",display:true,color:"#526080",font:{size:9},position:"start"}}
+        }}
+      },
+      scales:{
+        x:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9},maxRotation:45,maxTicksLimit:12}},
+        y:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9},callback:v=>v.toFixed(0)+unit}}
+      }
+    }
+  });
+
+  // legend
+  const lgEl=document.getElementById(legendId);
+  if(lgEl)lgEl.innerHTML=`
+    <div class="fc-item"><div class="fc-dot" style="background:${color}"></div>Actual</div>
+    <div class="fc-item"><div class="fc-dot" style="background:${color}99;border-top:2px dashed ${color}99"></div>Forecast 3M</div>
+    <div class="fc-item"><div class="fc-dot" style="background:${color}18;height:8px;border-radius:2px"></div>P10–P90 Band</div>
+    <div class="fc-item"><div class="fc-dot" style="background:${color}88;border-top:1px dashed ${color}88"></div>Median</div>
+  `;
+}
+
+
+
+function buildTrendForecast(getVal, color, unit, canvasId, legendId){
+  const mode = window.CHART_VIEW || 'monthly';
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let histKeys=[], histVals=[], fcLabels=[], fcVals=[], bands=[];
+
+  if(mode==='daily'){
+    const wm=byDay(getVal);
+    const keys=Object.keys(wm).sort().slice(-60);
+    if(!keys.length)return;
+    histVals=keys.map(k=>avg(wm[k]));
+    if(histVals.length<3)return;
+    bands=histVals.map(v=>({low:v*0.92,med:v,high:v*1.08}));
+    const{slope,intercept}=linearForecast(histVals);
+    const n=histVals.length;
+    for(let i=1;i<=7;i++){
+      const last=new Date(keys[keys.length-1]+'T00:00:00');
+      last.setDate(last.getDate()+i);
+      fcLabels.push(`${last.getDate()} ${MN[last.getMonth()]} ${String(last.getFullYear()).slice(2)}`);
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=keys.map(k=>{const[yr,mo,dd]=k.split('-');return `${parseInt(dd)} ${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
+
+  } else if(mode==='monthly'){
+    const wm=byMonth(getVal);
+    const months=Object.keys(wm).sort();
+    if(!months.length)return;
+    const monthVals=months.map(m=>avg(wm[m]));
+    if(months.length<3)return;
+    const hm=months.slice(-12), hv=monthVals.slice(-12);
+    histVals=hv; bands=hv.map(v=>({low:v*0.92,med:v,high:v*1.08}));
+    const{slope,intercept}=linearForecast(hv);
+    const n=hv.length;
+    for(let i=1;i<=3;i++){
+      const[yr,mo]=hm[hm.length-1].split('-').map(Number);
+      const d=new Date(yr,mo-1+i,1);
+      fcLabels.push(`${MN[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`);
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=hm.map(m=>{const[yr,mo]=m.split('-');return `${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
+
+  } else {
+    const wm=byYear(getVal);
+    const keys=Object.keys(wm).sort();
+    if(!keys.length)return;
+    histVals=keys.map(k=>avg(wm[k]));
+    if(histVals.length<2)return;
+    bands=histVals.map(v=>({low:v*0.92,med:v,high:v*1.08}));
+    const{slope,intercept}=linearForecast(histVals);
+    const n=histVals.length;
+    const lastYr=parseInt(keys[keys.length-1]);
+    for(let i=1;i<=3;i++){
+      fcLabels.push(String(lastYr+i));
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=[...keys];
+  }
+
+  if(!histVals.length)return;
+  makeForecastChart(canvasId, histKeys, histVals, fcLabels, fcVals, bands, color, unit, legendId);
+  return {slope, avg12m:avg(histVals), forecastEnd:fcVals[fcVals.length-1]};
+}
+
+
+
+function rOEETrend(){buildTrendForecast(d=>d.oee,"#e8b84b","%","c-oee","oee-legend");}
+function rDTForecast(){buildTrendForecast(d=>d.dtMin,"#f43f5e"," m","c-dt-fc","dt-legend");}
+
+
+function rPPMForecast(){
+  const mode = window.CHART_VIEW || 'monthly';
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let histKeys=[], histVals=[], fcLabels=[], fcVals=[], bands=[];
+
+  function buildPPMSeries(groupFn, sliceN){
+    const bdd={};
+    FD.forEach(d=>{
+      const k=groupFn(d.date);
+      if(!bdd[k])bdd[k]={def:0,tot:0};
+      bdd[k].def+=d.defect; bdd[k].tot+=d.total;
+    });
+    const keys=Object.keys(bdd).sort().slice(-sliceN);
+    return{keys, vals:keys.map(k=>bdd[k].tot>0?Math.round((bdd[k].def/bdd[k].tot)*1e6):0)};
+  }
+
+  if(mode==='daily'){
+    const{keys,vals}=buildPPMSeries(dt=>fmtIso(dt),60);
+    if(!keys.length)return;
+    const ma=vals.map((v,i)=>{const sl=vals.slice(Math.max(0,i-6),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
+    const{slope,intercept}=linearForecast(ma); const n=ma.length;
+    histVals=ma; bands=ma.map(v=>({low:v*0.8,med:v,high:v*1.2}));
+    for(let i=1;i<=7;i++){
+      const last=new Date(keys[keys.length-1]+'T00:00:00'); last.setDate(last.getDate()+i);
+      fcLabels.push(`${last.getDate()} ${MN[last.getMonth()]} ${String(last.getFullYear()).slice(2)}`);
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=keys.map(k=>{const[yr,mo,dd]=k.split('-');return `${parseInt(dd)} ${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
+
+  } else if(mode==='monthly'){
+    const{keys,vals}=buildPPMSeries(dt=>`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`,12);
+    if(!keys.length)return;
+    const ma=vals.map((v,i)=>{const sl=vals.slice(Math.max(0,i-2),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
+    histVals=ma; bands=ma.map(v=>({low:v*0.8,med:v,high:v*1.2}));
+    const{slope,intercept}=linearForecast(ma); const n=ma.length;
+    for(let i=1;i<=3;i++){
+      const[yr,mo]=keys[keys.length-1].split('-').map(Number);
+      const d=new Date(yr,mo-1+i,1);
+      fcLabels.push(`${MN[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`);
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=keys.map(k=>{const[yr,mo]=k.split('-');return `${MN[parseInt(mo)-1]} ${yr.slice(2)}`;});
+
+  } else {
+    const{keys,vals}=buildPPMSeries(dt=>String(dt.getFullYear()),20);
+    if(!keys.length)return;
+    histVals=vals; bands=vals.map(v=>({low:v*0.8,med:v,high:v*1.2}));
+    const{slope,intercept}=linearForecast(vals); const n=vals.length;
+    const lastYr=parseInt(keys[keys.length-1]);
+    for(let i=1;i<=3;i++){
+      fcLabels.push(String(lastYr+i));
+      fcVals.push(Math.max(0,intercept+slope*(n+i-1)));
+    }
+    histKeys=[...keys];
+  }
+
+  if(histVals.length<2)return;
+  makeForecastChart("c-ppm-fc",histKeys,histVals,fcLabels,fcVals,bands,"#a855f7"," PPM","ppm-legend");
+}
+
+
+
+function rDTPareto(){
+  const sums={};
+  FD.forEach(d=>d.dtTypes.forEach(t=>{sums[t.type]=(sums[t.type]||0)+t.val;}));
+  const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]);
+  const total=sorted.reduce((s,[,v])=>s+v,0)||1;
+  const colors=["#f43f5e","#f59e0b","#a855f7","#38bdf8","#22c55e","#fb923c","#60a5fa","#e879f9","#34d399","#fbbf24"];
+  let cum=0;
+  document.getElementById("dt-pareto").innerHTML=sorted.slice(0,10).map(([l,v],i)=>{
+    cum+=v;const pct=(v/total*100).toFixed(1);const cumPct=(cum/total*100).toFixed(1);
+    return `<div class="par-row">
+      <div class="par-label" title="${l}">${l}</div>
+      <div class="par-bar-bg"><div class="par-bar-fill" style="width:${(v/total*100).toFixed(0)}%;background:${colors[i]||'#526080'}"></div></div>
+      <div class="par-pct">${pct}%</div>
+      <div class="par-val">${v.toLocaleString()} m</div>
+      <div class="par-cum">∑${cumPct}%</div>
+    </div>`;
+  }).join("")||'<p style="color:var(--muted);padding:12px;font-size:12px">ไม่มีข้อมูล</p>';
+}
+
+function rDefPareto(){
+  const sums={};
+  FD.forEach(d=>d.defTypes.forEach(t=>{sums[t.type]=(sums[t.type]||0)+t.qty;}));
+  const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]);
+  const total=sorted.reduce((s,[,v])=>s+v,0)||1;
+  const colors=["#f59e0b","#f43f5e","#38bdf8","#a855f7","#22c55e","#fb923c","#60a5fa"];
+  let cum=0;
+  document.getElementById("def-pareto").innerHTML=sorted.slice(0,10).map(([l,v],i)=>{
+    cum+=v;const pct=(v/total*100).toFixed(1);const cumPct=(cum/total*100).toFixed(1);
+    return `<div class="par-row">
+      <div class="par-label" title="${l}">${l}</div>
+      <div class="par-bar-bg"><div class="par-bar-fill" style="width:${(v/total*100).toFixed(0)}%;background:${colors[i]||'#526080'}"></div></div>
+      <div class="par-pct">${pct}%</div>
+      <div class="par-val">${v.toLocaleString()} ชิ้น</div>
+      <div class="par-cum">∑${cumPct}%</div>
+    </div>`;
+  }).join("")||'<p style="color:var(--muted);padding:12px;font-size:12px">ไม่มีข้อมูล</p>';
+}
+
+function rDTPart(){
+  const m={};FD.forEach(d=>{m[d.part]=(m[d.part]||0)+d.dtMin;});
+  const sorted=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  dch("c-dt-part");
+  CH["c-dt-part"]=new Chart(document.getElementById("c-dt-part"),{type:"bar",
+    data:{labels:sorted.map(s=>s[0]),datasets:[{data:sorted.map(s=>s[1]),
+      backgroundColor:sorted.map((_,i)=>`hsl(${0+i*20},80%,60%)40`),
+      borderColor:sorted.map((_,i)=>`hsl(${0+i*20},80%,60%)`),borderWidth:1,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:"#0d1117",titleColor:"#dce4f0",bodyColor:"#526080",
+        callbacks:{label:ctx=>`DT: ${ctx.raw.toLocaleString()} นาที`}}},
+      scales:{x:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9},maxRotation:45}},
+        y:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9},callback:v=>v+"m"}}}}
+  });
+}
+
+function rDefPart(){
+  const m={};FD.forEach(d=>{if(!m[d.part])m[d.part]={def:0,tot:0};m[d.part].def+=d.defect;m[d.part].tot+=d.total;});
+  const sorted=Object.entries(m).map(([p,v])=>({p,ppm:v.tot>0?Math.round((v.def/v.tot)*1e6):0}))
+    .filter(x=>x.ppm>0).sort((a,b)=>b.ppm-a.ppm).slice(0,12);
+  dch("c-def-part");
+  CH["c-def-part"]=new Chart(document.getElementById("c-def-part"),{type:"bar",
+    data:{labels:sorted.map(s=>s.p),datasets:[{data:sorted.map(s=>s.ppm),
+      backgroundColor:sorted.map(s=>s.ppm>5000?"#f43f5e40":s.ppm>2000?"#f59e0b40":"#22c55e40"),
+      borderColor:sorted.map(s=>s.ppm>5000?"#f43f5e":s.ppm>2000?"#f59e0b":"#22c55e"),
+      borderWidth:1,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:"y",
+      plugins:{legend:{display:false},tooltip:{backgroundColor:"#0d1117",titleColor:"#dce4f0",bodyColor:"#526080",
+        callbacks:{label:ctx=>`PPM: ${ctx.raw.toLocaleString()}`}}},
+      scales:{x:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9},callback:v=>v.toLocaleString()}},
+        y:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9}}}}}
+  });
+}
+
+function rRemarks(){
+  const rows=[...FD].sort((a,b)=>b.date-a.date).filter(d=>d.oee>0&&(d.remark||d.commentBoss||d.dtTypes.length||d.defTypes.length)).slice(0,50);
+  document.getElementById("rem-tb").innerHTML=rows.map(d=>{
+    const dtTags=d.dtTypes.slice(0,3).map(t=>`<span class="tag tag-dt">${t.type} ${t.val}m</span>`).join("");
+    const defTags=d.defTypes.slice(0,2).map(t=>`<span class="tag tag-q">${t.type}</span>`).join("");
+    return `<tr>
+      <td style="white-space:nowrap">${d.dateStr}</td>
+      <td>${d.part}${d.suffix?" "+d.suffix:""}</td>
+      <td>${d.shift}</td>
+      <td><span style="color:${d.oee>=85?'var(--green)':d.oee>=70?'var(--gold)':'var(--red)'}; font-weight:700">${d.oee.toFixed(1)}%</span></td>
+      <td>${dtTags||'<span style="color:var(--muted)">—</span>'}</td>
+      <td style="max-width:200px;font-size:11px">${d.remark||'—'}</td>
+      <td style="max-width:160px;font-size:11px;color:var(--muted)">${d.commentBoss||'—'}</td>
+    </tr>`;
+  }).join("")||'<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">ไม่มีข้อมูล</td></tr>';
+}
+
+// ─── AI INSIGHTS ───
+async function runAI(){
+  if(!FD.length)return;
+  document.getElementById("ai-insights").innerHTML='<p class="ai-loading pulse">🤖 AI กำลังวิเคราะห์ข้อมูลเชิงลึก...</p>';
+
+  // Prepare stats
+  const oee=avg(FD.map(d=>d.oee)), a=avg(FD.map(d=>d.avail));
+  const p=avg(FD.map(d=>d.perf)), q=avg(FD.map(d=>d.qual));
+  const totDT=FD.reduce((s,d)=>s+d.dtMin,0);
+  const totDef=FD.reduce((s,d)=>s+d.defect,0), totProd=FD.reduce((s,d)=>s+d.total,0);
+  const ppm=totProd>0?Math.round((totDef/totProd)*1e6):0;
+
+  // DT types
+  const dtSums={};FD.forEach(d=>d.dtTypes.forEach(t=>{dtSums[t.type]=(dtSums[t.type]||0)+t.val;}));
+  const topDT=Object.entries(dtSums).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  // Defect types
+  const defSums={};FD.forEach(d=>d.defTypes.forEach(t=>{defSums[t.type]=(defSums[t.type]||0)+t.qty;}));
+  const topDef=Object.entries(defSums).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  // Worst parts
+  const pm={};FD.forEach(d=>{if(!pm[d.part])pm[d.part]={oee:[],dt:0,def:0,tot:0};
+    pm[d.part].oee.push(d.oee);pm[d.part].dt+=d.dtMin;pm[d.part].def+=d.defect;pm[d.part].tot+=d.total;});
+  const partStats=Object.entries(pm).map(([p,v])=>({p,oee:avg(v.oee).toFixed(1),dt:v.dt,ppm:v.tot>0?Math.round((v.def/v.tot)*1e6):0}))
+    .sort((a,b)=>a.oee-b.oee);
+
+  // Trend (last 2 months vs prev 2 months)
+  const sorted=[...FD].sort((a,b)=>a.date-b.date);
+  const last4w=sorted.filter(d=>d.date>=new Date(Date.now()-60*86400000));
+  const prev4w=sorted.filter(d=>d.date<new Date(Date.now()-60*86400000)&&d.date>=new Date(Date.now()-120*86400000));
+  const oeeRecent=avg(last4w.map(d=>d.oee)),oeePrev=avg(prev4w.map(d=>d.oee));
+  const dtRecent=last4w.reduce((s,d)=>s+d.dtMin,0)/(last4w.length||1);
+  const dtPrev=prev4w.reduce((s,d)=>s+d.dtMin,0)/(prev4w.length||1);
+
+  // Sample remarks (first 20 non-empty)
+  const remarks=FD.filter(d=>d.remark).slice(0,20).map(d=>`[${d.dateStr}] ${d.part}: ${d.remark}`).join("; ");
+
+  const prompt=`คุณเป็น OEE Expert และ Lean Manufacturing Consultant วิเคราะห์ข้อมูลแผนก PD4 ต่อไปนี้ แล้วสรุปเป็น INSIGHT ที่สำคัญที่สุด 5 อย่าง พร้อม action ที่ทำได้จริง:
+
+**ข้อมูลรวม (${FD.length} records):**
+OEE: ${oee.toFixed(1)}% | A: ${a.toFixed(1)}% | P: ${p.toFixed(1)}% | Q: ${q.toFixed(1)}%
+Total DT: ${totDT.toLocaleString()} นาที | PPM: ${ppm.toLocaleString()} | ผลิต: ${totProd.toLocaleString()}
+
+**เทรนด์ 2 เดือนล่าสุด vs 2 เดือนก่อน:**
+OEE: ${oeeRecent.toFixed(1)}% → ก่อนหน้า: ${oeePrev.toFixed(1)}% (${oeeRecent>oeePrev?"ดีขึ้น":"แย่ลง"})
+DT เฉลี่ย/วัน: ${dtRecent.toFixed(0)}m → ก่อนหน้า: ${dtPrev.toFixed(0)}m (${dtRecent<dtPrev?"ดีขึ้น":"แย่ลง"})
+
+**Top 5 DT Types (นาที):**
+${topDT.map(([k,v],i)=>`${i+1}. ${k}: ${v.toLocaleString()} นาที`).join("\n")}
+
+**Top 5 ประเภทงานเสีย:**
+${topDef.map(([k,v],i)=>`${i+1}. ${k}: ${v.toLocaleString()} ชิ้น`).join("\n")}
+
+**ชิ้นงานที่มีปัญหา (OEE ต่ำสุด):**
+${partStats.slice(0,4).map(x=>`${x.p}: OEE ${x.oee}%, DT ${x.dt}m, PPM ${x.ppm.toLocaleString()}`).join("\n")}
+
+**หมายเหตุที่พนักงานบันทึก (ตัวอย่าง):**
+${remarks.slice(0,500)||"ไม่มี"}
+
+ตอบ JSON เท่านั้น โดยมี array insights ที่มี 5 object:
+{"insights":[{"icon":"emoji","title":"หัวข้อสั้น","severity":"high|medium|low","body":"วิเคราะห์ 2-3 ประโยค พร้อมตัวเลขอ้างอิง","action":"สิ่งที่ต้องทำใน 1 ประโยค"},...]}`;
+
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,messages:[{role:"user",content:prompt}]})
+    });
+    const data=await r.json();
+    const txt=data.content?.map(c=>c.text||"").join("").replace(/```json|```/g,"").trim();
+    let ai;try{ai=JSON.parse(txt);}catch{ai=null;}
+    if(ai?.insights)renderInsights(ai.insights);
+    else fallbackInsights(oee,totDT,ppm,topDT,topDef,partStats,oeeRecent,oeePrev);
+  }catch(e){fallbackInsights(oee,totDT,ppm,topDT,topDef,partStats,oeeRecent,oeePrev);}
+}
+
+function renderInsights(insights){
+  const sevClass={high:"sev-h",medium:"sev-m",low:"sev-l"};
+  const sevLabel={high:"🔴 HIGH PRIORITY",medium:"🟡 MEDIUM","low":"🟢 LOW"};
+  document.getElementById("ai-insights").innerHTML=`
+    <div class="insights-grid">
+      ${insights.map((ins,i)=>`
+        <div class="ins">
+          <div class="ins-num">${String(i+1).padStart(2,"0")}</div>
+          <div class="ins-icon">${ins.icon||"💡"}</div>
+          <div class="ins-title">${ins.title||""}</div>
+          <div class="ins-body">${ins.body||""}</div>
+          ${ins.action?`<div style="margin-top:8px;font-size:11px;color:var(--cyan);border-left:2px solid var(--cyan);padding-left:8px">→ ${ins.action}</div>`:""}
+          <span class="ins-badge ${sevClass[ins.severity]||'sev-m'}">${sevLabel[ins.severity]||"🟡 MEDIUM"}</span>
+        </div>`).join("")}
+    </div>`;
+}
+
+function fallbackInsights(oee,totDT,ppm,topDT,topDef,partStats,oeeRecent,oeePrev){
+  const insights=[
+    {icon:"📉",title:"OEE Status",severity:oee>=80?"low":"high",
+      body:`OEE เฉลี่ย ${oee.toFixed(1)}% ${oee>=85?"อยู่ใน World Class":oee>=70?"ต้องปรับปรุง":"อยู่ในโซนวิกฤต"} เทรนด์ล่าสุด ${oeeRecent>oeePrev?"ดีขึ้น ↑":"แย่ลง ↓"} จาก ${oeePrev.toFixed(1)}% → ${oeeRecent.toFixed(1)}%`,
+      action:"ตั้ง Daily OEE Target Board หน้าไลน์และรีวิวทุก Shift"},
+    {icon:"🔧",title:"Top DT Cause",severity:"high",
+      body:`สาเหตุ Downtime อันดับ 1 คือ "${topDT[0]?.[0]||"—"}" (${topDT[0]?.[1]||0} นาที) รองลงมาคือ "${topDT[1]?.[0]||"—"}" รวม 2 สาเหตุนี้คิดเป็นสัดส่วนใหญ่ของ DT ทั้งหมด`,
+      action:`ทำ RCA บน "${topDT[0]?.[0]||""}" และวาง PM Schedule ภายใน 2 สัปดาห์`},
+    {icon:"⚠️",title:"Quality Issue",severity:ppm>3000?"high":"medium",
+      body:`งานเสียหลัก: "${topDef[0]?.[0]||"—"}" (${topDef[0]?.[1]||0} ชิ้น) PPM รวม ${ppm.toLocaleString()} ${ppm>5000?"สูงเกินเกณฑ์มาก":ppm>2000?"ต้องเฝ้าระวัง":"อยู่ในระดับยอมรับได้"}`,
+      action:`วิเคราะห์ defect mode ของ "${topDef[0]?.[0]||""}" และทำ Poka-Yoke`},
+    {icon:"🏭",title:"Worst Part",severity:"high",
+      body:`ชิ้นงานที่มี OEE ต่ำที่สุดคือ "${partStats[0]?.p||"—"}" (OEE ${partStats[0]?.oee||0}%) มี DT ${partStats[0]?.dt||0} นาที และ PPM ${partStats[0]?.ppm?.toLocaleString()||0}`,
+      action:"ทำ Line Balance Study และ Setup Time Reduction บนชิ้นงานนี้"},
+    {icon:"📈",title:"Forecast Trend",severity:"medium",
+      body:`จากการ Forecast 3 เดือนข้างหน้า OEE มีแนวโน้ม${oeeRecent>oeePrev?"ดีขึ้น หากรักษา Momentum":"แย่ลง หากไม่ดำเนินการแก้ไข"} ควรจับตา DT Type หลักและคุณภาพอย่างต่อเนื่อง`,
+      action:"ทำ Monthly OEE Review และ Update Action Plan ทุกเดือน"},
+  ];
+  renderInsights(insights);
+}
+
+loadData();
+</script>
+</body>
+</html>
