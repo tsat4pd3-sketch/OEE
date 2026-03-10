@@ -485,9 +485,17 @@ function selectAllParts(){
   applyFilter();
 }
 function setDefaultDates(){
-  const today=new Date(), minD=new Date(today);minD.setDate(minD.getDate()-180);
-  document.getElementById("date-from").value=fmtIso(minD);
-  document.getElementById("date-to").value=fmtIso(today);
+  if(ALL.length){
+    const dates=ALL.map(d=>d.date).filter(Boolean);
+    const minD=new Date(Math.min(...dates));
+    const maxD=new Date(Math.max(...dates));
+    document.getElementById("date-from").value=fmtIso(minD);
+    document.getElementById("date-to").value=fmtIso(maxD);
+  } else {
+    const today=new Date(), minD=new Date(today);minD.setDate(minD.getDate()-180);
+    document.getElementById("date-from").value=fmtIso(minD);
+    document.getElementById("date-to").value=fmtIso(today);
+  }
 }
 function selectAll(v){selectAllParts();}
 function applyFilter(){
