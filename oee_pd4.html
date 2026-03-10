@@ -193,12 +193,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </select>
   </div>
   <div class="ss">
-    <div class="ss-label">ชิ้นงาน</div>
-    <div class="btn-row">
-      <button class="btn-xs" onclick="selectAll(true)">✅ ทั้งหมด</button>
-      <button class="btn-xs" onclick="selectAll(false)">❌ ล้าง</button>
-    </div>
-    <div class="part-list" id="part-list"></div>
+    <div class="ss-label">ชิ้นงาน <span style="font-size:9px;color:var(--muted);font-weight:400">(Ctrl+Click เลือกหลายรายการ)</span></div>
+    <select id="part-select" multiple size="8" onchange="applyFilter()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--font-body);font-size:11px;padding:4px;outline:none;transition:border-color .2s;margin-bottom:5px"></select>
+    <button class="btn-xs" onclick="selectAllParts()" style="width:100%;margin-bottom:7px">✅ แสดงทั้งหมด</button>
   </div>
 
   <button class="btn-refresh" onclick="refreshLive()">🌐 ดึงข้อมูลใหม่</button>
@@ -476,19 +473,30 @@ function setBadge(t,cls){const b=document.getElementById("src-badge");if(b){b.te
 function setUpdate(t){const el=document.getElementById("last-update");if(el)el.textContent=t;}
 function hideLd(){const el=document.getElementById("loading");el.style.opacity="0";setTimeout(()=>el.style.display="none",500);}
 function initParts(){
-  document.getElementById("part-list").innerHTML=
-    PARTS.map(p=>`<label class="pcb"><input type="checkbox" value="${p}" checked class="pci" onchange="applyFilter()"><span>${p}</span></label>`).join("");
+  const sel=document.getElementById("part-select");
+  if(!sel)return;
+  sel.innerHTML=PARTS.map(p=>`<option value="${p}" style="padding:3px 6px">${p}</option>`).join("");
+  // default: select none = show all
+  for(let o of sel.options) o.selected=false;
+}
+function selectAllParts(){
+  const sel=document.getElementById("part-select");
+  for(let o of sel.options) o.selected=false;
+  applyFilter();
 }
 function setDefaultDates(){
   const today=new Date(), minD=new Date(today);minD.setDate(minD.getDate()-180);
   document.getElementById("date-from").value=fmtIso(minD);
   document.getElementById("date-to").value=fmtIso(today);
 }
-function selectAll(v){document.querySelectorAll(".pci").forEach(c=>c.checked=v);applyFilter();}
+function selectAll(v){selectAllParts();}
 function applyFilter(){
   const _f=document.getElementById("date-from").value.split("-");const from=new Date(+_f[0],+_f[1]-1,+_f[2]);
   const _t=document.getElementById("date-to").value.split("-");const to=new Date(+_t[0],+_t[1]-1,+_t[2],23,59,59);
-  const sel=[...document.querySelectorAll(".pci:checked")].map(c=>c.value);
+  const selEl=document.getElementById("part-select");
+  const chosen=[...selEl.selectedOptions].map(o=>o.value);
+  // if nothing selected → show all
+  const sel=chosen.length===0?PARTS:chosen;
   const sh=document.getElementById("shift-sel").value;
   FD=ALL.filter(d=>d.date>=from&&d.date<=to&&sel.includes(d.part)&&(sh==="all"||d.shift===sh));
   document.getElementById("range-lbl").textContent=
@@ -651,7 +659,9 @@ function makeForecastChart(canvasId, historicLabels, historicData, forecastLabel
         annotation:{annotations:{
           fcStart:{type:"line",xMin:historicLabels.length-0.5,xMax:historicLabels.length-0.5,
             borderColor:"#526080",borderWidth:1,borderDash:[3,3],
-            label:{content:"Forecast 3M →",display:true,color:"#526080",font:{size:9},position:"start"}}
+            label:{content:"Forecast 3M →",display:true,color:"#526080",font:{size:9},position:"start"}},
+          ...(unit==="%"?{target87:{type:"line",yMin:87,yMax:87,borderColor:"#22c55e",borderWidth:1.5,borderDash:[6,3],
+            label:{content:"Target 87%",display:true,color:"#22c55e",font:{size:9,weight:"600"},position:"end",backgroundColor:"#22c55e22",padding:{x:5,y:2}}}}:{})
         }}
       },
       scales:{
