@@ -560,61 +560,60 @@ function rPPMHeat(){
 function rDailyOutput(){
   const mode = window.CHART_VIEW || 'daily';
   const MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const PART_COLORS = ['#38bdf8','#e8b84b','#22c55e','#a855f7','#f43f5e','#fb923c','#60a5fa','#e879f9','#34d399','#fbbf24','#f87171','#818cf8'];
 
-  let labels=[], totals=[], defects=[];
+  const parts = [...new Set(FD.map(d=>d.part))].sort();
 
-  if(mode==='daily'){
-    // ใช้ช่วงวันที่จาก filter จริง ไม่ hardcode จากวันนี้
-    const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]={t:0,def:0};bdd[k].t+=d.total;bdd[k].def+=d.defect;});
-    const dates=Object.keys(bdd).sort();
-    labels=dates.map(s=>{const[yr,mo,dd]=s.split('-');return `${dd} ${MN[+mo-1]} ${yr.slice(2)}`;});
-    totals=dates.map(s=>bdd[s].t||null);
-    defects=dates.map(s=>bdd[s].def||null);
-  } else if(mode==='monthly'){
-    const mk={};
-    FD.forEach(d=>{
-      const k=`${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;
-      if(!mk[k])mk[k]={t:0,def:0};
-      mk[k].t+=d.total; mk[k].def+=d.defect;
-    });
-    const keys=Object.keys(mk).sort();
-    labels=keys.map(k=>{const[yr,mo]=k.split('-');return `${MN[+mo-1]} ${yr.slice(2)}`;});
-    totals=keys.map(k=>mk[k].t||null);
-    defects=keys.map(k=>mk[k].def||null);
-  } else { // yearly
-    const yk={};
-    FD.forEach(d=>{
-      const k=String(d.date.getFullYear());
-      if(!yk[k])yk[k]={t:0,def:0};
-      yk[k].t+=d.total; yk[k].def+=d.defect;
-    });
-    const keys=Object.keys(yk).sort();
-    labels=keys.map(k=>`${k}`);
-    totals=keys.map(k=>yk[k].t||null);
-    defects=keys.map(k=>yk[k].def||null);
+  function getKey(d){
+    if(mode==='daily') return fmtIso(d.date);
+    if(mode==='monthly') return `${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;
+    return String(d.date.getFullYear());
+  }
+  function fmtLabel(k){
+    if(mode==='daily'){const[yr,mo,dd]=k.split('-');return `${dd} ${MN[+mo-1]} ${yr.slice(2)}`;}
+    if(mode==='monthly'){const[yr,mo]=k.split('-');return `${MN[+mo-1]} ${yr.slice(2)}`;}
+    return k;
   }
 
-  const goods=totals.map((t,i)=>t===null?null:t-(defects[i]||0));
+  const agg={};
+  FD.forEach(d=>{
+    const k=getKey(d);
+    if(!agg[k])agg[k]={};
+    agg[k][d.part]=(agg[k][d.part]||0)+d.total;
+  });
+  const keys=Object.keys(agg).sort();
+  const labels=keys.map(fmtLabel);
+
+  const datasets=parts.map((p,i)=>({
+    label:p,
+    data:keys.map(k=>agg[k][p]||null),
+    backgroundColor:PART_COLORS[i%PART_COLORS.length]+'99',
+    borderColor:PART_COLORS[i%PART_COLORS.length],
+    borderWidth:1,
+    borderRadius:2,
+    stack:'total'
+  }));
+
   const ctx=document.getElementById('c-daily-output');
   if(!ctx)return;
   if(ctx._chart)ctx._chart.destroy();
   ctx._chart=new Chart(ctx,{
     type:'bar',
-    data:{
-      labels,
-      datasets:[
-        {label:'ยอดผลิตรวม',data:totals,backgroundColor:'#38bdf844',borderColor:'#38bdf8',borderWidth:1.5,borderRadius:2},
-        {label:'งานดี',data:goods,backgroundColor:'#22c55e44',borderColor:'#22c55e',borderWidth:1.5,borderRadius:2},
-        {label:'งานเสีย',data:defects,backgroundColor:'#f43f5e99',borderColor:'#f43f5e',borderWidth:1.5,borderRadius:2}
-      ]
-    },
+    data:{labels,datasets},
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,
-        callbacks:{label:c=>` ${c.dataset.label}: ${(c.raw||0).toLocaleString()} ชิ้น`}}},
+      plugins:{
+        legend:{display:parts.length>1,position:'bottom',labels:{color:'#526080',font:{size:9},boxWidth:10,padding:6}},
+        tooltip:{mode:'index',intersect:false,backgroundColor:'#0d1117',titleColor:'#dce4f0',bodyColor:'#94a3b8',borderColor:'#1c2640',borderWidth:1,
+          callbacks:{
+            label:c=>c.raw!=null?` ${c.dataset.label}: ${c.raw.toLocaleString()} ชิ้น`:null,
+            footer:items=>{const s=items.reduce((a,c)=>a+(c.raw||0),0);return s>0?`รวม: ${s.toLocaleString()} ชิ้น`:'';}
+          }
+        }
+      },
       scales:{
-        x:{ticks:{color:'#7a8aaa',font:{size:9},maxRotation:45},grid:{color:'#1c2640'}},
-        y:{ticks:{color:'#7a8aaa',font:{size:9},callback:v=>v.toLocaleString()},grid:{color:'#1c2640'}}
+        x:{stacked:true,ticks:{color:'#7a8aaa',font:{size:9},maxRotation:45},grid:{color:'#1c2640'}},
+        y:{stacked:true,ticks:{color:'#7a8aaa',font:{size:9},callback:v=>v.toLocaleString()},grid:{color:'#1c2640'}}
       }
     }
   });
