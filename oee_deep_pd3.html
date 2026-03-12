@@ -335,7 +335,11 @@ function csvParse(text){
       total:n(g(row,"ยอดผลิตรวมทั้งวัน")),defect:defQty,defTypes,dtMin:totalDTMin,dtTypes,
       avail:n(g(row,"Availbility")),perf:n(g(row,"Performance")),qual:n(g(row,"Quality")),oee:n(g(row,"OEE")),
       remark:g(row,"หมายเหตุ")||"",commentBoss:g(row,"Comment")||""});
-  }return rows;
+  }
+  // Deduplicate: keep only the LAST row per (date+part+shift) to handle sheet duplicates
+  const seen=new Map();
+  rows.forEach(r=>{const k=r.dateStr+"|"+r.part+"|"+r.shift;seen.set(k,r);});
+  return [...seen.values()];
 }
 
 async function loadData(){
@@ -401,8 +405,10 @@ function selectAllParts(){
 }
 function selectAll(v){selectAllParts();}
 function applyFilter(){
-  const from=new Date(document.getElementById("date-from").value);
-  const to=new Date(document.getElementById("date-to").value);to.setHours(23,59,59);
+  const _fv=document.getElementById("date-from").value.split("-");
+  const from=_fv.length===3?new Date(+_fv[0],+_fv[1]-1,+_fv[2]):new Date(0);
+  const _tv=document.getElementById("date-to").value.split("-");
+  const to=_tv.length===3?new Date(+_tv[0],+_tv[1]-1,+_tv[2],23,59,59):new Date(9999,0,1);
   const selEl=document.getElementById("part-select");
   const chosen=[...selEl.selectedOptions].map(o=>o.value);
   const sel=chosen.length===0?PARTS:chosen;
@@ -934,8 +940,10 @@ async function loadMO() {
 }
 
 function getMOFiltered() {
-  const from = new Date(document.getElementById("date-from").value);
-  const to = new Date(document.getElementById("date-to").value); to.setHours(23,59,59);
+  const _fv2=document.getElementById("date-from").value.split("-");
+  const from=_fv2.length===3?new Date(+_fv2[0],+_fv2[1]-1,+_fv2[2]):new Date(0);
+  const _tv2=document.getElementById("date-to").value.split("-");
+  const to=_tv2.length===3?new Date(+_tv2[0],+_tv2[1]-1,+_tv2[2],23,59,59):new Date(9999,0,1);
   // date-from may be CE year — MO dates are also CE after parsing, should match
   const filtered = MO_ALL.filter(d => d.date >= from && d.date <= to);
   // Debug: if empty, show range info

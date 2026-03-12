@@ -351,7 +351,11 @@ function csvParse(text){
       qual:n(g(row,"Quality")), oee:n(g(row,"OEE")),
       remark:g(row,"หมายเหตุ")||"", commentBoss:g(row,"Comment")||"", commentEng:"",
     });
-  }return rows;
+  }
+  // Deduplicate: keep only the LAST row per (date+part+shift) to handle sheet duplicates
+  const seen=new Map();
+  rows.forEach(r=>{const k=r.dateStr+"|"+r.part+"|"+r.shift;seen.set(k,r);});
+  return [...seen.values()];
 }
 
 // ─── LOAD ───
