@@ -115,7 +115,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <body>
 <div id="loading">
   <div class="ld-ring"></div>
-  <div style="font-family:var(--font-display);font-size:14px;color:var(--gold);letter-spacing:3px">PD3 DEEP ANALYSIS</div>
+  <div style="font-family:var(--font-display);font-size:14px;color:var(--gold);letter-spacing:3px">PD4 DEEP ANALYSIS</div>
   <p id="ldmsg" style="font-size:11px;color:var(--muted)">กำลังโหลดข้อมูล...</p>
 </div>
 
@@ -184,8 +184,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="kpi k2"><div class="kpi-lbl">Total Defect</div><div class="kpi-val" id="kdef">—</div><div class="kpi-sub" id="kdef-s"></div></div>
     <div class="kpi k3"><div class="kpi-lbl">PPM สูงสุด</div><div class="kpi-val" id="kppm">—</div><div class="kpi-sub" id="kppm-s"></div></div>
     <div class="kpi k4"><div class="kpi-lbl">วัน DT สูงสุด</div><div class="kpi-val" id="kworst" style="font-size:16px">—</div><div class="kpi-sub" id="kworst-s"></div></div>
-    <div class="kpi k5"><div class="kpi-lbl">Avg Output / Hour</div><div class="kpi-val" id="kjobhr" style="color:var(--cyan)">—</div><div class="kpi-sub" id="kjobhr-s"></div></div>
-    <div class="kpi k6"><div class="kpi-lbl">Avg Output / Shift</div><div class="kpi-val" id="koutday" style="color:#34d399">—</div><div class="kpi-sub" id="koutday-s"></div></div>
+    <div class="kpi k5"><div class="kpi-lbl">Median Output / Hour</div><div class="kpi-val" id="kjobhr" style="color:var(--cyan)">—</div><div class="kpi-sub" id="kjobhr-s"></div></div>
+    <div class="kpi k6"><div class="kpi-lbl">Median Output / Shift</div><div class="kpi-val" id="koutday" style="color:#34d399">—</div><div class="kpi-sub" id="koutday-s"></div></div>
   </div>
 
   <div class="row r2">
@@ -663,17 +663,18 @@ function rKPI(){
   document.getElementById("kworst").textContent=worstDay[0].slice(5)||"—";
   document.getElementById("kworst-s").textContent=worstDay[1]+" m";
 
-  // Avg Output/Hour = total good output ÷ total operating hours (8h × avail%)
-  const totalOpHours=FD.reduce((s,d)=>s+(8*(d.avail>0?d.avail/100:1)),0);
-  const totalGood=FD.reduce((s,d)=>s+(d.total-d.defect),0);
-  const avgOutHr=totalOpHours>0?Math.round(totalGood/totalOpHours):0;
-  // Avg Output/Shift = total good output ÷ total shifts (records)
-  const numShifts=FD.length||1;
-  const avgOutShift=Math.round(totalGood/numShifts);
-  document.getElementById("kjobhr").textContent=avgOutHr.toLocaleString();
-  document.getElementById("kjobhr-s").textContent=`${totalGood.toLocaleString()} ชิ้น / ${totalOpHours.toFixed(0)} op-hrs`;
-  document.getElementById("koutday").textContent=avgOutShift.toLocaleString();
-  document.getElementById("koutday-s").textContent=`${totalGood.toLocaleString()} ชิ้น / ${numShifts} กะ`;
+  // Median helper
+  const median=arr=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:Math.round((s[m-1]+s[m])/2);};
+  // Median Output/Hour = median of (good output ÷ op-hours) per shift
+  const outPerHr=FD.map(d=>{const h=8*(d.avail>0?d.avail/100:1);return h>0?(d.total-d.defect)/h:0;});
+  const medOutHr=Math.round(median(outPerHr));
+  // Median Output/Shift = median of good output per shift record
+  const outPerShift=FD.map(d=>d.total-d.defect);
+  const medOutShift=Math.round(median(outPerShift));
+  document.getElementById("kjobhr").textContent=medOutHr.toLocaleString();
+  document.getElementById("kjobhr-s").textContent=`median จาก ${FD.length} กะ`;
+  document.getElementById("koutday").textContent=medOutShift.toLocaleString();
+  document.getElementById("koutday-s").textContent=`median จาก ${FD.length} กะ`;
 }
 
 const copts=(extra={})=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#0d1117",titleColor:"#dce4f0",bodyColor:"#526080",borderColor:"#1c2640",borderWidth:1}},scales:{x:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9},maxRotation:45,maxTicksLimit:14}},y:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9}},...(extra.y||{})}}});
