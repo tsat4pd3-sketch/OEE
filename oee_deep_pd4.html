@@ -330,10 +330,11 @@ function csvParse(text){
     for(let i=0;i<3;i++){const flag=g(row,7+i*4).toUpperCase();const type=g(row,8+i*4);const qty=n(g(row,9+i*4));if((flag==="TRUE"||flag==="1")&&type&&qty>0)defTypes.push({type,qty});}
     const totalDefect=defTypes.reduce((s,d)=>s+d.qty,0);
     const totalDTMin=Math.round(n(g(row,74))*60);
+    const _ltIdx=idx["ชม.+เศษ"];const loadingHr=_ltIdx!==undefined?n(g(row,_ltIdx)):0;
     rows.push({date,dateStr:fmtDate(date),part:g(row,1),suffix:g(row,2),shift:g(row,5),
       total:n(g(row,6)),defect:totalDefect,defTypes,dtMin:totalDTMin,dtTypes,
       avail:n(g(row,77)),perf:n(g(row,80)),qual:n(g(row,82)),oee:n(g(row,83)),
-      remark:g(row,51),commentBoss:g(row,55)});
+      loadingHr,remark:g(row,51),commentBoss:g(row,55)});
   }
   // Deduplicate: keep only the LAST row per (date+part+shift) to handle sheet duplicates
   const seen=new Map();
@@ -660,8 +661,8 @@ function rKPI(){
 
   // Median helper
   const median=arr=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:Math.round((s[m-1]+s[m])/2);};
-  // Median Output/Hour = median of (good output ÷ op-hours) per shift
-  const outPerHr=FD.map(d=>{const h=8*(d.avail>0?d.avail/100:1);return h>0?(d.total-d.defect)/h:0;});
+  // Median Output/Hour = median of (good output ÷ loading hours) per shift
+  const outPerHr=FD.map(d=>{const h=d.loadingHr>0?d.loadingHr:8*(d.avail>0?d.avail/100:1);return h>0?(d.total-d.defect)/h:0;});
   const medOutHr=Math.round(median(outPerHr));
   // Median Output/Shift = median of good output per shift record
   const outPerShift=FD.map(d=>d.total-d.defect);

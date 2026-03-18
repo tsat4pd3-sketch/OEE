@@ -337,6 +337,7 @@ function csvParse(text){
     rows.push({date,dateStr:fmtDate(date),part:line,suffix:"",shift:g(row,"กะทำงาน"),
       total:n(g(row,"ยอดผลิตรวมทั้งวัน")),defect:defQty,defTypes,dtMin:totalDTMin,dtTypes,
       avail:n(g(row,"Availbility")),perf:n(g(row,"Performance")),qual:n(g(row,"Quality")),oee:n(g(row,"OEE")),
+      loadingHr:n(g(row,"Loading Time fx")),
       remark:g(row,"หมายเหตุ")||"",commentBoss:g(row,"Comment")||""});
   }
   // Deduplicate: keep only the LAST row per (date+part+shift) to handle sheet duplicates
@@ -665,8 +666,8 @@ function rKPI(){
 
   // Median helper
   const median=arr=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:Math.round((s[m-1]+s[m])/2);};
-  // Median Output/Hour = median of (good output ÷ op-hours) per shift
-  const outPerHr=FD.map(d=>{const h=8*(d.avail>0?d.avail/100:1);return h>0?(d.total-d.defect)/h:0;});
+  // Median Output/Hour = median of (good output ÷ loading hours) per shift
+  const outPerHr=FD.map(d=>{const h=d.loadingHr>0?d.loadingHr:8*(d.avail>0?d.avail/100:1);return h>0?(d.total-d.defect)/h:0;});
   const medOutHr=Math.round(median(outPerHr));
   // Median Output/Shift = median of good output per shift record
   const outPerShift=FD.map(d=>d.total-d.defect);
