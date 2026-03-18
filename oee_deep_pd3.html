@@ -51,6 +51,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .k0::after{background:linear-gradient(90deg,#f43f5e,#f59e0b)}.k1::after{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
 .k2::after{background:linear-gradient(90deg,#a855f7,#c084fc)}.k3::after{background:linear-gradient(90deg,#22c55e,#4ade80)}
 .k4::after{background:linear-gradient(90deg,#f43f5e,#f87171)}
+.k5::after{background:linear-gradient(90deg,#38bdf8,#7dd3fc)}.k6::after{background:linear-gradient(90deg,#10b981,#34d399)}
 .kpi-lbl{font-size:10px;color:var(--muted);letter-spacing:.3px;margin-bottom:5px}
 .kpi-val{font-family:var(--font-display);font-size:22px;font-weight:700}.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px;margin-bottom:15px}
@@ -183,6 +184,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="kpi k2"><div class="kpi-lbl">Total Defect</div><div class="kpi-val" id="kdef">—</div><div class="kpi-sub" id="kdef-s"></div></div>
     <div class="kpi k3"><div class="kpi-lbl">PPM สูงสุด</div><div class="kpi-val" id="kppm">—</div><div class="kpi-sub" id="kppm-s"></div></div>
     <div class="kpi k4"><div class="kpi-lbl">วัน DT สูงสุด</div><div class="kpi-val" id="kworst" style="font-size:16px">—</div><div class="kpi-sub" id="kworst-s"></div></div>
+    <div class="kpi k5"><div class="kpi-lbl">Avg Job / Hour</div><div class="kpi-val" id="kjobhr" style="color:var(--cyan)">—</div><div class="kpi-sub" id="kjobhr-s"></div></div>
+    <div class="kpi k6"><div class="kpi-lbl">Avg Output / Day</div><div class="kpi-val" id="koutday" style="color:#34d399">—</div><div class="kpi-sub" id="koutday-s"></div></div>
   </div>
 
   <div class="row r2">
@@ -659,6 +662,19 @@ function rKPI(){
   document.getElementById("kppm-s").textContent=worstPart.l;
   document.getElementById("kworst").textContent=worstDay[0].slice(5)||"—";
   document.getElementById("kworst-s").textContent=worstDay[1]+" m";
+
+  // Avg Job/Hour: total jobs ÷ total operating hours (shift = 8h, use avail% to get actual op hours)
+  const uniqueDays=[...new Set(FD.map(d=>fmtIso(d.date)))];
+  const numDays=uniqueDays.length||1;
+  const totalOpHours=FD.reduce((s,d)=>s+(8*(d.avail>0?d.avail/100:1)),0);
+  const avgJobHr=totalOpHours>0?(FD.length/totalOpHours).toFixed(2):0;
+  // Avg output/day = total good output ÷ unique days
+  const totalGood=FD.reduce((s,d)=>s+(d.total-d.defect),0);
+  const avgOutDay=Math.round(totalGood/numDays);
+  document.getElementById("kjobhr").textContent=avgJobHr;
+  document.getElementById("kjobhr-s").textContent=`${FD.length} jobs / ${totalOpHours.toFixed(0)} op-hrs`;
+  document.getElementById("koutday").textContent=avgOutDay.toLocaleString();
+  document.getElementById("koutday-s").textContent=`${numDays} วัน / งานดีรวม ${totalGood.toLocaleString()} ชิ้น`;
 }
 
 const copts=(extra={})=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#0d1117",titleColor:"#dce4f0",bodyColor:"#526080",borderColor:"#1c2640",borderWidth:1}},scales:{x:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9},maxRotation:45,maxTicksLimit:14}},y:{grid:{color:"rgba(28,38,64,.4)"},ticks:{color:"#526080",font:{size:9}},...(extra.y||{})}}});
