@@ -573,10 +573,10 @@ const PD3_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vToehKwHXa32rnaE0
 const PD4_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSs034o0M970g62tL1jkU4CU6HpAbVkER87uw3OzI97ueA6xXdBdwXd1Gcd0GrgaKOuIrTl-F75q3nz/pub?gid=122174819&single=true&output=csv";
 
 const PRODUCTS=[
-  {id:'gor',  label:'GOR',    cls:'pc-gor',color:'#38bdf8',src:'PD3',keywords:['GOR','gor']},
-  {id:'lwr',  label:'LWRBAR', cls:'pc-lwr',color:'#f59e0b',src:'PD4',keywords:['LWRBAR','LWR BAR','lwrbar']},
-  {id:'p60',  label:'60',     cls:'pc-60', color:'#a855f7',src:'PD4',keywords:['60']},
-  {id:'p61',  label:'61',     cls:'pc-61', color:'#22c55e',src:'PD4',keywords:['61']},
+  {id:'gor',  label:'GOR',    cls:'pc-gor',color:'#f59e0b',src:'PD4',keywords:['GOR','gor']},
+  {id:'lwr',  label:'LWRBAR', cls:'pc-lwr',color:'#38bdf8',src:'PD4',keywords:['LWRBAR','LWR BAR','lwrbar']},
+  {id:'p60',  label:'60',     cls:'pc-60', color:'#a855f7',src:'PD3',keywords:['60']},
+  {id:'p61',  label:'61',     cls:'pc-61', color:'#22c55e',src:'PD3',keywords:['61']},
 ];
 
 let PD3_ALL=[],PD4_ALL=[],arTimer=null;
@@ -633,7 +633,18 @@ function parsePD4(text){
   return[...seen.values()];
 }
 
-function matchProduct(part,keywords){return keywords.some(k=>part.toUpperCase().includes(k.toUpperCase()));}
+function matchProduct(part,keywords){
+  const p=part.toUpperCase().trim();
+  return keywords.some(k=>{
+    const kk=k.toUpperCase();
+    // Exact or word-boundary match — prevents '60' matching '601','602','60%' etc.
+    if(/^\d+$/.test(kk)){
+      // Numeric keyword: match whole word only
+      return new RegExp('(^|[^\\d])'+kk+'([^\\d]|$)').test(p);
+    }
+    return p.includes(kk);
+  });
+}
 function median(arr){if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
 
 function calcStats(rows){
@@ -644,7 +655,8 @@ function calcStats(rows){
   const totalDTMin=rows.reduce((s,d)=>s+(d.dtMin||0),0);
   const ppm=totalOut>0?Math.round((totalDef/totalOut)*1e6):0;
   const medShift=Math.round(median(rows.map(d=>d.total-d.defect)));
-  const outHrArr=rows.map(d=>{const h=d.loadingHr>0?d.loadingHr:8*(d.avail>0?d.avail/100:1);return h>0?(d.total-d.defect)/h:0;}).filter(v=>v>0);
+  // Loading hours: ใช้ค่าจาก sheet ถ้ามี ไม่งั้น fallback 8h ต่อกะ (ไม่ลด avail% เพราะ output นับของจริงที่ผลิตได้)
+  const outHrArr=rows.map(d=>{const h=d.loadingHr>0?d.loadingHr:8;return h>0?(d.total-d.defect)/h:0;}).filter(v=>v>0);
   const medHr=Math.round(median(outHrArr));
   const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
   const avgOEE=avg(rows.map(d=>d.oee).filter(v=>v>0));
@@ -904,7 +916,8 @@ function buildMonthlyData(all){
     const shiftHr=8;
     const loadHr=d.loadingHr>0?d.loadingHr:shiftHr;
     const planDT=Math.max(0,shiftHr-loadHr);
-    const unplanDThr=d.dtMin>0?d.dtMin/60:Math.max(0,loadHr-(loadHr*(d.avail>0?d.avail/100:1)));
+    // Unplan DT: ใช้ dtMin จาก sheet โดยตรง (แม่นกว่าคำนวณจาก avail)
+    const unplanDThr=d.dtMin>0?d.dtMin/60:0;
     mo.planDThr+=planDT;
     mo.unplanDThr+=unplanDThr;
     mo.workHr+=shiftHr;
