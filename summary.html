@@ -442,7 +442,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
         <thead>
           <tr>
             <th>Product</th><th>Source</th>
-            <th class="num">Records<br><span style="font-size:9px;font-weight:400">(PD3=วัน, PD4=กะ)</span></th>
+            <th class="num">Shifts</th>
             <th class="num">Output รวม</th>
             <th class="num">Med Out/Shift</th>
             <th class="num">Med Out/Hour</th>
@@ -579,10 +579,10 @@ const PD3_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vToehKwHXa32rnaE0
 const PD4_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSs034o0M970g62tL1jkU4CU6HpAbVkER87uw3OzI97ueA6xXdBdwXd1Gcd0GrgaKOuIrTl-F75q3nz/pub?gid=122174819&single=true&output=csv";
 
 const PRODUCTS=[
-  {id:'gor',  label:'GOR',    cls:'pc-gor',color:'#f59e0b',src:'PD4',keywords:['GOR','gor']},
-  {id:'lwr',  label:'LWRBAR', cls:'pc-lwr',color:'#38bdf8',src:'PD4',keywords:['LWRBAR','LWR BAR','lwrbar']},
-  {id:'p60',  label:'60',     cls:'pc-60', color:'#a855f7',src:'PD3',keywords:['60']},
-  {id:'p61',  label:'61',     cls:'pc-61', color:'#22c55e',src:'PD3',keywords:['61']},
+  {id:'gor',  label:'GOR',    cls:'pc-gor',color:'#f59e0b',src:'PD4',keywords:['GOR']},
+  {id:'lwr',  label:'LWRBAR', cls:'pc-lwr',color:'#38bdf8',src:'PD4',keywords:['LWRBAR','LWR BAR','LWR_BAR']},
+  {id:'p60',  label:'60',     cls:'pc-60', color:'#a855f7',src:'PD3',keywords:['060','RH 060','RH060']},
+  {id:'p61',  label:'61',     cls:'pc-61', color:'#22c55e',src:'PD3',keywords:['061','LH 061','LH061']},
 ];
 
 let PD3_ALL=[],PD4_ALL=[],arTimer=null;
@@ -641,15 +641,7 @@ function parsePD4(text){
 
 function matchProduct(part,keywords){
   const p=part.toUpperCase().trim();
-  return keywords.some(k=>{
-    const kk=k.toUpperCase();
-    // Exact or word-boundary match — prevents '60' matching '601','602','60%' etc.
-    if(/^\d+$/.test(kk)){
-      // Numeric keyword: match whole word only
-      return new RegExp('(^|[^\\d])'+kk+'([^\\d]|$)').test(p);
-    }
-    return p.includes(kk);
-  });
+  return keywords.some(k=>p.includes(k.toUpperCase()));
 }
 function median(arr){if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
 
@@ -703,7 +695,7 @@ function renderCard(prod,stats){
   el.innerHTML=`
     <div class="prod-card-accent"></div>
     <div class="pc-head">
-      <div><div class="pc-name" style="color:${prod.color}">${prod.label}</div><div class="pc-sub">${stats.shifts} ${prod.src==='PD3'?'วัน':'กะ'}</div></div>
+      <div><div class="pc-name" style="color:${prod.color}">${prod.label}</div><div class="pc-sub">${stats.shifts} กะ</div></div>
       <span class="src-badge ${srcCls}">${prod.src}</span>
     </div>
     <div class="pc-kpis">
@@ -746,7 +738,7 @@ function renderTable(allStats){
     return`<tr>
       <td><span class="tbl-prod" style="color:${prod.color}">${prod.label}</span></td>
       <td><span class="src-badge ${prod.src==='PD3'?'sp-pd3':'sp-pd4'}">${prod.src}</span></td>
-      <td class="num">${stats.shifts.toLocaleString()} <span style="font-size:9px;color:var(--muted)">${prod.src==="PD3"?"วัน":"กะ"}</span></td>
+      <td class="num">${stats.shifts.toLocaleString()}</td>
       <td class="num">${stats.totalOut.toLocaleString()}<div class="mini-bar"><div class="mini-bar-fill" style="width:${bar}%;background:${prod.color}88"></div></div></td>
       <td class="num">${stats.medShift.toLocaleString()}</td>
       <td class="num">${stats.medHr.toLocaleString()}</td>
