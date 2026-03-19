@@ -353,6 +353,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   <div class="ld-ring"></div>
   <div style="font-family:var(--font-display);font-size:14px;color:var(--accent);letter-spacing:2px">SUMMARY DASHBOARD</div>
   <p id="ld-msg" style="font-size:11px;color:var(--muted)">กำลังดึงข้อมูล...</p>
+  <div style="width:200px;height:3px;background:var(--border);border-radius:2px;margin-top:4px"><div id="ld-bar" style="height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .3s"></div></div>
   <div style="display:flex;gap:8px;margin-top:4px">
     <span class="src-pill sp-pd3" id="ld-pd3">PD3 ⋯</span>
     <span class="src-pill sp-pd4" id="ld-pd4">PD4 ⋯</span>
@@ -606,14 +607,19 @@ function parseThaiDate(s){if(!s)return null;s=s.trim().split(' ')[0];const p=s.s
 
 function parsePD3(text){
   const lines=text.split('\n').filter(l=>l.trim());if(lines.length<2)return[];
+  const _cutoff=new Date();_cutoff.setFullYear(_cutoff.getFullYear()-1);_cutoff.setHours(0,0,0,0);
+  // pre-filter: เก็บเฉพาะ line ที่เกี่ยวข้อง (060, 061)
+  const _pd3Keys=PRODUCTS.filter(p=>p.src==='PD3').flatMap(p=>p.keywords.map(k=>k.toUpperCase()));
   const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
   const g=(row,name)=>{const i=idx[name];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim():'';};
   const gi=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
   const rows=[];
   for(let r=1;r<lines.length;r++){
     const row=csvLine(lines[r]);if(row.length<10)continue;
-    const line=g(row,'เลือกไลน์การผลิต');const date=parsePD3Date(gi(row,43));
-    if(!line||!date)continue;
+    const line=g(row,'เลือกไลน์การผลิต');
+    if(!line||!_pd3Keys.some(k=>line.toUpperCase().includes(k)))continue; // skip ชิ้นงานอื่น
+    const date=parsePD3Date(gi(row,43));
+    if(!date||date<_cutoff)continue;
     const dtTypes=[];Object.entries(DT_KEYS_PD3).forEach(([label,col])=>{const v=n(g(row,col));if(v>0)dtTypes.push({type:label,val:v});});
     const defQty=n(g(row,'Defect'));
     rows.push({src:'PD3',date,dateStr:fmtDate(date),part:line,shift:g(row,'กะทำงาน'),
@@ -628,12 +634,17 @@ function parsePD3(text){
 
 function parsePD4(text){
   const lines=text.split('\n').filter(l=>l.trim());if(lines.length<2)return[];
+  const _cutoff=new Date();_cutoff.setFullYear(_cutoff.getFullYear()-1);_cutoff.setHours(0,0,0,0);
+  // pre-filter: เก็บเฉพาะ part ที่เกี่ยวข้อง (GOR, LWRBAR)
+  const _pd4Keys=PRODUCTS.filter(p=>p.src==='PD4').flatMap(p=>p.keywords.map(k=>k.toUpperCase()));
   const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
   const g=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
   const rows=[];
   for(let r=1;r<lines.length;r++){
     const row=csvLine(lines[r]);if(row.length<10)continue;
-    const date=parseThaiDate(g(row,59)||g(row,0));if(!date)continue;
+    const _part4=g(row,1);
+    if(!_part4||!_pd4Keys.some(k=>_part4.toUpperCase().includes(k)))continue; // skip ชิ้นงานอื่น
+    const date=parseThaiDate(g(row,59)||g(row,0));if(!date||date<_cutoff)continue;
     const dtTypes=[];
     for(let i=0;i<7;i++){const flag=g(row,21+i*3).toUpperCase();const type=g(row,22+i*3);const val=n(g(row,23+i*3));if((flag==='TRUE'||flag==='1')&&type&&val>0)dtTypes.push({type,val});}
     const defTypes=[];
@@ -818,12 +829,19 @@ function showAllRange(){
 async function init(){
   // Build card placeholders
   document.getElementById('products-grid').innerHTML=PRODUCTS.map(p=>`<div class="prod-card ${p.cls}" id="card-${p.id}"><div class="prod-card-accent"></div><div style="padding:24px;color:var(--muted);font-size:12px">Loading ${p.label}...</div></div>`).join('');
+  const setBar=p=>{const b=document.getElementById('ld-bar');if(b)b.style.width=p+'%';};
+  const setMsg=t=>{const m=document.getElementById('ld-msg');if(m)m.textContent=t;};
+  setMsg('กำลังดึงข้อมูล PD3 + PD4...');setBar(10);
   const results=await Promise.allSettled([
     fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
     fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
   ]);
+  setBar(60);setMsg('กำลัง parse ข้อมูล (เฉพาะ 1 ปีล่าสุด)...');
+  await new Promise(r=>setTimeout(r,0)); // yield to browser to update UI
   if(results[0].status==='fulfilled'){PD3_ALL=parsePD3(results[0].value);document.getElementById('ld-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
+  setBar(80);await new Promise(r=>setTimeout(r,0));
   if(results[1].status==='fulfilled'){PD4_ALL=parsePD4(results[1].value);document.getElementById('ld-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
+  setBar(95);setMsg('กำลังแสดงผล...');await new Promise(r=>setTimeout(r,0));
   // ใช้ช่วงที่ทั้ง PD3 และ PD4 มีข้อมูล (intersection) เป็น default
   // เพื่อให้ shift count เปรียบกันได้ยุติธรรม
   // ใช้ reduce() แทน spread เพื่อรองรับ array ขนาดใหญ่ (17k+ records)
