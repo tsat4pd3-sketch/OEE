@@ -403,7 +403,10 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
     <span class="src-pill sp-pd4" id="pill-pd4">PD4 ...</span>
   </div>
 
-  <button class="btn-refresh" onclick="reloadData()">🌐 ดึงข้อมูลใหม่</button>
+  <div style="padding:0 16px 0;display:flex;gap:6px">
+    <button class="btn-refresh" style="flex:1;margin:10px 0 0" onclick="reloadData()">🌐 ดึงใหม่</button>
+    <button style="flex:0 0 auto;margin:10px 0 0;padding:10px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-family:var(--font-body);font-size:11px;cursor:pointer;white-space:nowrap;transition:all .2s" onclick="showAllRange()" title="แสดงข้อมูลทั้งหมดทุก source">📅 ทั้งหมด</button>
+  </div>
   <div class="auto-info">🔄 Auto-refresh ทุก 1 ชม.<br>ครั้งถัดไป: <span id="next-refresh">—</span></div>
 
   <!-- Theme Toggle -->
@@ -421,7 +424,12 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
       <h2>📋 Summary Dashboard</h2>
       <p id="range-lbl">—</p>
     </div>
-    <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+      <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
+      <div id="range-note" style="font-size:10px;color:var(--accent);background:var(--accent-dim);padding:3px 10px;border-radius:12px;display:none">
+        📅 แสดงช่วงที่ PD3+PD4 มีข้อมูลตรงกัน
+      </div>
+    </div>
   </div>
 
   <div class="sec-hdr">
@@ -666,7 +674,12 @@ function calcStats(rows){
   const days=Object.keys(byDay).sort().slice(-30);
   const outTrend=days.map(k=>byDay[k].out);
   const oeeTrend=days.map(k=>byDay[k].oee.length?byDay[k].oee.reduce((a,b)=>a+b)/byDay[k].oee.length:0);
-  return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,medShift,medHr,avgOEE,avgAvail,avgPerf,avgQual,totalDTMin,outTrend,oeeTrend};
+  // date range
+  const dates=rows.map(d=>d.date).filter(Boolean).sort((a,b)=>a-b);
+  const d0=dates[0],d1=dates[dates.length-1];
+  const fmtD=d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+  const dateRange=dates.length?`${fmtD(d0)}–${fmtD(d1)}`:'—';
+  return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,medShift,medHr,avgOEE,avgAvail,avgPerf,avgQual,totalDTMin,outTrend,oeeTrend,dateRange};
 }
 
 function drawSpark(canvas,data,color){
@@ -696,7 +709,10 @@ function renderCard(prod,stats){
   el.innerHTML=`
     <div class="prod-card-accent"></div>
     <div class="pc-head">
-      <div><div class="pc-name" style="color:${prod.color}">${prod.label}</div><div class="pc-sub">${stats.shifts} กะ</div></div>
+      <div>
+        <div class="pc-name" style="color:${prod.color}">${prod.label}</div>
+        <div class="pc-sub">${stats.shifts} กะ &nbsp;·&nbsp; ${stats.dateRange}</div>
+      </div>
       <span class="src-badge ${srcCls}">${prod.src}</span>
     </div>
     <div class="pc-kpis">
@@ -762,6 +778,14 @@ function applyFilter(){
   const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
   document.getElementById('range-lbl').textContent=`${from||'—'} — ${to||'—'}`;
   document.getElementById('rec-count').textContent=`${all.length.toLocaleString()} records`;
+  // แสดง note ถ้า PD3 มีข้อมูลนานกว่า
+  const _pd3D=PD3_ALL.map(d=>d.date).filter(Boolean);
+  const _pd4D=PD4_ALL.map(d=>d.date).filter(Boolean);
+  const noteEl=document.getElementById('range-note');
+  if(noteEl&&_pd3D.length&&_pd4D.length){
+    const pd3Min=new Date(_pd3D.reduce((a,b)=>a<b?a:b)),pd4Min=new Date(_pd4D.reduce((a,b)=>a<b?a:b));
+    noteEl.style.display=Math.abs(pd3Min-pd4Min)>7*86400000?'block':'none';
+  }
   const allStats=PRODUCTS.map(prod=>({prod,stats:calcStats(all.filter(d=>matchProduct(d.part,prod.keywords)))}));
   renderTable(allStats);
   allStats.forEach(({prod,stats})=>renderCard(prod,stats));
@@ -781,6 +805,15 @@ async function reloadData(){
 }
 
 function updateNextLabel(){const el=document.getElementById('next-refresh');if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';}
+function showAllRange(){
+  const allDates=[...PD3_ALL,...PD4_ALL].map(d=>d.date).filter(Boolean);
+  if(!allDates.length)return;
+  const mn=allDates.reduce((a,b)=>a<b?a:b);
+  const mx=allDates.reduce((a,b)=>a>b?a:b);
+  document.getElementById('f-from').value=fmtIso(new Date(mn));
+  document.getElementById('f-to').value=fmtIso(new Date(mx));
+  applyFilter();
+}
 
 async function init(){
   // Build card placeholders
@@ -791,10 +824,30 @@ async function init(){
   ]);
   if(results[0].status==='fulfilled'){PD3_ALL=parsePD3(results[0].value);document.getElementById('ld-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
   if(results[1].status==='fulfilled'){PD4_ALL=parsePD4(results[1].value);document.getElementById('ld-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
-  const allDates=[...PD3_ALL,...PD4_ALL].map(d=>d.date).filter(Boolean);
-  if(allDates.length){
-    document.getElementById('f-from').value=fmtIso(new Date(Math.min(...allDates)));
-    document.getElementById('f-to').value=fmtIso(new Date(Math.max(...allDates)));
+  // ใช้ช่วงที่ทั้ง PD3 และ PD4 มีข้อมูล (intersection) เป็น default
+  // เพื่อให้ shift count เปรียบกันได้ยุติธรรม
+  // ใช้ reduce() แทน spread เพื่อรองรับ array ขนาดใหญ่ (17k+ records)
+  const arrMin=arr=>arr.reduce((a,b)=>a<b?a:b);
+  const arrMax=arr=>arr.reduce((a,b)=>a>b?a:b);
+  const pd3Dates=PD3_ALL.map(d=>d.date).filter(Boolean);
+  const pd4Dates=PD4_ALL.map(d=>d.date).filter(Boolean);
+  if(pd3Dates.length && pd4Dates.length){
+    const fromDate=new Date(Math.max(arrMin(pd3Dates),arrMin(pd4Dates)));
+    const toDate=new Date(Math.min(arrMax(pd3Dates),arrMax(pd4Dates)));
+    if(fromDate<=toDate){
+      document.getElementById('f-from').value=fmtIso(fromDate);
+      document.getElementById('f-to').value=fmtIso(toDate);
+    } else {
+      const allDates=[...pd3Dates,...pd4Dates];
+      document.getElementById('f-from').value=fmtIso(new Date(arrMin(allDates)));
+      document.getElementById('f-to').value=fmtIso(new Date(arrMax(allDates)));
+    }
+  } else {
+    const allDates=[...pd3Dates,...pd4Dates];
+    if(allDates.length){
+      document.getElementById('f-from').value=fmtIso(new Date(arrMin(allDates)));
+      document.getElementById('f-to').value=fmtIso(new Date(arrMax(allDates)));
+    }
   }
   document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
   document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
@@ -1164,11 +1217,11 @@ function updateQAMsg(id,text){
 }
 
 // ─── HOOK INTO applyFilter ────────────────────────────────────────────
-// applyFilter is defined above — extend it to also call renderTrendCharts
-const _baseApply = applyFilter;
-applyFilter = function(){
-  _baseApply();
-  if(PD3_ALL.length||PD4_ALL.length) renderTrendCharts();
+// Wrap applyFilter to also trigger renderTrendCharts
+const _applyFilterOrig = window.applyFilter || applyFilter;
+window.applyFilter = applyFilter = function(){
+  _applyFilterOrig();
+  if((PD3_ALL&&PD3_ALL.length)||(PD4_ALL&&PD4_ALL.length)) renderTrendCharts();
 };
 
 // Re-render charts on theme change
