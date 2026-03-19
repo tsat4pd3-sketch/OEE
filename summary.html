@@ -613,7 +613,8 @@ function parsePD3(text){
       avail:n(g(row,'Availbility')),perf:n(g(row,'Performance')),qual:n(g(row,'Quality')),oee:n(g(row,'OEE')),
       loadingHr:n(g(row,'Loading Time fx'))});
   }
-  const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+r.shift;seen.set(k,r);});
+  // dedup: keep last row per date+part+shift combo
+  const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+(r.shift||'_');seen.set(k,r);});
   return[...seen.values()];
 }
 
@@ -635,7 +636,7 @@ function parsePD4(text){
       total:n(g(row,6)),defect:totalDefect,dtMin:Math.round(n(g(row,74))*60),
       avail:n(g(row,77)),perf:n(g(row,80)),qual:n(g(row,82)),oee:n(g(row,83)),loadingHr});
   }
-  const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+r.shift;seen.set(k,r);});
+  const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+(r.shift||'_');seen.set(k,r);});
   return[...seen.values()];
 }
 
