@@ -11,8 +11,8 @@
   --bg:#f0f2f7;--bg2:#ffffff;--bg3:#f5f7fb;--card:#ffffff;
   --border:#e2e7f0;--border2:#cdd5e3;
   --accent:#2563eb;--accent2:#3b82f6;--accent-dim:#2563eb12;
-  --gold:#d97706;--gold2:#f59e0b;--gold-dim:#d9770612;
-  --cyan:#0891b2;--green:#16a34a;--red:#dc2626;--purple:#7c3aed;
+  --gold:#d97706;--gold2:#f59e0b;
+  --cyan:#0891b2;--green:#16a34a;--red:#dc2626;--purple:#7c3aed;--amber:#d97706;
   --text:#0f172a;--text2:#334155;--muted:#64748b;--muted2:#94a3b8;
   --sidebar:268px;--radius:12px;--radius-sm:8px;
   --font-body:'IBM Plex Sans Thai',sans-serif;--font-display:'Space Grotesk',sans-serif;
@@ -21,330 +21,108 @@
 body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-events:none;z-index:0}
 
-/* ─── SIDEBAR ─── */
-#sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100;box-shadow:1px 0 12px #00000008}
-.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
-.logo-tag{font-family:var(--font-display);font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:7px;font-weight:600}
+/* SIDEBAR */
+#sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100;box-shadow:1px 0 8px #00000008}
+.logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.logo-tag{font-family:var(--font-display);font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-weight:600}
 .logo h1{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);line-height:1.1}
-.logo-sub{font-size:11px;color:var(--muted);margin-top:7px;display:flex;align-items:center;gap:8px}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px}
 .badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px}
 .bl{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
-.bc{background:#fef9c3;color:#a16207;border:1px solid #fde68a}
 .bx{background:#f1f5f9;color:var(--muted);border:1px solid var(--border)}
-.nav-links{padding:12px 14px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--border)}
-.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;cursor:pointer;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
+.nav-links{padding:10px 12px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--border)}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
 .nav-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border)}
 .nav-btn.active{background:var(--accent-dim);border-color:#2563eb30;color:var(--accent);font-weight:600}
-.ss{padding:14px 16px 6px}
-.ss-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
-.ss input,.ss select{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;margin-bottom:8px;outline:none;transition:border-color .2s}
-.ss input:focus,.ss select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #2563eb15}
-.part-list{max-height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
-.pcb{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--text2);transition:background .15s;user-select:none}
-.pcb:hover{background:var(--bg3)}
-.pcb input{accent-color:var(--accent);width:13px;height:13px}
-.btn-row{display:flex;gap:6px;margin-bottom:8px}
-.btn-xs{flex:1;padding:6px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);cursor:pointer;font-size:11px;transition:all .15s;font-family:var(--font-body)}
-.btn-xs:hover{border-color:var(--accent);color:var(--accent)}
-.btn-refresh{margin:10px 16px 4px;padding:10px;background:var(--accent-dim);border:1px solid #2563eb30;border-radius:var(--radius-sm);color:var(--accent);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;width:calc(100% - 32px)}
-.btn-refresh:hover{background:var(--accent);color:var(--text);border-color:var(--accent)}
-.auto-info{font-size:10px;color:var(--muted2);text-align:center;padding:5px 16px 16px;line-height:1.6}
+.ss{padding:12px 16px 4px}
+.ss-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+.ss input,.ss select{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;margin-bottom:7px;outline:none;transition:border-color .2s}
+.ss input:focus,.ss select:focus{border-color:var(--accent)}
+.src-status{display:flex;gap:6px;padding:8px 16px 0;flex-wrap:wrap}
+.src-pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
+.sp-pd3{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
+.sp-pd4{background:#fef9c3;color:#a16207;border:1px solid #fde68a}
+.btn-refresh{margin:10px 16px 4px;padding:9px;background:var(--accent-dim);border:1px solid #2563eb30;border-radius:var(--radius-sm);color:var(--accent);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;width:calc(100% - 32px)}
+.btn-refresh:hover{background:var(--accent);color:#fff}
+.auto-info{font-size:10px;color:var(--muted2);text-align:center;padding:4px 16px 12px;line-height:1.6}
 
-/* ─── MAIN ─── */
-#main{flex:1;padding:28px 30px 48px;overflow-y:auto;position:relative;z-index:1}
-.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
-.topbar h2,.topbar-left h2{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px}
-.topbar p,.topbar-left p{font-size:12px;color:var(--muted);margin-top:4px}
-.topbar-right{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+/* MAIN */
+#main{flex:1;padding:26px 28px 48px;overflow-y:auto;position:relative;z-index:1}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.topbar h2{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.topbar p{font-size:12px;color:var(--muted);margin-top:4px}
 
-/* ─── KPI CARDS ─── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px}
-.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;transition:all .2s;box-shadow:0 1px 3px #00000008}
-.kpi:hover{border-color:var(--border2);box-shadow:0 4px 12px #00000010;transform:translateY(-1px)}
-.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
-.k0::after{background:linear-gradient(90deg,#2563eb,#60a5fa)}
-.k1::after{background:linear-gradient(90deg,#0891b2,#38bdf8)}
-.k2::after{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
-.k3::after{background:linear-gradient(90deg,#16a34a,#4ade80)}
-.k4::after{background:linear-gradient(90deg,#dc2626,#f87171)}
-.k5::after{background:linear-gradient(90deg,#0891b2,#67e8f9)}
-.k6::after{background:linear-gradient(90deg,#16a34a,#86efac)}
-.kpi-lbl{font-size:11px;color:var(--muted);letter-spacing:.3px;margin-bottom:8px;font-weight:500}
-.kpi-val{font-family:var(--font-display);font-size:30px;font-weight:700;line-height:1;margin-bottom:5px;color:var(--text)}
-.kpi-sub{font-size:12px;color:var(--muted)}
-.kpi-trend{font-size:12px;margin-top:6px;font-weight:600}
-.up{color:var(--green)}.dn{color:var(--red)}.flat{color:var(--muted)}
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sec-hdr h3{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text)}
+.sec-tag{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;letter-spacing:.3px;background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
+.sec-line{flex:1;height:1px;background:var(--border)}
 
-/* ─── CONTENT CARDS ─── */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px;box-shadow:0 1px 3px #00000008}
-.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.card-hdr h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
-.card-hdr em{font-style:normal;font-size:11px;color:var(--muted)}
-.row{display:grid;gap:18px;margin-bottom:18px}
-.r2{grid-template-columns:1fr 1fr}.r3{grid-template-columns:1fr 1fr 1fr}
-@media(max-width:1100px){.r3{grid-template-columns:1fr 1fr}}
-@media(max-width:800px){.r2,.r3{grid-template-columns:1fr}}
-.ch{position:relative}
-
-/* ─── PARETO ROWS ─── */
-.par-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
-.par-row:last-child{border-bottom:none}
-.par-label{flex:0 0 170px;font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.par-bar-bg{flex:1;background:var(--bg3);border-radius:4px;height:7px;overflow:hidden}
-.par-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
-.par-pct{flex:0 0 40px;text-align:right;font-size:12px;font-weight:700;color:var(--accent)}
-.par-val{flex:0 0 60px;text-align:right;font-size:11px;color:var(--muted)}
-.par-cum{flex:0 0 45px;text-align:right;font-size:10px;color:var(--muted2)}
-
-/* ─── TABLES ─── */
-.tbl-wrap{overflow-x:auto;max-height:340px;overflow-y:auto}
-.dt-tbl{width:100%;border-collapse:collapse;font-size:12px}
-.dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:700;padding:10px 13px;text-align:left;font-size:11px;position:sticky;top:0;letter-spacing:.3px;border-bottom:2px solid var(--border2)}
-.dt-tbl td{padding:10px 13px;border-bottom:1px solid var(--border);color:var(--text2)}
-.dt-tbl tr:hover td{background:#f8faff}
-.num{text-align:right;font-variant-numeric:tabular-nums}
+/* PRODUCT CARDS */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:20px}
+.prod-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:relative;box-shadow:0 1px 4px #00000008;transition:box-shadow .2s,border-color .2s}
+.prod-card:hover{border-color:var(--border2);box-shadow:0 4px 16px #00000012}
+.prod-card-accent{position:absolute;top:0;left:0;right:0;height:3px;z-index:1}
+.pc-gor .prod-card-accent{background:linear-gradient(90deg,#f59e0b,#f97316)}
+.pc-lwr .prod-card-accent{background:linear-gradient(90deg,#38bdf8,#0ea5e9)}
+.pc-60  .prod-card-accent{background:linear-gradient(90deg,#a855f7,#c084fc)}
+.pc-61  .prod-card-accent{background:linear-gradient(90deg,#22c55e,#34d399)}
+.pc-head{padding:14px 16px 11px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border)}
+.pc-name{font-family:var(--font-display);font-size:20px;font-weight:700;line-height:1}
+.pc-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.src-badge{font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.3px}
+.pc-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+.pc-kpi{background:var(--card);padding:11px 13px}
+.pc-kpi-lbl{font-size:9px;color:var(--muted);letter-spacing:.4px;margin-bottom:4px;font-weight:600;text-transform:uppercase}
+.pc-kpi-val{font-family:var(--font-display);font-size:19px;font-weight:700;line-height:1}
+.pc-kpi-unit{font-size:10px;color:var(--muted);margin-top:3px}
 .good{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
+.oee-bar-wrap{padding:12px 16px;border-top:1px solid var(--border)}
+.oee-bar-lbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.oee-bar-lbl span{font-size:10px;color:var(--muted)}
+.oee-segments{display:flex;gap:2px;height:7px;border-radius:3px;overflow:hidden;background:var(--bg3)}
+.pc-trends{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-top:1px solid var(--border)}
+.pc-trend{background:var(--card);padding:9px 13px}
+.pc-trend-lbl{font-size:9px;color:var(--muted);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.spark{height:36px;width:100%;display:block}
 
-/* ─── AI WRAP ─── */
-.ai-wrap{background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid #bfdbfe;border-radius:var(--radius);padding:22px;margin-bottom:18px}
-.ai-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.ai-orb{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:18px}
-.ai-hdr h3{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.3px}
-.ai-hdr span{font-size:11px;color:var(--muted)}
-.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:800px){.ai-grid{grid-template-columns:1fr}}
-.ai-sec h4{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.ai-sec li{font-size:13px;color:var(--text2);padding:9px 13px;border-radius:8px;line-height:1.7;border-left:3px solid var(--border2);list-style:none;margin-bottom:4px;background:var(--bg2)}
-.ai-sec li.w{border-left-color:var(--red);background:#fef2f2}
-.ai-sec li.y{border-left-color:var(--amber);background:#fffbeb}
-.ai-sec li.g{border-left-color:var(--green);background:#f0fdf4}
+/* COMPARISON TABLE */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 3px #00000008}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-hdr h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text)}
+.tbl-wrap{overflow-x:auto}
+.dt-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:700;padding:10px 12px;text-align:left;font-size:11px;position:sticky;top:0;border-bottom:2px solid var(--border2)}
+.dt-tbl td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.dt-tbl tr:hover td{background:#f8faff}
+.dt-tbl th.num,.dt-tbl td.num{text-align:right}
+.tbl-prod{font-family:var(--font-display);font-size:13px;font-weight:700}
+.mini-bar{height:4px;border-radius:2px;background:var(--bg3);overflow:hidden;margin-top:3px}
+.mini-bar-fill{height:100%;border-radius:2px}
 
-/* ─── HEATMAP ─── */
-.heat-cell{border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:default;font-size:9px;font-weight:600;transition:transform .1s}
-.heat-cell:hover{transform:scale(1.1);z-index:5}
-
-/* ─── CHART TOGGLE ─── */
-.chart-toggle{display:flex;gap:2px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:2px}
-.chart-toggle button{background:transparent;border:none;color:var(--muted);font-size:10px;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s;font-family:var(--font-body)}
-.chart-toggle button.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px #00000010}
-
-/* ─── INSIGHTS ─── */
-.insights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:18px}
-.ins{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;transition:all .22s;box-shadow:0 1px 3px #00000008}
-.ins:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 16px #00000012}
-.ins-num{font-family:var(--font-display);font-size:32px;font-weight:700;color:var(--border);position:absolute;top:10px;right:14px;line-height:1}
-.ins-icon{font-size:22px;margin-bottom:8px}
-.ins-title{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-.ins-body{font-size:13px;color:var(--text2);line-height:1.7}
-.ins-badge{display:inline-block;margin-top:9px;padding:3px 11px;border-radius:20px;font-size:10px;font-weight:700}
-.sev-h{background:#fee2e2;color:var(--red);border:1px solid #fca5a5}
-.sev-m{background:#fef9c3;color:#a16207;border:1px solid #fde68a}
-.sev-l{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
-
-/* ─── FORECAST LEGEND ─── */
-.fc-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
-.fc-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
-.fc-dot{width:26px;height:3px;border-radius:2px}
-
-/* ─── MO / RECURRENCE CARDS ─── */
-.act-item{display:flex;gap:10px;align-items:flex-start;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:6px;border:1px solid var(--border)}
-.act-pri{flex:0 0 36px;font-size:10px;font-weight:700;padding-top:1px}
-.act-title{font-size:13px;font-weight:600;color:var(--text)}.act-res{font-size:12px;color:var(--muted);margin-top:3px}
-.st-bar{border-left:3px solid;border-radius:0 8px 8px 0;padding:10px 16px;margin-bottom:12px}
-
-/* ─── LOADING ─── */
-#loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .5s}
-.ld-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;transition:opacity .5s}
+.ld-ring{width:42px;height:42px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ld-title{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.ld-bar-wrap{width:180px;height:4px;background:var(--border);border-radius:2px;margin-top:4px}
+.ld-bar-fill{height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .3s}
 
-/* ─── SCROLLBAR ─── */
-::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg3)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
-
-/* ─── PULSE ─── */
-.pulse{animation:pulse 1.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-
-
-/* ─── DARK THEME OVERRIDE ─── */
+/* DARK THEME */
 [data-theme="dark"]{
   --bg:#07090f;--bg2:#0d1117;--bg3:#13192a;--card:#0f1520;
   --border:#1c2640;--border2:#243050;
   --accent:#60a5fa;--accent2:#93c5fd;--accent-dim:#3b82f618;
-  --gold:#f59e0b;--gold2:#fbbf24;--gold-dim:#f59e0b18;
-  --cyan:#38bdf8;--green:#22c55e;--red:#f43f5e;--purple:#a855f7;--amber:#fbbf24;
   --text:#dce4f0;--text2:#94a3b8;--muted:#526080;--muted2:#334155;
 }
-/* body::before uses var(--bg) — auto dark via CSS vars */
-[data-theme="dark"] #sidebar{box-shadow:1px 0 0 var(--border)}
-[data-theme="dark"] .kpi:hover{box-shadow:0 4px 16px #00000040}
-[data-theme="dark"] .card{box-shadow:none}
-[data-theme="dark"] .ins{box-shadow:none}
-[data-theme="dark"] .ins:hover{box-shadow:0 6px 20px #00000040}
-[data-theme="dark"] .dt-tbl th{background:var(--bg2)}
+[data-theme="dark"] .prod-card:hover{box-shadow:0 4px 20px #00000050}
 [data-theme="dark"] .dt-tbl tr:hover td{background:#ffffff04}
-[data-theme="dark"] .ai-wrap{background:linear-gradient(135deg,#080f1e,#0f0d1e) !important;border-color:#2a1f5e !important}
-[data-theme="dark"] .ai-sec li{background:var(--bg3) !important;border-left-color:var(--border2)}
-[data-theme="dark"] .ai-sec li.w{border-left-color:var(--red) !important;background:#f43f5e0d !important}
-[data-theme="dark"] .ai-sec li.y{border-left-color:var(--amber) !important;background:#f59e0b0d !important}
-[data-theme="dark"] .ai-sec li.g{border-left-color:var(--green) !important;background:#22c55e0d !important}
-[data-theme="dark"] .sev-h{background:#f43f5e22;color:#f87171;border-color:#f43f5e44}
-[data-theme="dark"] .sev-m{background:#f59e0b22;color:#fbbf24;border-color:#f59e0b44}
-[data-theme="dark"] .sev-l{background:#22c55e22;color:#4ade80;border-color:#22c55e44}
-[data-theme="dark"] .bl{background:#22c55e;color:#000;border-color:#22c55e}
-[data-theme="dark"] .bc{background:#f59e0b;color:#000;border-color:#f59e0b}
-[data-theme="dark"] .bx{background:#526080;color:#fff;border-color:#526080}
-[data-theme="dark"] .btn-refresh{background:var(--accent-dim);border-color:#3b82f630;color:var(--accent)}
-[data-theme="dark"] .btn-refresh:hover{background:var(--accent);color:#000}
-[data-theme="dark"] .ins-sev-h,.dark .sev-h{background:#f43f5e22;color:#f87171}
-[data-theme="dark"] #loading{background:#07090f}
-[data-theme="dark"] ::-webkit-scrollbar-track{background:var(--bg2)}
-[data-theme="dark"] .chart-toggle button.active{background:var(--bg3);box-shadow:none}
-[data-theme="dark"] .prod-card{box-shadow:none}
-
-
-/* ─── SOURCE PILLS ─── */
-.src-status{display:flex;gap:6px;padding:8px 16px 0;flex-wrap:wrap}
-.src-pill{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.3px}
-.sp-pd3{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
-.sp-pd4{background:#fef9c3;color:#a16207;border:1px solid #fde68a}
-
-/* ─── SECTION HEADERS ─── */
-.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:6px}
-.sec-hdr h3{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text);letter-spacing:.2px}
-.sec-tag{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;letter-spacing:.3px}
-.tag-all{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
-.sec-line{flex:1;height:1px;background:var(--border)}
-
-/* ─── PRODUCT CARDS GRID ─── */
-.products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px;margin-bottom:24px}
-
-/* ─── PRODUCT CARD ─── */
-.prod-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:relative;box-shadow:0 1px 4px #00000010;transition:box-shadow .2s,border-color .2s}
-.prod-card:hover{border-color:var(--border2);box-shadow:0 4px 16px #00000014}
-.prod-card-accent{position:absolute;top:0;left:0;right:0;height:3px;z-index:1}
-.pc-gor .prod-card-accent{background:linear-gradient(90deg,#38bdf8,#0ea5e9)}
-.pc-lwr .prod-card-accent{background:linear-gradient(90deg,#f59e0b,#f97316)}
-.pc-60  .prod-card-accent{background:linear-gradient(90deg,#a855f7,#c084fc)}
-.pc-61  .prod-card-accent{background:linear-gradient(90deg,#22c55e,#34d399)}
-
-/* ─── PRODUCT CARD HEAD ─── */
-.pc-head{padding:16px 18px 12px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border)}
-.pc-name{font-family:var(--font-display);font-size:22px;font-weight:700;line-height:1}
-.pc-sub{font-size:11px;color:var(--muted);margin-top:4px}
-.src-badge{font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.5px}
-.sp-pd3.src-badge,.src-badge.sp-pd3{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
-.sp-pd4.src-badge,.src-badge.sp-pd4{background:#fef9c3;color:#a16207;border:1px solid #fde68a}
-
-/* ─── PRODUCT KPI GRID ─── */
-.pc-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
-.pc-kpi{background:var(--card);padding:12px 14px}
-.pc-kpi-lbl{font-size:9px;color:var(--muted);letter-spacing:.4px;margin-bottom:5px;font-weight:600;text-transform:uppercase}
-.pc-kpi-val{font-family:var(--font-display);font-size:20px;font-weight:700;line-height:1}
-.pc-kpi-unit{font-size:10px;color:var(--muted);margin-top:3px}
-.good{color:var(--green)}.warn{color:#d97706}.bad{color:var(--red)}
-
-/* ─── OEE BAR ─── */
-.oee-bar-wrap{padding:13px 18px;border-top:1px solid var(--border)}
-.oee-bar-lbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
-.oee-bar-lbl span{font-size:10px;color:var(--muted);font-weight:500}
-.oee-segments{display:flex;gap:2px;height:8px;border-radius:4px;overflow:hidden;background:var(--bg3)}
-
-/* ─── SPARKLINE TRENDS ─── */
-.pc-trends{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border)}
-.pc-trend{background:var(--card);padding:10px 14px}
-.pc-trend-lbl{font-size:9px;color:var(--muted);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-.spark{height:38px;width:100%;display:block}
-
-/* ─── TABLE EXTRAS ─── */
-.tbl-prod{font-family:var(--font-display);font-size:14px;font-weight:700}
-.mini-bar{height:4px;border-radius:2px;background:var(--bg3);overflow:hidden;margin-top:4px}
-.mini-bar-fill{height:100%;border-radius:2px}
-
-/* ─── DARK OVERRIDES FOR NEW CLASSES ─── */
 [data-theme="dark"] .sp-pd3{background:#0c2a3a;color:#38bdf8;border-color:#0ea5e940}
 [data-theme="dark"] .sp-pd4{background:#2a1f00;color:#fbbf24;border-color:#f59e0b40}
 [data-theme="dark"] .src-badge.sp-pd3{background:#0c2a3a;color:#38bdf8;border-color:#0ea5e940}
 [data-theme="dark"] .src-badge.sp-pd4{background:#2a1f00;color:#fbbf24;border-color:#f59e0b40}
-[data-theme="dark"] .tag-all{background:#052e16;color:#4ade80;border-color:#166534}
-[data-theme="dark"] .prod-card{box-shadow:none}
-[data-theme="dark"] .prod-card:hover{box-shadow:0 4px 20px #00000050}
-[data-theme="dark"] .oee-segments{background:var(--bg3)}
-[data-theme="dark"] .pc-kpi{background:var(--card)}
-[data-theme="dark"] .pc-trends .pc-trend{background:var(--card)}
+[data-theme="dark"] .bl{background:#22c55e;color:#000;border-color:#22c55e}
 
-
-/* ─── EXECUTIVE SECTIONS ─── */
-.exec-kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
-.exec-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:0 1px 3px #00000008}
-.exec-kpi-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.exec-kpi-val{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--text);line-height:1}
-.exec-kpi-sub{font-size:11px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:5px}
-.trend-up{color:var(--green);font-weight:700}.trend-dn{color:var(--red);font-weight:700}.trend-fl{color:var(--muted)}
-
-/* ─── MODE TOGGLE PILLS ─── */
-.mode-pills{display:flex;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px}
-.mode-pill{padding:5px 14px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .18s}
-.mode-pill.active{background:var(--card);color:var(--accent);box-shadow:0 1px 4px #00000012}
-
-.metric-pills{display:flex;gap:4px;flex-wrap:wrap}
-.metric-pill{padding:4px 12px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--muted);font-family:var(--font-body);transition:all .15s}
-.metric-pill.active{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
-.product-pill{padding:4px 12px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--muted);font-family:var(--font-body);transition:all .15s}
-.product-pill.active{color:#fff}
-
-/* ─── CHART CARD ─── */
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:18px;box-shadow:0 1px 3px #00000008}
-.chart-card-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-.chart-card-hdr h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text)}
-.chart-card-hdr .sub{font-size:11px;color:var(--muted);margin-top:3px}
-.chart-wrap{position:relative;height:260px}
-
-/* ─── QA PANEL ─── */
-.qa-wrap{background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
-.qa-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
-.qa-orb{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.qa-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text)}
-.qa-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.qa-messages{padding:16px 20px;display:flex;flex-direction:column;gap:12px;max-height:340px;overflow-y:auto}
-.qa-msg{display:flex;gap:10px;align-items:flex-start}
-.qa-msg.user{flex-direction:row-reverse}
-.qa-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.7;max-width:80%}
-.qa-bubble.user{background:var(--accent);color:#fff;border-radius:12px 12px 4px 12px}
-.qa-bubble.ai{background:var(--card);border:1px solid var(--border);color:var(--text2);border-radius:12px 12px 12px 4px}
-.qa-bubble.ai.loading{color:var(--muted);font-style:italic}
-.qa-avatar{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px}
-.qa-avatar.user{background:var(--accent-dim);color:var(--accent)}
-.qa-avatar.ai{background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff}
-.qa-input-row{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
-.qa-input{flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s}
-.qa-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #2563eb15}
-.qa-send{padding:10px 18px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#fff;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
-.qa-send:hover{background:var(--accent2)}.qa-send:disabled{opacity:.5;cursor:not-allowed}
-.qa-chips{padding:8px 20px 0;display:flex;gap:6px;flex-wrap:wrap}
-.qa-chip{padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;background:var(--bg3);border:1px solid var(--border);color:var(--text2);transition:all .15s;font-family:var(--font-body)}
-.qa-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
-
-/* ─── INSIGHT STRIP ─── */
-.insight-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:20px}
-.insight-box{padding:14px 16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card)}
-.insight-box.warn{border-color:#fde68a;background:#fffbeb}
-.insight-box.good{border-color:#bbf7d0;background:#f0fdf4}
-.insight-box.bad{border-color:#fca5a5;background:#fef2f2}
-.insight-box.info{border-color:#bfdbfe;background:#eff6ff}
-.insight-icon{font-size:20px;margin-bottom:6px}
-.insight-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px}
-.insight-body{font-size:12px;color:var(--text2);line-height:1.6}
-
-/* ─── DARK OVERRIDES ─── */
-[data-theme="dark"] .qa-bubble.ai{background:var(--bg3);border-color:var(--border)}
-[data-theme="dark"] .insight-box.warn{border-color:#78350f;background:#1c1000}
-[data-theme="dark"] .insight-box.good{border-color:#14532d;background:#001a0a}
-[data-theme="dark"] .insight-box.bad{border-color:#7f1d1d;background:#1a0000}
-[data-theme="dark"] .insight-box.info{border-color:#1e3a8a;background:#000d1a}
-[data-theme="dark"] .mode-pill.active{background:var(--bg3)}
-[data-theme="dark"] .chart-card{box-shadow:none}
-
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 </style>
 </head>
 <body>
@@ -353,10 +131,10 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   <div class="ld-ring"></div>
   <div style="font-family:var(--font-display);font-size:14px;color:var(--accent);letter-spacing:2px">SUMMARY DASHBOARD</div>
   <p id="ld-msg" style="font-size:11px;color:var(--muted)">กำลังดึงข้อมูล...</p>
-  <div style="width:200px;height:3px;background:var(--border);border-radius:2px;margin-top:4px"><div id="ld-bar" style="height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .3s"></div></div>
+  <div class="ld-bar-wrap"><div class="ld-bar-fill" id="ld-bar"></div></div>
   <div style="display:flex;gap:8px;margin-top:4px">
-    <span class="src-pill sp-pd3" id="ld-pd3">PD3 ⋯</span>
-    <span class="src-pill sp-pd4" id="ld-pd4">PD4 ⋯</span>
+    <span class="src-pill sp-pd3" id="ld-pd3">PD3 ...</span>
+    <span class="src-pill sp-pd4" id="ld-pd4">PD4 ...</span>
   </div>
 </div>
 
@@ -404,17 +182,12 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
     <span class="src-pill sp-pd4" id="pill-pd4">PD4 ...</span>
   </div>
 
-  <div style="padding:0 16px 0;display:flex;gap:6px">
-    <button class="btn-refresh" style="flex:1;margin:10px 0 0" onclick="reloadData()">🌐 ดึงใหม่</button>
-    <button style="flex:0 0 auto;margin:10px 0 0;padding:10px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-family:var(--font-body);font-size:11px;cursor:pointer;white-space:nowrap;transition:all .2s" onclick="showAllRange()" title="แสดงข้อมูลทั้งหมดทุก source">📅 ทั้งหมด</button>
-  </div>
+  <button class="btn-refresh" onclick="reloadData()">🌐 ดึงข้อมูลใหม่</button>
   <div class="auto-info">🔄 Auto-refresh ทุก 1 ชม.<br>ครั้งถัดไป: <span id="next-refresh">—</span></div>
 
-  <!-- Theme Toggle -->
-  <div style="padding:0 14px 12px;margin-top:auto">
+  <div style="padding:0 16px 14px;margin-top:auto">
     <button id="theme-toggle" onclick="toggleTheme()" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px">
-      <span id="theme-icon">🌙</span>
-      <span id="theme-label">Dark Mode</span>
+      <span id="theme-icon">🌙</span><span id="theme-label">Dark Mode</span>
     </button>
   </div>
 </aside>
@@ -425,24 +198,19 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
       <h2>📋 Summary Dashboard</h2>
       <p id="range-lbl">—</p>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-      <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
-      <div id="range-note" style="font-size:10px;color:var(--accent);background:var(--accent-dim);padding:3px 10px;border-radius:12px;display:none">
-        📅 แสดงช่วงที่ PD3+PD4 มีข้อมูลตรงกัน
-      </div>
-    </div>
+    <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
   </div>
 
   <div class="sec-hdr">
     <h3>PRODUCT OVERVIEW</h3>
-    <span class="sec-tag tag-all">4 PRODUCTS</span>
+    <span class="sec-tag">4 PRODUCTS</span>
     <div class="sec-line"></div>
   </div>
   <div class="products-grid" id="products-grid"></div>
 
-  <div class="sec-hdr" style="margin-top:8px">
+  <div class="sec-hdr">
     <h3>COMPARISON TABLE</h3>
-    <span class="sec-tag tag-all">ALL LINES</span>
+    <span class="sec-tag">ALL LINES</span>
     <div class="sec-line"></div>
   </div>
   <div class="card">
@@ -467,120 +235,6 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
       </table>
     </div>
   </div>
-
-  <!-- ═══ EXECUTIVE TREND ANALYSIS ═══ -->
-  <div class="sec-hdr" style="margin-top:4px">
-    <h3>📈 TREND ANALYSIS</h3>
-    <span class="sec-tag" style="background:#eff6ff;color:var(--accent);border:1px solid #bfdbfe">สำหรับผู้บริหาร</span>
-    <div class="sec-line"></div>
-  </div>
-
-  <!-- Auto-insight strip -->
-  <div class="insight-strip" id="insight-strip">
-    <div class="insight-box info"><div class="insight-icon">⏳</div><div class="insight-title">กำลังวิเคราะห์...</div><div class="insight-body">รอโหลดข้อมูล</div></div>
-  </div>
-
-  <!-- Exec KPI strip -->
-  <div class="exec-kpi-strip" id="exec-kpi-strip">
-    <div class="exec-kpi"><div class="exec-kpi-lbl">Output รวม (ช่วงที่เลือก)</div><div class="exec-kpi-val" id="ex-total-out">—</div><div class="exec-kpi-sub" id="ex-total-sub">—</div></div>
-    <div class="exec-kpi"><div class="exec-kpi-lbl">Avg Output / Shift</div><div class="exec-kpi-val" id="ex-avg-shift">—</div><div class="exec-kpi-sub" id="ex-avg-sub">vs เดือนก่อน</div></div>
-    <div class="exec-kpi"><div class="exec-kpi-lbl">Available Time (avg%)</div><div class="exec-kpi-val" id="ex-avail">—</div><div class="exec-kpi-sub" id="ex-avail-sub">—</div></div>
-    <div class="exec-kpi"><div class="exec-kpi-lbl">Unplan DT รวม</div><div class="exec-kpi-val" id="ex-unplan">—</div><div class="exec-kpi-sub" id="ex-unplan-sub">ชั่วโมง</div></div>
-    <div class="exec-kpi"><div class="exec-kpi-lbl">Plan DT รวม</div><div class="exec-kpi-val" id="ex-plan">—</div><div class="exec-kpi-sub" id="ex-plan-sub">ชั่วโมง</div></div>
-  </div>
-
-  <!-- Main trend chart -->
-  <div class="chart-card">
-    <div class="chart-card-hdr">
-      <div>
-        <h3>Output / Shift รายเดือน</h3>
-        <div class="sub">เปรียบเทียบแต่ละ product ตามช่วงที่เลือก</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-        <div class="mode-pills">
-          <button class="mode-pill active" onclick="setMode('avg',this)">Average</button>
-          <button class="mode-pill" onclick="setMode('median',this)">Median</button>
-          <button class="mode-pill" onclick="setMode('sum',this)">Accumulate</button>
-        </div>
-        <div class="metric-pills" id="metric-pills">
-          <button class="metric-pill active" onclick="setMetric('output',this)">Output/Shift</button>
-          <button class="metric-pill" onclick="setMetric('oee',this)">OEE%</button>
-          <button class="metric-pill" onclick="setMetric('avail',this)">Availability%</button>
-        </div>
-      </div>
-    </div>
-    <div class="chart-wrap"><canvas id="c-trend-main"></canvas></div>
-  </div>
-
-  <!-- Time breakdown chart -->
-  <div class="chart-card">
-    <div class="chart-card-hdr">
-      <div>
-        <h3>⏱ Time Breakdown รายเดือน</h3>
-        <div class="sub">Working Time · Available Time · Plan DT · Unplan DT (ชั่วโมงรวมต่อเดือน)</div>
-      </div>
-      <div class="metric-pills">
-        <button class="metric-pill active" onclick="setTimeView('stack',this)">Stacked</button>
-        <button class="metric-pill" onclick="setTimeView('line',this)">Line</button>
-      </div>
-    </div>
-    <div class="chart-wrap"><canvas id="c-time-breakdown"></canvas></div>
-  </div>
-
-  <!-- Product filter row -->
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-    <span style="font-size:11px;color:var(--muted);font-weight:600">แสดง:</span>
-    <div id="product-pills" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-  </div>
-
-  <!-- Month-over-month table -->
-  <div class="chart-card">
-    <div class="chart-card-hdr">
-      <div><h3>📊 ตาราง Month-over-Month</h3><div class="sub">Output/Shift, OEE, เวลา แยกรายเดือน</div></div>
-    </div>
-    <div class="tbl-wrap" style="max-height:320px">
-      <table class="dt-tbl" id="mom-tbl">
-        <thead><tr id="mom-thead"></tr></thead>
-        <tbody id="mom-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ═══ AI Q&A PANEL ═══ -->
-  <div class="sec-hdr" style="margin-top:8px">
-    <h3>🤖 AI ASSISTANT</h3>
-    <span class="sec-tag" style="background:#f5f3ff;color:var(--purple);border:1px solid #ddd6fe">ถามตอบข้อมูล Production</span>
-    <div class="sec-line"></div>
-  </div>
-
-  <div class="qa-wrap">
-    <div class="qa-header">
-      <div class="qa-orb">🤖</div>
-      <div>
-        <div class="qa-title">Production Intelligence Assistant</div>
-        <div class="qa-sub">ถามได้เลย — วิเคราะห์จากข้อมูลจริงของคุณ</div>
-      </div>
-    </div>
-    <div class="qa-chips">
-      <div class="qa-chip" onclick="askPreset(this)">Output ลดลงจากเดือนไหน?</div>
-      <div class="qa-chip" onclick="askPreset(this)">Product ไหน OEE ต่ำที่สุด?</div>
-      <div class="qa-chip" onclick="askPreset(this)">Unplan DT สูงสุดเดือนไหน?</div>
-      <div class="qa-chip" onclick="askPreset(this)">เปรียบ output เดือนนี้ vs เดือนก่อน</div>
-      <div class="qa-chip" onclick="askPreset(this)">สรุปสถานการณ์สำหรับผู้บริหาร</div>
-      <div class="qa-chip" onclick="askPreset(this)">Available time เปลี่ยนไปยังไง?</div>
-    </div>
-    <div class="qa-messages" id="qa-messages">
-      <div class="qa-msg">
-        <div class="qa-avatar ai">🤖</div>
-        <div class="qa-bubble ai">สวัสดีครับ ผมวิเคราะห์ข้อมูล Production ของคุณได้เลย<br>ลองถามเรื่อง output trend, downtime, OEE หรืออะไรก็ได้ที่อยากรู้ครับ 📊</div>
-      </div>
-    </div>
-    <div class="qa-input-row">
-      <input class="qa-input" id="qa-input" type="text" placeholder="ถามเกี่ยวกับข้อมูล production..." onkeydown="if(event.key==='Enter')sendQA()">
-      <button class="qa-send" id="qa-send" onclick="sendQA()">ส่ง ➤</button>
-    </div>
-  </div>
-
 </main>
 
 <script>
@@ -588,83 +242,87 @@ const PD3_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vToehKwHXa32rnaE0
 const PD4_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSs034o0M970g62tL1jkU4CU6HpAbVkER87uw3OzI97ueA6xXdBdwXd1Gcd0GrgaKOuIrTl-F75q3nz/pub?gid=122174819&single=true&output=csv";
 
 const PRODUCTS=[
-  {id:'gor',  label:'GOR',    cls:'pc-gor',color:'#f59e0b',src:'PD4',keywords:['GOR']},
-  {id:'lwr',  label:'LWRBAR', cls:'pc-lwr',color:'#38bdf8',src:'PD4',keywords:['LWRBAR','LWR BAR','LWR_BAR']},
-  {id:'p60',  label:'60',     cls:'pc-60', color:'#a855f7',src:'PD3',keywords:['060','RH 060','RH060']},
-  {id:'p61',  label:'61',     cls:'pc-61', color:'#22c55e',src:'PD3',keywords:['061','LH 061','LH061']},
+  {id:'gor', label:'GOR',    cls:'pc-gor',color:'#f59e0b',src:'PD4',keywords:['GOR']},
+  {id:'lwr', label:'LWRBAR', cls:'pc-lwr',color:'#38bdf8',src:'PD4',keywords:['LWRBAR','LWR BAR','LWR_BAR']},
+  {id:'p60', label:'60',     cls:'pc-60', color:'#a855f7',src:'PD3',keywords:['060','RH 060','RH060']},
+  {id:'p61', label:'61',     cls:'pc-61', color:'#22c55e',src:'PD3',keywords:['061','LH 061','LH061']},
 ];
 
 let PD3_ALL=[],PD4_ALL=[],arTimer=null;
 
+// ── Helpers ──────────────────────────────────────────────────────────
 function csvLine(l){const r=[];let c='',q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(c);c='';}else c+=ch;}r.push(c);return r;}
 function n(v){if(!v)return 0;const x=parseFloat(String(v).replace('%','').replace(/,/g,''));return isNaN(x)?0:x;}
 function fmtIso(d){return d.toISOString().split('T')[0];}
 function fmtDate(d){if(!d)return'—';return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
+function arrMin(arr){return arr.reduce((a,b)=>a<b?a:b);}
+function arrMax(arr){return arr.reduce((a,b)=>a>b?a:b);}
+function median(arr){if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
+function matchProduct(part,kws){const p=part.toUpperCase().trim();return kws.some(k=>p.includes(k.toUpperCase()));}
 
+// ── PD3 Parser ───────────────────────────────────────────────────────
 const DT_KEYS_PD3={'เครื่องจักรหลัก':'เครื่องจักรหลักเบรคดาวน์','เครื่องจักรรอง':'เครื่องจักรรองเบรคดาวน์','แม่พิมพ์/จิ๊ก':'แม่พิมพ์,จิ๊ก,กริ๊ปเปอร์ ชำรุด','PLC/Sensor':'ระบบ PLC / ระบบ เซนเซอร์ มีปัญหา','Robot':'โรบอทเบรคดาวน์','แก้คุณภาพ':'แก้ไขปัญหาคุณภาพ','รอภาชนะ':'รอภาชนะ','รอ QA':'รอQAคอนเฟิร์มคุณภาพ','อื่นๆ':'อื่นๆ'};
 function parsePD3Date(s){if(!s)return null;s=s.trim().replace(/"/g,'');const p=s.split('/');if(p.length!==3)return null;const dd=+p[0],mm=+p[1]-1,yyyy=+p[2];if(isNaN(dd)||yyyy<2000)return null;return new Date(yyyy,mm,dd);}
-function parseThaiDate(s){if(!s)return null;s=s.trim().split(' ')[0];const p=s.split('/');if(p.length!==3)return null;const d=+p[0],m=+p[1]-1,y=+p[2];return new Date(y>2400?y-543:y,m,d);}
 
 function parsePD3(text){
-  const lines=text.split('\n').filter(l=>l.trim());if(lines.length<2)return[];
-  const _cutoff=new Date();_cutoff.setFullYear(_cutoff.getFullYear()-1);_cutoff.setHours(0,0,0,0);
-  // pre-filter: เก็บเฉพาะ line ที่เกี่ยวข้อง (060, 061)
-  const _pd3Keys=PRODUCTS.filter(p=>p.src==='PD3').flatMap(p=>p.keywords.map(k=>k.toUpperCase()));
+  const lines=text.split('\n').filter(l=>l.trim());
+  if(lines.length<2)return[];
   const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
   const g=(row,name)=>{const i=idx[name];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim():'';};
   const gi=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
+  // Pre-filters
+  const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-1);cutoff.setHours(0,0,0,0);
+  const pd3Keys=PRODUCTS.filter(p=>p.src==='PD3').flatMap(p=>p.keywords.map(k=>k.toUpperCase()));
   const rows=[];
   for(let r=1;r<lines.length;r++){
     const row=csvLine(lines[r]);if(row.length<10)continue;
     const line=g(row,'เลือกไลน์การผลิต');
-    if(!line||!_pd3Keys.some(k=>line.toUpperCase().includes(k)))continue; // skip ชิ้นงานอื่น
+    if(!line||!pd3Keys.some(k=>line.toUpperCase().includes(k)))continue;
     const date=parsePD3Date(gi(row,43));
-    if(!date||date<_cutoff)continue;
+    if(!date||date<cutoff)continue;
     const dtTypes=[];Object.entries(DT_KEYS_PD3).forEach(([label,col])=>{const v=n(g(row,col));if(v>0)dtTypes.push({type:label,val:v});});
-    const defQty=n(g(row,'Defect'));
-    rows.push({src:'PD3',date,dateStr:fmtDate(date),part:line,shift:g(row,'กะทำงาน'),
-      total:n(g(row,'ยอดผลิตรวมทั้งวัน')),defect:defQty,dtMin:dtTypes.reduce((s,t)=>s+t.val,0),
+    rows.push({src:'PD3',date,dateStr:fmtDate(date),part:line,shift:g(row,'กะทำงาน')||'_',
+      total:n(g(row,'ยอดผลิตรวมทั้งวัน')),defect:n(g(row,'Defect')),
+      dtMin:dtTypes.reduce((s,t)=>s+t.val,0),
       avail:n(g(row,'Availbility')),perf:n(g(row,'Performance')),qual:n(g(row,'Quality')),oee:n(g(row,'OEE')),
       loadingHr:n(g(row,'Loading Time fx'))});
   }
-  // dedup: keep last row per date+part+shift combo
-  const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+(r.shift||'_');seen.set(k,r);});
+  const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+r.shift;seen.set(k,r);});
   return[...seen.values()];
 }
 
+// ── PD4 Parser ───────────────────────────────────────────────────────
+function parseThaiDate(s){if(!s)return null;s=s.trim().split(' ')[0];const p=s.split('/');if(p.length!==3)return null;const d=+p[0],m=+p[1]-1,y=+p[2];return new Date(y>2400?y-543:y,m,d);}
+
 function parsePD4(text){
-  const lines=text.split('\n').filter(l=>l.trim());if(lines.length<2)return[];
-  const _cutoff=new Date();_cutoff.setFullYear(_cutoff.getFullYear()-1);_cutoff.setHours(0,0,0,0);
-  // pre-filter: เก็บเฉพาะ part ที่เกี่ยวข้อง (GOR, LWRBAR)
-  const _pd4Keys=PRODUCTS.filter(p=>p.src==='PD4').flatMap(p=>p.keywords.map(k=>k.toUpperCase()));
+  const lines=text.split('\n').filter(l=>l.trim());
+  if(lines.length<2)return[];
   const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
   const g=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
+  const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-1);cutoff.setHours(0,0,0,0);
+  const pd4Keys=PRODUCTS.filter(p=>p.src==='PD4').flatMap(p=>p.keywords.map(k=>k.toUpperCase()));
   const rows=[];
   for(let r=1;r<lines.length;r++){
     const row=csvLine(lines[r]);if(row.length<10)continue;
-    const _part4=g(row,1);
-    if(!_part4||!_pd4Keys.some(k=>_part4.toUpperCase().includes(k)))continue; // skip ชิ้นงานอื่น
-    const date=parseThaiDate(g(row,59)||g(row,0));if(!date||date<_cutoff)continue;
+    const part=g(row,1);
+    if(!part||!pd4Keys.some(k=>part.toUpperCase().includes(k)))continue;
+    const date=parseThaiDate(g(row,59)||g(row,0));
+    if(!date||date<cutoff)continue;
     const dtTypes=[];
     for(let i=0;i<7;i++){const flag=g(row,21+i*3).toUpperCase();const type=g(row,22+i*3);const val=n(g(row,23+i*3));if((flag==='TRUE'||flag==='1')&&type&&val>0)dtTypes.push({type,val});}
     const defTypes=[];
     for(let i=0;i<3;i++){const flag=g(row,7+i*4).toUpperCase();const type=g(row,8+i*4);const qty=n(g(row,9+i*4));if((flag==='TRUE'||flag==='1')&&type&&qty>0)defTypes.push({type,qty});}
-    const totalDefect=defTypes.reduce((s,d)=>s+d.qty,0);
     const _ltIdx=idx['ชม.+เศษ'];const loadingHr=_ltIdx!==undefined?n(g(row,_ltIdx)):0;
-    rows.push({src:'PD4',date,dateStr:fmtDate(date),part:g(row,1),shift:g(row,5),
-      total:n(g(row,6)),defect:totalDefect,dtMin:Math.round(n(g(row,74))*60),
+    rows.push({src:'PD4',date,dateStr:fmtDate(date),part,shift:g(row,5)||'_',
+      total:n(g(row,6)),defect:defTypes.reduce((s,d)=>s+d.qty,0),
+      dtMin:Math.round(n(g(row,74))*60),
       avail:n(g(row,77)),perf:n(g(row,80)),qual:n(g(row,82)),oee:n(g(row,83)),loadingHr});
   }
-  const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+(r.shift||'_');seen.set(k,r);});
+  const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+r.shift;seen.set(k,r);});
   return[...seen.values()];
 }
 
-function matchProduct(part,keywords){
-  const p=part.toUpperCase().trim();
-  return keywords.some(k=>p.includes(k.toUpperCase()));
-}
-function median(arr){if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
-
+// ── Stats ─────────────────────────────────────────────────────────────
 function calcStats(rows){
   if(!rows.length)return null;
   const totalOut=rows.reduce((s,d)=>s+d.total,0);
@@ -673,57 +331,54 @@ function calcStats(rows){
   const totalDTMin=rows.reduce((s,d)=>s+(d.dtMin||0),0);
   const ppm=totalOut>0?Math.round((totalDef/totalOut)*1e6):0;
   const medShift=Math.round(median(rows.map(d=>d.total-d.defect)));
-  // Loading hours: ใช้ค่าจาก sheet ถ้ามี ไม่งั้น fallback 8h ต่อกะ (ไม่ลด avail% เพราะ output นับของจริงที่ผลิตได้)
-  const outHrArr=rows.map(d=>{const h=d.loadingHr>0?d.loadingHr:8;return h>0?(d.total-d.defect)/h:0;}).filter(v=>v>0);
+  const outHrArr=rows.map(d=>{const h=d.loadingHr>0?d.loadingHr:8;return(d.total-d.defect)/h;}).filter(v=>v>0);
   const medHr=Math.round(median(outHrArr));
-  const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
-  const avgOEE=avg(rows.map(d=>d.oee).filter(v=>v>0));
-  const avgAvail=avg(rows.map(d=>d.avail).filter(v=>v>0));
-  const avgPerf=avg(rows.map(d=>d.perf).filter(v=>v>0));
-  const avgQual=avg(rows.map(d=>d.qual).filter(v=>v>0));
-  const byDay={};rows.forEach(d=>{const k=fmtIso(d.date);if(!byDay[k])byDay[k]={out:0,oee:[]};byDay[k].out+=d.total-d.defect;if(d.oee>0)byDay[k].oee.push(d.oee);});
+  const avg=arr=>arr.filter(v=>v>0).reduce((a,b)=>a+b,0)/(arr.filter(v=>v>0).length||1);
+  const avgOEE=avg(rows.map(d=>d.oee));
+  const avgAvail=avg(rows.map(d=>d.avail));
+  const avgPerf=avg(rows.map(d=>d.perf));
+  const avgQual=avg(rows.map(d=>d.qual));
+  // Sparkline: 30-day output trend
+  const byDay={};rows.forEach(d=>{const k=fmtIso(d.date);if(!byDay[k])byDay[k]=0;byDay[k]+=d.total-d.defect;});
   const days=Object.keys(byDay).sort().slice(-30);
-  const outTrend=days.map(k=>byDay[k].out);
-  const oeeTrend=days.map(k=>byDay[k].oee.length?byDay[k].oee.reduce((a,b)=>a+b)/byDay[k].oee.length:0);
-  // date range
-  const dates=rows.map(d=>d.date).filter(Boolean).sort((a,b)=>a-b);
-  const d0=dates[0],d1=dates[dates.length-1];
-  const fmtD=d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
-  const dateRange=dates.length?`${fmtD(d0)}–${fmtD(d1)}`:'—';
-  return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,medShift,medHr,avgOEE,avgAvail,avgPerf,avgQual,totalDTMin,outTrend,oeeTrend,dateRange};
+  const outTrend=days.map(k=>byDay[k]);
+  const byDayOEE={};rows.forEach(d=>{const k=fmtIso(d.date);if(!byDayOEE[k])byDayOEE[k]=[];if(d.oee>0)byDayOEE[k].push(d.oee);});
+  const oeeTrend=days.map(k=>byDayOEE[k]&&byDayOEE[k].length?byDayOEE[k].reduce((a,b)=>a+b)/byDayOEE[k].length:0);
+  return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,medShift,medHr,avgOEE,avgAvail,avgPerf,avgQual,totalDTMin,outTrend,oeeTrend};
 }
 
+// ── Spark canvas ──────────────────────────────────────────────────────
 function drawSpark(canvas,data,color){
   if(!canvas||!data.length)return;
-  const W=canvas.width=canvas.offsetWidth*2||300;const H=canvas.height=canvas.offsetHeight*2||70;
-  const ctx=canvas.getContext('2d');ctx.scale(1,1);
-  const max=Math.max(...data)||1;const min=Math.min(...data.filter(v=>v>0))||0;
+  const W=canvas.width=canvas.offsetWidth*2||300;const H=canvas.height=canvas.offsetHeight*2||72;
+  const ctx=canvas.getContext('2d');
+  const max=arrMax(data)||1;const min=arrMin(data.filter(v=>v>0))||0;
   const pad=4;const pts=data.map((v,i)=>({x:pad+(i/(data.length-1||1))*(W-pad*2),y:H-pad-(v-min)/(max-min||1)*(H-pad*2)}));
   ctx.clearRect(0,0,W,H);
   if(pts.length>1){
-    const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,color+'44');grad.addColorStop(1,color+'00');
-    ctx.beginPath();ctx.moveTo(pts[0].x,H);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,H);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+    const gr=ctx.createLinearGradient(0,0,0,H);gr.addColorStop(0,color+'44');gr.addColorStop(1,color+'00');
+    ctx.beginPath();ctx.moveTo(pts[0].x,H);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,H);ctx.closePath();ctx.fillStyle=gr;ctx.fill();
     ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
   }
 }
 
-function oeeColor(v){return v>=85?'#22c55e':v>=70?'#f59e0b':'#f43f5e';}
+// ── Render ────────────────────────────────────────────────────────────
+function oeeColor(v){return v>=85?'var(--green)':v>=70?'var(--amber)':'var(--red)';}
 function oeeClass(v){return v>=85?'good':v>=70?'warn':'bad';}
 function fmt1(v){return(+v||0).toFixed(1);}
 
 function renderCard(prod,stats){
-  const el=document.getElementById('card-'+prod.id);
-  if(!el)return;
-  if(!stats){el.innerHTML=`<div class="prod-card-accent"></div><div style="padding:24px;color:var(--muted);font-size:12px">ไม่พบข้อมูล ${prod.label} ในช่วงที่เลือก</div>`;return;}
+  const el=document.getElementById('card-'+prod.id);if(!el)return;
+  if(!stats){
+    el.innerHTML=`<div class="prod-card-accent"></div><div style="padding:24px;color:var(--muted);font-size:12px">ไม่พบข้อมูล ${prod.label}</div>`;
+    return;
+  }
   const o=stats.avgOEE,a=stats.avgAvail,p=stats.avgPerf,q=stats.avgQual;
   const srcCls=prod.src==='PD3'?'sp-pd3':'sp-pd4';
   el.innerHTML=`
     <div class="prod-card-accent"></div>
     <div class="pc-head">
-      <div>
-        <div class="pc-name" style="color:${prod.color}">${prod.label}</div>
-        <div class="pc-sub">${stats.shifts} กะ &nbsp;·&nbsp; ${stats.dateRange}</div>
-      </div>
+      <div><div class="pc-name" style="color:${prod.color}">${prod.label}</div><div class="pc-sub">${stats.shifts} กะ</div></div>
       <span class="src-badge ${srcCls}">${prod.src}</span>
     </div>
     <div class="pc-kpis">
@@ -735,16 +390,19 @@ function renderCard(prod,stats){
       <div class="pc-kpi"><div class="pc-kpi-lbl">QUALITY</div><div class="pc-kpi-val ${oeeClass(q)}">${fmt1(q)}%</div><div class="pc-kpi-unit">avg</div></div>
     </div>
     <div class="oee-bar-wrap">
-      <div class="oee-bar-lbl"><span>OEE BREAKDOWN</span><span style="color:${oeeColor(o)};font-weight:700">${fmt1(o)}%</span></div>
+      <div class="oee-bar-lbl">
+        <span>OEE BREAKDOWN</span>
+        <span style="color:${oeeColor(o)};font-weight:700">${fmt1(o)}%</span>
+      </div>
       <div class="oee-segments">
-        <div style="width:${a}%;height:7px;background:#38bdf855;border-radius:2px" title="A ${fmt1(a)}%"></div>
-        <div style="width:${p*(a/100)}%;height:7px;background:#f59e0b55;border-radius:2px" title="P ${fmt1(p)}%"></div>
-        <div style="width:${q*(p/100)*(a/100)}%;height:7px;background:#22c55e77;border-radius:2px" title="Q ${fmt1(q)}%"></div>
+        <div style="width:${a}%;height:7px;background:#0891b255;border-radius:2px" title="A ${fmt1(a)}%"></div>
+        <div style="width:${p*(a/100)}%;height:7px;background:#d9770655;border-radius:2px" title="P ${fmt1(p)}%"></div>
+        <div style="width:${q*(p/100)*(a/100)}%;height:7px;background:#16a34a77;border-radius:2px" title="Q ${fmt1(q)}%"></div>
       </div>
       <div style="display:flex;gap:12px;margin-top:5px">
-        <span style="font-size:9px;color:#38bdf8">■ A ${fmt1(a)}%</span>
-        <span style="font-size:9px;color:#f59e0b">■ P ${fmt1(p)}%</span>
-        <span style="font-size:9px;color:#22c55e">■ Q ${fmt1(q)}%</span>
+        <span style="font-size:9px;color:var(--cyan)">■ A ${fmt1(a)}%</span>
+        <span style="font-size:9px;color:var(--amber)">■ P ${fmt1(p)}%</span>
+        <span style="font-size:9px;color:var(--green)">■ Q ${fmt1(q)}%</span>
         <span style="font-size:9px;color:var(--muted);margin-left:auto">DT ${(stats.totalDTMin/60).toFixed(1)}h · PPM ${stats.ppm.toLocaleString()}</span>
       </div>
     </div>
@@ -754,12 +412,12 @@ function renderCard(prod,stats){
     </div>`;
   requestAnimationFrame(()=>{
     drawSpark(document.getElementById('sp-out-'+prod.id),stats.outTrend,prod.color);
-    drawSpark(document.getElementById('sp-oee-'+prod.id),stats.oeeTrend,oeeColor(o));
+    drawSpark(document.getElementById('sp-oee-'+prod.id),stats.oeeTrend,oeeColor(o).replace('var(--green)','#16a34a').replace('var(--amber)','#d97706').replace('var(--red)','#dc2626'));
   });
 }
 
 function renderTable(allStats){
-  const maxOut=Math.max(...allStats.map(s=>s.stats?.totalOut||0))||1;
+  const maxOut=Math.max(...allStats.map(s=>s.stats?.totalOut||0),1);
   document.getElementById('sum-tbody').innerHTML=allStats.map(({prod,stats})=>{
     if(!stats)return`<tr><td class="tbl-prod" style="color:${prod.color}">${prod.label}</td><td colspan="11" style="color:var(--muted)">ไม่พบข้อมูล</td></tr>`;
     const bar=Math.round(stats.totalOut/maxOut*100);
@@ -789,14 +447,6 @@ function applyFilter(){
   const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
   document.getElementById('range-lbl').textContent=`${from||'—'} — ${to||'—'}`;
   document.getElementById('rec-count').textContent=`${all.length.toLocaleString()} records`;
-  // แสดง note ถ้า PD3 มีข้อมูลนานกว่า
-  const _pd3D=PD3_ALL.map(d=>d.date).filter(Boolean);
-  const _pd4D=PD4_ALL.map(d=>d.date).filter(Boolean);
-  const noteEl=document.getElementById('range-note');
-  if(noteEl&&_pd3D.length&&_pd4D.length){
-    const pd3Min=new Date(_pd3D.reduce((a,b)=>a<b?a:b)),pd4Min=new Date(_pd4D.reduce((a,b)=>a<b?a:b));
-    noteEl.style.display=Math.abs(pd3Min-pd4Min)>7*86400000?'block':'none';
-  }
   const allStats=PRODUCTS.map(prod=>({prod,stats:calcStats(all.filter(d=>matchProduct(d.part,prod.keywords)))}));
   renderTable(allStats);
   allStats.forEach(({prod,stats})=>renderCard(prod,stats));
@@ -804,75 +454,48 @@ function applyFilter(){
 
 async function reloadData(){
   document.getElementById('src-badge').className='badge bx';document.getElementById('src-badge').textContent='...';
-  const results=await Promise.allSettled([
+  const r=await Promise.allSettled([
     fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
     fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
   ]);
-  if(results[0].status==='fulfilled'){PD3_ALL=parsePD3(results[0].value);document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
-  if(results[1].status==='fulfilled'){PD4_ALL=parsePD4(results[1].value);document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
+  if(r[0].status==='fulfilled'){PD3_ALL=parsePD3(r[0].value);document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
+  if(r[1].status==='fulfilled'){PD4_ALL=parsePD4(r[1].value);document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
   document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
   document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
-  updateNextLabel();renderProductPills();applyFilter();
+  updateNextLabel();applyFilter();
 }
 
 function updateNextLabel(){const el=document.getElementById('next-refresh');if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';}
-function showAllRange(){
-  const allDates=[...PD3_ALL,...PD4_ALL].map(d=>d.date).filter(Boolean);
-  if(!allDates.length)return;
-  const mn=allDates.reduce((a,b)=>a<b?a:b);
-  const mx=allDates.reduce((a,b)=>a>b?a:b);
-  document.getElementById('f-from').value=fmtIso(new Date(mn));
-  document.getElementById('f-to').value=fmtIso(new Date(mx));
-  applyFilter();
-}
 
 async function init(){
-  // Build card placeholders
   document.getElementById('products-grid').innerHTML=PRODUCTS.map(p=>`<div class="prod-card ${p.cls}" id="card-${p.id}"><div class="prod-card-accent"></div><div style="padding:24px;color:var(--muted);font-size:12px">Loading ${p.label}...</div></div>`).join('');
   const setBar=p=>{const b=document.getElementById('ld-bar');if(b)b.style.width=p+'%';};
   const setMsg=t=>{const m=document.getElementById('ld-msg');if(m)m.textContent=t;};
-  setMsg('กำลังดึงข้อมูล PD3 + PD4...');setBar(10);
+  setMsg('กำลังดึงข้อมูล...');setBar(15);
   const results=await Promise.allSettled([
     fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
     fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
   ]);
-  setBar(60);setMsg('กำลัง parse ข้อมูล (เฉพาะ 1 ปีล่าสุด)...');
-  await new Promise(r=>setTimeout(r,0)); // yield to browser to update UI
+  setBar(60);setMsg('กำลัง parse ข้อมูล...');
+  await new Promise(r=>setTimeout(r,0));
   if(results[0].status==='fulfilled'){PD3_ALL=parsePD3(results[0].value);document.getElementById('ld-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
   setBar(80);await new Promise(r=>setTimeout(r,0));
   if(results[1].status==='fulfilled'){PD4_ALL=parsePD4(results[1].value);document.getElementById('ld-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
-  setBar(95);setMsg('กำลังแสดงผล...');await new Promise(r=>setTimeout(r,0));
-  // ใช้ช่วงที่ทั้ง PD3 และ PD4 มีข้อมูล (intersection) เป็น default
-  // เพื่อให้ shift count เปรียบกันได้ยุติธรรม
-  // ใช้ reduce() แทน spread เพื่อรองรับ array ขนาดใหญ่ (17k+ records)
-  const arrMin=arr=>arr.reduce((a,b)=>a<b?a:b);
-  const arrMax=arr=>arr.reduce((a,b)=>a>b?a:b);
-  const pd3Dates=PD3_ALL.map(d=>d.date).filter(Boolean);
-  const pd4Dates=PD4_ALL.map(d=>d.date).filter(Boolean);
-  if(pd3Dates.length && pd4Dates.length){
-    const fromDate=new Date(Math.max(arrMin(pd3Dates),arrMin(pd4Dates)));
-    const toDate=new Date(Math.min(arrMax(pd3Dates),arrMax(pd4Dates)));
-    if(fromDate<=toDate){
-      document.getElementById('f-from').value=fmtIso(fromDate);
-      document.getElementById('f-to').value=fmtIso(toDate);
-    } else {
-      const allDates=[...pd3Dates,...pd4Dates];
-      document.getElementById('f-from').value=fmtIso(new Date(arrMin(allDates)));
-      document.getElementById('f-to').value=fmtIso(new Date(arrMax(allDates)));
-    }
-  } else {
-    const allDates=[...pd3Dates,...pd4Dates];
-    if(allDates.length){
-      document.getElementById('f-from').value=fmtIso(new Date(arrMin(allDates)));
-      document.getElementById('f-to').value=fmtIso(new Date(arrMax(allDates)));
-    }
+  setBar(90);setMsg('กำลังแสดงผล...');await new Promise(r=>setTimeout(r,0));
+  // Set intersection date range
+  const pd3D=PD3_ALL.map(d=>d.date).filter(Boolean);
+  const pd4D=PD4_ALL.map(d=>d.date).filter(Boolean);
+  if(pd3D.length&&pd4D.length){
+    const from=new Date(Math.max(arrMin(pd3D),arrMin(pd4D)));
+    const to=new Date(Math.min(arrMax(pd3D),arrMax(pd4D)));
+    document.getElementById('f-from').value=fmtIso(from<=to?from:new Date(arrMin([...pd3D,...pd4D])));
+    document.getElementById('f-to').value=fmtIso(from<=to?to:new Date(arrMax([...pd3D,...pd4D])));
   }
   document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
   document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
   document.getElementById('f-from').addEventListener('change',applyFilter);
   document.getElementById('f-to').addEventListener('change',applyFilter);
-  renderProductPills();
-  applyFilter(); // this now also calls renderTrendCharts
+  setBar(100);applyFilter();
   const el=document.getElementById('loading');el.style.opacity='0';setTimeout(()=>el.style.display='none',500);
   if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadData,3600000);updateNextLabel();
 }
@@ -881,374 +504,20 @@ init();
 
 <script>
 (function(){
-  const saved = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', saved);
+  const saved=localStorage.getItem('theme')||'light';
+  document.documentElement.setAttribute('data-theme',saved);
   function updateBtn(){
-    const dark = document.documentElement.getAttribute('data-theme')==='dark';
-    const ic = document.getElementById('theme-icon');
-    const lb = document.getElementById('theme-label');
-    if(ic) ic.textContent = dark ? '☀️' : '🌙';
-    if(lb) lb.textContent = dark ? 'Light Mode' : 'Dark Mode';
+    const dark=document.documentElement.getAttribute('data-theme')==='dark';
+    const ic=document.getElementById('theme-icon');const lb=document.getElementById('theme-label');
+    if(ic)ic.textContent=dark?'☀️':'🌙';if(lb)lb.textContent=dark?'Light Mode':'Dark Mode';
   }
-  window.toggleTheme = function(){
-    const cur = document.documentElement.getAttribute('data-theme');
-    const next = cur === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    updateBtn();
-    // Re-render charts with new colors
-    if(typeof Chart !== 'undefined'){
-      Chart.instances && Object.values(Chart.instances).forEach(c=>{
-        const dark = next==='dark';
-        const gridColor = dark ? 'rgba(28,38,64,.5)' : 'rgba(226,231,240,1)';
-        const tickColor = dark ? '#526080' : '#94a3b8';
-        if(c.options.scales){
-          Object.values(c.options.scales).forEach(s=>{
-            if(s.grid) s.grid.color = gridColor;
-            if(s.ticks) s.ticks.color = tickColor;
-          });
-        }
-        if(c.options.plugins?.legend?.labels) c.options.plugins.legend.labels.color = tickColor;
-        c.update('none');
-      });
-    }
-    updateBtn();
+  window.toggleTheme=function(){
+    const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',next);
+    localStorage.setItem('theme',next);updateBtn();
   };
-  document.addEventListener('DOMContentLoaded', updateBtn);
+  document.addEventListener('DOMContentLoaded',updateBtn);
 })();
 </script>
-
-<script>
-// ─── TREND CHART STATE ────────────────────────────────────────────────
-let TREND_MODE = 'avg';   // avg | median | sum
-let TREND_METRIC = 'output'; // output | oee | avail
-let TIME_VIEW = 'stack';  // stack | line
-let ACTIVE_PRODUCTS = new Set(['gor','lwr','p60','p61']);
-let CHARTS = {};
-
-const MN = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-function moKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
-function moLabel(k){const[y,m]=k.split('-');return`${MN[+m-1]} ${(+y).toString().slice(2)}`;}
-
-function setMode(m,btn){
-  TREND_MODE=m;
-  document.querySelectorAll('.mode-pill').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTrendCharts();
-}
-function setMetric(m,btn){
-  TREND_METRIC=m;
-  document.querySelectorAll('.metric-pill').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTrendCharts();
-}
-function setTimeView(v,btn){
-  TIME_VIEW=v;
-  document.querySelectorAll('#c-time-breakdown').forEach(()=>{});
-  document.querySelectorAll('[onclick^="setTimeView"]').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTimeBreakdown();
-}
-function toggleProduct(id){
-  if(ACTIVE_PRODUCTS.has(id))ACTIVE_PRODUCTS.delete(id);
-  else ACTIVE_PRODUCTS.add(id);
-  document.querySelectorAll('.product-pill').forEach(b=>{
-    const pid=b.dataset.pid;
-    b.classList.toggle('active',ACTIVE_PRODUCTS.has(pid));
-  });
-  renderTrendCharts();
-}
-
-function getFilteredAll(){
-  const from=document.getElementById('f-from').value;
-  const to=document.getElementById('f-to').value;
-  const fDate=from?new Date(from):new Date(0);
-  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
-  const sh=document.getElementById('shift-sel').value;
-  return[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
-}
-
-// ─── AGGREGATE BY MONTH PER PRODUCT ──────────────────────────────────
-function buildMonthlyData(all){
-  // Returns {prodId: {moKey: {vals, oee, avail, planDT, unplanDT, workHr, shiftCount}}}
-  const data={};
-  PRODUCTS.forEach(p=>{data[p.id]={};});
-  all.forEach(d=>{
-    const prod=PRODUCTS.find(p=>matchProduct(d.part,p.keywords));
-    if(!prod)return;
-    const mk=moKey(d.date);
-    if(!data[prod.id][mk])data[prod.id][mk]={vals:[],oeeVals:[],availVals:[],planDThr:0,unplanDThr:0,workHr:0,shiftCount:0};
-    const mo=data[prod.id][mk];
-    const good=d.total-d.defect;
-    mo.vals.push(good);
-    if(d.oee>0)mo.oeeVals.push(d.oee);
-    if(d.avail>0)mo.availVals.push(d.avail);
-    // Time breakdown (per shift = 8h assumed)
-    const shiftHr=8;
-    const loadHr=d.loadingHr>0?d.loadingHr:shiftHr;
-    const planDT=Math.max(0,shiftHr-loadHr);
-    // Unplan DT: ใช้ dtMin จาก sheet โดยตรง (แม่นกว่าคำนวณจาก avail)
-    const unplanDThr=d.dtMin>0?d.dtMin/60:0;
-    mo.planDThr+=planDT;
-    mo.unplanDThr+=unplanDThr;
-    mo.workHr+=shiftHr;
-    mo.shiftCount+=1;
-  });
-  return data;
-}
-
-function aggregate(vals,mode){
-  if(!vals||!vals.length)return null;
-  if(mode==='sum')return vals.reduce((a,b)=>a+b,0);
-  if(mode==='median'){const s=[...vals].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
-  return vals.reduce((a,b)=>a+b,0)/vals.length; // avg
-}
-
-function renderProductPills(){
-  const container=document.getElementById('product-pills');
-  container.innerHTML=PRODUCTS.map(p=>`
-    <button class="product-pill active" data-pid="${p.id}" onclick="toggleProduct('${p.id}')"
-      style="border-color:${p.color};background:${p.color}22;color:${p.color}">
-      ${p.label}
-    </button>`).join('');
-  ACTIVE_PRODUCTS=new Set(PRODUCTS.map(p=>p.id));
-}
-
-function renderExecKPIs(all,monthlyData){
-  const totOut=all.reduce((s,d)=>s+d.total-d.defect,0);
-  const shiftCount=all.length||1;
-  const avgShift=Math.round(totOut/shiftCount);
-  const avgAvail=all.filter(d=>d.avail>0).reduce((s,d)=>s+d.avail,0)/(all.filter(d=>d.avail>0).length||1);
-  let totalUnplan=0,totalPlan=0;
-  PRODUCTS.forEach(p=>{Object.values(monthlyData[p.id]||{}).forEach(mo=>{totalUnplan+=mo.unplanDThr;totalPlan+=mo.planDThr;});});
-
-  // Month-over-month for avg shift
-  const allMonths=Object.keys(Object.values(monthlyData).reduce((acc,m)=>({...acc,...m}),{})).sort();
-  const lastTwo=allMonths.slice(-2);
-  let momText='—';let momCls='trend-fl';
-  if(lastTwo.length===2){
-    const getMonthAvg=(mk)=>{let vals=[];PRODUCTS.forEach(p=>{if(monthlyData[p.id][mk])vals.push(...monthlyData[p.id][mk].vals);});return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;};
-    const prev=getMonthAvg(lastTwo[0]),curr=getMonthAvg(lastTwo[1]);
-    const diff=prev>0?((curr-prev)/prev*100):0;
-    momText=`${diff>=0?'▲':'▼'} ${Math.abs(diff).toFixed(1)}% vs ${moLabel(lastTwo[0])}`;
-    momCls=diff>=0?'trend-up':'trend-dn';
-  }
-  document.getElementById('ex-total-out').textContent=totOut.toLocaleString();
-  document.getElementById('ex-total-sub').textContent=`${shiftCount} กะ รวม`;
-  document.getElementById('ex-avg-shift').textContent=avgShift.toLocaleString();
-  document.getElementById('ex-avg-sub').innerHTML=`<span class="${momCls}">${momText}</span>`;
-  document.getElementById('ex-avail').textContent=avgAvail.toFixed(1)+'%';
-  document.getElementById('ex-avail-sub').textContent=avgAvail>=85?'✅ ดี':avgAvail>=70?'⚠️ ควรปรับปรุง':'🔴 ต่ำ';
-  document.getElementById('ex-unplan').textContent=totalUnplan.toFixed(0);
-  document.getElementById('ex-plan').textContent=totalPlan.toFixed(0);
-}
-
-function renderInsights(all,monthlyData){
-  const allMonths=Object.keys(Object.values(monthlyData).reduce((acc,m)=>({...acc,...m}),{})).sort();
-  const insights=[];
-  if(allMonths.length>=2){
-    const last=allMonths[allMonths.length-1],prev=allMonths[allMonths.length-2];
-    const getVal=(mk)=>{let v=[];PRODUCTS.forEach(p=>{if(monthlyData[p.id][mk])v.push(...monthlyData[p.id][mk].vals);});return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;};
-    const c=getVal(last),p2=getVal(prev),diff=p2>0?(c-p2)/p2*100:0;
-    if(diff<-5)insights.push({type:'bad',icon:'📉',title:`Output ลดลง ${Math.abs(diff).toFixed(1)}%`,body:`${moLabel(prev)} → ${moLabel(last)}: จาก ${Math.round(p2).toLocaleString()} → ${Math.round(c).toLocaleString()} ชิ้น/กะ`});
-    else if(diff>5)insights.push({type:'good',icon:'📈',title:`Output เพิ่มขึ้น ${diff.toFixed(1)}%`,body:`${moLabel(prev)} → ${moLabel(last)}: ดีขึ้น ${Math.round(c-p2).toLocaleString()} ชิ้น/กะ`});
-    else insights.push({type:'info',icon:'📊',title:'Output ค่อนข้างคงที่',body:`เปลี่ยนแปลง ${diff.toFixed(1)}% จากเดือนก่อน`});
-  }
-  // Unplan DT spike
-  let maxUnplanMo='',maxUnplanVal=0;
-  allMonths.forEach(mk=>{let u=0;PRODUCTS.forEach(p=>{if(monthlyData[p.id][mk])u+=monthlyData[p.id][mk].unplanDThr;});if(u>maxUnplanVal){maxUnplanVal=u;maxUnplanMo=mk;}});
-  if(maxUnplanMo)insights.push({type:'warn',icon:'⚠️',title:`Unplan DT สูงสุด ${moLabel(maxUnplanMo)}`,body:`${maxUnplanVal.toFixed(0)} ชั่วโมง — อาจเป็นสาเหตุ output ลด`});
-  // OEE
-  const avgOEE=all.filter(d=>d.oee>0).reduce((s,d)=>s+d.oee,0)/(all.filter(d=>d.oee>0).length||1);
-  insights.push({type:avgOEE>=75?'good':avgOEE>=60?'warn':'bad',icon:'🏭',title:`OEE รวม ${avgOEE.toFixed(1)}%`,body:avgOEE>=75?'อยู่ในเกณฑ์ดี':avgOEE>=60?'ควรปรับปรุง — เป้าหมาย 75%+':'ต่ำกว่าเกณฑ์ — ต้องแก้ไขเร่งด่วน'});
-  insights.push({type:'info',icon:'📅',title:`ข้อมูล ${allMonths.length} เดือน`,body:`${all.length.toLocaleString()} records จาก PD3+PD4`});
-  document.getElementById('insight-strip').innerHTML=insights.map(i=>`
-    <div class="insight-box ${i.type}">
-      <div class="insight-icon">${i.icon}</div>
-      <div class="insight-title">${i.title}</div>
-      <div class="insight-body">${i.body}</div>
-    </div>`).join('');
-}
-
-function getChartColors(){
-  const dark=document.documentElement.getAttribute('data-theme')==='dark';
-  return{grid:dark?'rgba(28,38,64,.5)':'rgba(226,231,240,1)',tick:dark?'#526080':'#94a3b8',tooltip:{bg:dark?'#0d1117':'#fff',title:dark?'#dce4f0':'#0f172a',body:dark?'#94a3b8':'#64748b',border:dark?'#1c2640':'#e2e7f0'}};
-}
-
-function destroyChart(id){if(CHARTS[id]){CHARTS[id].destroy();delete CHARTS[id];}}
-
-function renderTrendCharts(){
-  const all=getFilteredAll();
-  const md=buildMonthlyData(all);
-  renderExecKPIs(all,md);
-  renderInsights(all,md);
-
-  const allMonths=[...new Set(PRODUCTS.flatMap(p=>Object.keys(md[p.id])))].sort();
-  const labels=allMonths.map(moLabel);
-  const C=getChartColors();
-  const copts={backgroundColor:C.tooltip.bg,titleColor:C.tooltip.title,bodyColor:C.tooltip.body,borderColor:C.tooltip.border,borderWidth:1};
-
-  // Main trend chart
-  destroyChart('trend');
-  const datasets=PRODUCTS.filter(p=>ACTIVE_PRODUCTS.has(p.id)).map(p=>{
-    const vals=allMonths.map(mk=>{
-      const mo=md[p.id][mk];
-      if(!mo)return null;
-      if(TREND_METRIC==='output')return aggregate(mo.vals,TREND_MODE);
-      if(TREND_METRIC==='oee')return aggregate(mo.oeeVals,TREND_MODE==='sum'?'avg':TREND_MODE);
-      if(TREND_METRIC==='avail')return aggregate(mo.availVals,TREND_MODE==='sum'?'avg':TREND_MODE);
-    });
-    return{label:p.label,data:vals,borderColor:p.color,backgroundColor:p.color+'30',borderWidth:2.5,pointRadius:4,pointHoverRadius:6,tension:.35,fill:ACTIVE_PRODUCTS.size===1,spanGaps:true};
-  });
-  const ctx1=document.getElementById('c-trend-main');
-  CHARTS['trend']=new Chart(ctx1,{type:'line',data:{labels,datasets},options:{
-    responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:true,position:'bottom',labels:{color:C.tick,font:{size:11},usePointStyle:true,pointStyleWidth:10,padding:16}},tooltip:{...copts,mode:'index',intersect:false,callbacks:{label:c=>c.raw!=null?` ${c.dataset.label}: ${TREND_METRIC==='output'?Math.round(c.raw).toLocaleString()+'  ชิ้น/กะ':c.raw.toFixed(1)+'%'}`:null}}},
-    scales:{x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:11}}},y:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:11},callback:v=>TREND_METRIC==='output'?v.toLocaleString():v.toFixed(0)+'%'},beginAtZero:false}}
-  }});
-
-  renderTimeBreakdown(allMonths,md,C);
-  renderMoMTable(allMonths,md);
-}
-
-function renderTimeBreakdown(allMonths,md,C){
-  if(!allMonths){
-    const all=getFilteredAll();md=buildMonthlyData(all);
-    allMonths=[...new Set(PRODUCTS.flatMap(p=>Object.keys(md[p.id])))].sort();
-    C=getChartColors();
-  }
-  const labels=allMonths.map(moLabel);
-  // Aggregate across ALL active products per month
-  const workHr=[],availHr=[],planDT=[],unplanDT=[];
-  allMonths.forEach(mk=>{
-    let w=0,a=0,pl=0,un=0;
-    PRODUCTS.filter(p=>ACTIVE_PRODUCTS.has(p.id)).forEach(p=>{
-      const mo=md[p.id][mk];
-      if(!mo)return;
-      w+=mo.workHr;
-      pl+=mo.planDThr;
-      un+=mo.unplanDThr;
-      a+=mo.workHr-pl-un;
-    });
-    workHr.push(w);availHr.push(Math.max(0,a));planDT.push(pl);unplanDT.push(un);
-  });
-
-  destroyChart('time');
-  const ctx2=document.getElementById('c-time-breakdown');
-  if(TIME_VIEW==='stack'){
-    CHARTS['time']=new Chart(ctx2,{type:'bar',data:{labels,datasets:[
-      {label:'Available Time',data:availHr,backgroundColor:'#22c55e55',borderColor:'#22c55e',borderWidth:1.5,stack:'t'},
-      {label:'Plan DT',data:planDT,backgroundColor:'#f59e0b55',borderColor:'#f59e0b',borderWidth:1.5,stack:'t'},
-      {label:'Unplan DT',data:unplanDT,backgroundColor:'#f43f5e55',borderColor:'#f43f5e',borderWidth:1.5,stack:'t'},
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:C.tick,font:{size:11},usePointStyle:true,padding:14}},tooltip:{backgroundColor:C.tooltip.bg,titleColor:C.tooltip.title,bodyColor:C.tooltip.body,borderColor:C.tooltip.border,borderWidth:1,mode:'index',callbacks:{label:c=>`  ${c.dataset.label}: ${c.raw.toFixed(1)}h`}}},
-    scales:{x:{stacked:true,grid:{color:C.grid},ticks:{color:C.tick,font:{size:11}}},y:{stacked:true,grid:{color:C.grid},ticks:{color:C.tick,font:{size:11},callback:v=>v+'h'},title:{display:true,text:'ชั่วโมง',color:C.tick,font:{size:11}}}}}});
-  } else {
-    CHARTS['time']=new Chart(ctx2,{type:'line',data:{labels,datasets:[
-      {label:'Available Time',data:availHr,borderColor:'#22c55e',backgroundColor:'#22c55e20',borderWidth:2,tension:.35,fill:false,pointRadius:3},
-      {label:'Plan DT',data:planDT,borderColor:'#f59e0b',backgroundColor:'#f59e0b20',borderWidth:2,tension:.35,fill:false,pointRadius:3},
-      {label:'Unplan DT',data:unplanDT,borderColor:'#f43f5e',backgroundColor:'#f43f5e20',borderWidth:2,tension:.35,fill:false,pointRadius:3},
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:C.tick,font:{size:11},usePointStyle:true,padding:14}},tooltip:{backgroundColor:C.tooltip.bg,titleColor:C.tooltip.title,bodyColor:C.tooltip.body,borderColor:C.tooltip.border,borderWidth:1,mode:'index',callbacks:{label:c=>`  ${c.dataset.label}: ${c.raw.toFixed(1)}h`}}},
-    scales:{x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:11}}},y:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:11},callback:v=>v+'h'}}}}});
-  }
-}
-
-function renderMoMTable(allMonths,md){
-  if(!allMonths)return;
-  const thead=document.getElementById('mom-thead');
-  const tbody=document.getElementById('mom-tbody');
-  thead.innerHTML='<th>Product</th>'+allMonths.map(mk=>`<th class="num">${moLabel(mk)}</th>`).join('');
-  tbody.innerHTML=PRODUCTS.filter(p=>ACTIVE_PRODUCTS.has(p.id)).map(p=>{
-    const cells=allMonths.map(mk=>{
-      const mo=md[p.id][mk];
-      if(!mo)return`<td class="num" style="color:var(--muted2)">—</td>`;
-      const out=Math.round(aggregate(mo.vals,'avg'));
-      const oee=aggregate(mo.oeeVals,'avg');
-      const prev=allMonths[allMonths.indexOf(mk)-1];
-      const prevOut=prev&&md[p.id][prev]?Math.round(aggregate(md[p.id][prev].vals,'avg')):null;
-      const diff=prevOut?((out-prevOut)/prevOut*100):null;
-      const arrow=diff===null?'':diff>=2?'<span style="color:var(--green);font-size:9px">▲</span>':diff<=-2?'<span style="color:var(--red);font-size:9px">▼</span>':'<span style="color:var(--muted2);font-size:9px">—</span>';
-      return`<td class="num"><div style="font-weight:700;font-size:12px">${out.toLocaleString()} ${arrow}</div><div style="font-size:10px;color:var(--muted)">OEE ${oee?oee.toFixed(0):'—'}%</div></td>`;
-    }).join('');
-    return`<tr><td><span style="font-family:var(--font-display);font-weight:700;color:${p.color}">${p.label}</span></td>${cells}</tr>`;
-  }).join('');
-}
-
-// ─── QA SYSTEM ────────────────────────────────────────────────────────
-function buildDataContext(){
-  const all=getFilteredAll();
-  const md=buildMonthlyData(all);
-  const allMonths=[...new Set(PRODUCTS.flatMap(p=>Object.keys(md[p.id])))].sort();
-  const summary=[];
-  allMonths.forEach(mk=>{
-    PRODUCTS.forEach(p=>{
-      const mo=md[p.id][mk];
-      if(!mo||!mo.vals.length)return;
-      summary.push(`${moLabel(mk)} | ${p.label}: output/shift avg=${Math.round(aggregate(mo.vals,'avg'))}, median=${Math.round(aggregate(mo.vals,'median'))}, OEE avg=${aggregate(mo.oeeVals,'avg').toFixed(1)}%, Avail avg=${aggregate(mo.availVals,'avg').toFixed(1)}%, PlanDT=${mo.planDThr.toFixed(1)}h, UnplanDT=${mo.unplanDThr.toFixed(1)}h, shifts=${mo.shiftCount}`);
-    });
-  });
-  return summary.join('
-');
-}
-
-async function sendQA(){
-  const input=document.getElementById('qa-input');
-  const q=input.value.trim();
-  if(!q)return;
-  input.value='';
-  addQAMsg(q,'user');
-  const loadId=addQAMsg('กำลังวิเคราะห์ข้อมูล...','ai',true);
-  document.getElementById('qa-send').disabled=true;
-  try{
-    const ctx=buildDataContext();
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',max_tokens:800,
-      system:`คุณเป็น Production Intelligence AI ที่วิเคราะห์ข้อมูลโรงงาน ตอบเป็นภาษาไทย กระชับ ชัดเจน มีข้อมูลตัวเลขสนับสนุน เหมาะสำหรับนำเสนอผู้บริหาร
-
-ข้อมูล Production รายเดือน:
-${ctx}`,
-      messages:[{role:'user',content:q}]
-    })});
-    const data=await res.json();
-    const ans=data.content?.[0]?.text||'ไม่สามารถวิเคราะห์ได้ในขณะนี้';
-    updateQAMsg(loadId,ans);
-  }catch(e){updateQAMsg(loadId,'เกิดข้อผิดพลาด: '+e.message);}
-  document.getElementById('qa-send').disabled=false;
-}
-
-function askPreset(el){document.getElementById('qa-input').value=el.textContent.trim();sendQA();}
-
-let _msgId=0;
-function addQAMsg(text,role,loading=false){
-  const id='msg-'+(_msgId++);
-  const msgs=document.getElementById('qa-messages');
-  const div=document.createElement('div');div.className=`qa-msg ${role}`;div.id=id;
-  div.innerHTML=`<div class="qa-avatar ${role}">${role==='user'?'👤':'🤖'}</div><div class="qa-bubble ${role}${loading?' loading':''}">${text.replace(/
-/g,'<br>')}</div>`;
-  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
-  return id;
-}
-function updateQAMsg(id,text){
-  const el=document.getElementById(id);
-  if(el){el.querySelector('.qa-bubble').className='qa-bubble ai';el.querySelector('.qa-bubble').innerHTML=text.replace(/
-/g,'<br>');}
-  document.getElementById('qa-messages').scrollTop=9999;
-}
-
-// ─── HOOK INTO applyFilter ────────────────────────────────────────────
-// Wrap applyFilter to also trigger renderTrendCharts
-const _applyFilterOrig = window.applyFilter || applyFilter;
-window.applyFilter = applyFilter = function(){
-  _applyFilterOrig();
-  if((PD3_ALL&&PD3_ALL.length)||(PD4_ALL&&PD4_ALL.length)) renderTrendCharts();
-};
-
-// Re-render charts on theme change
-const _origToggle=window.toggleTheme;
-window.toggleTheme=function(){if(_origToggle)_origToggle();setTimeout(()=>{Object.keys(CHARTS).forEach(k=>{delete CHARTS[k];});renderTrendCharts();},100);};
-
-// Init product pills
-// renderProductPills and renderTrendCharts are called inside init() after data loads
-</script>
-
 </body>
 </html>
