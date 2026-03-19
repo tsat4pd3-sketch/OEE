@@ -273,6 +273,78 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 [data-theme="dark"] .pc-kpi{background:var(--card)}
 [data-theme="dark"] .pc-trends .pc-trend{background:var(--card)}
 
+
+/* ─── EXECUTIVE SECTIONS ─── */
+.exec-kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.exec-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:0 1px 3px #00000008}
+.exec-kpi-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.exec-kpi-val{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--text);line-height:1}
+.exec-kpi-sub{font-size:11px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:5px}
+.trend-up{color:var(--green);font-weight:700}.trend-dn{color:var(--red);font-weight:700}.trend-fl{color:var(--muted)}
+
+/* ─── MODE TOGGLE PILLS ─── */
+.mode-pills{display:flex;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px}
+.mode-pill{padding:5px 14px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .18s}
+.mode-pill.active{background:var(--card);color:var(--accent);box-shadow:0 1px 4px #00000012}
+
+.metric-pills{display:flex;gap:4px;flex-wrap:wrap}
+.metric-pill{padding:4px 12px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--muted);font-family:var(--font-body);transition:all .15s}
+.metric-pill.active{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.product-pill{padding:4px 12px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--muted);font-family:var(--font-body);transition:all .15s}
+.product-pill.active{color:#fff}
+
+/* ─── CHART CARD ─── */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:18px;box-shadow:0 1px 3px #00000008}
+.chart-card-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.chart-card-hdr h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text)}
+.chart-card-hdr .sub{font-size:11px;color:var(--muted);margin-top:3px}
+.chart-wrap{position:relative;height:260px}
+
+/* ─── QA PANEL ─── */
+.qa-wrap{background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
+.qa-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.qa-orb{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.qa-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text)}
+.qa-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.qa-messages{padding:16px 20px;display:flex;flex-direction:column;gap:12px;max-height:340px;overflow-y:auto}
+.qa-msg{display:flex;gap:10px;align-items:flex-start}
+.qa-msg.user{flex-direction:row-reverse}
+.qa-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.7;max-width:80%}
+.qa-bubble.user{background:var(--accent);color:#fff;border-radius:12px 12px 4px 12px}
+.qa-bubble.ai{background:var(--card);border:1px solid var(--border);color:var(--text2);border-radius:12px 12px 12px 4px}
+.qa-bubble.ai.loading{color:var(--muted);font-style:italic}
+.qa-avatar{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px}
+.qa-avatar.user{background:var(--accent-dim);color:var(--accent)}
+.qa-avatar.ai{background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff}
+.qa-input-row{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
+.qa-input{flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s}
+.qa-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #2563eb15}
+.qa-send{padding:10px 18px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#fff;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.qa-send:hover{background:var(--accent2)}.qa-send:disabled{opacity:.5;cursor:not-allowed}
+.qa-chips{padding:8px 20px 0;display:flex;gap:6px;flex-wrap:wrap}
+.qa-chip{padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;background:var(--bg3);border:1px solid var(--border);color:var(--text2);transition:all .15s;font-family:var(--font-body)}
+.qa-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* ─── INSIGHT STRIP ─── */
+.insight-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:20px}
+.insight-box{padding:14px 16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card)}
+.insight-box.warn{border-color:#fde68a;background:#fffbeb}
+.insight-box.good{border-color:#bbf7d0;background:#f0fdf4}
+.insight-box.bad{border-color:#fca5a5;background:#fef2f2}
+.insight-box.info{border-color:#bfdbfe;background:#eff6ff}
+.insight-icon{font-size:20px;margin-bottom:6px}
+.insight-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px}
+.insight-body{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* ─── DARK OVERRIDES ─── */
+[data-theme="dark"] .qa-bubble.ai{background:var(--bg3);border-color:var(--border)}
+[data-theme="dark"] .insight-box.warn{border-color:#78350f;background:#1c1000}
+[data-theme="dark"] .insight-box.good{border-color:#14532d;background:#001a0a}
+[data-theme="dark"] .insight-box.bad{border-color:#7f1d1d;background:#1a0000}
+[data-theme="dark"] .insight-box.info{border-color:#1e3a8a;background:#000d1a}
+[data-theme="dark"] .mode-pill.active{background:var(--bg3)}
+[data-theme="dark"] .chart-card{box-shadow:none}
+
 </style>
 </head>
 <body>
@@ -380,6 +452,120 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
       </table>
     </div>
   </div>
+
+  <!-- ═══ EXECUTIVE TREND ANALYSIS ═══ -->
+  <div class="sec-hdr" style="margin-top:4px">
+    <h3>📈 TREND ANALYSIS</h3>
+    <span class="sec-tag" style="background:#eff6ff;color:var(--accent);border:1px solid #bfdbfe">สำหรับผู้บริหาร</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <!-- Auto-insight strip -->
+  <div class="insight-strip" id="insight-strip">
+    <div class="insight-box info"><div class="insight-icon">⏳</div><div class="insight-title">กำลังวิเคราะห์...</div><div class="insight-body">รอโหลดข้อมูล</div></div>
+  </div>
+
+  <!-- Exec KPI strip -->
+  <div class="exec-kpi-strip" id="exec-kpi-strip">
+    <div class="exec-kpi"><div class="exec-kpi-lbl">Output รวม (ช่วงที่เลือก)</div><div class="exec-kpi-val" id="ex-total-out">—</div><div class="exec-kpi-sub" id="ex-total-sub">—</div></div>
+    <div class="exec-kpi"><div class="exec-kpi-lbl">Avg Output / Shift</div><div class="exec-kpi-val" id="ex-avg-shift">—</div><div class="exec-kpi-sub" id="ex-avg-sub">vs เดือนก่อน</div></div>
+    <div class="exec-kpi"><div class="exec-kpi-lbl">Available Time (avg%)</div><div class="exec-kpi-val" id="ex-avail">—</div><div class="exec-kpi-sub" id="ex-avail-sub">—</div></div>
+    <div class="exec-kpi"><div class="exec-kpi-lbl">Unplan DT รวม</div><div class="exec-kpi-val" id="ex-unplan">—</div><div class="exec-kpi-sub" id="ex-unplan-sub">ชั่วโมง</div></div>
+    <div class="exec-kpi"><div class="exec-kpi-lbl">Plan DT รวม</div><div class="exec-kpi-val" id="ex-plan">—</div><div class="exec-kpi-sub" id="ex-plan-sub">ชั่วโมง</div></div>
+  </div>
+
+  <!-- Main trend chart -->
+  <div class="chart-card">
+    <div class="chart-card-hdr">
+      <div>
+        <h3>Output / Shift รายเดือน</h3>
+        <div class="sub">เปรียบเทียบแต่ละ product ตามช่วงที่เลือก</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <div class="mode-pills">
+          <button class="mode-pill active" onclick="setMode('avg',this)">Average</button>
+          <button class="mode-pill" onclick="setMode('median',this)">Median</button>
+          <button class="mode-pill" onclick="setMode('sum',this)">Accumulate</button>
+        </div>
+        <div class="metric-pills" id="metric-pills">
+          <button class="metric-pill active" onclick="setMetric('output',this)">Output/Shift</button>
+          <button class="metric-pill" onclick="setMetric('oee',this)">OEE%</button>
+          <button class="metric-pill" onclick="setMetric('avail',this)">Availability%</button>
+        </div>
+      </div>
+    </div>
+    <div class="chart-wrap"><canvas id="c-trend-main"></canvas></div>
+  </div>
+
+  <!-- Time breakdown chart -->
+  <div class="chart-card">
+    <div class="chart-card-hdr">
+      <div>
+        <h3>⏱ Time Breakdown รายเดือน</h3>
+        <div class="sub">Working Time · Available Time · Plan DT · Unplan DT (ชั่วโมงรวมต่อเดือน)</div>
+      </div>
+      <div class="metric-pills">
+        <button class="metric-pill active" onclick="setTimeView('stack',this)">Stacked</button>
+        <button class="metric-pill" onclick="setTimeView('line',this)">Line</button>
+      </div>
+    </div>
+    <div class="chart-wrap"><canvas id="c-time-breakdown"></canvas></div>
+  </div>
+
+  <!-- Product filter row -->
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <span style="font-size:11px;color:var(--muted);font-weight:600">แสดง:</span>
+    <div id="product-pills" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+  </div>
+
+  <!-- Month-over-month table -->
+  <div class="chart-card">
+    <div class="chart-card-hdr">
+      <div><h3>📊 ตาราง Month-over-Month</h3><div class="sub">Output/Shift, OEE, เวลา แยกรายเดือน</div></div>
+    </div>
+    <div class="tbl-wrap" style="max-height:320px">
+      <table class="dt-tbl" id="mom-tbl">
+        <thead><tr id="mom-thead"></tr></thead>
+        <tbody id="mom-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ AI Q&A PANEL ═══ -->
+  <div class="sec-hdr" style="margin-top:8px">
+    <h3>🤖 AI ASSISTANT</h3>
+    <span class="sec-tag" style="background:#f5f3ff;color:var(--purple);border:1px solid #ddd6fe">ถามตอบข้อมูล Production</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="qa-wrap">
+    <div class="qa-header">
+      <div class="qa-orb">🤖</div>
+      <div>
+        <div class="qa-title">Production Intelligence Assistant</div>
+        <div class="qa-sub">ถามได้เลย — วิเคราะห์จากข้อมูลจริงของคุณ</div>
+      </div>
+    </div>
+    <div class="qa-chips">
+      <div class="qa-chip" onclick="askPreset(this)">Output ลดลงจากเดือนไหน?</div>
+      <div class="qa-chip" onclick="askPreset(this)">Product ไหน OEE ต่ำที่สุด?</div>
+      <div class="qa-chip" onclick="askPreset(this)">Unplan DT สูงสุดเดือนไหน?</div>
+      <div class="qa-chip" onclick="askPreset(this)">เปรียบ output เดือนนี้ vs เดือนก่อน</div>
+      <div class="qa-chip" onclick="askPreset(this)">สรุปสถานการณ์สำหรับผู้บริหาร</div>
+      <div class="qa-chip" onclick="askPreset(this)">Available time เปลี่ยนไปยังไง?</div>
+    </div>
+    <div class="qa-messages" id="qa-messages">
+      <div class="qa-msg">
+        <div class="qa-avatar ai">🤖</div>
+        <div class="qa-bubble ai">สวัสดีครับ ผมวิเคราะห์ข้อมูล Production ของคุณได้เลย<br>ลองถามเรื่อง output trend, downtime, OEE หรืออะไรก็ได้ที่อยากรู้ครับ 📊</div>
+      </div>
+    </div>
+    <div class="qa-input-row">
+      <input class="qa-input" id="qa-input" type="text" placeholder="ถามเกี่ยวกับข้อมูล production..." onkeydown="if(event.key==='Enter')sendQA()">
+      <button class="qa-send" id="qa-send" onclick="sendQA()">ส่ง ➤</button>
+    </div>
+  </div>
+
 </main>
 
 <script>
@@ -648,5 +834,339 @@ init();
   document.addEventListener('DOMContentLoaded', updateBtn);
 })();
 </script>
+
+<script>
+// ─── TREND CHART STATE ────────────────────────────────────────────────
+let TREND_MODE = 'avg';   // avg | median | sum
+let TREND_METRIC = 'output'; // output | oee | avail
+let TIME_VIEW = 'stack';  // stack | line
+let ACTIVE_PRODUCTS = new Set(['gor','lwr','p60','p61']);
+let CHARTS = {};
+
+const MN = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function moKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+function moLabel(k){const[y,m]=k.split('-');return`${MN[+m-1]} ${(+y).toString().slice(2)}`;}
+
+function setMode(m,btn){
+  TREND_MODE=m;
+  document.querySelectorAll('.mode-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTrendCharts();
+}
+function setMetric(m,btn){
+  TREND_METRIC=m;
+  document.querySelectorAll('.metric-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTrendCharts();
+}
+function setTimeView(v,btn){
+  TIME_VIEW=v;
+  document.querySelectorAll('#c-time-breakdown').forEach(()=>{});
+  document.querySelectorAll('[onclick^="setTimeView"]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTimeBreakdown();
+}
+function toggleProduct(id){
+  if(ACTIVE_PRODUCTS.has(id))ACTIVE_PRODUCTS.delete(id);
+  else ACTIVE_PRODUCTS.add(id);
+  document.querySelectorAll('.product-pill').forEach(b=>{
+    const pid=b.dataset.pid;
+    b.classList.toggle('active',ACTIVE_PRODUCTS.has(pid));
+  });
+  renderTrendCharts();
+}
+
+function getFilteredAll(){
+  const from=document.getElementById('f-from').value;
+  const to=document.getElementById('f-to').value;
+  const fDate=from?new Date(from):new Date(0);
+  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
+  const sh=document.getElementById('shift-sel').value;
+  return[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
+}
+
+// ─── AGGREGATE BY MONTH PER PRODUCT ──────────────────────────────────
+function buildMonthlyData(all){
+  // Returns {prodId: {moKey: {vals, oee, avail, planDT, unplanDT, workHr, shiftCount}}}
+  const data={};
+  PRODUCTS.forEach(p=>{data[p.id]={};});
+  all.forEach(d=>{
+    const prod=PRODUCTS.find(p=>p.keywords.some(k=>d.part.toUpperCase().includes(k.toUpperCase())));
+    if(!prod)return;
+    const mk=moKey(d.date);
+    if(!data[prod.id][mk])data[prod.id][mk]={vals:[],oeeVals:[],availVals:[],planDThr:0,unplanDThr:0,workHr:0,shiftCount:0};
+    const mo=data[prod.id][mk];
+    const good=d.total-d.defect;
+    mo.vals.push(good);
+    if(d.oee>0)mo.oeeVals.push(d.oee);
+    if(d.avail>0)mo.availVals.push(d.avail);
+    // Time breakdown (per shift = 8h assumed)
+    const shiftHr=8;
+    const loadHr=d.loadingHr>0?d.loadingHr:shiftHr;
+    const planDT=Math.max(0,shiftHr-loadHr);
+    const unplanDThr=d.dtMin>0?d.dtMin/60:Math.max(0,loadHr-(loadHr*(d.avail>0?d.avail/100:1)));
+    mo.planDThr+=planDT;
+    mo.unplanDThr+=unplanDThr;
+    mo.workHr+=shiftHr;
+    mo.shiftCount+=1;
+  });
+  return data;
+}
+
+function aggregate(vals,mode){
+  if(!vals||!vals.length)return null;
+  if(mode==='sum')return vals.reduce((a,b)=>a+b,0);
+  if(mode==='median'){const s=[...vals].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
+  return vals.reduce((a,b)=>a+b,0)/vals.length; // avg
+}
+
+function renderProductPills(){
+  const container=document.getElementById('product-pills');
+  container.innerHTML=PRODUCTS.map(p=>`
+    <button class="product-pill active" data-pid="${p.id}" onclick="toggleProduct('${p.id}')"
+      style="border-color:${p.color};background:${p.color}22;color:${p.color}">
+      ${p.label}
+    </button>`).join('');
+  ACTIVE_PRODUCTS=new Set(PRODUCTS.map(p=>p.id));
+}
+
+function renderExecKPIs(all,monthlyData){
+  const totOut=all.reduce((s,d)=>s+d.total-d.defect,0);
+  const shiftCount=all.length||1;
+  const avgShift=Math.round(totOut/shiftCount);
+  const avgAvail=all.filter(d=>d.avail>0).reduce((s,d)=>s+d.avail,0)/(all.filter(d=>d.avail>0).length||1);
+  let totalUnplan=0,totalPlan=0;
+  PRODUCTS.forEach(p=>{Object.values(monthlyData[p.id]||{}).forEach(mo=>{totalUnplan+=mo.unplanDThr;totalPlan+=mo.planDThr;});});
+
+  // Month-over-month for avg shift
+  const allMonths=Object.keys(Object.values(monthlyData).reduce((acc,m)=>({...acc,...m}),{})).sort();
+  const lastTwo=allMonths.slice(-2);
+  let momText='—';let momCls='trend-fl';
+  if(lastTwo.length===2){
+    const getMonthAvg=(mk)=>{let vals=[];PRODUCTS.forEach(p=>{if(monthlyData[p.id][mk])vals.push(...monthlyData[p.id][mk].vals);});return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;};
+    const prev=getMonthAvg(lastTwo[0]),curr=getMonthAvg(lastTwo[1]);
+    const diff=prev>0?((curr-prev)/prev*100):0;
+    momText=`${diff>=0?'▲':'▼'} ${Math.abs(diff).toFixed(1)}% vs ${moLabel(lastTwo[0])}`;
+    momCls=diff>=0?'trend-up':'trend-dn';
+  }
+  document.getElementById('ex-total-out').textContent=totOut.toLocaleString();
+  document.getElementById('ex-total-sub').textContent=`${shiftCount} กะ รวม`;
+  document.getElementById('ex-avg-shift').textContent=avgShift.toLocaleString();
+  document.getElementById('ex-avg-sub').innerHTML=`<span class="${momCls}">${momText}</span>`;
+  document.getElementById('ex-avail').textContent=avgAvail.toFixed(1)+'%';
+  document.getElementById('ex-avail-sub').textContent=avgAvail>=85?'✅ ดี':avgAvail>=70?'⚠️ ควรปรับปรุง':'🔴 ต่ำ';
+  document.getElementById('ex-unplan').textContent=totalUnplan.toFixed(0);
+  document.getElementById('ex-plan').textContent=totalPlan.toFixed(0);
+}
+
+function renderInsights(all,monthlyData){
+  const allMonths=Object.keys(Object.values(monthlyData).reduce((acc,m)=>({...acc,...m}),{})).sort();
+  const insights=[];
+  if(allMonths.length>=2){
+    const last=allMonths[allMonths.length-1],prev=allMonths[allMonths.length-2];
+    const getVal=(mk)=>{let v=[];PRODUCTS.forEach(p=>{if(monthlyData[p.id][mk])v.push(...monthlyData[p.id][mk].vals);});return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;};
+    const c=getVal(last),p2=getVal(prev),diff=p2>0?(c-p2)/p2*100:0;
+    if(diff<-5)insights.push({type:'bad',icon:'📉',title:`Output ลดลง ${Math.abs(diff).toFixed(1)}%`,body:`${moLabel(prev)} → ${moLabel(last)}: จาก ${Math.round(p2).toLocaleString()} → ${Math.round(c).toLocaleString()} ชิ้น/กะ`});
+    else if(diff>5)insights.push({type:'good',icon:'📈',title:`Output เพิ่มขึ้น ${diff.toFixed(1)}%`,body:`${moLabel(prev)} → ${moLabel(last)}: ดีขึ้น ${Math.round(c-p2).toLocaleString()} ชิ้น/กะ`});
+    else insights.push({type:'info',icon:'📊',title:'Output ค่อนข้างคงที่',body:`เปลี่ยนแปลง ${diff.toFixed(1)}% จากเดือนก่อน`});
+  }
+  // Unplan DT spike
+  let maxUnplanMo='',maxUnplanVal=0;
+  allMonths.forEach(mk=>{let u=0;PRODUCTS.forEach(p=>{if(monthlyData[p.id][mk])u+=monthlyData[p.id][mk].unplanDThr;});if(u>maxUnplanVal){maxUnplanVal=u;maxUnplanMo=mk;}});
+  if(maxUnplanMo)insights.push({type:'warn',icon:'⚠️',title:`Unplan DT สูงสุด ${moLabel(maxUnplanMo)}`,body:`${maxUnplanVal.toFixed(0)} ชั่วโมง — อาจเป็นสาเหตุ output ลด`});
+  // OEE
+  const avgOEE=all.filter(d=>d.oee>0).reduce((s,d)=>s+d.oee,0)/(all.filter(d=>d.oee>0).length||1);
+  insights.push({type:avgOEE>=75?'good':avgOEE>=60?'warn':'bad',icon:'🏭',title:`OEE รวม ${avgOEE.toFixed(1)}%`,body:avgOEE>=75?'อยู่ในเกณฑ์ดี':avgOEE>=60?'ควรปรับปรุง — เป้าหมาย 75%+':'ต่ำกว่าเกณฑ์ — ต้องแก้ไขเร่งด่วน'});
+  insights.push({type:'info',icon:'📅',title:`ข้อมูล ${allMonths.length} เดือน`,body:`${all.length.toLocaleString()} records จาก PD3+PD4`});
+  document.getElementById('insight-strip').innerHTML=insights.map(i=>`
+    <div class="insight-box ${i.type}">
+      <div class="insight-icon">${i.icon}</div>
+      <div class="insight-title">${i.title}</div>
+      <div class="insight-body">${i.body}</div>
+    </div>`).join('');
+}
+
+function getChartColors(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  return{grid:dark?'rgba(28,38,64,.5)':'rgba(226,231,240,1)',tick:dark?'#526080':'#94a3b8',tooltip:{bg:dark?'#0d1117':'#fff',title:dark?'#dce4f0':'#0f172a',body:dark?'#94a3b8':'#64748b',border:dark?'#1c2640':'#e2e7f0'}};
+}
+
+function destroyChart(id){if(CHARTS[id]){CHARTS[id].destroy();delete CHARTS[id];}}
+
+function renderTrendCharts(){
+  const all=getFilteredAll();
+  const md=buildMonthlyData(all);
+  renderExecKPIs(all,md);
+  renderInsights(all,md);
+
+  const allMonths=[...new Set(PRODUCTS.flatMap(p=>Object.keys(md[p.id])))].sort();
+  const labels=allMonths.map(moLabel);
+  const C=getChartColors();
+  const copts={backgroundColor:C.tooltip.bg,titleColor:C.tooltip.title,bodyColor:C.tooltip.body,borderColor:C.tooltip.border,borderWidth:1};
+
+  // Main trend chart
+  destroyChart('trend');
+  const datasets=PRODUCTS.filter(p=>ACTIVE_PRODUCTS.has(p.id)).map(p=>{
+    const vals=allMonths.map(mk=>{
+      const mo=md[p.id][mk];
+      if(!mo)return null;
+      if(TREND_METRIC==='output')return aggregate(mo.vals,TREND_MODE);
+      if(TREND_METRIC==='oee')return aggregate(mo.oeeVals,TREND_MODE==='sum'?'avg':TREND_MODE);
+      if(TREND_METRIC==='avail')return aggregate(mo.availVals,TREND_MODE==='sum'?'avg':TREND_MODE);
+    });
+    return{label:p.label,data:vals,borderColor:p.color,backgroundColor:p.color+'30',borderWidth:2.5,pointRadius:4,pointHoverRadius:6,tension:.35,fill:ACTIVE_PRODUCTS.size===1,spanGaps:true};
+  });
+  const ctx1=document.getElementById('c-trend-main');
+  CHARTS['trend']=new Chart(ctx1,{type:'line',data:{labels,datasets},options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:true,position:'bottom',labels:{color:C.tick,font:{size:11},usePointStyle:true,pointStyleWidth:10,padding:16}},tooltip:{...copts,mode:'index',intersect:false,callbacks:{label:c=>c.raw!=null?` ${c.dataset.label}: ${TREND_METRIC==='output'?Math.round(c.raw).toLocaleString()+'  ชิ้น/กะ':c.raw.toFixed(1)+'%'}`:null}}},
+    scales:{x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:11}}},y:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:11},callback:v=>TREND_METRIC==='output'?v.toLocaleString():v.toFixed(0)+'%'},beginAtZero:false}}
+  }});
+
+  renderTimeBreakdown(allMonths,md,C);
+  renderMoMTable(allMonths,md);
+}
+
+function renderTimeBreakdown(allMonths,md,C){
+  if(!allMonths){
+    const all=getFilteredAll();md=buildMonthlyData(all);
+    allMonths=[...new Set(PRODUCTS.flatMap(p=>Object.keys(md[p.id])))].sort();
+    C=getChartColors();
+  }
+  const labels=allMonths.map(moLabel);
+  // Aggregate across ALL active products per month
+  const workHr=[],availHr=[],planDT=[],unplanDT=[];
+  allMonths.forEach(mk=>{
+    let w=0,a=0,pl=0,un=0;
+    PRODUCTS.filter(p=>ACTIVE_PRODUCTS.has(p.id)).forEach(p=>{
+      const mo=md[p.id][mk];
+      if(!mo)return;
+      w+=mo.workHr;
+      pl+=mo.planDThr;
+      un+=mo.unplanDThr;
+      a+=mo.workHr-pl-un;
+    });
+    workHr.push(w);availHr.push(Math.max(0,a));planDT.push(pl);unplanDT.push(un);
+  });
+
+  destroyChart('time');
+  const ctx2=document.getElementById('c-time-breakdown');
+  if(TIME_VIEW==='stack'){
+    CHARTS['time']=new Chart(ctx2,{type:'bar',data:{labels,datasets:[
+      {label:'Available Time',data:availHr,backgroundColor:'#22c55e55',borderColor:'#22c55e',borderWidth:1.5,stack:'t'},
+      {label:'Plan DT',data:planDT,backgroundColor:'#f59e0b55',borderColor:'#f59e0b',borderWidth:1.5,stack:'t'},
+      {label:'Unplan DT',data:unplanDT,backgroundColor:'#f43f5e55',borderColor:'#f43f5e',borderWidth:1.5,stack:'t'},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:C.tick,font:{size:11},usePointStyle:true,padding:14}},tooltip:{backgroundColor:C.tooltip.bg,titleColor:C.tooltip.title,bodyColor:C.tooltip.body,borderColor:C.tooltip.border,borderWidth:1,mode:'index',callbacks:{label:c=>`  ${c.dataset.label}: ${c.raw.toFixed(1)}h`}}},
+    scales:{x:{stacked:true,grid:{color:C.grid},ticks:{color:C.tick,font:{size:11}}},y:{stacked:true,grid:{color:C.grid},ticks:{color:C.tick,font:{size:11},callback:v=>v+'h'},title:{display:true,text:'ชั่วโมง',color:C.tick,font:{size:11}}}}}});
+  } else {
+    CHARTS['time']=new Chart(ctx2,{type:'line',data:{labels,datasets:[
+      {label:'Available Time',data:availHr,borderColor:'#22c55e',backgroundColor:'#22c55e20',borderWidth:2,tension:.35,fill:false,pointRadius:3},
+      {label:'Plan DT',data:planDT,borderColor:'#f59e0b',backgroundColor:'#f59e0b20',borderWidth:2,tension:.35,fill:false,pointRadius:3},
+      {label:'Unplan DT',data:unplanDT,borderColor:'#f43f5e',backgroundColor:'#f43f5e20',borderWidth:2,tension:.35,fill:false,pointRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:C.tick,font:{size:11},usePointStyle:true,padding:14}},tooltip:{backgroundColor:C.tooltip.bg,titleColor:C.tooltip.title,bodyColor:C.tooltip.body,borderColor:C.tooltip.border,borderWidth:1,mode:'index',callbacks:{label:c=>`  ${c.dataset.label}: ${c.raw.toFixed(1)}h`}}},
+    scales:{x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:11}}},y:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:11},callback:v=>v+'h'}}}}});
+  }
+}
+
+function renderMoMTable(allMonths,md){
+  if(!allMonths)return;
+  const thead=document.getElementById('mom-thead');
+  const tbody=document.getElementById('mom-tbody');
+  thead.innerHTML='<th>Product</th>'+allMonths.map(mk=>`<th class="num">${moLabel(mk)}</th>`).join('');
+  tbody.innerHTML=PRODUCTS.filter(p=>ACTIVE_PRODUCTS.has(p.id)).map(p=>{
+    const cells=allMonths.map(mk=>{
+      const mo=md[p.id][mk];
+      if(!mo)return`<td class="num" style="color:var(--muted2)">—</td>`;
+      const out=Math.round(aggregate(mo.vals,'avg'));
+      const oee=aggregate(mo.oeeVals,'avg');
+      const prev=allMonths[allMonths.indexOf(mk)-1];
+      const prevOut=prev&&md[p.id][prev]?Math.round(aggregate(md[p.id][prev].vals,'avg')):null;
+      const diff=prevOut?((out-prevOut)/prevOut*100):null;
+      const arrow=diff===null?'':diff>=2?'<span style="color:var(--green);font-size:9px">▲</span>':diff<=-2?'<span style="color:var(--red);font-size:9px">▼</span>':'<span style="color:var(--muted2);font-size:9px">—</span>';
+      return`<td class="num"><div style="font-weight:700;font-size:12px">${out.toLocaleString()} ${arrow}</div><div style="font-size:10px;color:var(--muted)">OEE ${oee?oee.toFixed(0):'—'}%</div></td>`;
+    }).join('');
+    return`<tr><td><span style="font-family:var(--font-display);font-weight:700;color:${p.color}">${p.label}</span></td>${cells}</tr>`;
+  }).join('');
+}
+
+// ─── QA SYSTEM ────────────────────────────────────────────────────────
+function buildDataContext(){
+  const all=getFilteredAll();
+  const md=buildMonthlyData(all);
+  const allMonths=[...new Set(PRODUCTS.flatMap(p=>Object.keys(md[p.id])))].sort();
+  const summary=[];
+  allMonths.forEach(mk=>{
+    PRODUCTS.forEach(p=>{
+      const mo=md[p.id][mk];
+      if(!mo||!mo.vals.length)return;
+      summary.push(`${moLabel(mk)} | ${p.label}: output/shift avg=${Math.round(aggregate(mo.vals,'avg'))}, median=${Math.round(aggregate(mo.vals,'median'))}, OEE avg=${aggregate(mo.oeeVals,'avg').toFixed(1)}%, Avail avg=${aggregate(mo.availVals,'avg').toFixed(1)}%, PlanDT=${mo.planDThr.toFixed(1)}h, UnplanDT=${mo.unplanDThr.toFixed(1)}h, shifts=${mo.shiftCount}`);
+    });
+  });
+  return summary.join('
+');
+}
+
+async function sendQA(){
+  const input=document.getElementById('qa-input');
+  const q=input.value.trim();
+  if(!q)return;
+  input.value='';
+  addQAMsg(q,'user');
+  const loadId=addQAMsg('กำลังวิเคราะห์ข้อมูล...','ai',true);
+  document.getElementById('qa-send').disabled=true;
+  try{
+    const ctx=buildDataContext();
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',max_tokens:800,
+      system:`คุณเป็น Production Intelligence AI ที่วิเคราะห์ข้อมูลโรงงาน ตอบเป็นภาษาไทย กระชับ ชัดเจน มีข้อมูลตัวเลขสนับสนุน เหมาะสำหรับนำเสนอผู้บริหาร
+
+ข้อมูล Production รายเดือน:
+${ctx}`,
+      messages:[{role:'user',content:q}]
+    })});
+    const data=await res.json();
+    const ans=data.content?.[0]?.text||'ไม่สามารถวิเคราะห์ได้ในขณะนี้';
+    updateQAMsg(loadId,ans);
+  }catch(e){updateQAMsg(loadId,'เกิดข้อผิดพลาด: '+e.message);}
+  document.getElementById('qa-send').disabled=false;
+}
+
+function askPreset(el){document.getElementById('qa-input').value=el.textContent.trim();sendQA();}
+
+let _msgId=0;
+function addQAMsg(text,role,loading=false){
+  const id='msg-'+(_msgId++);
+  const msgs=document.getElementById('qa-messages');
+  const div=document.createElement('div');div.className=`qa-msg ${role}`;div.id=id;
+  div.innerHTML=`<div class="qa-avatar ${role}">${role==='user'?'👤':'🤖'}</div><div class="qa-bubble ${role}${loading?' loading':''}">${text.replace(/
+/g,'<br>')}</div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+  return id;
+}
+function updateQAMsg(id,text){
+  const el=document.getElementById(id);
+  if(el){el.querySelector('.qa-bubble').className='qa-bubble ai';el.querySelector('.qa-bubble').innerHTML=text.replace(/
+/g,'<br>');}
+  document.getElementById('qa-messages').scrollTop=9999;
+}
+
+// ─── HOOK INTO applyFilter ────────────────────────────────────────────
+const _origApply=window.applyFilter;
+window.applyFilter=function(){
+  if(_origApply)_origApply();
+  if(PD3_ALL.length||PD4_ALL.length)renderTrendCharts();
+};
+
+// Re-render charts on theme change
+const _origToggle=window.toggleTheme;
+window.toggleTheme=function(){if(_origToggle)_origToggle();setTimeout(()=>{Object.keys(CHARTS).forEach(k=>{delete CHARTS[k];});renderTrendCharts();},100);};
+
+// Init product pills
+document.addEventListener('DOMContentLoaded',()=>{
+  renderProductPills();
+});
+// Also call after data loads (init calls applyFilter which calls renderTrendCharts)
+</script>
+
 </body>
 </html>
