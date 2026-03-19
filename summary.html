@@ -171,7 +171,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
         <option value="Shift 02">Shift 02 (Night)</option>
       </optgroup>
       <optgroup label="PD4">
-        <option value="กลางวัน">กลางวัน</option>
+        <option value="เช้า">เช้า</option>
         <option value="กลางคืน">กลางคืน</option>
       </optgroup>
     </select>
@@ -248,6 +248,16 @@ const PRODUCTS=[
   {id:'p61', label:'61',     cls:'pc-61', color:'#22c55e',src:'PD3',keywords:['061','LH 061','LH061']},
 ];
 
+// Exclude list — part names ที่มี keyword แต่ไม่ต้องการ
+const EXCLUDES=['LASER','BENDING','BEND'];
+
+function matchProduct(part,kws){
+  const p=part.toUpperCase().trim();
+  // ถ้ามีคำใน EXCLUDES ให้ skip เลย
+  if(EXCLUDES.some(ex=>p.includes(ex)))return false;
+  return kws.some(k=>p.includes(k.toUpperCase()));
+}
+
 let PD3_ALL=[],PD4_ALL=[],arTimer=null;
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -258,7 +268,6 @@ function fmtDate(d){if(!d)return'—';return`${String(d.getDate()).padStart(2,'0
 function arrMin(arr){return arr.reduce((a,b)=>a<b?a:b);}
 function arrMax(arr){return arr.reduce((a,b)=>a>b?a:b);}
 function median(arr){if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
-function matchProduct(part,kws){const p=part.toUpperCase().trim();return kws.some(k=>p.includes(k.toUpperCase()));}
 
 // ── PD3 Parser ───────────────────────────────────────────────────────
 const DT_KEYS_PD3={'เครื่องจักรหลัก':'เครื่องจักรหลักเบรคดาวน์','เครื่องจักรรอง':'เครื่องจักรรองเบรคดาวน์','แม่พิมพ์/จิ๊ก':'แม่พิมพ์,จิ๊ก,กริ๊ปเปอร์ ชำรุด','PLC/Sensor':'ระบบ PLC / ระบบ เซนเซอร์ มีปัญหา','Robot':'โรบอทเบรคดาวน์','แก้คุณภาพ':'แก้ไขปัญหาคุณภาพ','รอภาชนะ':'รอภาชนะ','รอ QA':'รอQAคอนเฟิร์มคุณภาพ','อื่นๆ':'อื่นๆ'};
@@ -305,7 +314,8 @@ function parsePD4(text){
   for(let r=1;r<lines.length;r++){
     const row=csvLine(lines[r]);if(row.length<10)continue;
     const part=g(row,1);
-    if(!part||!pd4Keys.some(k=>part.toUpperCase().includes(k)))continue;
+    if(!part||EXCLUDES.some(ex=>part.toUpperCase().includes(ex)))continue;
+    if(!pd4Keys.some(k=>part.toUpperCase().includes(k)))continue;
     const date=parseThaiDate(g(row,59)||g(row,0));
     if(!date||date<cutoff)continue;
     const dtTypes=[];
