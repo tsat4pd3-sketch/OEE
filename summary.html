@@ -132,8 +132,32 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 [data-theme=“dark”] .bl{background:#22c55e;color:#000;border-color:#22c55e}
 
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(–border2);border-radius:2px}
-</style>
 
+/* TREND CHART SECTION */
+.chart-card{background:var(–card);border:1px solid var(–border);border-radius:var(–radius);padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 3px #00000008}
+.chart-card-hdr{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.chart-card-hdr h3{font-family:var(–font-display);font-size:14px;font-weight:600;color:var(–text)}
+.chart-card-hdr .sub{font-size:11px;color:var(–muted);margin-top:3px}
+.chart-wrap{position:relative;height:280px}
+.toggle-group{display:flex;gap:3px;background:var(–bg3);border:1px solid var(–border);border-radius:20px;padding:3px}
+.tg-btn{padding:4px 12px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(–muted);font-family:var(–font-body);transition:all .15s}
+.tg-btn.active{background:var(–card);color:var(–accent);box-shadow:0 1px 4px #00000012}
+[data-theme=“dark”] .tg-btn.active{background:var(–bg2)}
+
+/* WORK TYPE KPI STRIP */
+.wt-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.wt-kpi{background:var(–card);border:1px solid var(–border);border-radius:var(–radius);padding:13px 15px;position:relative;overflow:hidden}
+.wt-kpi::after{content:’’;position:absolute;bottom:0;left:0;right:0;height:3px}
+.wt-normal::after{background:linear-gradient(90deg,#16a34a,#4ade80)}
+.wt-ot::after{background:linear-gradient(90deg,#d97706,#fbbf24)}
+.wt-holiday::after{background:linear-gradient(90deg,#dc2626,#f87171)}
+.wt-kpi-lbl{font-size:10px;color:var(–muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.wt-kpi-val{font-family:var(–font-display);font-size:24px;font-weight:700;color:var(–text);line-height:1}
+.wt-kpi-sub{font-size:10px;color:var(–muted);margin-top:4px}
+.wt-bar{height:4px;border-radius:2px;background:var(–bg3);overflow:hidden;margin-top:8px}
+.wt-bar-fill{height:100%;border-radius:2px}
+
+</style>
 </head>
 <body>
 
@@ -228,6 +252,44 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
     <div class="sec-line"></div>
   </div>
   <div class="products-grid" id="products-grid"></div>
+
+  <!-- WORK TYPE KPI STRIP -->
+
+  <div class="sec-hdr">
+    <h3>WORK TYPE SUMMARY</h3>
+    <span class="sec-tag">Normal / OT / Holiday</span>
+    <div class="sec-line"></div>
+  </div>
+  <div id="wt-strip-container"></div>
+
+  <!-- TREND CHART -->
+
+  <div class="sec-hdr">
+    <h3>OUTPUT TREND</h3>
+    <span class="sec-tag">ทุก Product</span>
+    <div class="sec-line"></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card-hdr">
+      <div>
+        <h3 id="trend-title">Output / Day รายวัน</h3>
+        <div class="sub">เปรียบเทียบทุก product ตามช่วงที่เลือก</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;align-items:flex-end">
+        <div class="toggle-group">
+          <button class="tg-btn active" onclick="setTrendMetric('day',this)">Out/Day</button>
+          <button class="tg-btn" onclick="setTrendMetric('hr',this)">Out/Hour</button>
+        </div>
+        <div class="toggle-group">
+          <button class="tg-btn active" onclick="setTrendPeriod('day',this)">วัน</button>
+          <button class="tg-btn" onclick="setTrendPeriod('week',this)">สัปดาห์</button>
+          <button class="tg-btn" onclick="setTrendPeriod('month',this)">เดือน</button>
+          <button class="tg-btn" onclick="setTrendPeriod('year',this)">ปี</button>
+        </div>
+      </div>
+    </div>
+    <div class="chart-wrap"><canvas id="c-trend"></canvas></div>
+  </div>
 
   <div class="sec-hdr">
     <h3>COMPARISON TABLE</h3>
@@ -440,11 +502,12 @@ function calcStats(rows){
   rows.forEach(d=>{const k=fmtIso(d.date);if(!byDayOEE[k])byDayOEE[k]=[];if(d.oee>0)byDayOEE[k].push(d.oee);});
   const oeeTrend=days.map(k=>byDayOEE[k]&&byDayOEE[k].length?byDayOEE[k].reduce((a,b)=>a+b)/byDayOEE[k].length:0);
 
+  const wt=calcWorkTypes(rows);
   return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,totalDTMin,
     outShift:{median:medShift,avg:avgShift,total:totShift},
     outHr:{median:medHr,avg:avgHr,total:totHr},
     outDay:{median:medDay,avg:avgDay,total:totDay},
-    avgOEE,avgAvail,avgPerf,avgQual,
+    avgOEE,avgAvail,avgPerf,avgQual,wt,
     lhDebug:{avg:lhAvg,min:lhMin,max:lhMax,missing:lhMissing,total:rows.length,otCount:lhOtCount},
     outTrend,oeeTrend};
 }
@@ -538,6 +601,9 @@ function renderTable(allStats){
   document.getElementById('tbl-thead').innerHTML=`
     <th>Product</th><th>Source</th>
     <th class="num">Shifts</th>
+    <th class="num" style="color:var(--green)">Normal</th>
+    <th class="num" style="color:var(--amber)">OT</th>
+    <th class="num" style="color:var(--red)">Holiday</th>
     <th class="num">Output รวม</th>
     <th class="num">${mLabel} Out/Shift</th>
     <th class="num">${mLabel} Out/Hour</th>
@@ -549,12 +615,15 @@ function renderTable(allStats){
     <th class="num">PPM</th>
     <th class="num">DT รวม</th>`;
   document.getElementById('sum-tbody').innerHTML=allStats.map(({prod,stats})=>{
-    if(!stats)return`<tr><td class="tbl-prod" style="color:${prod.color}">${prod.label}</td><td colspan="12" style="color:var(--muted)">ไม่พบข้อมูล</td></tr>`;
+    if(!stats)return`<tr><td class="tbl-prod" style="color:${prod.color}">${prod.label}</td><td colspan="15" style="color:var(--muted)">ไม่พบข้อมูล</td></tr>`;
     const bar=Math.round(stats.totalOut/maxOut*100);
     return`<tr>
       <td><span class="tbl-prod" style="color:${prod.color}">${prod.label}</span></td>
       <td><span class="src-badge ${prod.src==='PD3'?'sp-pd3':'sp-pd4'}">${prod.src}</span></td>
       <td class="num">${stats.shifts.toLocaleString()}</td>
+      <td class="num" style="color:var(--green)">${stats.wt.normal}</td>
+      <td class="num" style="color:var(--amber)">${stats.wt.ot}</td>
+      <td class="num" style="color:var(--red)">${stats.wt.holiday}</td>
       <td class="num">${stats.totalOut.toLocaleString()}<div class="mini-bar"><div class="mini-bar-fill" style="width:${bar}%;background:${prod.color}88"></div></div></td>
       <td class="num">${stats.outShift[m].toLocaleString()}</td>
       <td class="num">${stats.outHr[m].toLocaleString()}</td>
@@ -581,6 +650,8 @@ function applyFilter(){
   const allStats=PRODUCTS.map(prod=>({prod,stats:calcStats(all.filter(d=>matchProduct(d.part,prod.keywords)))}));
   renderTable(allStats);
   allStats.forEach(({prod,stats})=>renderCard(prod,stats));
+  renderWorkTypeStrip(allStats);
+  renderTrendChart();
 }
 
 async function reloadData(){
@@ -631,6 +702,220 @@ async function init(){
   if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadData,3600000);updateNextLabel();
 }
 init();
+
+// ── WORK TYPE CLASSIFICATION ─────────────────────────────────────────
+// Normal = Mon-Fri, loadingHr ≤ 9.5h
+// OT     = Mon-Fri, loadingHr > 9.5h
+// Holiday = Sat-Sun
+const OT_THRESHOLD = 9.5; // ชั่วโมง — เกินนี้ถือว่ามี OT
+
+function getWorkType(row){
+  const dow = row.date ? row.date.getDay() : -1; // 0=Sun, 6=Sat
+  if(dow===0||dow===6) return 'holiday';
+  return (row.loadingHr > OT_THRESHOLD) ? 'ot' : 'normal';
+}
+
+function calcWorkTypes(rows){
+  let normal=0,ot=0,holiday=0;
+  let normalOut=0,otOut=0,holidayOut=0;
+  rows.forEach(d=>{
+    const wt=getWorkType(d);
+    const good=d.total-d.defect;
+    if(wt==='normal'){normal++;normalOut+=good;}
+    else if(wt==='ot'){ot++;otOut+=good;}
+    else{holiday++;holidayOut+=good;}
+  });
+  return{normal,ot,holiday,normalOut,otOut,holidayOut,total:rows.length};
+}
+
+// ── WORK TYPE KPI STRIP ───────────────────────────────────────────────
+function renderWorkTypeStrip(allStats){
+  const container=document.getElementById('wt-strip-container');
+  if(!container)return;
+  // รวมทุก product
+  let n=0,o=0,h=0,nOut=0,oOut=0,hOut=0,tot=0;
+  allStats.forEach(({stats})=>{
+    if(!stats)return;
+    n+=stats.wt.normal;o+=stats.wt.ot;h+=stats.wt.holiday;
+    nOut+=stats.wt.normalOut;oOut+=stats.wt.otOut;hOut+=stats.wt.holidayOut;
+    tot+=stats.wt.total;
+  });
+  const pct=v=>tot?Math.round(v/tot*100):0;
+  const m=STAT_MODE;
+  // Output per shift per type (avg)
+  const nAvg=n?Math.round(nOut/n):0;
+  const oAvg=o?Math.round(oOut/o):0;
+  const hAvg=h?Math.round(hOut/h):0;
+
+  container.innerHTML=`
+    <div class="wt-strip">
+      <div class="wt-kpi wt-normal">
+        <div class="wt-kpi-lbl">✅ Normal (จ–ศ ไม่มีOT)</div>
+        <div class="wt-kpi-val">${n.toLocaleString()}</div>
+        <div class="wt-kpi-sub">${pct(n)}% · avg ${nAvg.toLocaleString()} ชิ้น/กะ</div>
+        <div class="wt-bar"><div class="wt-bar-fill" style="width:${pct(n)}%;background:#16a34a"></div></div>
+      </div>
+      <div class="wt-kpi wt-ot">
+        <div class="wt-kpi-lbl">⏱ OT (จ–ศ มีOT >${OT_THRESHOLD}h)</div>
+        <div class="wt-kpi-val">${o.toLocaleString()}</div>
+        <div class="wt-kpi-sub">${pct(o)}% · avg ${oAvg.toLocaleString()} ชิ้น/กะ</div>
+        <div class="wt-bar"><div class="wt-bar-fill" style="width:${pct(o)}%;background:#d97706"></div></div>
+      </div>
+      <div class="wt-kpi wt-holiday">
+        <div class="wt-kpi-lbl">🗓 วันหยุด (เสาร์–อาทิตย์)</div>
+        <div class="wt-kpi-val">${h.toLocaleString()}</div>
+        <div class="wt-kpi-sub">${pct(h)}% · avg ${hAvg.toLocaleString()} ชิ้น/กะ</div>
+        <div class="wt-bar"><div class="wt-bar-fill" style="width:${pct(h)}%;background:#dc2626"></div></div>
+      </div>
+    </div>
+    <!-- Per-product breakdown -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:16px">
+    ${allStats.map(({prod,stats})=>{
+      if(!stats)return'';
+      const wt=stats.wt;
+      const ptot=wt.total||1;
+      return`<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
+          <span style="font-family:var(--font-display);font-size:14px;font-weight:700;color:${prod.color}">${prod.label}</span>
+          <span style="font-size:10px;color:var(--muted)">${wt.total} กะ</span>
+        </div>
+        <div style="display:flex;gap:3px;height:8px;border-radius:4px;overflow:hidden;background:var(--bg3)">
+          <div style="width:${Math.round(wt.normal/ptot*100)}%;background:#16a34a88" title="Normal ${wt.normal}"></div>
+          <div style="width:${Math.round(wt.ot/ptot*100)}%;background:#d9770688" title="OT ${wt.ot}"></div>
+          <div style="width:${Math.round(wt.holiday/ptot*100)}%;background:#dc262688" title="Holiday ${wt.holiday}"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:5px;font-size:9px;color:var(--muted)">
+          <span style="color:#16a34a">■ N ${wt.normal}</span>
+          <span style="color:#d97706">■ OT ${wt.ot}</span>
+          <span style="color:#dc2626">■ H ${wt.holiday}</span>
+        </div>
+      </div>`;
+    }).join('')}
+    </div>`;
+}
+
+// ── TREND CHART ───────────────────────────────────────────────────────
+let TREND_METRIC='day'; // day | hr
+let TREND_PERIOD='day'; // day | week | month | year
+let TREND_CHART=null;
+const MN=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+function setTrendMetric(m,btn){
+  TREND_METRIC=m;
+  document.querySelectorAll('[onclick^="setTrendMetric"]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTrendChart();
+}
+function setTrendPeriod(p,btn){
+  TREND_PERIOD=p;
+  document.querySelectorAll('[onclick^="setTrendPeriod"]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTrendChart();
+}
+
+function getPeriodKey(date){
+  const y=date.getFullYear(),m=date.getMonth(),d=date.getDate();
+  if(TREND_PERIOD==='day')return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  if(TREND_PERIOD==='week'){
+    // ISO week: Monday-based
+    const tmp=new Date(date);tmp.setHours(0,0,0,0);
+    const dow=(tmp.getDay()+6)%7; // Mon=0
+    tmp.setDate(tmp.getDate()-dow);
+    return`${tmp.getFullYear()}-W${String(Math.ceil((tmp.getDate()+new Date(tmp.getFullYear(),0,1).getDay())/7)).padStart(2,'0')}-${String(tmp.getMonth()+1).padStart(2,'0')}-${String(tmp.getDate()).padStart(2,'0')}`;
+  }
+  if(TREND_PERIOD==='month')return`${y}-${String(m+1).padStart(2,'0')}`;
+  return`${y}`;
+}
+function fmtPeriodLabel(key){
+  const p=key.split('-');
+  if(TREND_PERIOD==='day')return`${p[2]}/${p[1]}`;
+  if(TREND_PERIOD==='week')return`W${p[1].replace('W','')} ${p[2]}/${p[3]||''}`.trim();
+  if(TREND_PERIOD==='month')return`${MN[+p[1]-1]} ${p[0].slice(2)}`;
+  return key;
+}
+
+function renderTrendChart(){
+  const from=document.getElementById('f-from').value;
+  const to=document.getElementById('f-to').value;
+  const fDate=from?new Date(from):new Date(0);
+  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
+  const sh=document.getElementById('shift-sel').value;
+  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
+
+  // Build per-period data for each product
+  const periodSets=new Set();
+  const prodData={};
+  PRODUCTS.forEach(p=>{
+    prodData[p.id]={};
+    const rows=all.filter(d=>matchProduct(d.part,p.keywords));
+    rows.forEach(d=>{
+      const key=getPeriodKey(d.date);
+      periodSets.add(key);
+      if(!prodData[p.id][key])prodData[p.id][key]={goodSum:0,hrSum:0,dayMap:new Set()};
+      const good=d.total-d.defect;
+      const h=d.loadingHr>0?d.loadingHr:8;
+      prodData[p.id][key].goodSum+=good;
+      prodData[p.id][key].hrSum+=h;
+      prodData[p.id][key].dayMap.add(fmtIso(d.date));
+    });
+  });
+
+  const periods=[...periodSets].sort();
+  const labels=periods.map(fmtPeriodLabel);
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  const gridC=dark?'rgba(28,38,64,.5)':'rgba(226,231,240,1)';
+  const tickC=dark?'#526080':'#94a3b8';
+
+  const datasets=PRODUCTS.map(p=>({
+    label:p.label,
+    data:periods.map(k=>{
+      const d=prodData[p.id][k];
+      if(!d)return null;
+      if(TREND_METRIC==='day'){
+        // output/day = goodSum ÷ unique days in period
+        return d.dayMap.size>0?Math.round(d.goodSum/d.dayMap.size):null;
+      } else {
+        // output/hr = goodSum ÷ total loading hours
+        return d.hrSum>0?Math.round(d.goodSum/d.hrSum):null;
+      }
+    }),
+    borderColor:p.color,
+    backgroundColor:p.color+'25',
+    borderWidth:2,
+    pointRadius:TREND_PERIOD==='day'?2:4,
+    pointHoverRadius:6,
+    tension:.35,
+    spanGaps:true,
+    fill:false,
+  }));
+
+  const yLabel=TREND_METRIC==='day'?'ชิ้น/วัน':'ชิ้น/ชม.';
+  const titleMap={day:'วัน',week:'สัปดาห์',month:'เดือน',year:'ปี'};
+  const metricMap={day:'Output / Day',hr:'Output / Hour'};
+  document.getElementById('trend-title').textContent=`${metricMap[TREND_METRIC]} ราย${titleMap[TREND_PERIOD]}`;
+
+  if(TREND_CHART){TREND_CHART.destroy();TREND_CHART=null;}
+  const ctx=document.getElementById('c-trend');
+  if(!ctx)return;
+  TREND_CHART=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{color:tickC,font:{size:11},usePointStyle:true,pointStyleWidth:10,padding:14}},
+        tooltip:{backgroundColor:dark?'#0d1117':'#fff',titleColor:dark?'#dce4f0':'#0f172a',bodyColor:tickC,borderColor:dark?'#1c2640':'#e2e7f0',borderWidth:1,mode:'index',intersect:false,
+          callbacks:{label:c=>c.raw!=null?` ${c.dataset.label}: ${c.raw.toLocaleString()} ${yLabel}`:null}}
+      },
+      scales:{
+        x:{grid:{color:gridC},ticks:{color:tickC,font:{size:10},maxRotation:45,maxTicksLimit:20}},
+        y:{grid:{color:gridC},ticks:{color:tickC,font:{size:11},callback:v=>v.toLocaleString()},
+           title:{display:true,text:yLabel,color:tickC,font:{size:11}},beginAtZero:false}
+      }
+    }
+  });
+}
+
 </script>
 
 <script>
