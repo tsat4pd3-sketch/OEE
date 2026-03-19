@@ -52,6 +52,14 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .topbar h2{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px}
 .topbar p{font-size:12px;color:var(--muted);margin-top:4px}
 
+/* MODE TOGGLE */
+.mode-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mode-lbl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.mode-pills{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px}
+.mode-pill{padding:5px 14px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .18s;letter-spacing:.2px}
+.mode-pill.active{background:var(--card);color:var(--accent);box-shadow:0 1px 4px #00000014}
+[data-theme="dark"] .mode-pill.active{background:var(--bg3)}
+
 /* SECTION HEADER */
 .sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .sec-hdr h3{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text)}
@@ -198,7 +206,17 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
       <h2>📋 Summary Dashboard</h2>
       <p id="range-lbl">—</p>
     </div>
-    <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
+      <div class="mode-bar">
+        <span class="mode-lbl">แสดงผลแบบ</span>
+        <div class="mode-pills">
+          <button class="mode-pill active" onclick="setMode('median',this)">Median</button>
+          <button class="mode-pill" onclick="setMode('avg',this)">Average</button>
+          <button class="mode-pill" onclick="setMode('total',this)">Total</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="sec-hdr">
@@ -216,21 +234,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   <div class="card">
     <div class="tbl-wrap">
       <table class="dt-tbl">
-        <thead>
-          <tr>
-            <th>Product</th><th>Source</th>
-            <th class="num">Shifts</th>
-            <th class="num">Output รวม</th>
-            <th class="num">Med Out/Shift</th>
-            <th class="num">Med Out/Hour</th>
-            <th class="num">OEE</th>
-            <th class="num">Avail</th>
-            <th class="num">Perf</th>
-            <th class="num">Quality</th>
-            <th class="num">PPM</th>
-            <th class="num">DT รวม</th>
-          </tr>
-        </thead>
+        <thead><tr id="tbl-thead"></tr></thead>
         <tbody id="sum-tbody"></tbody>
       </table>
     </div>
@@ -333,28 +337,64 @@ function parsePD4(text){
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────
+let STAT_MODE='median'; // median | avg | total
+
+function setMode(mode,btn){
+  STAT_MODE=mode;
+  document.querySelectorAll('.mode-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter();
+}
+
 function calcStats(rows){
   if(!rows.length)return null;
+  const goodArr=rows.map(d=>d.total-d.defect);
   const totalOut=rows.reduce((s,d)=>s+d.total,0);
-  const totalGood=rows.reduce((s,d)=>s+(d.total-d.defect),0);
+  const totalGood=goodArr.reduce((a,b)=>a+b,0);
   const totalDef=rows.reduce((s,d)=>s+d.defect,0);
   const totalDTMin=rows.reduce((s,d)=>s+(d.dtMin||0),0);
   const ppm=totalOut>0?Math.round((totalDef/totalOut)*1e6):0;
-  const medShift=Math.round(median(rows.map(d=>d.total-d.defect)));
+
+  // Output/shift — all 3 modes
+  const medShift=Math.round(median(goodArr));
+  const avgShift=Math.round(totalGood/(rows.length||1));
+  const totShift=totalGood;
+
+  // Output/hour — all 3 modes
   const outHrArr=rows.map(d=>{const h=d.loadingHr>0?d.loadingHr:8;return(d.total-d.defect)/h;}).filter(v=>v>0);
   const medHr=Math.round(median(outHrArr));
+  const avgHr=Math.round(outHrArr.reduce((a,b)=>a+b,0)/(outHrArr.length||1));
+  const totHr=Math.round(outHrArr.reduce((a,b)=>a+b,0));
+
+  // Output/day = output/shift × 2 (2 shifts/day) — all 3 modes
+  const medDay=medShift*2;
+  const avgDay=avgShift*2;
+  const totDay=totShift; // total ต่อวัน = total รวม (ไม่ × 2 เพราะ record แยกกะอยู่แล้ว รวมกันเลย)
+
+  // OEE components — avg เหมือนเดิม (% ไม่ sum)
   const avg=arr=>arr.filter(v=>v>0).reduce((a,b)=>a+b,0)/(arr.filter(v=>v>0).length||1);
   const avgOEE=avg(rows.map(d=>d.oee));
   const avgAvail=avg(rows.map(d=>d.avail));
   const avgPerf=avg(rows.map(d=>d.perf));
   const avgQual=avg(rows.map(d=>d.qual));
-  // Sparkline: 30-day output trend
-  const byDay={};rows.forEach(d=>{const k=fmtIso(d.date);if(!byDay[k])byDay[k]=0;byDay[k]+=d.total-d.defect;});
+
+  // Sparkline: daily total good (aggregate both shifts per day)
+  const byDay={};
+  rows.forEach(d=>{const k=fmtIso(d.date);if(!byDay[k])byDay[k]=0;byDay[k]+=d.total-d.defect;});
   const days=Object.keys(byDay).sort().slice(-30);
   const outTrend=days.map(k=>byDay[k]);
-  const byDayOEE={};rows.forEach(d=>{const k=fmtIso(d.date);if(!byDayOEE[k])byDayOEE[k]=[];if(d.oee>0)byDayOEE[k].push(d.oee);});
+  const byDayOEE={};
+  rows.forEach(d=>{const k=fmtIso(d.date);if(!byDayOEE[k])byDayOEE[k]=[];if(d.oee>0)byDayOEE[k].push(d.oee);});
   const oeeTrend=days.map(k=>byDayOEE[k]&&byDayOEE[k].length?byDayOEE[k].reduce((a,b)=>a+b)/byDayOEE[k].length:0);
-  return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,medShift,medHr,avgOEE,avgAvail,avgPerf,avgQual,totalDTMin,outTrend,oeeTrend};
+
+  return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,totalDTMin,
+    // per-mode output values
+    outShift:{median:medShift,avg:avgShift,total:totShift},
+    outHr:{median:medHr,avg:avgHr,total:totHr},
+    outDay:{median:medDay,avg:avgDay,total:totDay},
+    // OEE always avg
+    avgOEE,avgAvail,avgPerf,avgQual,
+    outTrend,oeeTrend};
 }
 
 // ── Spark canvas ──────────────────────────────────────────────────────
@@ -385,19 +425,27 @@ function renderCard(prod,stats){
   }
   const o=stats.avgOEE,a=stats.avgAvail,p=stats.avgPerf,q=stats.avgQual;
   const srcCls=prod.src==='PD3'?'sp-pd3':'sp-pd4';
+  const m=STAT_MODE;
+  const vShift=stats.outShift[m];
+  const vHr=stats.outHr[m];
+  const vDay=stats.outDay[m];
+  const modeLabel=m==='median'?'MED':m==='avg'?'AVG':'TOTAL';
+  const unitShift=m==='total'?'ชิ้น':'ชิ้น/กะ';
+  const unitHr=m==='total'?'ชิ้น':'ชิ้น/ชม.';
+  const unitDay=m==='total'?'ชิ้น':'ชิ้น/วัน';
   el.innerHTML=`
     <div class="prod-card-accent"></div>
     <div class="pc-head">
-      <div><div class="pc-name" style="color:${prod.color}">${prod.label}</div><div class="pc-sub">${stats.shifts} กะ</div></div>
+      <div><div class="pc-name" style="color:${prod.color}">${prod.label}</div><div class="pc-sub">${stats.shifts} กะ · <span style="color:var(--accent);font-weight:600">${modeLabel}</span></div></div>
       <span class="src-badge ${srcCls}">${prod.src}</span>
     </div>
     <div class="pc-kpis">
-      <div class="pc-kpi"><div class="pc-kpi-lbl">MED OUT/SHIFT</div><div class="pc-kpi-val" style="color:${prod.color}">${stats.medShift.toLocaleString()}</div><div class="pc-kpi-unit">ชิ้น/กะ</div></div>
-      <div class="pc-kpi"><div class="pc-kpi-lbl">MED OUT/HOUR</div><div class="pc-kpi-val" style="color:var(--cyan)">${stats.medHr.toLocaleString()}</div><div class="pc-kpi-unit">ชิ้น/ชม.</div></div>
-      <div class="pc-kpi"><div class="pc-kpi-lbl">OEE</div><div class="pc-kpi-val ${oeeClass(o)}">${fmt1(o)}%</div><div class="pc-kpi-unit">avg</div></div>
+      <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/SHIFT</div><div class="pc-kpi-val" style="color:${prod.color}">${vShift.toLocaleString()}</div><div class="pc-kpi-unit">${unitShift}</div></div>
+      <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/HOUR</div><div class="pc-kpi-val" style="color:var(--cyan)">${vHr.toLocaleString()}</div><div class="pc-kpi-unit">${unitHr}</div></div>
+      <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/DAY</div><div class="pc-kpi-val" style="color:var(--purple)">${vDay.toLocaleString()}</div><div class="pc-kpi-unit">${unitDay}</div></div>
       <div class="pc-kpi"><div class="pc-kpi-lbl">AVAILABILITY</div><div class="pc-kpi-val ${oeeClass(a)}">${fmt1(a)}%</div><div class="pc-kpi-unit">avg</div></div>
       <div class="pc-kpi"><div class="pc-kpi-lbl">PERFORMANCE</div><div class="pc-kpi-val ${oeeClass(p)}">${fmt1(p)}%</div><div class="pc-kpi-unit">avg</div></div>
-      <div class="pc-kpi"><div class="pc-kpi-lbl">QUALITY</div><div class="pc-kpi-val ${oeeClass(q)}">${fmt1(q)}%</div><div class="pc-kpi-unit">avg</div></div>
+      <div class="pc-kpi"><div class="pc-kpi-lbl">OEE</div><div class="pc-kpi-val ${oeeClass(o)}">${fmt1(o)}%</div><div class="pc-kpi-unit">avg</div></div>
     </div>
     <div class="oee-bar-wrap">
       <div class="oee-bar-lbl">
@@ -427,17 +475,33 @@ function renderCard(prod,stats){
 }
 
 function renderTable(allStats){
+  const m=STAT_MODE;
+  const mLabel=m==='median'?'Med':m==='avg'?'Avg':'Total';
   const maxOut=Math.max(...allStats.map(s=>s.stats?.totalOut||0),1);
+  document.getElementById('tbl-thead').innerHTML=`
+    <th>Product</th><th>Source</th>
+    <th class="num">Shifts</th>
+    <th class="num">Output รวม</th>
+    <th class="num">${mLabel} Out/Shift</th>
+    <th class="num">${mLabel} Out/Hour</th>
+    <th class="num">${mLabel} Out/Day</th>
+    <th class="num">OEE</th>
+    <th class="num">Avail</th>
+    <th class="num">Perf</th>
+    <th class="num">Quality</th>
+    <th class="num">PPM</th>
+    <th class="num">DT รวม</th>`;
   document.getElementById('sum-tbody').innerHTML=allStats.map(({prod,stats})=>{
-    if(!stats)return`<tr><td class="tbl-prod" style="color:${prod.color}">${prod.label}</td><td colspan="11" style="color:var(--muted)">ไม่พบข้อมูล</td></tr>`;
+    if(!stats)return`<tr><td class="tbl-prod" style="color:${prod.color}">${prod.label}</td><td colspan="12" style="color:var(--muted)">ไม่พบข้อมูล</td></tr>`;
     const bar=Math.round(stats.totalOut/maxOut*100);
     return`<tr>
       <td><span class="tbl-prod" style="color:${prod.color}">${prod.label}</span></td>
       <td><span class="src-badge ${prod.src==='PD3'?'sp-pd3':'sp-pd4'}">${prod.src}</span></td>
       <td class="num">${stats.shifts.toLocaleString()}</td>
       <td class="num">${stats.totalOut.toLocaleString()}<div class="mini-bar"><div class="mini-bar-fill" style="width:${bar}%;background:${prod.color}88"></div></div></td>
-      <td class="num">${stats.medShift.toLocaleString()}</td>
-      <td class="num">${stats.medHr.toLocaleString()}</td>
+      <td class="num">${stats.outShift[m].toLocaleString()}</td>
+      <td class="num">${stats.outHr[m].toLocaleString()}</td>
+      <td class="num" style="color:var(--purple);font-weight:600">${stats.outDay[m].toLocaleString()}</td>
       <td class="num ${oeeClass(stats.avgOEE)}">${fmt1(stats.avgOEE)}%</td>
       <td class="num ${oeeClass(stats.avgAvail)}">${fmt1(stats.avgAvail)}%</td>
       <td class="num ${oeeClass(stats.avgPerf)}">${fmt1(stats.avgPerf)}%</td>
