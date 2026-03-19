@@ -387,8 +387,14 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
     <div class="ss-label">กะ</div>
     <select id="shift-sel" onchange="applyFilter()">
       <option value="all">ทุกกะ</option>
-      <option value="กลางวัน">กลางวัน</option>
-      <option value="กลางคืน">กลางคืน</option>
+      <optgroup label="PD3">
+        <option value="Shift 01">Shift 01 (Day)</option>
+        <option value="Shift 02">Shift 02 (Night)</option>
+      </optgroup>
+      <optgroup label="PD4">
+        <option value="กลางวัน">กลางวัน</option>
+        <option value="กลางคืน">กลางคืน</option>
+      </optgroup>
     </select>
   </div>
 
@@ -436,7 +442,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
         <thead>
           <tr>
             <th>Product</th><th>Source</th>
-            <th class="num">Shifts</th>
+            <th class="num">Records<br><span style="font-size:9px;font-weight:400">(PD3=วัน, PD4=กะ)</span></th>
             <th class="num">Output รวม</th>
             <th class="num">Med Out/Shift</th>
             <th class="num">Med Out/Hour</th>
@@ -573,10 +579,10 @@ const PD3_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vToehKwHXa32rnaE0
 const PD4_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSs034o0M970g62tL1jkU4CU6HpAbVkER87uw3OzI97ueA6xXdBdwXd1Gcd0GrgaKOuIrTl-F75q3nz/pub?gid=122174819&single=true&output=csv";
 
 const PRODUCTS=[
-  {id:'GOR',  label:'GOR',    cls:'pc-gor',color:'#f59e0b',src:'PD4',keywords:['GOR']},
-  {id:'LWR BAR',  label:'LWR BAR', cls:'pc-lwr',color:'#38bdf8',src:'PD4',keywords:['LWR BAR']},
-  {id:'ASSY APRON RH 060',  label:'ASSY APRON RH 060',     cls:'pc-60', color:'#a855f7',src:'PD3',keywords:['ASSY APRON RH 060']},
-  {id:'ASSY APRON LH 061',  label:'ASSY APRON LH 061',     cls:'pc-61', color:'#22c55e',src:'PD3',keywords:['ASSY APRON LH 061']},
+  {id:'gor',  label:'GOR',    cls:'pc-gor',color:'#f59e0b',src:'PD4',keywords:['GOR','gor']},
+  {id:'lwr',  label:'LWRBAR', cls:'pc-lwr',color:'#38bdf8',src:'PD4',keywords:['LWRBAR','LWR BAR','lwrbar']},
+  {id:'p60',  label:'60',     cls:'pc-60', color:'#a855f7',src:'PD3',keywords:['60']},
+  {id:'p61',  label:'61',     cls:'pc-61', color:'#22c55e',src:'PD3',keywords:['61']},
 ];
 
 let PD3_ALL=[],PD4_ALL=[],arTimer=null;
@@ -697,7 +703,7 @@ function renderCard(prod,stats){
   el.innerHTML=`
     <div class="prod-card-accent"></div>
     <div class="pc-head">
-      <div><div class="pc-name" style="color:${prod.color}">${prod.label}</div><div class="pc-sub">${stats.shifts} กะ</div></div>
+      <div><div class="pc-name" style="color:${prod.color}">${prod.label}</div><div class="pc-sub">${stats.shifts} ${prod.src==='PD3'?'วัน':'กะ'}</div></div>
       <span class="src-badge ${srcCls}">${prod.src}</span>
     </div>
     <div class="pc-kpis">
@@ -740,7 +746,7 @@ function renderTable(allStats){
     return`<tr>
       <td><span class="tbl-prod" style="color:${prod.color}">${prod.label}</span></td>
       <td><span class="src-badge ${prod.src==='PD3'?'sp-pd3':'sp-pd4'}">${prod.src}</span></td>
-      <td class="num">${stats.shifts.toLocaleString()}</td>
+      <td class="num">${stats.shifts.toLocaleString()} <span style="font-size:9px;color:var(--muted)">${prod.src==="PD3"?"วัน":"กะ"}</span></td>
       <td class="num">${stats.totalOut.toLocaleString()}<div class="mini-bar"><div class="mini-bar-fill" style="width:${bar}%;background:${prod.color}88"></div></div></td>
       <td class="num">${stats.medShift.toLocaleString()}</td>
       <td class="num">${stats.medHr.toLocaleString()}</td>
@@ -778,7 +784,7 @@ async function reloadData(){
   if(results[1].status==='fulfilled'){PD4_ALL=parsePD4(results[1].value);document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
   document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
   document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
-  updateNextLabel();applyFilter();
+  updateNextLabel();renderProductPills();applyFilter();
 }
 
 function updateNextLabel(){const el=document.getElementById('next-refresh');if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';}
@@ -801,7 +807,8 @@ async function init(){
   document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
   document.getElementById('f-from').addEventListener('change',applyFilter);
   document.getElementById('f-to').addEventListener('change',applyFilter);
-  applyFilter();
+  renderProductPills();
+  applyFilter(); // this now also calls renderTrendCharts
   const el=document.getElementById('loading');el.style.opacity='0';setTimeout(()=>el.style.display='none',500);
   if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadData,3600000);updateNextLabel();
 }
@@ -903,7 +910,7 @@ function buildMonthlyData(all){
   const data={};
   PRODUCTS.forEach(p=>{data[p.id]={};});
   all.forEach(d=>{
-    const prod=PRODUCTS.find(p=>p.keywords.some(k=>d.part.toUpperCase().includes(k.toUpperCase())));
+    const prod=PRODUCTS.find(p=>matchProduct(d.part,p.keywords));
     if(!prod)return;
     const mk=moKey(d.date);
     if(!data[prod.id][mk])data[prod.id][mk]={vals:[],oeeVals:[],availVals:[],planDThr:0,unplanDThr:0,workHr:0,shiftCount:0};
@@ -1164,10 +1171,11 @@ function updateQAMsg(id,text){
 }
 
 // ─── HOOK INTO applyFilter ────────────────────────────────────────────
-const _origApply=window.applyFilter;
-window.applyFilter=function(){
-  if(_origApply)_origApply();
-  if(PD3_ALL.length||PD4_ALL.length)renderTrendCharts();
+// applyFilter is defined above — extend it to also call renderTrendCharts
+const _baseApply = applyFilter;
+applyFilter = function(){
+  _baseApply();
+  if(PD3_ALL.length||PD4_ALL.length) renderTrendCharts();
 };
 
 // Re-render charts on theme change
@@ -1175,10 +1183,7 @@ const _origToggle=window.toggleTheme;
 window.toggleTheme=function(){if(_origToggle)_origToggle();setTimeout(()=>{Object.keys(CHARTS).forEach(k=>{delete CHARTS[k];});renderTrendCharts();},100);};
 
 // Init product pills
-document.addEventListener('DOMContentLoaded',()=>{
-  renderProductPills();
-});
-// Also call after data loads (init calls applyFilter which calls renderTrendCharts)
+// renderProductPills and renderTrendCharts are called inside init() after data loads
 </script>
 
 </body>
