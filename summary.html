@@ -1090,17 +1090,22 @@ ${ctx}
 
 หมายเหตุ: Med=Median, OT=กะที่มีโอที (loading>9.5h), Holiday=เสาร์อาทิตย์, DT=Downtime`;
 
-    // Build messages with history (keep last 6 turns)
     const historyToSend=_qaHistory.slice(-6);
+    const messages=[...historyToSend];
 
+    // ใช้ Anthropic API ผ่าน fetch พร้อม CORS header ที่ถูกต้อง
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json',
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:800,
         system:systemPrompt,
-        messages:historyToSend
+        messages
       })
     });
 
@@ -1108,7 +1113,6 @@ ${ctx}
     if(!res.ok)throw new Error(data.error?.message||`HTTP ${res.status}`);
     const ans=data.content?.[0]?.text||'ไม่สามารถตอบได้ในขณะนี้';
 
-    // Add AI response to history
     _qaHistory.push({role:'assistant',content:ans});
     updateMsg(loadId,ans);
   }catch(e){
