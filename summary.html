@@ -156,6 +156,35 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .wt-bar{height:4px;border-radius:2px;background:var(--bg3);overflow:hidden;margin-top:8px}
 .wt-bar-fill{height:100%;border-radius:2px}
 
+
+/* AI Q&A */
+.qa-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px #00000008}
+.qa-header{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.qa-orb{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.qa-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text)}
+.qa-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.qa-chips{padding:10px 16px 0;display:flex;gap:6px;flex-wrap:wrap}
+.qa-chip{padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;background:var(--bg3);border:1px solid var(--border);color:var(--text2);transition:all .15s;font-family:var(--font-body);white-space:nowrap}
+.qa-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.qa-messages{padding:14px 16px;display:flex;flex-direction:column;gap:10px;max-height:380px;overflow-y:auto}
+.qa-msg{display:flex;gap:9px;align-items:flex-start}
+.qa-msg.user{flex-direction:row-reverse}
+.qa-avatar{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px}
+.qa-avatar.user{background:var(--accent-dim);color:var(--accent)}
+.qa-avatar.ai{background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff}
+.qa-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.7;max-width:82%}
+.qa-bubble.user{background:var(--accent);color:#fff;border-radius:12px 12px 4px 12px}
+.qa-bubble.ai{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:12px 12px 12px 4px}
+.qa-bubble.ai.thinking{color:var(--muted);font-style:italic}
+.qa-bubble.ai.thinking::after{content:'';display:inline-block;width:8px;animation:dots 1.2s steps(3,end) infinite}
+@keyframes dots{0%,100%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+.qa-input-row{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+.qa-input{flex:1;padding:9px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s}
+.qa-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #2563eb15}
+.qa-send{padding:9px 18px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#fff;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;flex-shrink:0}
+.qa-send:hover{background:var(--accent2)}.qa-send:disabled{opacity:.5;cursor:not-allowed}
+[data-theme="dark"] .qa-bubble.ai{background:var(--bg2)}
+
 </style>
 </head>
 <body>
@@ -301,6 +330,43 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
       </table>
     </div>
   </div>
+
+  <!-- AI Q&A -->
+  <div class="sec-hdr" style="margin-top:4px">
+    <h3>🤖 AI ASSISTANT</h3>
+    <span class="sec-tag" style="background:#f5f3ff;color:#7c3aed;border-color:#ddd6fe">สำหรับผู้บริหาร</span>
+    <div class="sec-line"></div>
+  </div>
+  <div class="qa-wrap">
+    <div class="qa-header">
+      <div class="qa-orb">🤖</div>
+      <div>
+        <div class="qa-title">Production Intelligence Assistant</div>
+        <div class="qa-sub">วิเคราะห์จากข้อมูลจริง · ตอบเป็นภาษาไทย · เหมาะสำหรับนำเสนอผู้บริหาร</div>
+      </div>
+      <button onclick="clearQA()" style="margin-left:auto;padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-body)">🗑 ล้าง</button>
+    </div>
+    <div class="qa-chips">
+      <span class="qa-chip" onclick="askPreset(this)">📉 ทำไม output ถึงลดลง?</span>
+      <span class="qa-chip" onclick="askPreset(this)">🏆 Product ไหนประสิทธิภาพดีสุด?</span>
+      <span class="qa-chip" onclick="askPreset(this)">⏱ OT มีผลต่อ output ยังไง?</span>
+      <span class="qa-chip" onclick="askPreset(this)">🔧 ปัจจัยหลักที่ทำให้ OEE ต่ำ?</span>
+      <span class="qa-chip" onclick="askPreset(this)">📊 สรุปภาพรวมสำหรับผู้บริหาร</span>
+      <span class="qa-chip" onclick="askPreset(this)">📅 เปรียบ Normal vs OT vs Holiday</span>
+      <span class="qa-chip" onclick="askPreset(this)">🎯 แนะนำแผนปรับปรุง</span>
+    </div>
+    <div class="qa-messages" id="qa-messages">
+      <div class="qa-msg">
+        <div class="qa-avatar ai">🤖</div>
+        <div class="qa-bubble ai">สวัสดีครับ ผมวิเคราะห์ข้อมูล Production ของ 4 ไลน์ได้เลย<br>ลองกดคำถามด้านบน หรือพิมพ์ถามได้เลยครับ 📊</div>
+      </div>
+    </div>
+    <div class="qa-input-row">
+      <input class="qa-input" id="qa-input" type="text" placeholder="ถามเกี่ยวกับ production data..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendQA();}">
+      <button class="qa-send" id="qa-send-btn" onclick="sendQA()">ส่ง ➤</button>
+    </div>
+  </div>
+
 </main>
 
 <script>
@@ -745,6 +811,8 @@ function renderWorkTypeStrip(allStats){
   const hAvg=h?Math.round(hOut/h):0;
 
   container.innerHTML=`
+    <!-- ภาพรวมทุก product -->
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">ภาพรวมทุกไลน์</div>
     <div class="wt-strip">
       <div class="wt-kpi wt-normal">
         <div class="wt-kpi-lbl">✅ Normal (จ–ศ ไม่มีOT)</div>
@@ -765,26 +833,51 @@ function renderWorkTypeStrip(allStats){
         <div class="wt-bar"><div class="wt-bar-fill" style="width:${pct(h)}%;background:#dc2626"></div></div>
       </div>
     </div>
-    <!-- Per-product breakdown -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:16px">
+
+    <!-- แยกต่อ product -->
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px">แยกตามชิ้นงาน</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:16px">
     ${allStats.map(({prod,stats})=>{
       if(!stats)return'';
       const wt=stats.wt;
       const ptot=wt.total||1;
-      return`<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px">
-        <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
-          <span style="font-family:var(--font-display);font-size:14px;font-weight:700;color:${prod.color}">${prod.label}</span>
-          <span style="font-size:10px;color:var(--muted)">${wt.total} กะ</span>
+      const pn=Math.round(wt.normal/ptot*100);
+      const po=Math.round(wt.ot/ptot*100);
+      const ph=Math.round(wt.holiday/ptot*100);
+      const nAvgP=wt.normal?Math.round(wt.normalOut/wt.normal):0;
+      const oAvgP=wt.ot?Math.round(wt.otOut/wt.ot):0;
+      const hAvgP=wt.holiday?Math.round(wt.holidayOut/wt.holiday):0;
+      return`<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <!-- header -->
+        <div style="padding:11px 14px 9px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-family:var(--font-display);font-size:16px;font-weight:700;color:${prod.color}">${prod.label}</span>
+          <span style="font-size:10px;color:var(--muted)">${wt.total} กะทั้งหมด</span>
         </div>
-        <div style="display:flex;gap:3px;height:8px;border-radius:4px;overflow:hidden;background:var(--bg3)">
-          <div style="width:${Math.round(wt.normal/ptot*100)}%;background:#16a34a88" title="Normal ${wt.normal}"></div>
-          <div style="width:${Math.round(wt.ot/ptot*100)}%;background:#d9770688" title="OT ${wt.ot}"></div>
-          <div style="width:${Math.round(wt.holiday/ptot*100)}%;background:#dc262688" title="Holiday ${wt.holiday}"></div>
+        <!-- stacked bar -->
+        <div style="padding:10px 14px 4px">
+          <div style="display:flex;gap:2px;height:10px;border-radius:5px;overflow:hidden;background:var(--bg3);margin-bottom:6px">
+            <div style="width:${pn}%;background:#16a34a" title="Normal ${wt.normal}กะ"></div>
+            <div style="width:${po}%;background:#d97706" title="OT ${wt.ot}กะ"></div>
+            <div style="width:${ph}%;background:#dc2626" title="Holiday ${wt.holiday}กะ"></div>
+          </div>
         </div>
-        <div style="display:flex;gap:10px;margin-top:5px;font-size:9px;color:var(--muted)">
-          <span style="color:#16a34a">■ N ${wt.normal}</span>
-          <span style="color:#d97706">■ OT ${wt.ot}</span>
-          <span style="color:#dc2626">■ H ${wt.holiday}</span>
+        <!-- 3 mini kpis -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)">
+          <div style="background:var(--card);padding:9px 12px">
+            <div style="font-size:9px;color:#16a34a;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">Normal</div>
+            <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text)">${wt.normal}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">${pn}% · ${nAvgP.toLocaleString()} ชิ้น/กะ</div>
+          </div>
+          <div style="background:var(--card);padding:9px 12px">
+            <div style="font-size:9px;color:#d97706;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">OT</div>
+            <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text)">${wt.ot}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">${po}% · ${oAvgP.toLocaleString()} ชิ้น/กะ</div>
+          </div>
+          <div style="background:var(--card);padding:9px 12px">
+            <div style="font-size:9px;color:#dc2626;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">Holiday</div>
+            <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text)">${wt.holiday}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">${ph}% · ${hAvgP.toLocaleString()} ชิ้น/กะ</div>
+          </div>
         </div>
       </div>`;
     }).join('')}
@@ -911,6 +1004,133 @@ function renderTrendChart(){
       }
     }
   });
+}
+
+
+// ── AI Q&A ───────────────────────────────────────────────────────────
+let _qaHistory=[];
+let _msgId=0;
+
+function buildDataSummary(){
+  // สร้าง context จากข้อมูลจริง สั้น compact สำหรับ API
+  const from=document.getElementById('f-from').value;
+  const to=document.getElementById('f-to').value;
+  const fDate=from?new Date(from):new Date(0);
+  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
+  const sh=document.getElementById('shift-sel').value;
+  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
+
+  const lines=[];
+  lines.push(`ช่วงข้อมูล: ${from||'—'} ถึง ${to||'—'} | กะ: ${sh==='all'?'ทั้งหมด':sh}`);
+
+  PRODUCTS.forEach(p=>{
+    const rows=all.filter(d=>matchProduct(d.part,p.keywords));
+    if(!rows.length){lines.push(`${p.label}: ไม่มีข้อมูล`);return;}
+    const s=calcStats(rows);
+    const wt=s.wt;
+    lines.push(
+      `${p.label} (${p.src}): ${s.shifts}กะ | `+
+      `Med Out/Shift=${s.outShift.median.toLocaleString()} | `+
+      `Med Out/Hr=${s.outHr.median.toLocaleString()} | `+
+      `Med Out/Day=${s.outDay.median.toLocaleString()} | `+
+      `OEE=${s.avgOEE.toFixed(1)}% | A=${s.avgAvail.toFixed(1)}% P=${s.avgPerf.toFixed(1)}% Q=${s.avgQual.toFixed(1)}% | `+
+      `Normal=${wt.normal}กะ OT=${wt.ot}กะ Holiday=${wt.holiday}กะ | `+
+      `DT=${(s.totalDTMin/60).toFixed(0)}h | PPM=${s.ppm.toLocaleString()} | `+
+      `LoadingHr avg=${s.lhDebug.avg}h (${s.lhDebug.min}–${s.lhDebug.max}h OT=${s.lhDebug.otCount}กะ)`
+    );
+  });
+  return lines.join('\n');
+}
+
+function addMsg(text,role,loading=false){
+  const id='qm-'+(++_msgId);
+  const msgs=document.getElementById('qa-messages');
+  const div=document.createElement('div');
+  div.className=`qa-msg ${role}`;div.id=id;
+  const bubble=`<div class="qa-bubble ${role}${loading?' thinking':''}">
+    ${loading?'กำลังวิเคราะห์ข้อมูล':text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')}
+  </div>`;
+  div.innerHTML=`<div class="qa-avatar ${role}">${role==='user'?'👤':'🤖'}</div>${bubble}`;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return id;
+}
+
+function updateMsg(id,text){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const b=el.querySelector('.qa-bubble');
+  b.classList.remove('thinking');
+  b.innerHTML=text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
+  document.getElementById('qa-messages').scrollTop=9999;
+}
+
+async function sendQA(){
+  const inp=document.getElementById('qa-input');
+  const q=inp.value.trim();
+  if(!q)return;
+  inp.value='';
+
+  addMsg(q,'user');
+  const loadId=addMsg('','ai',true);
+  const sendBtn=document.getElementById('qa-send-btn');
+  sendBtn.disabled=true;
+
+  // Add to history
+  _qaHistory.push({role:'user',content:q});
+
+  try{
+    const ctx=buildDataSummary();
+    const systemPrompt=`คุณเป็น Production Intelligence AI ผู้เชี่ยวชาญด้านการวิเคราะห์ข้อมูลโรงงาน
+ตอบเป็นภาษาไทย กระชับ ชัดเจน มีตัวเลขสนับสนุน เหมาะสำหรับนำเสนอผู้บริหาร
+ใช้ **bold** เพื่อเน้นตัวเลขสำคัญ จัดเป็นข้อๆ ถ้าเนื้อหาซับซ้อน
+
+ข้อมูล Production ปัจจุบัน:
+${ctx}
+
+หมายเหตุ: Med=Median, OT=กะที่มีโอที (loading>9.5h), Holiday=เสาร์อาทิตย์, DT=Downtime`;
+
+    // Build messages with history (keep last 6 turns)
+    const historyToSend=_qaHistory.slice(-6);
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:800,
+        system:systemPrompt,
+        messages:historyToSend
+      })
+    });
+
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error?.message||`HTTP ${res.status}`);
+    const ans=data.content?.[0]?.text||'ไม่สามารถตอบได้ในขณะนี้';
+
+    // Add AI response to history
+    _qaHistory.push({role:'assistant',content:ans});
+    updateMsg(loadId,ans);
+  }catch(e){
+    _qaHistory.pop(); // remove failed user message
+    updateMsg(loadId,`⚠️ เกิดข้อผิดพลาด: ${e.message}`);
+  }
+  sendBtn.disabled=false;
+  inp.focus();
+}
+
+function askPreset(el){
+  document.getElementById('qa-input').value=el.textContent.trim();
+  sendQA();
+}
+
+function clearQA(){
+  _qaHistory=[];
+  document.getElementById('qa-messages').innerHTML=`
+    <div class="qa-msg">
+      <div class="qa-avatar ai">🤖</div>
+      <div class="qa-bubble ai">ล้างประวัติแล้วครับ พร้อมตอบคำถามใหม่ 😊</div>
+    </div>`;
 }
 
 </script>
