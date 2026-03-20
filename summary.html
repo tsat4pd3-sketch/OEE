@@ -331,42 +331,6 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
     </div>
   </div>
 
-  <!-- AI Q&A -->
-  <div class="sec-hdr" style="margin-top:4px">
-    <h3>🤖 AI ASSISTANT</h3>
-    <span class="sec-tag" style="background:#f5f3ff;color:#7c3aed;border-color:#ddd6fe">สำหรับผู้บริหาร</span>
-    <div class="sec-line"></div>
-  </div>
-  <div class="qa-wrap">
-    <div class="qa-header">
-      <div class="qa-orb">🤖</div>
-      <div>
-        <div class="qa-title">Production Intelligence Assistant</div>
-        <div class="qa-sub">วิเคราะห์จากข้อมูลจริง · ตอบเป็นภาษาไทย · เหมาะสำหรับนำเสนอผู้บริหาร</div>
-      </div>
-      <button onclick="clearQA()" style="margin-left:auto;padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-body)">🗑 ล้าง</button>
-    </div>
-    <div class="qa-chips">
-      <span class="qa-chip" onclick="askPreset(this)">📉 ทำไม output ถึงลดลง?</span>
-      <span class="qa-chip" onclick="askPreset(this)">🏆 Product ไหนประสิทธิภาพดีสุด?</span>
-      <span class="qa-chip" onclick="askPreset(this)">⏱ OT มีผลต่อ output ยังไง?</span>
-      <span class="qa-chip" onclick="askPreset(this)">🔧 ปัจจัยหลักที่ทำให้ OEE ต่ำ?</span>
-      <span class="qa-chip" onclick="askPreset(this)">📊 สรุปภาพรวมสำหรับผู้บริหาร</span>
-      <span class="qa-chip" onclick="askPreset(this)">📅 เปรียบ Normal vs OT vs Holiday</span>
-      <span class="qa-chip" onclick="askPreset(this)">🎯 แนะนำแผนปรับปรุง</span>
-    </div>
-    <div class="qa-messages" id="qa-messages">
-      <div class="qa-msg">
-        <div class="qa-avatar ai">🤖</div>
-        <div class="qa-bubble ai">สวัสดีครับ ผมวิเคราะห์ข้อมูล Production ของ 4 ไลน์ได้เลย<br>ลองกดคำถามด้านบน หรือพิมพ์ถามได้เลยครับ 📊</div>
-      </div>
-    </div>
-    <div class="qa-input-row">
-      <input class="qa-input" id="qa-input" type="text" placeholder="ถามเกี่ยวกับ production data..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendQA();}">
-      <button class="qa-send" id="qa-send-btn" onclick="sendQA()">ส่ง ➤</button>
-    </div>
-  </div>
-
 </main>
 
 <script>
@@ -811,29 +775,7 @@ function renderWorkTypeStrip(allStats){
   const hAvg=h?Math.round(hOut/h):0;
 
   container.innerHTML=`
-    <!-- ภาพรวมทุก product -->
-    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">ภาพรวมทุกไลน์</div>
-    <div class="wt-strip">
-      <div class="wt-kpi wt-normal">
-        <div class="wt-kpi-lbl">✅ Normal (จ–ศ ไม่มีOT)</div>
-        <div class="wt-kpi-val">${n.toLocaleString()}</div>
-        <div class="wt-kpi-sub">${pct(n)}% · avg ${nAvg.toLocaleString()} ชิ้น/กะ</div>
-        <div class="wt-bar"><div class="wt-bar-fill" style="width:${pct(n)}%;background:#16a34a"></div></div>
-      </div>
-      <div class="wt-kpi wt-ot">
-        <div class="wt-kpi-lbl">⏱ OT (จ–ศ มีOT >${OT_THRESHOLD}h)</div>
-        <div class="wt-kpi-val">${o.toLocaleString()}</div>
-        <div class="wt-kpi-sub">${pct(o)}% · avg ${oAvg.toLocaleString()} ชิ้น/กะ</div>
-        <div class="wt-bar"><div class="wt-bar-fill" style="width:${pct(o)}%;background:#d97706"></div></div>
-      </div>
-      <div class="wt-kpi wt-holiday">
-        <div class="wt-kpi-lbl">🗓 วันหยุด (เสาร์–อาทิตย์)</div>
-        <div class="wt-kpi-val">${h.toLocaleString()}</div>
-        <div class="wt-kpi-sub">${pct(h)}% · avg ${hAvg.toLocaleString()} ชิ้น/กะ</div>
-        <div class="wt-bar"><div class="wt-bar-fill" style="width:${pct(h)}%;background:#dc2626"></div></div>
-      </div>
-    </div>
-
+  
     <!-- แยกต่อ product -->
     <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px">แยกตามชิ้นงาน</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:16px">
