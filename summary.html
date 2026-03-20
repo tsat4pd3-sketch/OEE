@@ -273,7 +273,6 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
         <div class="mode-pills">
           <button class="mode-pill active" onclick="setMode('median',this)">Median</button>
           <button class="mode-pill" onclick="setMode('avg',this)">Average</button>
-          <button class="mode-pill" onclick="setMode('total',this)">Total</button>
         </div>
       </div>
     </div>
@@ -468,9 +467,10 @@ function parsePD4(text){
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────
-let STAT_MODE='median'; // median | avg | total
+let STAT_MODE='median'; // median | avg
 
 function setMode(mode,btn){
+  if(mode==='total')return; // total removed
   STAT_MODE=mode;
   document.querySelectorAll('.mode-pill').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
@@ -531,18 +531,23 @@ function calcStats(rows){
   const byMon={};
   rows.forEach(d=>{
     const k=`${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;
-    if(!byMon[k])byMon[k]={goodSum:0,oeeArr:[],daySet:new Set()};
-    byMon[k].goodSum+=d.total-d.defect;
+    if(!byMon[k])byMon[k]={goodSum:0,oeeArr:[],daySet:new Set(),shiftGoods:[]};
+    const good=d.total-d.defect;
+    byMon[k].goodSum+=good;
+    byMon[k].shiftGoods.push(good); // per-shift values for median/avg
     if(d.oee>0)byMon[k].oeeArr.push(d.oee);
     byMon[k].daySet.add(fmtIso(d.date));
   });
   const last3=Object.keys(byMon).sort().slice(-3);
+  const _med=arr=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;};
   const monthTrend=last3.map(k=>{
     const mo=byMon[k];const[y,mn]=k.split('-');
+    // shiftGoods: good output per shift record in this month
     return{
       label:MN_TH[+mn-1],
       year:y.slice(2),
-      avgOut:mo.daySet.size>0?Math.round(mo.goodSum/mo.daySet.size):0,
+      medShift:Math.round(_med(mo.shiftGoods||[])),
+      avgShift:mo.shiftGoods&&mo.shiftGoods.length?Math.round(mo.shiftGoods.reduce((a,b)=>a+b)/mo.shiftGoods.length):0,
       avgOEE:mo.oeeArr.length?+(mo.oeeArr.reduce((a,b)=>a+b)/mo.oeeArr.length).toFixed(1):0
     };
   });
@@ -552,7 +557,7 @@ function calcStats(rows){
     const base=arr[arr.length-2][f]||1;
     return d/base*100>2?'up':d/base*100<-2?'dn':'flat';
   };
-  const outArrow=trendDir(monthTrend,'avgOut');
+  const outArrow=trendDir(monthTrend,STAT_MODE==='avg'?'avgShift':'medShift');
   const oeeArrow=trendDir(monthTrend,'avgOEE');
   const outTrend=[];const oeeTrend=[]; // unused, kept for compat
 
@@ -654,7 +659,9 @@ function renderCard(prod,stats){
     </div>`;
   requestAnimationFrame(()=>{
     const oeeCol=oeeColor(o).replace('var(--green)','#16a34a').replace('var(--amber)','#d97706').replace('var(--red)','#dc2626');
-    renderMoM(document.getElementById('mom-out-'+prod.id),stats.monthTrend,'avgOut','OUTPUT / DAY',stats.outArrow,prod.color,'ชิ้น/วัน');
+    const momField=STAT_MODE==='avg'?'avgShift':'medShift';
+    const momLabel=STAT_MODE==='avg'?'AVG OUT/SHIFT':'MED OUT/SHIFT';
+    renderMoM(document.getElementById('mom-out-'+prod.id),stats.monthTrend,momField,momLabel,stats.outArrow,prod.color,'ชิ้น/กะ');
     renderMoM(document.getElementById('mom-oee-'+prod.id),stats.monthTrend,'avgOEE','OEE %',stats.oeeArrow,oeeCol,'%');
   });
 }
