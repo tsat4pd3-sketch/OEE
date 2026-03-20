@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Overview — PD3 + PD4</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f2f7;--bg2:#ffffff;--bg3:#f5f7fb;--card:#ffffff;
+  --border:#e2e7f0;--border2:#cdd5e3;
+  --accent:#2563eb;--accent-dim:#2563eb12;
+  --cyan:#0891b2;--green:#16a34a;--red:#dc2626;--purple:#7c3aed;--amber:#d97706;
+  --text:#0f172a;--text2:#334155;--muted:#64748b;--muted2:#94a3b8;
+  --pd3:#0369a1;--pd3-bg:#e0f2fe;--pd3-border:#bae6fd;
+  --pd4:#a16207;--pd4-bg:#fef9c3;--pd4-border:#fde68a;
+  --sidebar:268px;--radius:12px;--radius-sm:8px;
+  --font-body:'IBM Plex Sans Thai',sans-serif;--font-display:'Space Grotesk',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-events:none;z-index:0}
+
+/* SIDEBAR */
+#sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100;box-shadow:1px 0 8px #00000008}
+.logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.logo-tag{font-family:var(--font-display);font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.logo h1{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);line-height:1.1}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.bl{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
+.bx{background:#f1f5f9;color:var(--muted);border:1px solid var(--border)}
+.nav-links{padding:10px 12px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--border)}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
+.nav-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border)}
+.nav-btn.active{background:var(--accent-dim);border-color:#2563eb30;color:var(--accent);font-weight:600}
+.ss{padding:12px 16px 4px}
+.ss-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+.ss input,.ss select{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;margin-bottom:7px;outline:none;transition:border-color .2s}
+.ss input:focus,.ss select:focus{border-color:var(--accent)}
+.src-pills{display:flex;gap:5px;padding:8px 16px 0;flex-wrap:wrap}
+.src-pill{padding:4px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--muted);transition:all .15s;font-family:var(--font-body)}
+.src-pill.pd3.active{background:var(--pd3-bg);color:var(--pd3);border-color:var(--pd3-border)}
+.src-pill.pd4.active{background:var(--pd4-bg);color:var(--pd4);border-color:var(--pd4-border)}
+.src-pill.all.active{background:var(--accent-dim);color:var(--accent);border-color:#2563eb30}
+.btn-refresh{margin:10px 16px 4px;padding:9px;background:var(--accent-dim);border:1px solid #2563eb30;border-radius:var(--radius-sm);color:var(--accent);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;width:calc(100% - 32px)}
+.btn-refresh:hover{background:var(--accent);color:#fff}
+.auto-info{font-size:10px;color:var(--muted2);text-align:center;padding:4px 16px 12px;line-height:1.6}
+
+/* MAIN */
+#main{flex:1;padding:26px 28px 48px;overflow-y:auto;position:relative;z-index:1}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.topbar h2{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text)}
+.topbar p{font-size:12px;color:var(--muted);margin-top:4px}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;margin-top:4px}
+.sec-hdr h3{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text)}
+.sec-tag{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px}
+.sec-line{flex:1;height:1px;background:var(--border)}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:13px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 3px #00000008;transition:all .2s}
+.kpi:hover{transform:translateY(-1px);box-shadow:0 4px 12px #00000010}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
+.k0::after{background:linear-gradient(90deg,#d97706,#fbbf24)}
+.k1::after{background:linear-gradient(90deg,#0891b2,#38bdf8)}
+.k2::after{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+.k3::after{background:linear-gradient(90deg,#16a34a,#4ade80)}
+.k4::after{background:linear-gradient(90deg,#dc2626,#f87171)}
+.kpi-lbl{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.3px;margin-bottom:7px}
+.kpi-val{font-family:var(--font-display);font-size:28px;font-weight:700;line-height:1;color:var(--text)}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.kpi-split{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.kpi-split span{padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700}
+.good{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
+
+/* CARDS & CHARTS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 3px #00000008}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.card-hdr h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
+.card-hdr em{font-style:normal;font-size:11px;color:var(--muted)}
+.ch{position:relative}
+.row{display:grid;gap:16px;margin-bottom:16px}
+.r2{grid-template-columns:1fr 1fr}
+@media(max-width:900px){.r2{grid-template-columns:1fr}}
+.toggle-group{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px}
+.tg-btn{padding:4px 11px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .15s}
+.tg-btn.active{background:var(--card);color:var(--accent);box-shadow:0 1px 3px #00000010}
+
+/* PARETO */
+.par-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.par-row:last-child{border-bottom:none}
+.par-label{flex:0 0 150px;font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.par-bar-bg{flex:1;background:var(--bg3);border-radius:4px;height:6px;overflow:hidden}
+.par-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.par-pct{flex:0 0 38px;text-align:right;font-size:11px;font-weight:700;color:var(--accent)}
+.par-val{flex:0 0 55px;text-align:right;font-size:10px;color:var(--muted)}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto;max-height:300px;overflow-y:auto}
+.dt-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:700;padding:9px 12px;text-align:left;font-size:11px;position:sticky;top:0;border-bottom:2px solid var(--border2)}
+.dt-tbl td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.dt-tbl tr:hover td{background:#f8faff}
+.dt-tbl th.r,.dt-tbl td.r{text-align:right}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;transition:opacity .5s}
+.ld-ring{width:42px;height:42px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld-bar-wrap{width:200px;height:4px;background:var(--border);border-radius:2px;margin-top:4px}
+.ld-bar-fill{height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .4s}
+.src-badges{display:flex;gap:8px}
+
+/* DARK */
+[data-theme="dark"]{
+  --bg:#07090f;--bg2:#0d1117;--bg3:#13192a;--card:#0f1520;
+  --border:#1c2640;--border2:#243050;
+  --accent:#60a5fa;--accent-dim:#3b82f618;
+  --text:#dce4f0;--text2:#94a3b8;--muted:#526080;--muted2:#334155;
+  --pd3:#38bdf8;--pd3-bg:#0c2a3a;--pd3-border:#0ea5e940;
+  --pd4:#fbbf24;--pd4-bg:#2a1f00;--pd4-border:#f59e0b40;
+}
+[data-theme="dark"] .dt-tbl tr:hover td{background:#ffffff04}
+[data-theme="dark"] .tg-btn.active{background:var(--bg2);box-shadow:none}
+[data-theme="dark"] .kpi:hover{box-shadow:0 4px 20px #00000050}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="ld-ring"></div>
+  <div style="font-family:var(--font-display);font-size:14px;color:var(--accent);letter-spacing:2px">PRODUCTION OVERVIEW</div>
+  <p id="ld-msg" style="font-size:11px;color:var(--muted)">กำลังดึงข้อมูล...</p>
+  <div class="ld-bar-wrap"><div class="ld-bar-fill" id="ld-bar"></div></div>
+  <div class="src-badges" style="margin-top:4px">
+    <span id="ld-pd3" style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border)">PD3 ...</span>
+    <span id="ld-pd4" style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border)">PD4 ...</span>
+  </div>
+</div>
+
+<aside id="sidebar">
+  <div class="logo">
+    <div class="logo-tag">Production Overview</div>
+    <h1>PD3 + PD4<br>COMBINED</h1>
+    <div class="logo-sub">
+      <span id="src-badge" class="badge bx">...</span>
+      <span id="last-update" style="font-size:9px;color:var(--muted)"></span>
+    </div>
+  </div>
+
+  <div class="nav-links">
+    <a class="nav-btn active">🔭 Combined Overview</a>
+    <a class="nav-btn" href="summary.html">📋 Summary Dashboard</a>
+    <a class="nav-btn" href="index.html">📊 PD3 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd3.html">🔍 Deep PD3</a>
+    <a class="nav-btn" href="oee_pd4.html">🏭 PD4 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd4.html">🔎 Deep PD4</a>
+  </div>
+
+  <!-- Source Filter -->
+  <div class="ss">
+    <div class="ss-label">แหล่งข้อมูล</div>
+    <div class="src-pills">
+      <button class="src-pill all active" onclick="setSrc('all',this)">ทั้งหมด</button>
+      <button class="src-pill pd3" onclick="setSrc('pd3',this)">PD3</button>
+      <button class="src-pill pd4" onclick="setSrc('pd4',this)">PD4</button>
+    </div>
+  </div>
+
+  <div class="ss">
+    <div class="ss-label">📅 ช่วงวันที่</div>
+    <input type="date" id="f-from">
+    <input type="date" id="f-to">
+  </div>
+
+  <div class="ss">
+    <div class="ss-label">กะ</div>
+    <select id="shift-sel" onchange="render()">
+      <option value="all">ทั้งหมด</option>
+      <optgroup label="PD3">
+        <option value="Shift 01">Shift 01 (Day)</option>
+        <option value="Shift 02">Shift 02 (Night)</option>
+      </optgroup>
+      <optgroup label="PD4">
+        <option value="เช้า">เช้า</option>
+        <option value="กลางคืน">กลางคืน</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div style="padding:4px 16px 2px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px">สถานะข้อมูล</div>
+  <div style="padding:4px 16px 8px;display:flex;gap:6px;flex-wrap:wrap">
+    <span id="pill-pd3" style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border)">PD3 ...</span>
+    <span id="pill-pd4" style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border)">PD4 ...</span>
+  </div>
+
+  <button class="btn-refresh" onclick="reloadAll()">🌐 ดึงข้อมูลใหม่</button>
+  <div class="auto-info">🔄 Auto-refresh ทุก 1 ชม.<br>ครั้งถัดไป: <span id="next-refresh">—</span></div>
+
+  <div style="padding:0 16px 14px;margin-top:auto">
+    <button id="theme-toggle" onclick="toggleTheme()" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px">
+      <span id="theme-icon">🌙</span><span id="theme-label">Dark Mode</span>
+    </button>
+  </div>
+</aside>
+
+<main id="main">
+  <div class="topbar">
+    <div>
+      <h2 id="main-title">🔭 Production Overview — ทั้งหมด</h2>
+      <p id="range-lbl">—</p>
+    </div>
+    <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
+  </div>
+
+  <!-- OEE KPIs -->
+  <div class="sec-hdr">
+    <h3>📊 OEE METRICS</h3>
+    <span class="sec-tag" id="kpi-tag" style="background:var(--accent-dim);color:var(--accent);border:1px solid #2563eb30">Combined</span>
+    <div class="sec-line"></div>
+  </div>
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <!-- OEE Trend -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>📈 OEE Trend<em>PD3 vs PD4</em></h3>
+      <div class="toggle-group">
+        <button class="tg-btn" onclick="setPeriod('day',this)">วัน</button>
+        <button class="tg-btn active" onclick="setPeriod('month',this)">เดือน</button>
+        <button class="tg-btn" onclick="setPeriod('year',this)">ปี</button>
+      </div>
+    </div>
+    <div class="ch" style="height:270px"><canvas id="c-oee"></canvas></div>
+  </div>
+
+  <!-- Output Trend -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>📦 Output Trend<em>ชิ้น/วัน</em></h3>
+      <div style="display:flex;gap:8px">
+        <div class="toggle-group">
+          <button class="tg-btn active" onclick="setOutMetric('day',this)">Out/Day</button>
+          <button class="tg-btn" onclick="setOutMetric('shift',this)">Out/Shift</button>
+          <button class="tg-btn" onclick="setOutMetric('hr',this)">Out/Hour</button>
+        </div>
+        <div class="toggle-group">
+          <button class="tg-btn" onclick="setPeriodOut('day',this)">วัน</button>
+          <button class="tg-btn active" onclick="setPeriodOut('month',this)">เดือน</button>
+          <button class="tg-btn" onclick="setPeriodOut('year',this)">ปี</button>
+        </div>
+      </div>
+    </div>
+    <div class="ch" style="height:270px"><canvas id="c-output"></canvas></div>
+  </div>
+
+  <!-- A P Q Breakdown -->
+  <div class="row r2">
+    <div class="card">
+      <div class="card-hdr"><h3>📊 A / P / Q Breakdown</h3></div>
+      <div class="ch" style="height:220px"><canvas id="c-apq"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>⏱ Downtime Trend</h3></div>
+      <div class="ch" style="height:220px"><canvas id="c-dt"></canvas></div>
+    </div>
+  </div>
+
+  <!-- DT Pareto PD3 + PD4 -->
+  <div class="row r2">
+    <div class="card">
+      <div class="card-hdr"><h3>📊 DT Pareto — PD3<em>นาที</em></h3></div>
+      <div id="pareto-pd3"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>📊 DT Pareto — PD4<em>นาที</em></h3></div>
+      <div id="pareto-pd4"></div>
+    </div>
+  </div>
+
+  <!-- Remarks table -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>📝 หมายเหตุล่าสุด<em>50 รายการ</em></h3>
+      <div style="display:flex;gap:6px">
+        <span id="rem-pd3-badge" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border)">PD3</span>
+        <span id="rem-pd4-badge" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border)">PD4</span>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="dt-tbl">
+        <thead><tr><th>วันที่</th><th>Source</th><th>ไลน์</th><th>กะ</th><th class="r">OEE%</th><th class="r">DT (m)</th><th>หมายเหตุ</th><th>Comment</th></tr></thead>
+        <tbody id="rem-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+// ── URLs ──────────────────────────────────────────────────────────────
+const PD3_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vToehKwHXa32rnaE008gbSZ795A_2tpe4mgEsPECNX9-o5gv7aFfNWBZnxoVdvrqmylqv7bjg26PXHY/pub?output=csv&gid=2011515171";
+const PD4_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSs034o0M970g62tL1jkU4CU6HpAbVkER87uw3OzI97ueA6xXdBdwXd1Gcd0GrgaKOuIrTl-F75q3nz/pub?gid=122174819&single=true&output=csv";
+
+// ── State ─────────────────────────────────────────────────────────────
+let PD3_ALL=[],PD4_ALL=[],arTimer=null;
+let SRC='all',PERIOD='month',OUT_METRIC='day',PERIOD_OUT='month';
+let CHARTS={};
+
+// ── Helpers ───────────────────────────────────────────────────────────
+function csvLine(l){const r=[];let c='',q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(c);c='';}else c+=ch;}r.push(c);return r;}
+function nv(v){if(!v)return 0;const x=parseFloat(String(v).replace('%','').replace(/,/g,''));return isNaN(x)?0:x;}
+function fmtIso(d){return d.toISOString().split('T')[0];}
+function fmtDate(d){if(!d)return'—';return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
+function arrMin(arr){return arr.reduce((a,b)=>a<b?a:b);}
+function arrMax(arr){return arr.reduce((a,b)=>a>b?a:b);}
+function avg(arr){const v=arr.filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b)/v.length:0;}
+function dch(id){if(CHARTS[id]){CHARTS[id].destroy();delete CHARTS[id];}}
+
+// ── HH:MM → decimal hours ─────────────────────────────────────────────
+function parseHHMM(s){
+  if(!s)return null;s=s.trim().replace(/[^0-9:]/g,'');
+  const p=s.split(':');if(p.length<2)return null;
+  const h=+p[0],m=+p[1];if(isNaN(h)||isNaN(m))return null;
+  return h+m/60;
+}
+function calcShiftHours(startStr,endStr){
+  const s=parseHHMM(startStr),e=parseHHMM(endStr);
+  if(s===null||e===null)return 0;
+  let diff=e-s;if(diff<=0)diff+=24;return diff;
+}
+
+// ── PD3 Parser ────────────────────────────────────────────────────────
+// Field mapping (verified against index.html original):
+// date: col 43 (parsePD3Date dd/mm/yyyy)
+// part: named 'เลือกไลน์การผลิต'
+// shift: named 'กะทำงาน' → 'Shift 01' / 'Shift 02'
+// total: named 'ยอดผลิตรวมทั้งวัน' (per-shift value despite name)
+// defect: named 'Defect'
+// dtMin: sum of DT_KEYS named columns (stored in minutes)
+// avail: named 'Availbility' (typo in sheet!)
+// perf: named 'Performance'
+// qual: named 'Quality'
+// oee: named 'OEE'
+// loadingHr: from 'เริ่มการผลิต'/'สิ้นสุดการผลิต' → fallback 'Loading Time fx'
+const DT_KEYS_PD3={
+  'เครื่องจักรหลัก':'เครื่องจักรหลักเบรคดาวน์',
+  'เครื่องจักรรอง':'เครื่องจักรรองเบรคดาวน์',
+  'แม่พิมพ์/จิ๊ก':'แม่พิมพ์,จิ๊ก,กริ๊ปเปอร์ ชำรุด',
+  'PLC/Sensor':'ระบบ PLC / ระบบ เซนเซอร์ มีปัญหา',
+  'Robot':'โรบอทเบรคดาวน์',
+  'แก้คุณภาพ':'แก้ไขปัญหาคุณภาพ',
+  'รอภาชนะ':'รอภาชนะ',
+  'รอ QA':'รอQAคอนเฟิร์มคุณภาพ',
+  'อื่นๆ':'อื่นๆ',
+};
+function parsePD3Date(s){if(!s)return null;s=s.trim().replace(/"/g,'');const p=s.split('/');if(p.length!==3)return null;const dd=+p[0],mm=+p[1]-1,yyyy=+p[2];if(isNaN(dd)||yyyy<2000)return null;return new Date(yyyy,mm,dd);}
+
+function parsePD3(text){
+  const lines=text.split('\n').filter(l=>l.trim());if(lines.length<2)return[];
+  const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
+  const g=(row,name)=>{const i=idx[name];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim():'';};
+  const gi=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
+  const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-1);cutoff.setHours(0,0,0,0);
+  const pd3Kws=['060','RH 060','RH060','061','LH 061','LH061'];
+  const rows=[];
+  for(let r=1;r<lines.length;r++){
+    const row=csvLine(lines[r]);if(row.length<10)continue;
+    const line=g(row,'เลือกไลน์การผลิต');
+    if(!line||!pd3Kws.some(k=>line.toUpperCase().includes(k)))continue;
+    const date=parsePD3Date(gi(row,43));if(!date||date<cutoff)continue;
+    const dtTypes=[];Object.entries(DT_KEYS_PD3).forEach(([label,col])=>{const v=nv(g(row,col));if(v>0)dtTypes.push({type:label,val:v});});
+    const defect=nv(g(row,'Defect'));
+    const loadingHrActual=calcShiftHours(g(row,'เริ่มการผลิต'),g(row,'สิ้นสุดการผลิต'));
+    const loadingHr=loadingHrActual>0?loadingHrActual:(nv(g(row,'Loading Time fx'))||0);
+    rows.push({src:'PD3',date,dateStr:fmtDate(date),
+      part:line,shift:g(row,'กะทำงาน')||'_',
+      total:nv(g(row,'ยอดผลิตรวมทั้งวัน')),defect,
+      good:nv(g(row,'ยอดผลิตรวมทั้งวัน'))-defect,
+      dtMin:dtTypes.reduce((s,t)=>s+t.val,0),dtTypes,
+      avail:nv(g(row,'Availbility')),perf:nv(g(row,'Performance')),
+      qual:nv(g(row,'Quality')),oee:nv(g(row,'OEE')),
+      loadingHr,
+      remark:g(row,'หมายเหตุ')||'',comment:g(row,'Comment')||''});
+  }
+  const seen=new Map();rows.forEach(r=>{seen.set(r.dateStr+'|'+r.part+'|'+r.shift,r);});
+  return[...seen.values()];
+}
+
+// ── PD4 Parser ────────────────────────────────────────────────────────
+// Field mapping (verified against oee_pd4.html original):
+// date: col 59 || col 0 (Thai Buddhist Era → subtract 543)
+// part: col 1
+// shift: col 5 → 'เช้า' / 'กลางคืน'
+// total: col 6 (per-shift output)
+// good: col 6 - defect (goodPart = total - defect, same as col 81)
+// defect: sum of defTypes (cols 7+i*4, 8+i*4, 9+i*4: flag,type,qty)
+// dtMin: col 74 * 60 (STORED AS HOURS, convert to minutes)
+// dtTypes: cols 21+i*3, 22+i*3, 23+i*3 (flag, type, minutes)
+// avail: col 77
+// perf: col 80
+// qual: col 82
+// oee: col 83
+// loadingHr: from 'เริ่มผลิต'/'ผลิตจบ' → fallback 'ชม.+เศษ'
+// excludes: LASER, BENDING, BEND
+const EXCLUDES_PD4=['LASER','BENDING','BEND'];
+function parseThaiDate(s){if(!s)return null;s=s.trim().split(' ')[0];const p=s.split('/');if(p.length!==3)return null;const d=+p[0],m=+p[1]-1,y=+p[2];return new Date(y>2400?y-543:y,m,d);}
+
+function parsePD4(text){
+  const lines=text.split('\n').filter(l=>l.trim());if(lines.length<2)return[];
+  const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
+  const g=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
+  const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-1);cutoff.setHours(0,0,0,0);
+  const pd4Kws=['GOR','LWRBAR','LWR BAR'];
+  const rows=[];
+  for(let r=1;r<lines.length;r++){
+    const row=csvLine(lines[r]);if(row.length<10)continue;
+    const part=g(row,1);if(!part)continue;
+    const pUp=part.toUpperCase();
+    if(EXCLUDES_PD4.some(ex=>pUp.includes(ex)))continue;
+    if(!pd4Kws.some(k=>pUp.includes(k)))continue;
+    const date=parseThaiDate(g(row,59)||g(row,0));if(!date||date<cutoff)continue;
+    // DT types (flag=col21+i*3, type=col22+i*3, val=col23+i*3 in MINUTES)
+    const dtTypes=[];
+    for(let i=0;i<7;i++){const flag=g(row,21+i*3).toUpperCase();const type=g(row,22+i*3);const val=nv(g(row,23+i*3));if((flag==='TRUE'||flag==='1')&&type&&val>0)dtTypes.push({type,val});}
+    // Defect types (flag=col7+i*4, type=col8+i*4, qty=col9+i*4)
+    const defTypes=[];
+    for(let i=0;i<3;i++){const flag=g(row,7+i*4).toUpperCase();const type=g(row,8+i*4);const qty=nv(g(row,9+i*4));if((flag==='TRUE'||flag==='1')&&type&&qty>0)defTypes.push({type,qty});}
+    const defect=defTypes.reduce((s,d)=>s+d.qty,0);
+    const total=nv(g(row,6));
+    // dtMin: col74 is in HOURS → convert to minutes
+    const dtMin=Math.round(nv(g(row,74))*60);
+    // loadingHr: from start/end times first, then ชม.+เศษ
+    const _siIdx=idx['เริ่มผลิต'],_eiIdx=idx['ผลิตจบ'];
+    const startStr=_siIdx!==undefined&&row[_siIdx]!==undefined?String(row[_siIdx]).trim():'';
+    const endStr=_eiIdx!==undefined&&row[_eiIdx]!==undefined?String(row[_eiIdx]).trim():'';
+    const loadingHrActual=calcShiftHours(startStr,endStr);
+    const _ltIdx=idx['ชม.+เศษ'];const loadingHrCol=_ltIdx!==undefined?nv(g(row,_ltIdx)):0;
+    const loadingHr=loadingHrActual>0?loadingHrActual:(loadingHrCol>0?loadingHrCol:0);
+    rows.push({src:'PD4',date,dateStr:fmtDate(date),
+      part,shift:g(row,5)||'_',
+      total,defect,good:total-defect,
+      dtMin,dtTypes,
+      avail:nv(g(row,77)),perf:nv(g(row,80)),qual:nv(g(row,82)),oee:nv(g(row,83)),
+      loadingHr,
+      remark:g(row,51),comment:g(row,55)});
+  }
+  const seen=new Map();rows.forEach(r=>{seen.set(r.dateStr+'|'+r.part+'|'+r.shift,r);});
+  return[...seen.values()];
+}
+
+// ── Filter ────────────────────────────────────────────────────────────
+function getFiltered(){
+  const from=document.getElementById('f-from').value;
+  const to=document.getElementById('f-to').value;
+  const fDate=from?new Date(from):new Date(0);
+  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
+  const sh=document.getElementById('shift-sel').value;
+  const filter=d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh);
+  const pd3=PD3_ALL.filter(filter);
+  const pd4=PD4_ALL.filter(filter);
+  if(SRC==='pd3')return{pd3,pd4:[],all:pd3};
+  if(SRC==='pd4')return{pd3:[],pd4,all:pd4};
+  return{pd3,pd4,all:[...pd3,...pd4]};
+}
+
+function setSrc(src,btn){
+  SRC=src;
+  document.querySelectorAll('.src-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const labels={all:'ทั้งหมด',pd3:'PD3 เท่านั้น',pd4:'PD4 เท่านั้น'};
+  document.getElementById('main-title').textContent=`🔭 Production Overview — ${labels[src]}`;
+  render();
+}
+
+// ── Period helpers ────────────────────────────────────────────────────
+const MN=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function getPKey(d,p){const y=d.getFullYear(),m=d.getMonth(),dd=d.getDate();if(p==='day')return`${y}-${String(m+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;if(p==='month')return`${y}-${String(m+1).padStart(2,'0')}`;return`${y}`;}
+function fmtPKey(k,p){const pts=k.split('-');if(p==='day')return`${pts[2]}/${pts[1]}`;if(p==='month')return`${MN[+pts[1]-1]} ${pts[0].slice(2)}`;return k;}
+function setPeriod(p,btn){PERIOD=p;document.querySelectorAll('[onclick^="setPeriod("]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rOEEChart();}
+function setOutMetric(m,btn){OUT_METRIC=m;document.querySelectorAll('[onclick^="setOutMetric"]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rOutputChart();}
+function setPeriodOut(p,btn){PERIOD_OUT=p;document.querySelectorAll('[onclick^="setPeriodOut"]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rOutputChart();}
+
+// ── Chart colors ──────────────────────────────────────────────────────
+function gc(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  return{grid:dark?'rgba(28,38,64,.5)':'rgba(226,231,240,1)',tick:dark?'#526080':'#94a3b8',
+    tooltip:{bg:dark?'#0d1117':'#fff',title:dark?'#dce4f0':'#0f172a',body:dark?'#94a3b8':'#64748b',border:dark?'#1c2640':'#e2e7f0'}};
+}
+function baseOpts(C){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:C.tick,font:{size:11},usePointStyle:true,padding:12}},tooltip:{backgroundColor:C.tooltip.bg,titleColor:C.tooltip.title,bodyColor:C.tooltip.body,borderColor:C.tooltip.border,borderWidth:1,mode:'index',intersect:false}},scales:{x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:10},maxRotation:45,maxTicksLimit:16}},y:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:11}}}}};}
+
+// ── Render KPIs ───────────────────────────────────────────────────────
+function rKPI(){
+  const {pd3,pd4,all}=getFiltered();
+  const oeeAll=avg(all.map(d=>d.oee)),aAll=avg(all.map(d=>d.avail));
+  const pAll=avg(all.map(d=>d.perf)),qAll=avg(all.map(d=>d.qual));
+  const dtAll=all.reduce((s,d)=>s+(d.dtMin||0),0);
+  const oee3=avg(pd3.map(d=>d.oee)),oee4=avg(pd4.map(d=>d.oee));
+  const a3=avg(pd3.map(d=>d.avail)),a4=avg(pd4.map(d=>d.avail));
+  const p3=avg(pd3.map(d=>d.perf)),p4=avg(pd4.map(d=>d.perf));
+  const q3=avg(pd3.map(d=>d.qual)),q4=avg(pd4.map(d=>d.qual));
+  const f=v=>(+v||0).toFixed(1);
+  const oc=v=>v>=85?'var(--green)':v>=70?'var(--amber)':'var(--red)';
+  const showSplit=SRC==='all'&&pd3.length>0&&pd4.length>0;
+  const split=(v3,v4)=>showSplit?`<div class="kpi-split"><span style="background:var(--pd3-bg);color:var(--pd3)">PD3 ${f(v3)}%</span><span style="background:var(--pd4-bg);color:var(--pd4)">PD4 ${f(v4)}%</span></div>`:'';
+
+  document.getElementById('kpi-grid').innerHTML=`
+    <div class="kpi k0"><div class="kpi-lbl">OEE เฉลี่ย</div>
+      <div class="kpi-val" style="color:${oc(oeeAll)}">${f(oeeAll)}%</div>
+      <div class="kpi-sub">${all.length.toLocaleString()} กะ</div>${split(oee3,oee4)}</div>
+    <div class="kpi k1"><div class="kpi-lbl">Availability (A)</div>
+      <div class="kpi-val" style="color:${oc(aAll)}">${f(aAll)}%</div>
+      <div class="kpi-sub">${aAll>=85?'✅ World Class':aAll>=70?'⚠️ ต้องปรับปรุง':'🔴 วิกฤต'}</div>${split(a3,a4)}</div>
+    <div class="kpi k2"><div class="kpi-lbl">Performance (P)</div>
+      <div class="kpi-val" style="color:${oc(pAll)}">${f(pAll)}%</div>
+      <div class="kpi-sub">${pAll>=85?'✅ World Class':pAll>=70?'⚠️ ต้องปรับปรุง':'🔴 วิกฤต'}</div>${split(p3,p4)}</div>
+    <div class="kpi k3"><div class="kpi-lbl">Quality (Q)</div>
+      <div class="kpi-val" style="color:${oc(qAll)}">${f(qAll)}%</div>
+      <div class="kpi-sub">${qAll>=99?'✅ เยี่ยม':qAll>=95?'ปกติ':'⚠️ ต้องปรับปรุง'}</div>${split(q3,q4)}</div>
+    <div class="kpi k4"><div class="kpi-lbl">Total Downtime</div>
+      <div class="kpi-val" style="color:var(--red);font-size:22px">${(dtAll/60).toFixed(1)} ชม.</div>
+      <div class="kpi-sub">${dtAll.toLocaleString()} นาที</div></div>`;
+}
+
+// ── OEE Trend Chart ───────────────────────────────────────────────────
+function rOEEChart(){
+  const {pd3,pd4}=getFiltered();const C=gc();
+  const agg=(rows)=>{const m={};rows.forEach(d=>{if(!d.oee||d.oee<=0)return;const k=getPKey(d.date,PERIOD);if(!m[k])m[k]=[];m[k].push(d.oee);});return m;};
+  const m3=agg(pd3),m4=agg(pd4);
+  const keys=[...new Set([...Object.keys(m3),...Object.keys(m4)])].sort();
+  const labels=keys.map(k=>fmtPKey(k,PERIOD));
+  const avgArr=(m,k)=>m[k]?+(m[k].reduce((a,b)=>a+b)/m[k].length).toFixed(1):null;
+  const datasets=[];
+  if(pd3.length)datasets.push({label:'PD3 OEE',data:keys.map(k=>avgArr(m3,k)),borderColor:'#0369a1',backgroundColor:'#0369a120',borderWidth:2,pointRadius:PERIOD==='day'?1:3,tension:.3,spanGaps:true});
+  if(pd4.length)datasets.push({label:'PD4 OEE',data:keys.map(k=>avgArr(m4,k)),borderColor:'#d97706',backgroundColor:'#d9770620',borderWidth:2,pointRadius:PERIOD==='day'?1:3,tension:.3,spanGaps:true});
+  datasets.push({label:'Target 85%',data:keys.map(()=>85),borderColor:'#dc262660',borderWidth:1.5,borderDash:[6,4],pointRadius:0,fill:false});
+  dch('c-oee');const opts=baseOpts(C);opts.scales.y.min=0;opts.scales.y.max=100;opts.scales.y.ticks.callback=v=>v+'%';
+  CHARTS['c-oee']=new Chart(document.getElementById('c-oee'),{type:'line',data:{labels,datasets},options:opts});
+}
+
+// ── Output Trend Chart ────────────────────────────────────────────────
+// PD3: 1 record/shift → total per shift already correct
+// PD4: 1 record/shift → total per shift already correct
+// Out/Day = sum daily good (all shifts on same day)
+// Out/Shift = median of good per shift
+// Out/Hour = good / loadingHr per shift
+function rOutputChart(){
+  const {pd3,pd4}=getFiltered();const C=gc();
+  const PROD_COLORS={'GOR':'#f59e0b','LWRBAR':'#38bdf8','ASSY APRON RH 060':'#a855f7','ASSY APRON LH 061':'#22c55e'};
+  const getColor=part=>{for(const[k,v] of Object.entries(PROD_COLORS))if(part.toUpperCase().includes(k))return v;return'#94a3b8';};
+  const parts=[...new Set([...pd3,...pd4].map(d=>d.part))].sort();
+  const datasets=parts.map(part=>{
+    const rows=[...pd3,...pd4].filter(d=>d.part===part);
+    const m={};
+    rows.forEach(d=>{
+      const k=getPKey(d.date,PERIOD_OUT);
+      if(!m[k])m[k]={goods:[],hrs:[],daySet:new Set()};
+      m[k].goods.push(d.good);
+      m[k].hrs.push(d.loadingHr>0?d.loadingHr:8);
+      m[k].daySet.add(fmtIso(d.date));
+    });
+    const keys2=[...new Set([...pd3,...pd4].map(d=>getPKey(d.date,PERIOD_OUT)))].sort();
+    const median=arr=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const mid=Math.floor(s.length/2);return s.length%2?s[mid]:(s[mid-1]+s[mid])/2;};
+    const vals=keys2.map(k=>{
+      if(!m[k])return null;
+      if(OUT_METRIC==='shift')return Math.round(median(m[k].goods));
+      if(OUT_METRIC==='hr'){const totalGood=m[k].goods.reduce((a,b)=>a+b,0);const totalHr=m[k].hrs.reduce((a,b)=>a+b,0);return totalHr>0?Math.round(totalGood/totalHr):null;}
+      // day: sum good / unique days in period
+      return m[k].daySet.size>0?Math.round(m[k].goods.reduce((a,b)=>a+b)/m[k].daySet.size):null;
+    });
+    const col=getColor(part);
+    return{label:part,data:vals,borderColor:col,backgroundColor:col+'25',borderWidth:2,pointRadius:PERIOD_OUT==='day'?1:3,tension:.3,spanGaps:true};
+  });
+  const keys=[...new Set([...pd3,...pd4].map(d=>getPKey(d.date,PERIOD_OUT)))].sort();
+  const labels=keys.map(k=>fmtPKey(k,PERIOD_OUT));
+  const unitMap={day:'ชิ้น/วัน',shift:'ชิ้น/กะ (median)',hr:'ชิ้น/ชม.'};
+  dch('c-output');const opts=baseOpts(C);opts.scales.y.ticks.callback=v=>v.toLocaleString();
+  opts.scales.y.title={display:true,text:unitMap[OUT_METRIC],color:C.tick,font:{size:11}};
+  CHARTS['c-output']=new Chart(document.getElementById('c-output'),{type:'line',data:{labels,datasets},options:opts});
+}
+
+// ── A/P/Q Breakdown Bar Chart ─────────────────────────────────────────
+function rAPQChart(){
+  const {pd3,pd4}=getFiltered();const C=gc();
+  const parts=[...new Set([...pd3,...pd4].map(d=>d.part))].sort();
+  const avgField=(rows,f)=>avg(rows.map(d=>d[f]));
+  const PROD_COLORS={'GOR':'#f59e0b','LWRBAR':'#38bdf8','060':'#a855f7','061':'#22c55e'};
+  const getColor=part=>{for(const[k,v] of Object.entries(PROD_COLORS))if(part.toUpperCase().includes(k))return v;return'#94a3b8';};
+  const labels=parts;
+  const aData=parts.map(p=>+avgField([...pd3,...pd4].filter(d=>d.part===p),'avail').toFixed(1));
+  const pData=parts.map(p=>+avgField([...pd3,...pd4].filter(d=>d.part===p),'perf').toFixed(1));
+  const qData=parts.map(p=>+avgField([...pd3,...pd4].filter(d=>d.part===p),'qual').toFixed(1));
+  dch('c-apq');
+  const opts=baseOpts(C);opts.scales.y.min=0;opts.scales.y.max=100;opts.scales.y.ticks.callback=v=>v+'%';
+  CHARTS['c-apq']=new Chart(document.getElementById('c-apq'),{type:'bar',data:{labels,datasets:[
+    {label:'Availability',data:aData,backgroundColor:'#0891b255',borderColor:'#0891b2',borderWidth:1.5,borderRadius:3},
+    {label:'Performance',data:pData,backgroundColor:'#d9770655',borderColor:'#d97706',borderWidth:1.5,borderRadius:3},
+    {label:'Quality',data:qData,backgroundColor:'#16a34a55',borderColor:'#16a34a',borderWidth:1.5,borderRadius:3},
+  ]},options:opts});
+}
+
+// ── DT Trend Chart ────────────────────────────────────────────────────
+function rDTChart(){
+  const {pd3,pd4}=getFiltered();const C=gc();
+  const agg=(rows)=>{const m={};rows.forEach(d=>{const k=getPKey(d.date,PERIOD);if(!m[k])m[k]=0;m[k]+=d.dtMin||0;});return m;};
+  const m3=agg(pd3),m4=agg(pd4);
+  const keys=[...new Set([...Object.keys(m3),...Object.keys(m4)])].sort();
+  const labels=keys.map(k=>fmtPKey(k,PERIOD));
+  const datasets=[];
+  if(pd3.length)datasets.push({label:'PD3 DT',data:keys.map(k=>Math.round((m3[k]||0)/60*10)/10),borderColor:'#0369a1',backgroundColor:'#0369a120',borderWidth:2,pointRadius:PERIOD==='day'?1:3,tension:.3,spanGaps:true,fill:true});
+  if(pd4.length)datasets.push({label:'PD4 DT',data:keys.map(k=>Math.round((m4[k]||0)/60*10)/10),borderColor:'#d97706',backgroundColor:'#d9770620',borderWidth:2,pointRadius:PERIOD==='day'?1:3,tension:.3,spanGaps:true,fill:true});
+  dch('c-dt');const opts=baseOpts(C);opts.scales.y.ticks.callback=v=>v+'h';
+  opts.scales.y.title={display:true,text:'ชั่วโมง',color:C.tick,font:{size:11}};
+  CHARTS['c-dt']=new Chart(document.getElementById('c-dt'),{type:'line',data:{labels,datasets},options:opts});
+}
+
+// ── DT Pareto ─────────────────────────────────────────────────────────
+function rPareto(rows,containerId){
+  const el=document.getElementById(containerId);if(!el)return;
+  const sums={};rows.forEach(d=>(d.dtTypes||[]).forEach(t=>{sums[t.type]=(sums[t.type]||0)+t.val;}));
+  const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const total=sorted.reduce((s,[,v])=>s+v,0)||1;
+  const COLS=['#2563eb','#0891b2','#7c3aed','#d97706','#dc2626','#16a34a','#db2777','#ea580c'];
+  if(!sorted.length){el.innerHTML='<p style="color:var(--muted);font-size:12px;padding:8px">ไม่มีข้อมูล DT</p>';return;}
+  let cum=0;
+  el.innerHTML=sorted.map(([l,v],i)=>{cum+=v;const pct=(v/total*100).toFixed(1);
+    return`<div class="par-row">
+      <div class="par-label" title="${l}">${l}</div>
+      <div class="par-bar-bg"><div class="par-bar-fill" style="width:${(v/total*100).toFixed(0)}%;background:${COLS[i]}"></div></div>
+      <div class="par-pct">${pct}%</div>
+      <div class="par-val">${v.toLocaleString()}m</div>
+    </div>`;}).join('');
+}
+
+// ── Remarks Table ─────────────────────────────────────────────────────
+function rRemarks(){
+  const {all}=getFiltered();
+  const rows=all.filter(d=>d.remark||d.comment).sort((a,b)=>b.date-a.date).slice(0,50);
+  const srcStyle=src=>src==='PD3'?'background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border)':'background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border)';
+  document.getElementById('rem-tbody').innerHTML=rows.map(d=>`<tr>
+    <td>${d.dateStr}</td>
+    <td><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:12px;${srcStyle(d.src)}">${d.src}</span></td>
+    <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.part}">${d.part}</td>
+    <td>${d.shift}</td>
+    <td class="r">${d.oee?d.oee.toFixed(1)+'%':'—'}</td>
+    <td class="r">${d.dtMin||0}</td>
+    <td style="max-width:200px">${d.remark||'—'}</td>
+    <td style="max-width:160px">${d.comment||'—'}</td>
+  </tr>`).join('');
+}
+
+// ── Main Render ───────────────────────────────────────────────────────
+function render(){
+  const {all}=getFiltered();
+  const from=document.getElementById('f-from').value;
+  const to=document.getElementById('f-to').value;
+  document.getElementById('range-lbl').textContent=`${from||'—'} — ${to||'—'}`;
+  document.getElementById('rec-count').textContent=`${all.length.toLocaleString()} records`;
+  rKPI();rOEEChart();rOutputChart();rAPQChart();rDTChart();
+  const {pd3,pd4}=getFiltered();
+  rPareto(pd3,'pareto-pd3');rPareto(pd4,'pareto-pd4');
+  rRemarks();
+}
+
+// ── Data Loading ──────────────────────────────────────────────────────
+async function reloadAll(){
+  document.getElementById('src-badge').className='badge bx';document.getElementById('src-badge').textContent='...';
+  const r=await Promise.allSettled([
+    fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
+    fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
+  ]);
+  if(r[0].status==='fulfilled'){PD3_ALL=parsePD3(r[0].value);document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
+  if(r[1].status==='fulfilled'){PD4_ALL=parsePD4(r[1].value);document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
+  document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
+  document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
+  updateNextLabel();render();
+}
+function updateNextLabel(){const el=document.getElementById('next-refresh');if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';}
+
+async function init(){
+  const setBar=p=>{const b=document.getElementById('ld-bar');if(b)b.style.width=p+'%';};
+  const setMsg=t=>{const m=document.getElementById('ld-msg');if(m)m.textContent=t;};
+  setMsg('กำลังดึงข้อมูล...');setBar(15);
+  const results=await Promise.allSettled([
+    fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
+    fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
+  ]);
+  setBar(60);setMsg('กำลัง parse ข้อมูล...');await new Promise(r=>setTimeout(r,0));
+  if(results[0].status==='fulfilled'){PD3_ALL=parsePD3(results[0].value);document.getElementById('ld-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
+  setBar(80);await new Promise(r=>setTimeout(r,0));
+  if(results[1].status==='fulfilled'){PD4_ALL=parsePD4(results[1].value);document.getElementById('ld-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
+  setBar(92);setMsg('กำลังแสดงผล...');await new Promise(r=>setTimeout(r,0));
+  // Set intersection date range
+  const pd3D=PD3_ALL.map(d=>d.date).filter(Boolean);
+  const pd4D=PD4_ALL.map(d=>d.date).filter(Boolean);
+  if(pd3D.length&&pd4D.length){
+    const fromD=new Date(Math.max(arrMin(pd3D),arrMin(pd4D)));
+    const toD=new Date(Math.min(arrMax(pd3D),arrMax(pd4D)));
+    document.getElementById('f-from').value=fmtIso(fromD<=toD?fromD:new Date(arrMin([...pd3D,...pd4D])));
+    document.getElementById('f-to').value=fmtIso(fromD<=toD?toD:new Date(arrMax([...pd3D,...pd4D])));
+  }
+  document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
+  document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
+  document.getElementById('f-from').addEventListener('change',render);
+  document.getElementById('f-to').addEventListener('change',render);
+  setBar(100);render();
+  const el=document.getElementById('loading');el.style.opacity='0';setTimeout(()=>el.style.display='none',500);
+  if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadAll,3600000);updateNextLabel();
+}
+init();
+</script>
+
+<script>
+(function(){
+  const saved=localStorage.getItem('theme')||'light';
+  document.documentElement.setAttribute('data-theme',saved);
+  function updateBtn(){
+    const dark=document.documentElement.getAttribute('data-theme')==='dark';
+    const ic=document.getElementById('theme-icon');const lb=document.getElementById('theme-label');
+    if(ic)ic.textContent=dark?'☀️':'🌙';if(lb)lb.textContent=dark?'Light Mode':'Dark Mode';
+  }
+  window.toggleTheme=function(){
+    const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',next);
+    localStorage.setItem('theme',next);updateBtn();
+    // re-render charts with new colors
+    if(typeof render==='function')setTimeout(render,50);
+  };
+  document.addEventListener('DOMContentLoaded',updateBtn);
+})();
+</script>
+</body>
+</html>
