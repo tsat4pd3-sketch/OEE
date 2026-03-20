@@ -90,9 +90,15 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .oee-bar-lbl span{font-size:10px;color:var(--muted)}
 .oee-segments{display:flex;gap:2px;height:7px;border-radius:3px;overflow:hidden;background:var(--bg3)}
 .pc-trends{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-top:1px solid var(--border)}
-.pc-trend{background:var(--card);padding:9px 13px}
-.pc-trend-lbl{font-size:9px;color:var(--muted);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-.spark{height:36px;width:100%;display:block}
+.pc-trend{background:var(--card);padding:10px 14px}
+.pc-trend-lbl{font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center}
+.mom-row{display:flex;gap:4px;align-items:flex-end}
+.mom-cell{flex:1;text-align:center}
+.mom-lbl{font-size:9px;color:var(--muted);margin-bottom:3px}
+.mom-val{font-family:var(--font-display);font-size:14px;font-weight:700;line-height:1}
+.mom-bar{height:3px;border-radius:2px;margin-top:4px}
+.mom-unit{font-size:9px;color:var(--muted2);text-align:right;margin-top:5px}
+.arr-up{color:var(--green)}.arr-dn{color:var(--red)}.arr-flat{color:var(--muted)}
 
 /* COMPARISON TABLE */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 3px #00000008}
@@ -520,14 +526,35 @@ function calcStats(rows){
   const avgPerf=avg(rows.map(d=>d.perf));
   const avgQual=avg(rows.map(d=>d.qual));
 
-  // Sparkline: daily total good (aggregate both shifts per day)
-  const byDay={};
-  rows.forEach(d=>{const k=fmtIso(d.date);if(!byDay[k])byDay[k]=0;byDay[k]+=d.total-d.defect;});
-  const days=Object.keys(byDay).sort().slice(-30);
-  const outTrend=days.map(k=>byDay[k]);
-  const byDayOEE={};
-  rows.forEach(d=>{const k=fmtIso(d.date);if(!byDayOEE[k])byDayOEE[k]=[];if(d.oee>0)byDayOEE[k].push(d.oee);});
-  const oeeTrend=days.map(k=>byDayOEE[k]&&byDayOEE[k].length?byDayOEE[k].reduce((a,b)=>a+b)/byDayOEE[k].length:0);
+  // Month-over-Month: 3 เดือนล่าสุด avg output/day + avg OEE
+  const MN_TH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const byMon={};
+  rows.forEach(d=>{
+    const k=`${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;
+    if(!byMon[k])byMon[k]={goodSum:0,oeeArr:[],daySet:new Set()};
+    byMon[k].goodSum+=d.total-d.defect;
+    if(d.oee>0)byMon[k].oeeArr.push(d.oee);
+    byMon[k].daySet.add(fmtIso(d.date));
+  });
+  const last3=Object.keys(byMon).sort().slice(-3);
+  const monthTrend=last3.map(k=>{
+    const mo=byMon[k];const[y,mn]=k.split('-');
+    return{
+      label:MN_TH[+mn-1],
+      year:y.slice(2),
+      avgOut:mo.daySet.size>0?Math.round(mo.goodSum/mo.daySet.size):0,
+      avgOEE:mo.oeeArr.length?+(mo.oeeArr.reduce((a,b)=>a+b)/mo.oeeArr.length).toFixed(1):0
+    };
+  });
+  const trendDir=(arr,f)=>{
+    if(arr.length<2)return'flat';
+    const d=arr[arr.length-1][f]-arr[arr.length-2][f];
+    const base=arr[arr.length-2][f]||1;
+    return d/base*100>2?'up':d/base*100<-2?'dn':'flat';
+  };
+  const outArrow=trendDir(monthTrend,'avgOut');
+  const oeeArrow=trendDir(monthTrend,'avgOEE');
+  const outTrend=[];const oeeTrend=[]; // unused, kept for compat
 
   const wt=calcWorkTypes(rows);
   return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,totalDTMin,
@@ -536,22 +563,32 @@ function calcStats(rows){
     outDay:{median:medDay,avg:avgDay,total:totDay},
     avgOEE,avgAvail,avgPerf,avgQual,wt,
     lhDebug:{avg:lhAvg,min:lhMin,max:lhMax,missing:lhMissing,total:rows.length,otCount:lhOtCount},
-    outTrend,oeeTrend};
+    monthTrend,outArrow,oeeArrow};
 }
 
-// ── Spark canvas ──────────────────────────────────────────────────────
-function drawSpark(canvas,data,color){
-  if(!canvas||!data.length)return;
-  const W=canvas.width=canvas.offsetWidth*2||300;const H=canvas.height=canvas.offsetHeight*2||72;
-  const ctx=canvas.getContext('2d');
-  const max=arrMax(data)||1;const min=arrMin(data.filter(v=>v>0))||0;
-  const pad=4;const pts=data.map((v,i)=>({x:pad+(i/(data.length-1||1))*(W-pad*2),y:H-pad-(v-min)/(max-min||1)*(H-pad*2)}));
-  ctx.clearRect(0,0,W,H);
-  if(pts.length>1){
-    const gr=ctx.createLinearGradient(0,0,0,H);gr.addColorStop(0,color+'44');gr.addColorStop(1,color+'00');
-    ctx.beginPath();ctx.moveTo(pts[0].x,H);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,H);ctx.closePath();ctx.fillStyle=gr;ctx.fill();
-    ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
-  }
+// ── Month-over-Month widget (Option C) ───────────────────────────────
+function renderMoM(el,data,field,label,arrow,color,unit){
+  if(!el||!data||!data.length)return;
+  const arrowEl={up:`<span class="arr-up">↑</span>`,dn:`<span class="arr-dn">↓</span>`,flat:`<span class="arr-flat">—</span>`}[arrow]||'';
+  const vals=data.map(m=>m[field]);
+  const maxVal=Math.max(...vals)||1;
+  el.innerHTML=`
+    <div class="pc-trend-lbl"><span>${label}</span>${arrowEl}</div>
+    <div class="mom-row">
+      ${data.map((m,i)=>{
+        const v=m[field];
+        const isLast=i===data.length-1;
+        const barW=Math.round(v/maxVal*100);
+        const displayCol=isLast?color:'var(--muted2)';
+        const vFmt=unit==='%'?v.toFixed(1)+'%':v.toLocaleString();
+        return`<div class="mom-cell">
+          <div class="mom-lbl">${m.label}<span style="font-size:8px">'${m.year}</span></div>
+          <div class="mom-val" style="color:${displayCol};font-size:${isLast?'15px':'13px'}">${vFmt}</div>
+          <div class="mom-bar" style="width:${barW}%;background:${isLast?color:color+'55'};margin:4px auto 0"></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="mom-unit">${unit}</div>`;
 }
 
 // ── Render ────────────────────────────────────────────────────────────
@@ -607,8 +644,8 @@ function renderCard(prod,stats){
       </div>
     </div>
     <div class="pc-trends">
-      <div class="pc-trend"><div class="pc-trend-lbl">OUTPUT TREND (30d)</div><canvas class="spark" id="sp-out-${prod.id}"></canvas></div>
-      <div class="pc-trend"><div class="pc-trend-lbl">OEE TREND (30d)</div><canvas class="spark" id="sp-oee-${prod.id}"></canvas></div>
+      <div class="pc-trend" id="mom-out-${prod.id}"></div>
+      <div class="pc-trend" id="mom-oee-${prod.id}"></div>
     </div>
     <div style="padding:8px 16px;background:var(--bg3);border-top:1px solid var(--border);font-size:10px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap">
       <span>🕐 Loading Time: avg <b style="color:var(--text2)">${stats.lhDebug.avg}h</b> (${stats.lhDebug.min}–${stats.lhDebug.max}h)</span>
@@ -616,8 +653,9 @@ function renderCard(prod,stats){
       ${stats.lhDebug.missing>0?`<span style="color:var(--red)">⚠️ fallback 8h: ${stats.lhDebug.missing}/${stats.lhDebug.total} กะ</span>`:`<span style="color:var(--green)">✓ มีค่าครบ ${stats.lhDebug.total} กะ</span>`}
     </div>`;
   requestAnimationFrame(()=>{
-    drawSpark(document.getElementById('sp-out-'+prod.id),stats.outTrend,prod.color);
-    drawSpark(document.getElementById('sp-oee-'+prod.id),stats.oeeTrend,oeeColor(o).replace('var(--green)','#16a34a').replace('var(--amber)','#d97706').replace('var(--red)','#dc2626'));
+    const oeeCol=oeeColor(o).replace('var(--green)','#16a34a').replace('var(--amber)','#d97706').replace('var(--red)','#dc2626');
+    renderMoM(document.getElementById('mom-out-'+prod.id),stats.monthTrend,'avgOut','OUTPUT / DAY',stats.outArrow,prod.color,'ชิ้น/วัน');
+    renderMoM(document.getElementById('mom-oee-'+prod.id),stats.monthTrend,'avgOEE','OEE %',stats.oeeArrow,oeeCol,'%');
   });
 }
 
