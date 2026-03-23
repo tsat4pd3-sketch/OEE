@@ -58,6 +58,8 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .mode-pills{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px}
 .mode-pill{padding:5px 14px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .18s;letter-spacing:.2px}
 .mode-pill.active{background:var(--card);color:var(--accent);box-shadow:0 1px 4px #00000014}
+.mode-pill.m-max.active{background:#dcfce7;color:#15803d}
+.mode-pill.m-min.active{background:#fef2f2;color:#dc2626}
 [data-theme="dark"] .mode-pill.active{background:var(--bg3)}
 
 /* SECTION HEADER */
@@ -273,7 +275,8 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
         <div class="mode-pills">
           <button class="mode-pill active" onclick="setMode('median',this)">Median</button>
           <button class="mode-pill" onclick="setMode('avg',this)">Average</button>
-          <button class="mode-pill" onclick="setMode('total',this)">Total</button>
+          <button class="mode-pill m-max" onclick="setMode('max',this)">Max</button>
+          <button class="mode-pill m-min" onclick="setMode('min',this)">Min</button>
         </div>
       </div>
     </div>
@@ -468,7 +471,7 @@ function parsePD4(text){
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────
-let STAT_MODE='median'; // median | avg | total
+let STAT_MODE='median'; // median | avg | max | min
 
 function setMode(mode,btn){
   STAT_MODE=mode;
@@ -486,10 +489,12 @@ function calcStats(rows){
   const totalDTMin=rows.reduce((s,d)=>s+(d.dtMin||0),0);
   const ppm=totalOut>0?Math.round((totalDef/totalOut)*1e6):0;
 
-  // Output/shift — all 3 modes
+  // Output/shift — all modes
   const medShift=Math.round(median(goodArr));
   const avgShift=Math.round(totalGood/(rows.length||1));
   const totShift=totalGood;
+  const maxShift=goodArr.length?Math.round(goodArr.reduce((a,b)=>a>b?a:b,0)):0;
+  const minShift=goodArr.filter(v=>v>0).length?Math.round(goodArr.filter(v=>v>0).reduce((a,b)=>a<b?a:b,Infinity)):0;
 
   const _lhSample=rows.slice(0,5).map(d=>({part:d.part,src:d.src,loadingHr:d.loadingHr,total:d.total,good:d.total-d.defect}));
   console.log('[calcStats] loadingHr sample:',_lhSample);
@@ -513,11 +518,15 @@ function calcStats(rows){
   const medHr=Math.round(median(outHrArr));
   const avgHr=Math.round(outHrArr.reduce((a,b)=>a+b,0)/(outHrArr.length||1));
   const totHr=Math.round(outHrArr.reduce((a,b)=>a+b,0));
+  const maxHr=outHrArr.length?Math.round(outHrArr.reduce((a,b)=>a>b?a:b,0)):0;
+  const minHr=outHrArr.length?Math.round(outHrArr.reduce((a,b)=>a<b?a:b,Infinity)):0;
 
-  // Output/day = output/shift × 2 (2 shifts/day) — all 3 modes
+  // Output/day = output/shift × 2 (2 shifts/day) — all modes
   const medDay=medShift*2;
   const avgDay=avgShift*2;
-  const totDay=totShift; // total ต่อวัน = total รวม (ไม่ × 2 เพราะ record แยกกะอยู่แล้ว รวมกันเลย)
+  const totDay=totShift;
+  const maxDay=maxShift*2;
+  const minDay=minShift*2;
 
   // OEE components — avg เหมือนเดิม (% ไม่ sum)
   const avg=arr=>arr.filter(v=>v>0).reduce((a,b)=>a+b,0)/(arr.filter(v=>v>0).length||1);
@@ -531,36 +540,33 @@ function calcStats(rows){
   const byMon={};
   rows.forEach(d=>{
     const k=`${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;
-    if(!byMon[k])byMon[k]={goodSum:0,oeeArr:[],daySet:new Set()};
-    byMon[k].goodSum+=d.total-d.defect;
+    if(!byMon[k])byMon[k]={shiftGoods:[],oeeArr:[]};
+    byMon[k].shiftGoods.push(d.total-d.defect);
     if(d.oee>0)byMon[k].oeeArr.push(d.oee);
-    byMon[k].daySet.add(fmtIso(d.date));
   });
   const last3=Object.keys(byMon).sort().slice(-3);
+  const _med=arr=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;};
   const monthTrend=last3.map(k=>{
     const mo=byMon[k];const[y,mn]=k.split('-');
-    return{
-      label:MN_TH[+mn-1],
-      year:y.slice(2),
-      avgOut:mo.daySet.size>0?Math.round(mo.goodSum/mo.daySet.size):0,
-      avgOEE:mo.oeeArr.length?+(mo.oeeArr.reduce((a,b)=>a+b)/mo.oeeArr.length).toFixed(1):0
-    };
+    const sg=mo.shiftGoods;const fsg=sg.filter(v=>v>0);
+    return{label:MN_TH[+mn-1],year:y.slice(2),
+      medShift:Math.round(_med(sg)),
+      avgShift:sg.length?Math.round(sg.reduce((a,b)=>a+b)/sg.length):0,
+      maxShift:fsg.length?Math.round(fsg.reduce((a,b)=>a>b?a:b,0)):0,
+      minShift:fsg.length?Math.round(fsg.reduce((a,b)=>a<b?a:b,Infinity)):0,
+      avgOEE:mo.oeeArr.length?+(mo.oeeArr.reduce((a,b)=>a+b)/mo.oeeArr.length).toFixed(1):0};
   });
-  const trendDir=(arr,f)=>{
-    if(arr.length<2)return'flat';
-    const d=arr[arr.length-1][f]-arr[arr.length-2][f];
-    const base=arr[arr.length-2][f]||1;
-    return d/base*100>2?'up':d/base*100<-2?'dn':'flat';
-  };
-  const outArrow=trendDir(monthTrend,'avgOut');
+  const trendDir=(arr,f)=>{if(arr.length<2)return'flat';const d=arr[arr.length-1][f]-arr[arr.length-2][f];const base=arr[arr.length-2][f]||1;return d/base*100>2?'up':d/base*100<-2?'dn':'flat';};
+  const _mfMap={median:'medShift',avg:'avgShift',max:'maxShift',min:'minShift'};
+  const outArrow=trendDir(monthTrend,_mfMap[STAT_MODE]||'medShift');
   const oeeArrow=trendDir(monthTrend,'avgOEE');
   const outTrend=[];const oeeTrend=[]; // unused, kept for compat
 
   const wt=calcWorkTypes(rows);
   return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,totalDTMin,
-    outShift:{median:medShift,avg:avgShift,total:totShift},
-    outHr:{median:medHr,avg:avgHr,total:totHr},
-    outDay:{median:medDay,avg:avgDay,total:totDay},
+    outShift:{median:medShift,avg:avgShift,total:totShift,max:maxShift,min:minShift},
+    outHr:{median:medHr,avg:avgHr,total:totHr,max:maxHr,min:minHr},
+    outDay:{median:medDay,avg:avgDay,total:totDay,max:maxDay,min:minDay},
     avgOEE,avgAvail,avgPerf,avgQual,wt,
     lhDebug:{avg:lhAvg,min:lhMin,max:lhMax,missing:lhMissing,total:rows.length,otCount:lhOtCount},
     monthTrend,outArrow,oeeArrow};
@@ -571,7 +577,7 @@ function renderMoM(el,data,field,label,arrow,color,unit){
   if(!el||!data||!data.length)return;
   const arrowEl={up:`<span class="arr-up">↑</span>`,dn:`<span class="arr-dn">↓</span>`,flat:`<span class="arr-flat">—</span>`}[arrow]||'';
   const vals=data.map(m=>m[field]);
-  const maxVal=Math.max(...vals)||1;
+  const maxVal=vals.reduce((a,b)=>a>b?a:b,0)||1;
   el.innerHTML=`
     <div class="pc-trend-lbl"><span>${label}</span>${arrowEl}</div>
     <div class="mom-row">
@@ -608,10 +614,10 @@ function renderCard(prod,stats){
   const vShift=stats.outShift[m];
   const vHr=stats.outHr[m];
   const vDay=stats.outDay[m];
-  const modeLabel=m==='median'?'MED':m==='avg'?'AVG':'TOTAL';
-  const unitShift=m==='total'?'ชิ้น':'ชิ้น/กะ';
-  const unitHr=m==='total'?'ชิ้น':'ชิ้น/ชม.';
-  const unitDay=m==='total'?'ชิ้น':'ชิ้น/วัน';
+  const modeLabel={median:'MED',avg:'AVG',max:'MAX',min:'MIN'}[m]||'MED';
+  const unitShift='ชิ้น/กะ';
+  const unitHr='ชิ้น/ชม.';
+  const unitDay='ชิ้น/วัน';
   el.innerHTML=`
     <div class="prod-card-accent"></div>
     <div class="pc-head">
@@ -654,15 +660,19 @@ function renderCard(prod,stats){
     </div>`;
   requestAnimationFrame(()=>{
     const oeeCol=oeeColor(o).replace('var(--green)','#16a34a').replace('var(--amber)','#d97706').replace('var(--red)','#dc2626');
-    renderMoM(document.getElementById('mom-out-'+prod.id),stats.monthTrend,'avgOut','OUTPUT / DAY',stats.outArrow,prod.color,'ชิ้น/วัน');
+    const _mfM={median:'medShift',avg:'avgShift',max:'maxShift',min:'minShift'};
+    const _mlM={median:'MED OUT/SHIFT',avg:'AVG OUT/SHIFT',max:'MAX OUT/SHIFT',min:'MIN OUT/SHIFT'};
+    const momF=_mfM[STAT_MODE]||'medShift';
+    const momL=_mlM[STAT_MODE]||'MED OUT/SHIFT';
+    renderMoM(document.getElementById('mom-out-'+prod.id),stats.monthTrend,momF,momL,stats.outArrow,prod.color,'ชิ้น/กะ');
     renderMoM(document.getElementById('mom-oee-'+prod.id),stats.monthTrend,'avgOEE','OEE %',stats.oeeArrow,oeeCol,'%');
   });
 }
 
 function renderTable(allStats){
   const m=STAT_MODE;
-  const mLabel=m==='median'?'Med':m==='avg'?'Avg':'Total';
-  const maxOut=Math.max(...allStats.map(s=>s.stats?.totalOut||0),1);
+  const mLabel={median:'Med',avg:'Avg',max:'Max',min:'Min'}[m]||'Med';
+  const maxOut=allStats.reduce((a,b)=>Math.max(a,b.stats?.totalOut||0),1);
   document.getElementById('tbl-thead').innerHTML=`
     <th>Product</th><th>Source</th>
     <th class="num">Shifts</th>
