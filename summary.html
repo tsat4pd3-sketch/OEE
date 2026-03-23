@@ -516,8 +516,8 @@ function calcStats(rows){
   const medHr=Math.round(median(outHrArr));
   const avgHr=Math.round(outHrArr.reduce((a,b)=>a+b,0)/(outHrArr.length||1));
   const totHr=Math.round(outHrArr.reduce((a,b)=>a+b,0));
-  const maxHr=outHrArr.length?Math.round(Math.max(...outHrArr)):0;
-  const minHr=outHrArr.length?Math.round(Math.min(...outHrArr)):0;
+  const maxHr=outHrArr.length?Math.round(outHrArr.reduce((a,b)=>a>b?a:b,0)):0;
+  const minHr=outHrArr.length?Math.round(outHrArr.reduce((a,b)=>a<b?a:b,Infinity)):0;
 
   // Output/day = output/shift × 2 (2 shifts/day) — all 3 modes
   const medDay=medShift*2;
@@ -550,8 +550,8 @@ function calcStats(rows){
     return{label:MN_TH[+mn-1],year:y.slice(2),
       medShift:Math.round(_medArr(sg)),
       avgShift:sg.length?Math.round(sg.reduce((a,b)=>a+b)/sg.length):0,
-      maxShift:fsg.length?Math.round(Math.max(...fsg)):0,
-      minShift:fsg.length?Math.round(Math.min(...fsg)):0,
+      maxShift:fsg.length?Math.round(fsg.reduce((a,b)=>a>b?a:b,0)):0,
+      minShift:fsg.length?Math.round(fsg.reduce((a,b)=>a<b?a:b,Infinity)):0,
       avgOEE:mo.oeeArr.length?+(mo.oeeArr.reduce((a,b)=>a+b)/mo.oeeArr.length).toFixed(1):0};
   });
   const trendDir=(arr,f)=>{if(arr.length<2)return'flat';const d=arr[arr.length-1][f]-arr[arr.length-2][f];const base=arr[arr.length-2][f]||1;return d/base*100>2?'up':d/base*100<-2?'dn':'flat';};
@@ -575,7 +575,7 @@ function renderMoM(el,data,field,label,arrow,color,unit){
   if(!el||!data||!data.length)return;
   const arrowEl={up:'<span class="arr-up">↑</span>',dn:'<span class="arr-dn">↓</span>',flat:'<span class="arr-flat">—</span>'}[arrow]||'';
   const vals=data.map(m=>m[field]);
-  const maxVal=Math.max(...vals)||1;
+  const maxVal=vals.reduce((a,b)=>a>b?a:b,0)||1;
   el.innerHTML=`
     <div class="pc-trend-lbl"><span>${label}</span>${arrowEl}</div>
     <div class="mom-row">
@@ -669,7 +669,7 @@ function renderCard(prod,stats){
 function renderTable(allStats){
   const m=STAT_MODE;
   const mLabel=m==='median'?'Med':m==='avg'?'Avg':'Total';
-  const maxOut=Math.max(...allStats.map(s=>s.stats?.totalOut||0),1);
+  const maxOut=allStats.reduce((a,b)=>Math.max(a,b.stats?.totalOut||0),1);
   document.getElementById('tbl-thead').innerHTML=`
     <th>Product</th><th>Source</th>
     <th class="num">Shifts</th>
