@@ -59,7 +59,6 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .mode-pill{padding:5px 14px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .18s;letter-spacing:.2px}
 .mode-pill.active{background:var(--card);color:var(--accent);box-shadow:0 1px 4px #00000014}
 .mode-pill.m-max.active{background:#dcfce7;color:#15803d}
-.mode-pill.m-min.active{background:#fef2f2;color:#dc2626}
 [data-theme="dark"] .mode-pill.active{background:var(--bg3)}
 
 /* SECTION HEADER */
@@ -276,7 +275,6 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
           <button class="mode-pill active" onclick="setMode('median',this)">Median</button>
           <button class="mode-pill" onclick="setMode('avg',this)">Average</button>
           <button class="mode-pill m-max" onclick="setMode('max',this)">Max</button>
-          <button class="mode-pill m-min" onclick="setMode('min',this)">Min</button>
         </div>
       </div>
     </div>
@@ -474,6 +472,7 @@ function parsePD4(text){
 let STAT_MODE='median'; // median | avg | max | min
 
 function setMode(mode,btn){
+  if(mode==='min')return;
   STAT_MODE=mode;
   document.querySelectorAll('.mode-pill').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
