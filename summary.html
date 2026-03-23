@@ -741,39 +741,94 @@ async function reloadData(){
 
 function updateNextLabel(){const el=document.getElementById('next-refresh');if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';}
 
+function hideLoading(){
+  const el=document.getElementById('loading');
+  if(el){el.style.opacity='0';setTimeout(()=>el.style.display='none',500);}
+}
+
 async function init(){
   document.getElementById('products-grid').innerHTML=PRODUCTS.map(p=>`<div class="prod-card ${p.cls}" id="card-${p.id}"><div class="prod-card-accent"></div><div style="padding:24px;color:var(--muted);font-size:12px">Loading ${p.label}...</div></div>`).join('');
   const setBar=p=>{const b=document.getElementById('ld-bar');if(b)b.style.width=p+'%';};
   const setMsg=t=>{const m=document.getElementById('ld-msg');if(m)m.textContent=t;};
-  setMsg('กำลังดึงข้อมูล...');setBar(15);
-  const results=await Promise.allSettled([
-    fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
-    fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
-  ]);
-  setBar(60);setMsg('กำลัง parse ข้อมูล...');
-  await new Promise(r=>setTimeout(r,0));
-  if(results[0].status==='fulfilled'){PD3_ALL=parsePD3(results[0].value);document.getElementById('ld-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
-  setBar(80);await new Promise(r=>setTimeout(r,0));
-  if(results[1].status==='fulfilled'){PD4_ALL=parsePD4(results[1].value);document.getElementById('ld-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
-  setBar(90);setMsg('กำลังแสดงผล...');await new Promise(r=>setTimeout(r,0));
-  // Set intersection date range
-  const pd3D=PD3_ALL.map(d=>d.date).filter(Boolean);
-  const pd4D=PD4_ALL.map(d=>d.date).filter(Boolean);
-  if(pd3D.length&&pd4D.length){
-    const from=new Date(Math.max(arrMin(pd3D),arrMin(pd4D)));
-    const to=new Date(Math.min(arrMax(pd3D),arrMax(pd4D)));
-    document.getElementById('f-from').value=fmtIso(from<=to?from:new Date(arrMin([...pd3D,...pd4D])));
-    document.getElementById('f-to').value=fmtIso(from<=to?to:new Date(arrMax([...pd3D,...pd4D])));
+
+  // Safety timeout — ซ่อน loading ถ้าค้างนานเกิน 20 วินาที
+  const safetyTimer=setTimeout(()=>{
+    setMsg('หมดเวลา — แสดงข้อมูลที่มี');
+    hideLoading();
+  },20000);
+
+  try{
+    setMsg('กำลังดึงข้อมูล...');setBar(15);
+    const results=await Promise.allSettled([
+      fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
+      fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
+    ]);
+    setBar(60);setMsg('กำลัง parse ข้อมูล...');
+    await new Promise(r=>setTimeout(r,0));
+    if(results[0].status==='fulfilled'){
+      try{PD3_ALL=parsePD3(results[0].value);}catch(e){console.warn('PD3 parse error',e);PD3_ALL=[];}
+      document.getElementById('ld-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;
+      document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;
+    }else{
+      document.getElementById('ld-pd3').textContent='PD3 ✗';
+      document.getElementById('pill-pd3').textContent='PD3 ✗';
+      console.warn('PD3 fetch failed',results[0].reason);
+    }
+    setBar(80);await new Promise(r=>setTimeout(r,0));
+    if(results[1].status==='fulfilled'){
+      try{PD4_ALL=parsePD4(results[1].value);}catch(e){console.warn('PD4 parse error',e);PD4_ALL=[];}
+      document.getElementById('ld-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;
+      document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;
+    }else{
+      document.getElementById('ld-pd4').textContent='PD4 ✗';
+      document.getElementById('pill-pd4').textContent='PD4 ✗';
+      console.warn('PD4 fetch failed',results[1].reason);
+    }
+    setBar(90);setMsg('กำลังแสดงผล...');await new Promise(r=>setTimeout(r,0));
+    // Set intersection date range
+    const pd3D=PD3_ALL.map(d=>d.date).filter(Boolean);
+    const pd4D=PD4_ALL.map(d=>d.date).filter(Boolean);
+    const allD=[...pd3D,...pd4D];
+    if(allD.length){
+      let fromD,toD;
+      if(pd3D.length&&pd4D.length){
+        fromD=new Date(Math.max(arrMin(pd3D),arrMin(pd4D)));
+        toD=new Date(Math.min(arrMax(pd3D),arrMax(pd4D)));
+        if(fromD>toD){fromD=new Date(arrMin(allD));toD=new Date(arrMax(allD));}
+      }else{fromD=new Date(arrMin(allD));toD=new Date(arrMax(allD));}
+      document.getElementById('f-from').value=fmtIso(fromD);
+      document.getElementById('f-to').value=fmtIso(toD);
+    }
+    document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
+    document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
+    document.getElementById('f-from').addEventListener('change',applyFilter);
+    document.getElementById('f-to').addEventListener('change',applyFilter);
+    setBar(100);
+    try{applyFilter();}catch(e){console.warn('applyFilter error',e);}
+  }catch(e){
+    console.error('init error',e);
+    setMsg('เกิดข้อผิดพลาด: '+e.message);
+  }finally{
+    clearTimeout(safetyTimer);
+    hideLoading();
+    if(arTimer)clearInterval(arTimer);
+    arTimer=setInterval(reloadData,3600000);
+    updateNextLabel();
   }
-  document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
-  document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
-  document.getElementById('f-from').addEventListener('change',applyFilter);
-  document.getElementById('f-to').addEventListener('change',applyFilter);
-  setBar(100);applyFilter();
-  const el=document.getElementById('loading');el.style.opacity='0';setTimeout(()=>el.style.display='none',500);
-  if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadData,3600000);updateNextLabel();
 }
-init();
+
+// รอ Chart.js โหลดเสร็จก่อน init
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',init);
+}else{
+  // รอสักครู่เผื่อ Chart.js CDN ยังโหลดไม่เสร็จ
+  if(typeof Chart==='undefined'){
+    const waitChart=setInterval(()=>{if(typeof Chart!=='undefined'){clearInterval(waitChart);init();}},50);
+    setTimeout(()=>{clearInterval(waitChart);init();},5000); // init ต่อเลยถ้ารอ 5 วิแล้วยัง undefined
+  }else{
+    init();
+  }
+}
 
 // ── WORK TYPE CLASSIFICATION ─────────────────────────────────────────
 // Normal = Mon-Fri, loadingHr ≤ 9.5h
@@ -912,6 +967,7 @@ function fmtPeriodLabel(key){
 }
 
 function renderTrendChart(){
+  if(typeof Chart==='undefined'){console.warn('Chart.js not loaded yet');return;}
   const from=document.getElementById('f-from').value;
   const to=document.getElementById('f-to').value;
   const fDate=from?new Date(from):new Date(0);
