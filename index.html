@@ -204,9 +204,54 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 [data-theme="dark"] .chart-toggle button.active{background:var(--bg3);box-shadow:none}
 [data-theme="dark"] .prod-card{box-shadow:none}
 
+
+/* SIDEBAR TOGGLE */
+#sidebar-toggle{
+  position:fixed;top:12px;left:12px;z-index:200;
+  width:36px;height:36px;border-radius:10px;
+  background:var(--bg2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:18px;
+  box-shadow:0 2px 8px #00000015;
+  transition:all .2s;
+}
+#sidebar-toggle:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+#sidebar-overlay{display:none;position:fixed;inset:0;background:#00000050;z-index:150;backdrop-filter:blur(1px)}
+/* collapsed state */
+body.sidebar-collapsed #sidebar{
+  transform:translateX(calc(-1 * var(--sidebar)));
+  position:fixed;
+}
+body.sidebar-collapsed #main{margin-left:0}
+body.sidebar-collapsed #sidebar-overlay{display:none}
+/* mobile: sidebar is overlay by default */
+@media(max-width:768px){
+  #sidebar{
+    position:fixed;
+    top:0;left:0;height:100vh;
+    transform:translateX(calc(-1 * var(--sidebar)));
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    z-index:160;
+  }
+  body.sidebar-open #sidebar{transform:translateX(0)}
+  body.sidebar-open #sidebar-overlay{display:block}
+  #main{margin-left:0 !important;padding-top:60px !important}
+  #sidebar-toggle{display:flex}
+}
+@media(min-width:769px){
+  #sidebar{
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+  }
+  #sidebar-toggle{display:flex}
+  body.sidebar-collapsed #sidebar{transform:translateX(calc(-1 * var(--sidebar)));position:fixed}
+  body.sidebar-collapsed #main{margin-left:0}
+  /* default: sidebar visible, no offset needed */
+}
 </style>
 </head>
 <body>
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu">☰</button>
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <div id="loading">
   <div class="ld-ring"></div>
@@ -1082,6 +1127,23 @@ loadData();
   };
   document.addEventListener('DOMContentLoaded', updateBtn);
 })();
+
+  // Sidebar toggle
+  window.toggleSidebar = function() {
+    var isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      document.body.classList.toggle('sidebar-open');
+    } else {
+      document.body.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
+    }
+  };
+  // Restore desktop state
+  (function(){
+    if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === '1') {
+      document.body.classList.add('sidebar-collapsed');
+    }
+  })();
 </script>
 </body>
 </html>
