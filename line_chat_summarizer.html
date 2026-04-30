@@ -14,10 +14,9 @@
   header{padding:28px 0 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border)}
   .logo{width:46px;height:46px;background:linear-gradient(135deg,var(--line),#04a244);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 0 20px rgba(6,199,85,0.3)}
   .ht{font-size:20px;font-weight:700}.hs{font-size:12px;color:var(--t2);margin-top:2px}
-  .hr{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .hdr{margin-left:auto;display:flex;gap:8px;align-items:center}
   .chip{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px}
-  .cg{background:var(--gdim);border:1px solid var(--green);color:var(--green)}
-  .cb{background:var(--bdim);border:1px solid var(--blue);color:var(--blue)}
+  .cg{background:var(--gdim);border:1px solid var(--green);color:var(--green)}.cb{background:var(--bdim);border:1px solid var(--blue);color:var(--blue)}
   nav{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-top:20px}
   .nt{background:none;border:none;color:var(--t2);font-family:'Sarabun',sans-serif;font-size:14px;font-weight:500;padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s}
   .nt:hover{color:var(--text)}.nt.on{color:var(--green);border-bottom-color:var(--green)}
@@ -25,32 +24,30 @@
   .dz{border:2px dashed var(--border2);border-radius:12px;padding:40px 28px;text-align:center;cursor:pointer;position:relative;background:var(--bg2);transition:.25s}
   .dz:hover,.dz.over{border-color:var(--green);background:var(--gdim)}
   .dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-  .dz-icon{font-size:34px;margin-bottom:10px}.dz-t{font-size:15px;font-weight:600}
-  .dz-s{font-size:12px;color:var(--t2);margin-top:4px}
+  .dz-icon{font-size:34px;margin-bottom:10px}.dz-t{font-size:15px;font-weight:600}.dz-s{font-size:12px;color:var(--t2);margin-top:4px}
   .dz-tag{display:inline-flex;align-items:center;gap:6px;margin-top:14px;background:var(--bg3);border:1px solid var(--border);padding:7px 14px;border-radius:8px;font-size:11px;color:var(--t2);font-family:'IBM Plex Mono',monospace}
   .lb{display:none;align-items:center;gap:8px;background:var(--gdim);border:1px solid var(--green);border-radius:8px;padding:10px 16px;margin-top:10px;font-size:13px;color:var(--green)}.lb.on{display:flex}
   .fr{display:flex;align-items:center;gap:10px;margin:16px 0;flex-wrap:wrap}
   .fr label{font-size:12px;color:var(--t2);white-space:nowrap}
   select,input[type=date]{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;outline:none;cursor:pointer;transition:border-color .2s}
-  select:focus,input[type=date]:focus{border-color:var(--green)}
+  select:focus{border-color:var(--green)}
   .ic{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 12px;border-radius:8px;background:var(--ydim);border:1px solid var(--yellow);color:var(--yellow);margin-left:auto}
-  .div{display:flex;align-items:center;gap:14px;margin:16px 0;color:var(--t3);font-size:12px}.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
+  .divd{display:flex;align-items:center;gap:14px;margin:16px 0;color:var(--t3);font-size:12px}.divd::before,.divd::after{content:'';flex:1;height:1px;background:var(--border)}
   textarea{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;resize:vertical;min-height:140px;outline:none;transition:border-color .2s}
   textarea:focus{border-color:var(--green)}textarea::placeholder{color:var(--t3)}
   .btn{width:100%;padding:15px;background:var(--green);border:none;border-radius:10px;color:#07120e;font-family:'Sarabun',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
   .btn:hover{background:#00f5a0;transform:translateY(-1px)}.btn:disabled{background:var(--border2);color:var(--t3);cursor:not-allowed;transform:none}
-  .ld{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:36px;text-align:center;margin-top:22px}.ld.on{display:block}
+  .ldiv{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:36px;text-align:center;margin-top:22px}.ldiv.on{display:block}
   .spin{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 14px}
-  @keyframes sp{to{transform:rotate(360deg)}}
-  .ld p{color:var(--t2);font-size:14px}
+  @keyframes sp{to{transform:rotate(360deg)}}.ldiv p{color:var(--t2);font-size:14px}
   .dots::after{content:'';animation:dt 1.5s steps(4,end) infinite}
   @keyframes dt{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
   .eb{display:none;background:var(--rdim);border:1px solid var(--red);border-radius:10px;padding:16px;margin-top:18px;color:var(--red);font-size:13px;line-height:1.6}.eb.on{display:block}
   .res{display:none;margin-top:26px}.res.on{display:block}
   .rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
   .rhl{font-size:15px;font-weight:600}.rm{font-size:11.5px;color:var(--t2);font-family:'IBM Plex Mono',monospace;margin-top:3px}
-  .bc{background:var(--bg3);border:1px solid var(--border);color:var(--t2);padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'Sarabun',sans-serif;transition:.2s;display:flex;align-items:center;gap:6px}
-  .bc:hover{border-color:var(--green);color:var(--green)}
+  .bcp{background:var(--bg3);border:1px solid var(--border);color:var(--t2);padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'Sarabun',sans-serif;transition:.2s;display:flex;align-items:center;gap:6px}
+  .bcp:hover{border-color:var(--green);color:var(--green)}
   .ks{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
   @media(max-width:600px){.ks{grid-template-columns:repeat(2,1fr)}}
   .kb{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 14px;animation:up .35s ease forwards;opacity:0}
@@ -62,16 +59,14 @@
   .c2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
   @media(max-width:600px){.c2{grid-template-columns:1fr}}
   .card{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:18px;animation:up .35s ease forwards;opacity:0}
-  .card.full{grid-column:1/-1}
-  .bly{border-left:3px solid var(--yellow)}.blr{border-left:3px solid var(--red)}.blo{border-left:3px solid var(--orange)}.blb{border-left:3px solid var(--blue)}
-  .ci{font-size:20px;margin-bottom:8px}.cl{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-bottom:10px;font-family:'IBM Plex Mono',monospace}
+  .card.full{grid-column:1/-1}.bly{border-left:3px solid var(--yellow)}.blr{border-left:3px solid var(--red)}.blo{border-left:3px solid var(--orange)}.blb{border-left:3px solid var(--blue)}
+  .ci{font-size:20px;margin-bottom:8px}.cll{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-bottom:10px;font-family:'IBM Plex Mono',monospace}
   .cb2{font-size:13.5px;line-height:1.75;white-space:pre-wrap}
   .lr{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px}
   .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
   .dg{background:var(--green);box-shadow:0 0 6px var(--green)}.dr{background:var(--red);box-shadow:0 0 6px var(--red)}.dy{background:var(--yellow);box-shadow:0 0 6px var(--yellow)}
-  .ln{font-weight:600;min-width:110px;font-family:'IBM Plex Mono',monospace;font-size:12px}
-  .ld2{flex:1;color:var(--t2);font-size:12.5px}.ldt{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px}
-  .ldt.y{color:var(--red)}.ldt.n{color:var(--green)}
+  .ln{font-weight:600;min-width:110px;font-family:'IBM Plex Mono',monospace;font-size:12px}.ld2{flex:1;color:var(--t2);font-size:12.5px}
+  .ldt{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px}.ldt.y{color:var(--red)}.ldt.n{color:var(--green)}
   .ar{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:border-color .2s}
   .ar:hover{border-color:var(--green)}.ar input[type=checkbox]{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin-top:2px;flex-shrink:0}
   .ar.done .at{text-decoration:line-through;color:var(--t3)}.at{font-size:13px;line-height:1.65;flex:1}
@@ -82,7 +77,7 @@
   .hr2:hover{border-color:var(--green)}.hd{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--green);min-width:92px}
   .hp{flex:1;font-size:13px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .hb{font-size:10.5px;background:var(--rdim);color:var(--red);border:1px solid var(--red);padding:3px 8px;border-radius:4px;font-family:'IBM Plex Mono',monospace}
-  .bd{background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px;padding:4px 8px;border-radius:6px;transition:.2s}.bd:hover{color:var(--red);background:var(--rdim)}
+  .bdd{background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px;padding:4px 8px;border-radius:6px;transition:.2s}.bdd:hover{color:var(--red);background:var(--rdim)}
   .tbr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
   .tbl{font-size:12px;color:var(--t2);min-width:130px;font-family:'IBM Plex Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tbw{flex:1;background:var(--bg2);border-radius:4px;height:22px;overflow:hidden}
@@ -97,7 +92,7 @@
   <header>
     <div class="logo">🏭</div>
     <div><div class="ht">TSAT Production LINE Summarizer</div><div class="hs">วิเคราะห์ Production Report จากกลุ่ม LINE P703/U704</div></div>
-    <div class="hr"><span class="chip cg">AI POWERED</span><span class="chip cb">PD3 · PD4</span></div>
+    <div class="hdr"><span class="chip cg">AI POWERED</span><span class="chip cb">PD3 · PD4</span></div>
   </header>
   <nav>
     <button class="nt on" onclick="go('input',this)">📥 อัปโหลด / วิเคราะห์</button>
@@ -105,7 +100,6 @@
     <button class="nt" onclick="go('trend',this)">📊 แนวโน้ม DT</button>
   </nav>
 
-  <!-- INPUT -->
   <div id="p-input" class="panel on">
     <div class="dz" id="dz">
       <input type="file" accept=".txt" onchange="loadFile(event)">
@@ -119,47 +113,48 @@
     <div class="fr" id="fr" style="display:none">
       <label>📅 เลือกวันที่:</label>
       <select id="dsel" onchange="onDate()"><option value="">-- เลือกวันที่ --</option></select>
-      <select id="msel"><option value="daily">สรุปรายวัน</option><option value="downtime">เน้น Downtime</option><option value="production">เน้นยอดผลิต</option></select>
+      <select id="msel">
+        <option value="daily">สรุปรายวัน</option>
+        <option value="downtime">เน้น Downtime</option>
+        <option value="production">เน้นยอดผลิต</option>
+      </select>
       <div class="ic" id="lc">0 บรรทัด</div>
     </div>
 
-    <div class="div">หรือ paste ข้อความโดยตรง</div>
+    <div class="divd">หรือ paste ข้อความโดยตรง</div>
     <textarea id="raw" placeholder="วาง (Paste) ข้อความจากกลุ่ม LINE ได้เลย...&#10;&#10;ตัวอย่าง:&#10;07:46  LINE Notify  PD3 Prod. Report: HDF2 เครื่องจักรหลักเบรคดาวน์: 70&#10;09:25  bill  Laser LWR306 ยังไม่สามารถขึ้นงานได้ Alarm PLC"></textarea>
 
     <button class="btn" id="goBtn" onclick="analyze()"><span>🤖</span><span>วิเคราะห์ด้วย AI</span></button>
-
-    <div class="ld" id="ldiv"><div class="spin"></div><p>AI กำลังวิเคราะห์<span class="dots"></span></p></div>
+    <div class="ldiv" id="ldiv"><div class="spin"></div><p>AI กำลังวิเคราะห์<span class="dots"></span></p></div>
     <div class="eb" id="eb"></div>
 
     <div class="res" id="rdiv">
       <div class="rh">
         <div><div class="rhl">📋 ผลการวิเคราะห์</div><div class="rm" id="rmeta"></div></div>
-        <button class="bc" onclick="copyAll()">📋 Copy</button>
+        <button class="bcp" onclick="copyAll()">📋 Copy</button>
       </div>
       <div class="ks" id="kpi"></div>
       <div class="c2">
-        <div class="card blr" style="animation-delay:.2s"><div class="ci">⚠️</div><div class="cl">Lines ที่มี Downtime</div><div id="dtl"></div></div>
-        <div class="card bly" style="animation-delay:.25s"><div class="ci">🔧</div><div class="cl">สาเหตุ Downtime</div><div class="cb2" id="dtr">—</div></div>
+        <div class="card blr" style="animation-delay:.2s"><div class="ci">⚠️</div><div class="cll">Lines ที่มี Downtime</div><div id="dtl"></div></div>
+        <div class="card bly" style="animation-delay:.25s"><div class="ci">🔧</div><div class="cll">สาเหตุ Downtime</div><div class="cb2" id="dtr">—</div></div>
       </div>
       <div class="c2">
-        <div class="card blb" style="animation-delay:.3s"><div class="ci">📝</div><div class="cl">สรุปภาพรวม</div><div class="cb2" id="sum">—</div></div>
-        <div class="card blo" style="animation-delay:.35s"><div class="ci">📊</div><div class="cl">ยอดผลิต</div><div class="cb2" id="prod">—</div></div>
+        <div class="card blb" style="animation-delay:.3s"><div class="ci">📝</div><div class="cll">สรุปภาพรวม</div><div class="cb2" id="sum">—</div></div>
+        <div class="card blo" style="animation-delay:.35s"><div class="ci">📊</div><div class="cll">ยอดผลิต</div><div class="cb2" id="prod">—</div></div>
       </div>
-      <div class="card full bly" style="animation-delay:.4s;margin-bottom:12px"><div class="ci">✅</div><div class="cl">Action Items</div><div id="acts"></div></div>
+      <div class="card full bly" style="animation-delay:.4s;margin-bottom:12px"><div class="ci">✅</div><div class="cll">Action Items</div><div id="acts"></div></div>
       <div class="c2">
-        <div class="card" style="animation-delay:.45s"><div class="ci">🔁</div><div class="cl">แนวโน้ม</div><div class="cb2" id="rec">—</div></div>
-        <div class="card" style="animation-delay:.5s"><div class="ci">💡</div><div class="cl">ข้อเสนอแนะ</div><div class="cb2" id="sug">—</div></div>
+        <div class="card" style="animation-delay:.45s"><div class="ci">🔁</div><div class="cll">แนวโน้ม</div><div class="cb2" id="rec">—</div></div>
+        <div class="card" style="animation-delay:.5s"><div class="ci">💡</div><div class="cll">ข้อเสนอแนะ</div><div class="cb2" id="sug">—</div></div>
       </div>
     </div>
   </div>
 
-  <!-- HISTORY -->
   <div id="p-history" class="panel"><div id="hl"><div class="he">⏳ ยังไม่มีประวัติ</div></div></div>
 
-  <!-- TREND -->
   <div id="p-trend" class="panel">
-    <div class="card" style="animation:none;opacity:1;margin-bottom:12px"><div class="ci">📊</div><div class="cl">Lines DT บ่อยสุด (นาทีสะสม)</div><div id="tdt"><div style="color:var(--t3);font-size:13px;padding:16px 0">ยังไม่มีข้อมูล</div></div></div>
-    <div class="card" style="animation:none;opacity:1"><div class="ci">🔁</div><div class="cl">Keywords บ่อย</div><div id="tkw"><div style="color:var(--t3);font-size:13px;padding:16px 0">ยังไม่มีข้อมูล</div></div></div>
+    <div class="card" style="animation:none;opacity:1;margin-bottom:12px"><div class="ci">📊</div><div class="cll">Lines DT บ่อยสุด</div><div id="tdt"><div style="color:var(--t3);font-size:13px;padding:16px 0">ยังไม่มีข้อมูล</div></div></div>
+    <div class="card" style="animation:none;opacity:1"><div class="ci">🔁</div><div class="cll">Keywords บ่อย</div><div id="tkw"><div style="color:var(--t3);font-size:13px;padding:16px 0">ยังไม่มีข้อมูล</div></div></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -173,10 +168,13 @@ dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')})
 dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');const f=e.dataTransfer.files[0];if(f)readF(f)});
 function loadFile(e){const f=e.target.files[0];if(f)readF(f)}
+
 function readF(f){
   const r=new FileReader();
   r.onload=ev=>{
-    allL=ev.target.result.split('\n');
+    // ── KEY FIX: strip \r from Windows line endings ──
+    const raw=ev.target.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    allL=raw.split('\n');
     buildMap();
     document.getElementById('lb').classList.add('on');
     document.getElementById('lb-txt').textContent=`${f.name} (${(f.size/1024).toFixed(1)} KB · ${allL.length.toLocaleString()} บรรทัด)`;
@@ -186,14 +184,40 @@ function readF(f){
   };
   r.readAsText(f,'UTF-8');
 }
+
 function buildMap(){
-  dmap={};const s=document.getElementById('dsel');
+  dmap={};
+  const s=document.getElementById('dsel');
   s.innerHTML='<option value="">-- เลือกวันที่ --</option>';
-  allL.forEach((l,i)=>{const m=l.match(/^\w+,\s+(\d{2}\/\d{2}\/\d{4}\s+BE)\s*$/);if(m&&!dmap[m[1]]){dmap[m[1]]=i;const o=document.createElement('option');o.value=m[1];o.textContent=m[1];s.appendChild(o)}});
+  allL.forEach((line,i)=>{
+    // ── KEY FIX: flexible regex handles any whitespace/\r at end ──
+    // Format: "Fri, 05/07/2567 BE"  (day-of-week optional)
+    const m=line.trim().match(/^(?:\w+,\s+)?(\d{2}\/\d{2}\/\d{4}(?:\s+BE)?)\s*$/);
+    if(m&&!dmap[m[1]]){
+      dmap[m[1]]=i;
+      const o=document.createElement('option');
+      o.value=m[1];o.textContent=m[1];
+      s.appendChild(o);
+    }
+  });
+
+  // fallback: if nothing found, try to detect date from message timestamps
+  if(Object.keys(dmap).length===0){
+    const seen=new Set();
+    allL.forEach((line,i)=>{
+      // message lines: "HH:MM\tSender\tMessage" — use date from file header
+      const mh=line.match(/^(\d{2}:\d{2})\t/);
+      if(mh){
+        // find nearest date header above
+      }
+    });
+  }
 }
+
 function onDate(){
   const c=document.getElementById('dsel').value;if(!c)return;
-  const si=dmap[c],ks=Object.keys(dmap),ki=ks.indexOf(c),ei=ki+1<ks.length?dmap[ks[ki+1]]:allL.length;
+  const si=dmap[c],ks=Object.keys(dmap),ki=ks.indexOf(c);
+  const ei=ki+1<ks.length?dmap[ks[ki+1]]:allL.length;
   document.getElementById('raw').value=allL.slice(si,ei).join('\n');
   document.getElementById('lc').textContent=(ei-si).toLocaleString()+' บรรทัด';
 }
@@ -205,16 +229,14 @@ function go(name,btn){
   if(name==='history')rHist();if(name==='trend')rTrend();
 }
 
-// ── ANALYZE ──────────────────────────────────────────────────
 async function analyze(){
-  const raw=document.getElementById('raw').value.trim();
-  if(!raw){toast('⚠️ กรุณาใส่ข้อมูลก่อน');return}
-
+  const rawText=document.getElementById('raw').value.trim();
+  if(!rawText){toast('⚠️ กรุณาใส่ข้อมูลก่อน');return}
   const mode=document.getElementById('msel').value;
   const ml={daily:'รายวัน',downtime:'เน้น Downtime',production:'เน้นยอดผลิต'}[mode]||'รายวัน';
 
-  // Trim to max 3500 chars (safe for nested JSON response)
-  let text=raw;
+  // Trim to max 3500 chars — take last portion (most recent)
+  let text=rawText;
   if(text.length>3500){
     text=text.slice(-3500);
     const nl=text.indexOf('\n');
@@ -222,18 +244,19 @@ async function analyze(){
   }
 
   let dtLabel=document.getElementById('dsel')?.value||'';
-  if(!dtLabel){const m=raw.match(/(\d{2}\/\d{2}\/\d{4}\s+BE)/);dtLabel=m?m[1]:'ไม่ระบุ'}
+  if(!dtLabel){const m=rawText.match(/(\d{2}\/\d{2}\/\d{4}(?:\s+BE)?)/);dtLabel=m?m[1]:'ไม่ระบุ'}
 
   const prompt=`Analyze this TSAT factory LINE group chat (P703/U704 production reports + team messages).
 Lines: BENDING/LASER/ASSY E50, HDF1-2, LASER CUT 1-6, LWRBAR 222 (PD3); ASSY GOR 297, Laser 297, ASSY LWRBAR 306, Laser 306 (PD4); Apron 060/061.
 DT fields (minutes): เครื่องจักรหลักเบรคดาวน์,เครื่องจักรรองเบรคดาวน์,โรบอทเบรคดาวน์,PLC/เซนเซอร์,แม่พิมพ์/จิ๊ก.
+Note: messages are tab-separated: TIME[TAB]SENDER[TAB]MESSAGE
 Mode: ${ml} | Date: ${dtLabel}
 DATA:
 ---
 ${text}
 ---
-Respond ONLY with this exact JSON (no markdown, no extra text):
-{"kpi":{"totalLines":0,"linesWithDT":0,"totalDTmin":0,"maxOutput":""},"dtLines":[{"line":"","dt":0,"cause":"","status":""}],"dtReasons":"","summary":"","production":"","actions":[{"task":"","owner":"","priority":""}],"recurring":"","suggest":"","keywords":[]}`;
+Respond ONLY with valid JSON. No markdown. No explanation. Use this exact structure:
+{"kpi":{"totalLines":0,"linesWithDT":0,"totalDTmin":0,"maxOutput":""},"dtLines":[{"line":"","dt":0,"cause":"","status":"ongoing"}],"dtReasons":"","summary":"","production":"","actions":[{"task":"","owner":"","priority":"high"}],"recurring":"","suggest":"","keywords":[""]}`;
 
   document.getElementById('goBtn').disabled=true;
   document.getElementById('ldiv').classList.add('on');
@@ -250,24 +273,22 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
         messages:[{role:'user',content:prompt}]
       })
     });
-
     if(!resp.ok){
       let msg=`HTTP ${resp.status}`;
       try{const e=await resp.json();msg=e?.error?.message||msg}catch(x){}
       throw new Error(msg);
     }
-
     const data=await resp.json();
-    const rawTxt=(data.content||[]).map(b=>b.text||'').join('').trim();
+    const rawResp=(data.content||[]).map(b=>b.text||'').join('').trim();
+    if(!rawResp)throw new Error('AI returned empty response');
 
-    if(!rawTxt) throw new Error('API returned empty response');
-
-    // Parse JSON - try 3 strategies
     let r=null;
-    for(const s of [rawTxt, (rawTxt.match(/\{[\s\S]*\}/)||[''])[0], rawTxt.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim()]){
-      try{r=JSON.parse(s);break}catch(e){}
-    }
-    if(!r) throw new Error('Could not parse AI response as JSON. Raw: '+rawTxt.slice(0,200));
+    for(const s of[
+      rawResp,
+      (rawResp.match(/\{[\s\S]*\}/)||[''])[0],
+      rawResp.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim()
+    ]){try{r=JSON.parse(s);break}catch(e){}}
+    if(!r)throw new Error('Parse failed. Response: '+rawResp.slice(0,300));
 
     render(r,dtLabel,ml);
     saveH(r,dtLabel,ml);
@@ -275,7 +296,7 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
     console.error(err);
     const eb=document.getElementById('eb');
     eb.classList.add('on');
-    eb.innerHTML=`❌ <strong>${err.message}</strong><br><small style="opacity:.7;margin-top:4px;display:block">💡 ลองเลือกวันที่ให้แน่ใจว่าข้อมูลไม่เกิน 3,500 ตัวอักษร</small>`;
+    eb.innerHTML=`❌ <strong>${err.message}</strong><br><small style="opacity:.7;margin-top:4px;display:block">💡 ตรวจสอบว่าเลือกวันที่แล้ว และข้อมูลอยู่ใน textarea</small>`;
   }finally{
     document.getElementById('goBtn').disabled=false;
     document.getElementById('ldiv').classList.remove('on');
@@ -291,8 +312,8 @@ function render(r,dt,mode){
     <div class="kb"><div class="ki">🔴</div><div class="kl">Lines มี DT</div><div class="kv ${dc}">${k.linesWithDT??'—'}</div><div class="ks2">lines</div></div>
     <div class="kb"><div class="ki">⏱️</div><div class="kl">DT รวม</div><div class="kv vy">${k.totalDTmin!=null?k.totalDTmin+' min':'—'}</div><div class="ks2">${k.totalDTmin!=null?(k.totalDTmin/60).toFixed(1)+' ชม.':''}</div></div>
     <div class="kb"><div class="ki">🏆</div><div class="kl">Output สูงสุด</div><div class="kv vg" style="font-size:13px">${k.maxOutput??'—'}</div><div class="ks2"> </div></div>`;
-  const dtl=document.getElementById('dtl');
-  dtl.innerHTML=r.dtLines?.length?r.dtLines.map(d=>{
+  const dtld=document.getElementById('dtl');
+  dtld.innerHTML=r.dtLines?.length?r.dtLines.map(d=>{
     const sc=d.status==='ongoing'?'dr':d.status==='resolved'?'dg':'dy';
     return`<div class="lr"><div class="dot ${sc}"></div><div class="ln">${d.line||'—'}</div><div class="ld2">${d.cause||'—'}</div><div class="ldt ${d.dt>0?'y':'n'}">${d.dt?d.dt+' min':'OK'}</div></div>`;
   }).join(''):'<div style="color:var(--t3);font-size:13px;padding:8px 0">ไม่พบ Downtime 🟢</div>';
@@ -337,7 +358,7 @@ function saveH(r,dt,mode){
 function rHist(){
   const h=JSON.parse(localStorage.getItem('th')||'[]'),el=document.getElementById('hl');
   if(!h.length){el.innerHTML='<div class="he">⏳ ยังไม่มีประวัติ</div>';return}
-  el.innerHTML=h.map(x=>`<div class="hr2" onclick="lHist(${x.id})"><div class="hd">${x.dt||'—'}</div><div class="hp">${(x.r?.summary||'—').slice(0,80)}…</div><div class="hb">DT ${x.r?.kpi?.totalDTmin||0} min</div><button class="bd" onclick="dHist(event,${x.id})">🗑️</button></div>`).join('');
+  el.innerHTML=h.map(x=>`<div class="hr2" onclick="lHist(${x.id})"><div class="hd">${x.dt||'—'}</div><div class="hp">${(x.r?.summary||'—').slice(0,80)}…</div><div class="hb">DT ${x.r?.kpi?.totalDTmin||0} min</div><button class="bdd" onclick="dHist(event,${x.id})">🗑️</button></div>`).join('');
 }
 function lHist(id){
   const h=JSON.parse(localStorage.getItem('th')||'[]'),x=h.find(v=>v.id===id);if(!x)return;
