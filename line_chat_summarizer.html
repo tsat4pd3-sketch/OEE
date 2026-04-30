@@ -29,7 +29,7 @@
   .lb{display:none;align-items:center;gap:8px;background:var(--gdim);border:1px solid var(--green);border-radius:8px;padding:10px 16px;margin-top:10px;font-size:13px;color:var(--green)}.lb.on{display:flex}
   .fr{display:flex;align-items:center;gap:10px;margin:16px 0;flex-wrap:wrap}
   .fr label{font-size:12px;color:var(--t2);white-space:nowrap}
-  select,input[type=date]{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;outline:none;cursor:pointer;transition:border-color .2s}
+  select{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;outline:none;cursor:pointer;transition:border-color .2s}
   select:focus{border-color:var(--green)}
   .ic{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 12px;border-radius:8px;background:var(--ydim);border:1px solid var(--yellow);color:var(--yellow);margin-left:auto}
   .divd{display:flex;align-items:center;gap:14px;margin:16px 0;color:var(--t3);font-size:12px}.divd::before,.divd::after{content:'';flex:1;height:1px;background:var(--border)}
@@ -122,7 +122,7 @@
     </div>
 
     <div class="divd">หรือ paste ข้อความโดยตรง</div>
-    <textarea id="raw" placeholder="วาง (Paste) ข้อความจากกลุ่ม LINE ได้เลย...&#10;&#10;ตัวอย่าง:&#10;07:46  LINE Notify  PD3 Prod. Report: HDF2 เครื่องจักรหลักเบรคดาวน์: 70&#10;09:25  bill  Laser LWR306 ยังไม่สามารถขึ้นงานได้ Alarm PLC"></textarea>
+    <textarea id="raw" placeholder="วาง (Paste) ข้อความจากกลุ่ม LINE ได้เลย...&#10;&#10;รองรับทั้งสองรูปแบบ:&#10;• [LINE] Chat export (Fri, 05/07/2567 BE)&#10;• ไฟล์แบบใหม่ (2026.04.29 วันพุธ)"></textarea>
 
     <button class="btn" id="goBtn" onclick="analyze()"><span>🤖</span><span>วิเคราะห์ด้วย AI</span></button>
     <div class="ldiv" id="ldiv"><div class="spin"></div><p>AI กำลังวิเคราะห์<span class="dots"></span></p></div>
@@ -162,7 +162,6 @@
 <script>
 let cur=null, allL=[], dmap={};
 
-// drag & drop
 const dz=document.getElementById('dz');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});
 dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
@@ -172,7 +171,6 @@ function loadFile(e){const f=e.target.files[0];if(f)readF(f)}
 function readF(f){
   const r=new FileReader();
   r.onload=ev=>{
-    // ── KEY FIX: strip \r from Windows line endings ──
     const raw=ev.target.result.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
     allL=raw.split('\n');
     buildMap();
@@ -189,29 +187,36 @@ function buildMap(){
   dmap={};
   const s=document.getElementById('dsel');
   s.innerHTML='<option value="">-- เลือกวันที่ --</option>';
+
   allL.forEach((line,i)=>{
-    // ── KEY FIX: flexible regex handles any whitespace/\r at end ──
-    // Format: "Fri, 05/07/2567 BE"  (day-of-week optional)
-    const m=line.trim().match(/^(?:\w+,\s+)?(\d{2}\/\d{2}\/\d{4}(?:\s+BE)?)\s*$/);
-    if(m&&!dmap[m[1]]){
-      dmap[m[1]]=i;
+    const t=line.trim();
+
+    // Format 1: "Fri, 05/07/2567 BE"  (original LINE export)
+    const m1=t.match(/^(?:\w+,\s+)?(\d{2}\/\d{2}\/\d{4}(?:\s+BE)?)\s*$/);
+    if(m1&&!dmap[m1[1]]){
+      dmap[m1[1]]=i;
       const o=document.createElement('option');
-      o.value=m[1];o.textContent=m[1];
-      s.appendChild(o);
+      o.value=m1[1];o.textContent=m1[1];s.appendChild(o);
+      return;
+    }
+
+    // Format 2: "2026.04.29 วันพุธ"  (new TSAT file format)
+    const m2=t.match(/^(\d{4}\.\d{2}\.\d{2})\s*/);
+    if(m2&&!dmap[m2[1]]){
+      dmap[m2[1]]=i;
+      const o=document.createElement('option');
+      o.value=m2[1];o.textContent=m2[1];s.appendChild(o);
+      return;
+    }
+
+    // Format 3: "วันที่  29/04/2026"
+    const m3=t.match(/^วันที่\s+(\d{2}\/\d{2}\/\d{4})\s*$/);
+    if(m3&&!dmap[m3[1]]){
+      dmap[m3[1]]=i;
+      const o=document.createElement('option');
+      o.value=m3[1];o.textContent=m3[1];s.appendChild(o);
     }
   });
-
-  // fallback: if nothing found, try to detect date from message timestamps
-  if(Object.keys(dmap).length===0){
-    const seen=new Set();
-    allL.forEach((line,i)=>{
-      // message lines: "HH:MM\tSender\tMessage" — use date from file header
-      const mh=line.match(/^(\d{2}:\d{2})\t/);
-      if(mh){
-        // find nearest date header above
-      }
-    });
-  }
 }
 
 function onDate(){
@@ -235,7 +240,7 @@ async function analyze(){
   const mode=document.getElementById('msel').value;
   const ml={daily:'รายวัน',downtime:'เน้น Downtime',production:'เน้นยอดผลิต'}[mode]||'รายวัน';
 
-  // Trim to max 3500 chars — take last portion (most recent)
+  // Smart trim: max 3500 chars
   let text=rawText;
   if(text.length>3500){
     text=text.slice(-3500);
@@ -244,18 +249,21 @@ async function analyze(){
   }
 
   let dtLabel=document.getElementById('dsel')?.value||'';
-  if(!dtLabel){const m=rawText.match(/(\d{2}\/\d{2}\/\d{4}(?:\s+BE)?)/);dtLabel=m?m[1]:'ไม่ระบุ'}
+  if(!dtLabel){
+    const m=rawText.match(/(\d{4}\.\d{2}\.\d{2}|\d{2}\/\d{2}\/\d{4})/);
+    dtLabel=m?m[1]:'ไม่ระบุ';
+  }
 
-  const prompt=`Analyze this TSAT factory LINE group chat (P703/U704 production reports + team messages).
+  const prompt=`Analyze this TSAT factory LINE group chat (P703/U704 production reports + team conversations).
 Lines: BENDING/LASER/ASSY E50, HDF1-2, LASER CUT 1-6, LWRBAR 222 (PD3); ASSY GOR 297, Laser 297, ASSY LWRBAR 306, Laser 306 (PD4); Apron 060/061.
 DT fields (minutes): เครื่องจักรหลักเบรคดาวน์,เครื่องจักรรองเบรคดาวน์,โรบอทเบรคดาวน์,PLC/เซนเซอร์,แม่พิมพ์/จิ๊ก.
-Note: messages are tab-separated: TIME[TAB]SENDER[TAB]MESSAGE
+Note: messages may be in Thai or English. Downtime may be stated as "Downtime = X นาที".
 Mode: ${ml} | Date: ${dtLabel}
 DATA:
 ---
 ${text}
 ---
-Respond ONLY with valid JSON. No markdown. No explanation. Use this exact structure:
+Respond ONLY with valid JSON. No markdown. No explanation:
 {"kpi":{"totalLines":0,"linesWithDT":0,"totalDTmin":0,"maxOutput":""},"dtLines":[{"line":"","dt":0,"cause":"","status":"ongoing"}],"dtReasons":"","summary":"","production":"","actions":[{"task":"","owner":"","priority":"high"}],"recurring":"","suggest":"","keywords":[""]}`;
 
   document.getElementById('goBtn').disabled=true;
@@ -264,7 +272,10 @@ Respond ONLY with valid JSON. No markdown. No explanation. Use this exact struct
   document.getElementById('eb').classList.remove('on');
 
   try{
-    const resp=await fetch('https://tsat-proxy.tsat4pd3.workers.dev/',{
+    // ── ใช้ Cloudflare Worker URL ของคุณ ──
+    const PROXY_URL = 'https://tsat-proxy.tsat4pd3.workers.dev/';
+
+    const resp=await fetch(PROXY_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
@@ -273,11 +284,13 @@ Respond ONLY with valid JSON. No markdown. No explanation. Use this exact struct
         messages:[{role:'user',content:prompt}]
       })
     });
+
     if(!resp.ok){
       let msg=`HTTP ${resp.status}`;
       try{const e=await resp.json();msg=e?.error?.message||msg}catch(x){}
       throw new Error(msg);
     }
+
     const data=await resp.json();
     const rawResp=(data.content||[]).map(b=>b.text||'').join('').trim();
     if(!rawResp)throw new Error('AI returned empty response');
@@ -288,7 +301,7 @@ Respond ONLY with valid JSON. No markdown. No explanation. Use this exact struct
       (rawResp.match(/\{[\s\S]*\}/)||[''])[0],
       rawResp.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim()
     ]){try{r=JSON.parse(s);break}catch(e){}}
-    if(!r)throw new Error('Parse failed. Response: '+rawResp.slice(0,300));
+    if(!r)throw new Error('Parse failed: '+rawResp.slice(0,200));
 
     render(r,dtLabel,ml);
     saveH(r,dtLabel,ml);
@@ -296,7 +309,7 @@ Respond ONLY with valid JSON. No markdown. No explanation. Use this exact struct
     console.error(err);
     const eb=document.getElementById('eb');
     eb.classList.add('on');
-    eb.innerHTML=`❌ <strong>${err.message}</strong><br><small style="opacity:.7;margin-top:4px;display:block">💡 ตรวจสอบว่าเลือกวันที่แล้ว และข้อมูลอยู่ใน textarea</small>`;
+    eb.innerHTML=`❌ <strong>${err.message}</strong><br><small style="opacity:.7;margin-top:4px;display:block">💡 ตรวจสอบว่าเลือกวันที่แล้ว และ Cloudflare Worker ทำงานอยู่</small>`;
   }finally{
     document.getElementById('goBtn').disabled=false;
     document.getElementById('ldiv').classList.remove('on');
@@ -312,16 +325,19 @@ function render(r,dt,mode){
     <div class="kb"><div class="ki">🔴</div><div class="kl">Lines มี DT</div><div class="kv ${dc}">${k.linesWithDT??'—'}</div><div class="ks2">lines</div></div>
     <div class="kb"><div class="ki">⏱️</div><div class="kl">DT รวม</div><div class="kv vy">${k.totalDTmin!=null?k.totalDTmin+' min':'—'}</div><div class="ks2">${k.totalDTmin!=null?(k.totalDTmin/60).toFixed(1)+' ชม.':''}</div></div>
     <div class="kb"><div class="ki">🏆</div><div class="kl">Output สูงสุด</div><div class="kv vg" style="font-size:13px">${k.maxOutput??'—'}</div><div class="ks2"> </div></div>`;
+
   const dtld=document.getElementById('dtl');
   dtld.innerHTML=r.dtLines?.length?r.dtLines.map(d=>{
     const sc=d.status==='ongoing'?'dr':d.status==='resolved'?'dg':'dy';
     return`<div class="lr"><div class="dot ${sc}"></div><div class="ln">${d.line||'—'}</div><div class="ld2">${d.cause||'—'}</div><div class="ldt ${d.dt>0?'y':'n'}">${d.dt?d.dt+' min':'OK'}</div></div>`;
   }).join(''):'<div style="color:var(--t3);font-size:13px;padding:8px 0">ไม่พบ Downtime 🟢</div>';
+
   document.getElementById('dtr').textContent=r.dtReasons||'—';
   document.getElementById('sum').textContent=r.summary||'—';
   document.getElementById('prod').textContent=r.production||'—';
   document.getElementById('rec').textContent=r.recurring||'—';
   document.getElementById('sug').textContent=r.suggest||'—';
+
   const ad=document.getElementById('acts');ad.innerHTML='';
   (r.actions||[]).forEach(a=>{
     const pm={high:['ph','HIGH'],medium:['pm','MED'],low:['pl','LOW']};
@@ -331,6 +347,7 @@ function render(r,dt,mode){
     ad.appendChild(el);
   });
   if(!r.actions?.length)ad.textContent='ไม่พบ Action Items';
+
   document.getElementById('rdiv').classList.add('on');
   document.getElementById('rdiv').scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -355,19 +372,23 @@ function saveH(r,dt,mode){
   (r.keywords||[]).forEach(k=>{t['k_'+k]=(t['k_'+k]||0)+1});
   localStorage.setItem('tt',JSON.stringify(t));
 }
+
 function rHist(){
   const h=JSON.parse(localStorage.getItem('th')||'[]'),el=document.getElementById('hl');
   if(!h.length){el.innerHTML='<div class="he">⏳ ยังไม่มีประวัติ</div>';return}
   el.innerHTML=h.map(x=>`<div class="hr2" onclick="lHist(${x.id})"><div class="hd">${x.dt||'—'}</div><div class="hp">${(x.r?.summary||'—').slice(0,80)}…</div><div class="hb">DT ${x.r?.kpi?.totalDTmin||0} min</div><button class="bdd" onclick="dHist(event,${x.id})">🗑️</button></div>`).join('');
 }
+
 function lHist(id){
   const h=JSON.parse(localStorage.getItem('th')||'[]'),x=h.find(v=>v.id===id);if(!x)return;
   render(x.r,x.dt,x.mode||'—');go('input',document.querySelector('.nt'));
 }
+
 function dHist(e,id){
   e.stopPropagation();let h=JSON.parse(localStorage.getItem('th')||'[]');
   h=h.filter(x=>x.id!==id);localStorage.setItem('th',JSON.stringify(h));rHist();toast('🗑️ ลบแล้ว');
 }
+
 function rTrend(){
   const t=JSON.parse(localStorage.getItem('tt')||'{}');
   const ld=Object.entries(t).filter(([k])=>!k.startsWith('k_')).sort((a,b)=>b[1]-a[1]).slice(0,8);
@@ -381,6 +402,7 @@ function rTrend(){
   document.getElementById('tkw').innerHTML=mk(kw,'br2,br2,by2,bg2,bg2,bg2');
   setTimeout(()=>{document.querySelectorAll('.tbb').forEach(b=>b.style.width=(b.dataset.w||0)+'%')},120);
 }
+
 function toast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');
   setTimeout(()=>t.classList.remove('on'),3000);
