@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSAT Production LINE Summarizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0f18;--bg2:#111827;--bg3:#1a2235;--border:#243048;--border2:#334466;--green:#00d98b;--gdim:rgba(0,217,139,0.1);--yellow:#f5c518;--ydim:rgba(245,197,24,0.1);--red:#ff5252;--rdim:rgba(255,82,82,0.1);--blue:#4db8ff;--bdim:rgba(77,184,255,0.1);--orange:#ff9f43;--text:#dce8f5;--t2:#7a93b8;--t3:#3d5070;--line:#06c755}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(0,217,139,0.06),transparent 60%);pointer-events:none;z-index:0}
+  .w{max-width:1080px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+  header{padding:28px 0 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border)}
+  .logo{width:46px;height:46px;background:linear-gradient(135deg,var(--line),#04a244);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 0 20px rgba(6,199,85,0.3)}
+  .ht{font-size:20px;font-weight:700}.hs{font-size:12px;color:var(--t2);margin-top:2px}
+  .hr{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px}
+  .cg{background:var(--gdim);border:1px solid var(--green);color:var(--green)}
+  .cb{background:var(--bdim);border:1px solid var(--blue);color:var(--blue)}
+  nav{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-top:20px}
+  .nt{background:none;border:none;color:var(--t2);font-family:'Sarabun',sans-serif;font-size:14px;font-weight:500;padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s}
+  .nt:hover{color:var(--text)}.nt.on{color:var(--green);border-bottom-color:var(--green)}
+  .panel{display:none;padding:24px 0}.panel.on{display:block}
+  .dz{border:2px dashed var(--border2);border-radius:12px;padding:40px 28px;text-align:center;cursor:pointer;position:relative;background:var(--bg2);transition:.25s}
+  .dz:hover,.dz.over{border-color:var(--green);background:var(--gdim)}
+  .dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .dz-icon{font-size:34px;margin-bottom:10px}.dz-t{font-size:15px;font-weight:600}
+  .dz-s{font-size:12px;color:var(--t2);margin-top:4px}
+  .dz-tag{display:inline-flex;align-items:center;gap:6px;margin-top:14px;background:var(--bg3);border:1px solid var(--border);padding:7px 14px;border-radius:8px;font-size:11px;color:var(--t2);font-family:'IBM Plex Mono',monospace}
+  .lb{display:none;align-items:center;gap:8px;background:var(--gdim);border:1px solid var(--green);border-radius:8px;padding:10px 16px;margin-top:10px;font-size:13px;color:var(--green)}.lb.on{display:flex}
+  .fr{display:flex;align-items:center;gap:10px;margin:16px 0;flex-wrap:wrap}
+  .fr label{font-size:12px;color:var(--t2);white-space:nowrap}
+  select,input[type=date]{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;outline:none;cursor:pointer;transition:border-color .2s}
+  select:focus,input[type=date]:focus{border-color:var(--green)}
+  .ic{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 12px;border-radius:8px;background:var(--ydim);border:1px solid var(--yellow);color:var(--yellow);margin-left:auto}
+  .div{display:flex;align-items:center;gap:14px;margin:16px 0;color:var(--t3);font-size:12px}.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
+  textarea{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;resize:vertical;min-height:140px;outline:none;transition:border-color .2s}
+  textarea:focus{border-color:var(--green)}textarea::placeholder{color:var(--t3)}
+  .btn{width:100%;padding:15px;background:var(--green);border:none;border-radius:10px;color:#07120e;font-family:'Sarabun',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn:hover{background:#00f5a0;transform:translateY(-1px)}.btn:disabled{background:var(--border2);color:var(--t3);cursor:not-allowed;transform:none}
+  .ld{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:36px;text-align:center;margin-top:22px}.ld.on{display:block}
+  .spin{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 14px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .ld p{color:var(--t2);font-size:14px}
+  .dots::after{content:'';animation:dt 1.5s steps(4,end) infinite}
+  @keyframes dt{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+  .eb{display:none;background:var(--rdim);border:1px solid var(--red);border-radius:10px;padding:16px;margin-top:18px;color:var(--red);font-size:13px;line-height:1.6}.eb.on{display:block}
+  .res{display:none;margin-top:26px}.res.on{display:block}
+  .rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .rhl{font-size:15px;font-weight:600}.rm{font-size:11.5px;color:var(--t2);font-family:'IBM Plex Mono',monospace;margin-top:3px}
+  .bc{background:var(--bg3);border:1px solid var(--border);color:var(--t2);padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'Sarabun',sans-serif;transition:.2s;display:flex;align-items:center;gap:6px}
+  .bc:hover{border-color:var(--green);color:var(--green)}
+  .ks{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+  @media(max-width:600px){.ks{grid-template-columns:repeat(2,1fr)}}
+  .kb{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 14px;animation:up .35s ease forwards;opacity:0}
+  .kb:nth-child(1){animation-delay:.04s}.kb:nth-child(2){animation-delay:.08s}.kb:nth-child(3){animation-delay:.12s}.kb:nth-child(4){animation-delay:.16s}
+  @keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .ki{font-size:18px;margin-bottom:6px}.kl{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;font-family:'IBM Plex Mono',monospace;margin-bottom:6px}
+  .kv{font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace}.ks2{font-size:11px;color:var(--t2);margin-top:3px}
+  .vg{color:var(--green)}.vr{color:var(--red)}.vy{color:var(--yellow)}.vb{color:var(--blue)}
+  .c2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  @media(max-width:600px){.c2{grid-template-columns:1fr}}
+  .card{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:18px;animation:up .35s ease forwards;opacity:0}
+  .card.full{grid-column:1/-1}
+  .bly{border-left:3px solid var(--yellow)}.blr{border-left:3px solid var(--red)}.blo{border-left:3px solid var(--orange)}.blb{border-left:3px solid var(--blue)}
+  .ci{font-size:20px;margin-bottom:8px}.cl{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-bottom:10px;font-family:'IBM Plex Mono',monospace}
+  .cb2{font-size:13.5px;line-height:1.75;white-space:pre-wrap}
+  .lr{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .dg{background:var(--green);box-shadow:0 0 6px var(--green)}.dr{background:var(--red);box-shadow:0 0 6px var(--red)}.dy{background:var(--yellow);box-shadow:0 0 6px var(--yellow)}
+  .ln{font-weight:600;min-width:110px;font-family:'IBM Plex Mono',monospace;font-size:12px}
+  .ld2{flex:1;color:var(--t2);font-size:12.5px}.ldt{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px}
+  .ldt.y{color:var(--red)}.ldt.n{color:var(--green)}
+  .ar{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:border-color .2s}
+  .ar:hover{border-color:var(--green)}.ar input[type=checkbox]{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin-top:2px;flex-shrink:0}
+  .ar.done .at{text-decoration:line-through;color:var(--t3)}.at{font-size:13px;line-height:1.65;flex:1}
+  .pr{font-size:10px;padding:2px 7px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-weight:700;flex-shrink:0}
+  .ph{background:var(--rdim);color:var(--red);border:1px solid var(--red)}.pm{background:var(--ydim);color:var(--yellow);border:1px solid var(--yellow)}.pl{background:var(--bdim);color:var(--blue);border:1px solid var(--blue)}
+  .he{text-align:center;padding:56px 20px;color:var(--t3);font-size:14px}
+  .hr2{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:14px 18px;margin-bottom:10px;cursor:pointer;transition:border-color .2s;display:flex;align-items:center;gap:14px}
+  .hr2:hover{border-color:var(--green)}.hd{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--green);min-width:92px}
+  .hp{flex:1;font-size:13px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hb{font-size:10.5px;background:var(--rdim);color:var(--red);border:1px solid var(--red);padding:3px 8px;border-radius:4px;font-family:'IBM Plex Mono',monospace}
+  .bd{background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px;padding:4px 8px;border-radius:6px;transition:.2s}.bd:hover{color:var(--red);background:var(--rdim)}
+  .tbr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .tbl{font-size:12px;color:var(--t2);min-width:130px;font-family:'IBM Plex Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tbw{flex:1;background:var(--bg2);border-radius:4px;height:22px;overflow:hidden}
+  .tbb{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:10.5px;font-weight:700;font-family:'IBM Plex Mono',monospace;transition:width 1.1s cubic-bezier(.4,0,.2,1);width:0}
+  .br2{background:linear-gradient(90deg,var(--red),#cc2222);color:#fff}.by2{background:linear-gradient(90deg,var(--yellow),#c9a000);color:#000}.bg2{background:linear-gradient(90deg,var(--green),#009960);color:#000}
+  .toast{position:fixed;bottom:22px;right:22px;background:var(--bg3);border:1px solid var(--green);color:var(--green);padding:11px 18px;border-radius:9px;font-size:13px;font-weight:500;z-index:999;transform:translateY(70px);opacity:0;transition:.3s}.toast.on{transform:none;opacity:1}
+  ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="w">
+  <header>
+    <div class="logo">🏭</div>
+    <div><div class="ht">TSAT Production LINE Summarizer</div><div class="hs">วิเคราะห์ Production Report จากกลุ่ม LINE P703/U704</div></div>
+    <div class="hr"><span class="chip cg">AI POWERED</span><span class="chip cb">PD3 · PD4</span></div>
+  </header>
+  <nav>
+    <button class="nt on" onclick="go('input',this)">📥 อัปโหลด / วิเคราะห์</button>
+    <button class="nt" onclick="go('history',this)">📁 ประวัติ</button>
+    <button class="nt" onclick="go('trend',this)">📊 แนวโน้ม DT</button>
+  </nav>
+
+  <!-- INPUT -->
+  <div id="p-input" class="panel on">
+    <div class="dz" id="dz">
+      <input type="file" accept=".txt" onchange="loadFile(event)">
+      <div class="dz-icon">📂</div>
+      <div class="dz-t">ลากไฟล์มาวาง หรือคลิกเพื่อเลือก</div>
+      <div class="dz-s">ไฟล์ .txt Export จาก LINE Group P703/U704</div>
+      <div class="dz-tag">LINE กลุ่ม → ☰ → ตั้งค่า → ส่งออกประวัติการสนทนา</div>
+    </div>
+    <div class="lb" id="lb"><span>✅</span><span id="lb-txt"></span></div>
+
+    <div class="fr" id="fr" style="display:none">
+      <label>📅 เลือกวันที่:</label>
+      <select id="dsel" onchange="onDate()"><option value="">-- เลือกวันที่ --</option></select>
+      <select id="msel"><option value="daily">สรุปรายวัน</option><option value="downtime">เน้น Downtime</option><option value="production">เน้นยอดผลิต</option></select>
+      <div class="ic" id="lc">0 บรรทัด</div>
+    </div>
+
+    <div class="div">หรือ paste ข้อความโดยตรง</div>
+    <textarea id="raw" placeholder="วาง (Paste) ข้อความจากกลุ่ม LINE ได้เลย...&#10;&#10;ตัวอย่าง:&#10;07:46  LINE Notify  PD3 Prod. Report: HDF2 เครื่องจักรหลักเบรคดาวน์: 70&#10;09:25  bill  Laser LWR306 ยังไม่สามารถขึ้นงานได้ Alarm PLC"></textarea>
+
+    <button class="btn" id="goBtn" onclick="analyze()"><span>🤖</span><span>วิเคราะห์ด้วย AI</span></button>
+
+    <div class="ld" id="ldiv"><div class="spin"></div><p>AI กำลังวิเคราะห์<span class="dots"></span></p></div>
+    <div class="eb" id="eb"></div>
+
+    <div class="res" id="rdiv">
+      <div class="rh">
+        <div><div class="rhl">📋 ผลการวิเคราะห์</div><div class="rm" id="rmeta"></div></div>
+        <button class="bc" onclick="copyAll()">📋 Copy</button>
+      </div>
+      <div class="ks" id="kpi"></div>
+      <div class="c2">
+        <div class="card blr" style="animation-delay:.2s"><div class="ci">⚠️</div><div class="cl">Lines ที่มี Downtime</div><div id="dtl"></div></div>
+        <div class="card bly" style="animation-delay:.25s"><div class="ci">🔧</div><div class="cl">สาเหตุ Downtime</div><div class="cb2" id="dtr">—</div></div>
+      </div>
+      <div class="c2">
+        <div class="card blb" style="animation-delay:.3s"><div class="ci">📝</div><div class="cl">สรุปภาพรวม</div><div class="cb2" id="sum">—</div></div>
+        <div class="card blo" style="animation-delay:.35s"><div class="ci">📊</div><div class="cl">ยอดผลิต</div><div class="cb2" id="prod">—</div></div>
+      </div>
+      <div class="card full bly" style="animation-delay:.4s;margin-bottom:12px"><div class="ci">✅</div><div class="cl">Action Items</div><div id="acts"></div></div>
+      <div class="c2">
+        <div class="card" style="animation-delay:.45s"><div class="ci">🔁</div><div class="cl">แนวโน้ม</div><div class="cb2" id="rec">—</div></div>
+        <div class="card" style="animation-delay:.5s"><div class="ci">💡</div><div class="cl">ข้อเสนอแนะ</div><div class="cb2" id="sug">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="p-history" class="panel"><div id="hl"><div class="he">⏳ ยังไม่มีประวัติ</div></div></div>
+
+  <!-- TREND -->
+  <div id="p-trend" class="panel">
+    <div class="card" style="animation:none;opacity:1;margin-bottom:12px"><div class="ci">📊</div><div class="cl">Lines DT บ่อยสุด (นาทีสะสม)</div><div id="tdt"><div style="color:var(--t3);font-size:13px;padding:16px 0">ยังไม่มีข้อมูล</div></div></div>
+    <div class="card" style="animation:none;opacity:1"><div class="ci">🔁</div><div class="cl">Keywords บ่อย</div><div id="tkw"><div style="color:var(--t3);font-size:13px;padding:16px 0">ยังไม่มีข้อมูล</div></div></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let cur=null, allL=[], dmap={};
+
+// drag & drop
+const dz=document.getElementById('dz');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');const f=e.dataTransfer.files[0];if(f)readF(f)});
+function loadFile(e){const f=e.target.files[0];if(f)readF(f)}
+function readF(f){
+  const r=new FileReader();
+  r.onload=ev=>{
+    allL=ev.target.result.split('\n');
+    buildMap();
+    document.getElementById('lb').classList.add('on');
+    document.getElementById('lb-txt').textContent=`${f.name} (${(f.size/1024).toFixed(1)} KB · ${allL.length.toLocaleString()} บรรทัด)`;
+    document.getElementById('fr').style.display='flex';
+    const s=document.getElementById('dsel');
+    if(s.options.length>1){s.selectedIndex=s.options.length-1;onDate()}
+  };
+  r.readAsText(f,'UTF-8');
+}
+function buildMap(){
+  dmap={};const s=document.getElementById('dsel');
+  s.innerHTML='<option value="">-- เลือกวันที่ --</option>';
+  allL.forEach((l,i)=>{const m=l.match(/^\w+,\s+(\d{2}\/\d{2}\/\d{4}\s+BE)\s*$/);if(m&&!dmap[m[1]]){dmap[m[1]]=i;const o=document.createElement('option');o.value=m[1];o.textContent=m[1];s.appendChild(o)}});
+}
+function onDate(){
+  const c=document.getElementById('dsel').value;if(!c)return;
+  const si=dmap[c],ks=Object.keys(dmap),ki=ks.indexOf(c),ei=ki+1<ks.length?dmap[ks[ki+1]]:allL.length;
+  document.getElementById('raw').value=allL.slice(si,ei).join('\n');
+  document.getElementById('lc').textContent=(ei-si).toLocaleString()+' บรรทัด';
+}
+
+function go(name,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(b=>b.classList.remove('on'));
+  document.getElementById('p-'+name).classList.add('on');btn.classList.add('on');
+  if(name==='history')rHist();if(name==='trend')rTrend();
+}
+
+// ── ANALYZE ──────────────────────────────────────────────────
+async function analyze(){
+  const raw=document.getElementById('raw').value.trim();
+  if(!raw){toast('⚠️ กรุณาใส่ข้อมูลก่อน');return}
+
+  const mode=document.getElementById('msel').value;
+  const ml={daily:'รายวัน',downtime:'เน้น Downtime',production:'เน้นยอดผลิต'}[mode]||'รายวัน';
+
+  // Trim to max 3500 chars (safe for nested JSON response)
+  let text=raw;
+  if(text.length>3500){
+    text=text.slice(-3500);
+    const nl=text.indexOf('\n');
+    if(nl>0&&nl<80)text=text.slice(nl+1);
+  }
+
+  let dtLabel=document.getElementById('dsel')?.value||'';
+  if(!dtLabel){const m=raw.match(/(\d{2}\/\d{2}\/\d{4}\s+BE)/);dtLabel=m?m[1]:'ไม่ระบุ'}
+
+  const prompt=`Analyze this TSAT factory LINE group chat (P703/U704 production reports + team messages).
+Lines: BENDING/LASER/ASSY E50, HDF1-2, LASER CUT 1-6, LWRBAR 222 (PD3); ASSY GOR 297, Laser 297, ASSY LWRBAR 306, Laser 306 (PD4); Apron 060/061.
+DT fields (minutes): เครื่องจักรหลักเบรคดาวน์,เครื่องจักรรองเบรคดาวน์,โรบอทเบรคดาวน์,PLC/เซนเซอร์,แม่พิมพ์/จิ๊ก.
+Mode: ${ml} | Date: ${dtLabel}
+DATA:
+---
+${text}
+---
+Respond ONLY with this exact JSON (no markdown, no extra text):
+{"kpi":{"totalLines":0,"linesWithDT":0,"totalDTmin":0,"maxOutput":""},"dtLines":[{"line":"","dt":0,"cause":"","status":""}],"dtReasons":"","summary":"","production":"","actions":[{"task":"","owner":"","priority":""}],"recurring":"","suggest":"","keywords":[]}`;
+
+  document.getElementById('goBtn').disabled=true;
+  document.getElementById('ldiv').classList.add('on');
+  document.getElementById('rdiv').classList.remove('on');
+  document.getElementById('eb').classList.remove('on');
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+
+    if(!resp.ok){
+      let msg=`HTTP ${resp.status}`;
+      try{const e=await resp.json();msg=e?.error?.message||msg}catch(x){}
+      throw new Error(msg);
+    }
+
+    const data=await resp.json();
+    const rawTxt=(data.content||[]).map(b=>b.text||'').join('').trim();
+
+    if(!rawTxt) throw new Error('API returned empty response');
+
+    // Parse JSON - try 3 strategies
+    let r=null;
+    for(const s of [rawTxt, (rawTxt.match(/\{[\s\S]*\}/)||[''])[0], rawTxt.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim()]){
+      try{r=JSON.parse(s);break}catch(e){}
+    }
+    if(!r) throw new Error('Could not parse AI response as JSON. Raw: '+rawTxt.slice(0,200));
+
+    render(r,dtLabel,ml);
+    saveH(r,dtLabel,ml);
+  }catch(err){
+    console.error(err);
+    const eb=document.getElementById('eb');
+    eb.classList.add('on');
+    eb.innerHTML=`❌ <strong>${err.message}</strong><br><small style="opacity:.7;margin-top:4px;display:block">💡 ลองเลือกวันที่ให้แน่ใจว่าข้อมูลไม่เกิน 3,500 ตัวอักษร</small>`;
+  }finally{
+    document.getElementById('goBtn').disabled=false;
+    document.getElementById('ldiv').classList.remove('on');
+  }
+}
+
+function render(r,dt,mode){
+  cur=r;
+  document.getElementById('rmeta').textContent=`${dt} · ${mode} · ${r.actions?.length||0} actions`;
+  const k=r.kpi||{},dc=k.linesWithDT>0?'vr':'vg';
+  document.getElementById('kpi').innerHTML=`
+    <div class="kb"><div class="ki">🏭</div><div class="kl">Lines รายงาน</div><div class="kv vb">${k.totalLines??'—'}</div><div class="ks2">lines</div></div>
+    <div class="kb"><div class="ki">🔴</div><div class="kl">Lines มี DT</div><div class="kv ${dc}">${k.linesWithDT??'—'}</div><div class="ks2">lines</div></div>
+    <div class="kb"><div class="ki">⏱️</div><div class="kl">DT รวม</div><div class="kv vy">${k.totalDTmin!=null?k.totalDTmin+' min':'—'}</div><div class="ks2">${k.totalDTmin!=null?(k.totalDTmin/60).toFixed(1)+' ชม.':''}</div></div>
+    <div class="kb"><div class="ki">🏆</div><div class="kl">Output สูงสุด</div><div class="kv vg" style="font-size:13px">${k.maxOutput??'—'}</div><div class="ks2"> </div></div>`;
+  const dtl=document.getElementById('dtl');
+  dtl.innerHTML=r.dtLines?.length?r.dtLines.map(d=>{
+    const sc=d.status==='ongoing'?'dr':d.status==='resolved'?'dg':'dy';
+    return`<div class="lr"><div class="dot ${sc}"></div><div class="ln">${d.line||'—'}</div><div class="ld2">${d.cause||'—'}</div><div class="ldt ${d.dt>0?'y':'n'}">${d.dt?d.dt+' min':'OK'}</div></div>`;
+  }).join(''):'<div style="color:var(--t3);font-size:13px;padding:8px 0">ไม่พบ Downtime 🟢</div>';
+  document.getElementById('dtr').textContent=r.dtReasons||'—';
+  document.getElementById('sum').textContent=r.summary||'—';
+  document.getElementById('prod').textContent=r.production||'—';
+  document.getElementById('rec').textContent=r.recurring||'—';
+  document.getElementById('sug').textContent=r.suggest||'—';
+  const ad=document.getElementById('acts');ad.innerHTML='';
+  (r.actions||[]).forEach(a=>{
+    const pm={high:['ph','HIGH'],medium:['pm','MED'],low:['pl','LOW']};
+    const[pc,pl]=pm[a.priority]||['pl','LOW'];
+    const el=document.createElement('div');el.className='ar';
+    el.innerHTML=`<input type="checkbox" onchange="this.closest('.ar').classList.toggle('done',this.checked)"><div class="at">${a.task||''}<br><small style="color:var(--t3)">👤 ${a.owner||'ไม่ระบุ'}</small></div><span class="pr ${pc}">${pl}</span>`;
+    ad.appendChild(el);
+  });
+  if(!r.actions?.length)ad.textContent='ไม่พบ Action Items';
+  document.getElementById('rdiv').classList.add('on');
+  document.getElementById('rdiv').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function copyAll(){
+  if(!cur)return;const r=cur;
+  const t=['📋 TSAT Production Daily Summary','',
+    `📊 Lines=${r.kpi?.totalLines} | DT Lines=${r.kpi?.linesWithDT} | ${r.kpi?.totalDTmin} min`,'',
+    `⚠️ DT\n${r.dtLines?.map(d=>`• ${d.line}: ${d.dt}min — ${d.cause}`).join('\n')||'ไม่มี'}`,'',
+    `📝 ${r.summary}`,'',`🏭 ${r.production}`,'',
+    `✅\n${r.actions?.map(a=>`• [${(a.priority||'').toUpperCase()}] ${a.task} (${a.owner})`).join('\n')||'ไม่มี'}`,'',
+    `🔁 ${r.recurring}`,`💡 ${r.suggest}`].join('\n');
+  navigator.clipboard.writeText(t).then(()=>toast('✅ Copy แล้ว!'));
+}
+
+function saveH(r,dt,mode){
+  const h=JSON.parse(localStorage.getItem('th')||'[]');
+  h.unshift({id:Date.now(),dt,mode,r});if(h.length>25)h.pop();
+  localStorage.setItem('th',JSON.stringify(h));
+  const t=JSON.parse(localStorage.getItem('tt')||'{}');
+  (r.dtLines||[]).forEach(d=>{if(d.dt>0)t[d.line]=(t[d.line]||0)+d.dt});
+  (r.keywords||[]).forEach(k=>{t['k_'+k]=(t['k_'+k]||0)+1});
+  localStorage.setItem('tt',JSON.stringify(t));
+}
+function rHist(){
+  const h=JSON.parse(localStorage.getItem('th')||'[]'),el=document.getElementById('hl');
+  if(!h.length){el.innerHTML='<div class="he">⏳ ยังไม่มีประวัติ</div>';return}
+  el.innerHTML=h.map(x=>`<div class="hr2" onclick="lHist(${x.id})"><div class="hd">${x.dt||'—'}</div><div class="hp">${(x.r?.summary||'—').slice(0,80)}…</div><div class="hb">DT ${x.r?.kpi?.totalDTmin||0} min</div><button class="bd" onclick="dHist(event,${x.id})">🗑️</button></div>`).join('');
+}
+function lHist(id){
+  const h=JSON.parse(localStorage.getItem('th')||'[]'),x=h.find(v=>v.id===id);if(!x)return;
+  render(x.r,x.dt,x.mode||'—');go('input',document.querySelector('.nt'));
+}
+function dHist(e,id){
+  e.stopPropagation();let h=JSON.parse(localStorage.getItem('th')||'[]');
+  h=h.filter(x=>x.id!==id);localStorage.setItem('th',JSON.stringify(h));rHist();toast('🗑️ ลบแล้ว');
+}
+function rTrend(){
+  const t=JSON.parse(localStorage.getItem('tt')||'{}');
+  const ld=Object.entries(t).filter(([k])=>!k.startsWith('k_')).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const kw=Object.entries(t).filter(([k])=>k.startsWith('k_')).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const mk=(arr,cls)=>{
+    if(!arr.length)return'<div style="color:var(--t3);font-size:13px;padding:12px 0">ยังไม่มีข้อมูล</div>';
+    const mx=arr[0][1],c=cls.split(',');
+    return arr.map(([l,v],i)=>`<div class="tbr"><div class="tbl">${l.replace('k_','')}</div><div class="tbw"><div class="tbb ${c[Math.min(i,c.length-1)]}" data-w="${Math.round(v/mx*100)}">${v}</div></div></div>`).join('');
+  };
+  document.getElementById('tdt').innerHTML=mk(ld,'br2,br2,by2,by2,bg2,bg2,bg2,bg2');
+  document.getElementById('tkw').innerHTML=mk(kw,'br2,br2,by2,bg2,bg2,bg2');
+  setTimeout(()=>{document.querySelectorAll('.tbb').forEach(b=>b.style.width=(b.dataset.w||0)+'%')},120);
+}
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),3000);
+}
+</script>
+</body>
+</html>
