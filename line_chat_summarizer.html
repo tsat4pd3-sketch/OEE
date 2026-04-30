@@ -264,7 +264,7 @@ Respond ONLY with valid JSON. No markdown. No explanation. Use this exact struct
   document.getElementById('eb').classList.remove('on');
 
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const resp=await fetch('https://tsat-proxy.tsat4pd3.workers.dev/',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
