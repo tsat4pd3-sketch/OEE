@@ -357,6 +357,7 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
         <div class="toggle-group">
           <button class="tg-btn active" onclick="setTrendMetric('day',this)">Out/Day</button>
           <button class="tg-btn" onclick="setTrendMetric('hr',this)">Out/Hour</button>
+          <button class="tg-btn" onclick="setTrendMetric('oee',this)">%OEE</button>
         </div>
         <div class="toggle-group">
           <button class="tg-btn active" onclick="setTrendPeriod('day',this)">วัน</button>
@@ -992,12 +993,13 @@ function renderTrendChart(){
     rows.forEach(d=>{
       const key=getPeriodKey(d.date);
       periodSets.add(key);
-      if(!prodData[p.id][key])prodData[p.id][key]={goodSum:0,hrSum:0,dayMap:new Set()};
+      if(!prodData[p.id][key])prodData[p.id][key]={goodSum:0,hrSum:0,dayMap:new Set(),oeeArr:[]};
       const good=d.total-d.defect;
       const h=d.loadingHr>0?d.loadingHr:8;
       prodData[p.id][key].goodSum+=good;
       prodData[p.id][key].hrSum+=h;
       prodData[p.id][key].dayMap.add(fmtIso(d.date));
+      if(d.oee>0)prodData[p.id][key].oeeArr.push(d.oee);
     });
   });
 
@@ -1006,23 +1008,26 @@ function renderTrendChart(){
   const dark=document.documentElement.getAttribute('data-theme')==='dark';
   const gridC=dark?'rgba(28,38,64,.5)':'rgba(226,231,240,1)';
   const tickC=dark?'#526080':'#94a3b8';
+  const isOEE=TREND_METRIC==='oee';
 
   const datasets=PRODUCTS.map(p=>({
     label:p.label,
+    yAxisID: isOEE ? 'yOEE' : 'y',
     data:periods.map(k=>{
       const d=prodData[p.id][k];
       if(!d)return null;
       if(TREND_METRIC==='day'){
-        // output/day = goodSum ÷ unique days in period
         return d.dayMap.size>0?Math.round(d.goodSum/d.dayMap.size):null;
-      } else {
-        // output/hr = goodSum ÷ total loading hours
+      } else if(TREND_METRIC==='hr'){
         return d.hrSum>0?Math.round(d.goodSum/d.hrSum):null;
+      } else {
+        // %OEE — avg of all shifts in period
+        return d.oeeArr.length>0?parseFloat((d.oeeArr.reduce((a,b)=>a+b,0)/d.oeeArr.length).toFixed(1)):null;
       }
     }),
     borderColor:p.color,
     backgroundColor:p.color+'25',
-    borderWidth:2,
+    borderWidth:isOEE?2.5:2,
     pointRadius:TREND_PERIOD==='day'?2:4,
     pointHoverRadius:6,
     tension:.35,
@@ -1030,9 +1035,15 @@ function renderTrendChart(){
     fill:false,
   }));
 
-  const yLabel=TREND_METRIC==='day'?'ชิ้น/วัน':'ชิ้น/ชม.';
+  // OEE reference lines at 85% and 70%
+  const oeeAnnotationDatasets = isOEE ? [
+    {label:'เป้า 85%',yAxisID:'yOEE',data:periods.map(()=>85),borderColor:'#16a34a55',backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,4],pointRadius:0,pointHoverRadius:0,tension:0,spanGaps:true,fill:false},
+    {label:'ขั้นต่ำ 70%',yAxisID:'yOEE',data:periods.map(()=>70),borderColor:'#dc262655',backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,4],pointRadius:0,pointHoverRadius:0,tension:0,spanGaps:true,fill:false},
+  ] : [];
+
+  const yLabel = TREND_METRIC==='day'?'ชิ้น/วัน': TREND_METRIC==='hr'?'ชิ้น/ชม.':'%OEE';
   const titleMap={day:'วัน',week:'สัปดาห์',month:'เดือน',year:'ปี'};
-  const metricMap={day:'Output / Day',hr:'Output / Hour'};
+  const metricMap={day:'Output / Day',hr:'Output / Hour',oee:'%OEE Trend'};
   document.getElementById('trend-title').textContent=`${metricMap[TREND_METRIC]} ราย${titleMap[TREND_PERIOD]}`;
 
   if(TREND_CHART){TREND_CHART.destroy();TREND_CHART=null;}
@@ -1040,18 +1051,35 @@ function renderTrendChart(){
   if(!ctx)return;
   TREND_CHART=new Chart(ctx,{
     type:'line',
-    data:{labels,datasets},
+    data:{labels,datasets:[...datasets,...oeeAnnotationDatasets]},
     options:{
       responsive:true,maintainAspectRatio:false,
       plugins:{
-        legend:{display:true,position:'bottom',labels:{color:tickC,font:{size:11},usePointStyle:true,pointStyleWidth:10,padding:14}},
+        legend:{display:true,position:'bottom',labels:{color:tickC,font:{size:11},usePointStyle:true,pointStyleWidth:10,padding:14,
+          filter: item => !['เป้า 85%','ขั้นต่ำ 70%'].includes(item.text) || isOEE
+        }},
         tooltip:{backgroundColor:dark?'#0d1117':'#fff',titleColor:dark?'#dce4f0':'#0f172a',bodyColor:tickC,borderColor:dark?'#1c2640':'#e2e7f0',borderWidth:1,mode:'index',intersect:false,
-          callbacks:{label:c=>c.raw!=null?` ${c.dataset.label}: ${c.raw.toLocaleString()} ${yLabel}`:null}}
+          callbacks:{label:c=>{
+            if(['เป้า 85%','ขั้นต่ำ 70%'].includes(c.dataset.label))return null;
+            if(c.raw==null)return null;
+            return isOEE?` ${c.dataset.label}: ${c.raw.toFixed(1)}%`:` ${c.dataset.label}: ${c.raw.toLocaleString()} ${yLabel}`;
+          }}
+        }
       },
       scales:{
         x:{grid:{color:gridC},ticks:{color:tickC,font:{size:10},maxRotation:45,maxTicksLimit:20}},
-        y:{grid:{color:gridC},ticks:{color:tickC,font:{size:11},callback:v=>v.toLocaleString()},
-           title:{display:true,text:yLabel,color:tickC,font:{size:11}},beginAtZero:false}
+        y: isOEE ? {display:false} : {
+          id:'y',grid:{color:gridC},
+          ticks:{color:tickC,font:{size:11},callback:v=>v.toLocaleString()},
+          title:{display:true,text:yLabel,color:tickC,font:{size:11}},
+          beginAtZero:false
+        },
+        yOEE: isOEE ? {
+          id:'yOEE',grid:{color:gridC},
+          min:0,max:100,
+          ticks:{color:tickC,font:{size:11},callback:v=>v+'%',stepSize:10},
+          title:{display:true,text:'%OEE',color:tickC,font:{size:11}},
+        } : {display:false}
       }
     }
   });
