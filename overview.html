@@ -738,7 +738,7 @@ function rAlarm() {
     const gap = med - recentAvg;
     const gapPct = (gap / med) * 100;
 
-    if (gapPct >= 15) { // threshold: ≥15% below median
+    if (gapPct >= 10) { // threshold: ≥10% below median
       alarms.push({ part, src, med, recentAvg, gapPct, recentCount: recent.length });
     }
   });
@@ -801,7 +801,7 @@ function rAlarm() {
       <h3>🚨 Flash Alarm — ยอดผลิตต่ำกว่าค่ากลาง</h3>
       <span class="alarm-badge-flash">${alarms.length} รายการ</span>
       <em style="font-size:10px;color:var(--muted)">3 วันล่าสุด: ${fmtD(threeDayAgo)}–${fmtD(latestDate)}</em>
-      <em style="font-size:10px;color:var(--muted)">threshold ≥5% ต่ำกว่า median</em>
+      <em style="font-size:10px;color:var(--muted)">threshold ≥10% ต่ำกว่า median</em>
       <button class="alarm-dismiss" onclick="ALARM_DISMISSED=true;rAlarm()">ซ่อน</button>
     </div>
     ${cards}
