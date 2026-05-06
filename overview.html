@@ -770,47 +770,68 @@ function rAlarm() {
   const { all } = getFiltered();
   const section = document.getElementById('alarm-section');
 
-  // Group all data by part → list of { date, good } per shift
+  // Group by part → records with good output AND loadingHr for out/hr calculation
   const byPart = {};
   all.forEach(d => {
     if (!byPart[d.part]) byPart[d.part] = { src: d.src, records: [] };
-    byPart[d.part].records.push({ date: d.date, good: d.good || d.total || 0 });
+    const good = d.good || d.total || 0;
+    const hr = d.loadingHr > 0 ? d.loadingHr : 8; // fallback 8h
+    byPart[d.part].records.push({
+      date: d.date,
+      good,
+      hr,
+      outPerHr: good > 0 && hr > 0 ? good / hr : 0,
+    });
   });
 
-  // Find the latest date in the dataset
   const allDates = all.map(d => d.date.getTime()).filter(Boolean);
   if (!allDates.length) { section.innerHTML = ''; return; }
   const latestTs = Math.max(...allDates);
   const latestDate = new Date(latestTs);
-  // 3-day window ending at latest date
-  const threeDayAgo = new Date(latestTs - 2 * 86400000); // inclusive: latest-2 to latest
+  const threeDayAgo = new Date(latestTs - 2 * 86400000);
   threeDayAgo.setHours(0, 0, 0, 0);
 
   const alarms = [];
 
   Object.entries(byPart).forEach(([part, { src, records }]) => {
-    const allGoods = records.map(r => r.good).filter(x => x > 0);
-    if (allGoods.length < 4) return; // not enough data
-    const med = median(allGoods);
-    if (med <= 0) return;
+    // ── Out/Hr median (primary metric — normalises for shift length) ──
+    const allOph = records.map(r => r.outPerHr).filter(x => x > 0);
+    if (allOph.length < 4) return;
+    const medOph = median(allOph);
+    if (medOph <= 0) return;
 
-    // Avg good for last 3 days
+    // ── Raw output median (supporting info) ──
+    const allGood = records.map(r => r.good).filter(x => x > 0);
+    const medGood = median(allGood);
+
+    // ── Recent 3-day window ──
     const recent = records.filter(r => r.date >= threeDayAgo && r.date <= latestDate);
     if (!recent.length) return;
-    const recentAvg = recent.reduce((s, r) => s + r.good, 0) / recent.length;
 
-    const gap = med - recentAvg;
-    const gapPct = (gap / med) * 100;
+    const recentOph = recent.reduce((s, r) => s + r.outPerHr, 0) / recent.length;
+    const recentGood = recent.reduce((s, r) => s + r.good, 0) / recent.length;
+    const recentHr = recent.reduce((s, r) => s + r.hr, 0) / recent.length;
 
-    if (gapPct >= 10) { // threshold: ≥10% below median
-      alarms.push({ part, src, med, recentAvg, gapPct, recentCount: recent.length });
+    const gapOphPct = (medOph - recentOph) / medOph * 100;
+    const gapGoodPct = (medGood - recentGood) / medGood * 100;
+
+    // Trigger alarm on Out/Hr drop ≥ 10%
+    if (gapOphPct >= 10) {
+      alarms.push({
+        part, src,
+        // out/hr data
+        medOph, recentOph, gapOphPct,
+        // raw output supporting data
+        medGood, recentGood, gapGoodPct,
+        // avg shift hours for context
+        recentHr,
+        recentCount: recent.length,
+      });
     }
   });
 
-  // Sort by gap desc
-  alarms.sort((a, b) => b.gapPct - a.gapPct);
+  alarms.sort((a, b) => b.gapOphPct - a.gapOphPct);
 
-  // Update nav dot
   const dot = document.getElementById('alarm-nav-dot');
   if (dot) dot.style.display = alarms.length > 0 ? 'block' : 'none';
 
@@ -825,8 +846,8 @@ function rAlarm() {
   const srcStyle = src => src === 'PD3'
     ? 'background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border)'
     : 'background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border)';
-
-  const fmtD = (date) => `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}`;
+  const fmtD = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+  const f1 = v => (+v).toFixed(1);
 
   if (alarms.length === 0) {
     section.innerHTML = `<div class="alarm-panel" style="border-color:var(--green)">
@@ -835,37 +856,64 @@ function rAlarm() {
         <span class="alarm-ok-badge">OK</span>
         <em style="font-size:10px;color:var(--muted);margin-left:auto">ตรวจ 3 วันล่าสุด: ${fmtD(threeDayAgo)}–${fmtD(latestDate)}</em>
       </div>
-      <div class="alarm-no-issue">ยอดผลิตทุก product อยู่ในระดับปกติ ≥ ค่ากลาง</div>
+      <div class="alarm-no-issue">Output/Hour ทุก product อยู่ในระดับปกติ ≥ ค่ากลาง</div>
     </div>`;
     return;
   }
 
+  // colour the raw-output gap: green if small gap (shift-length effect), red if also bad
+  const gapGoodColor = a => a.gapGoodPct < 5 ? 'var(--green)' : a.gapGoodPct < 15 ? 'var(--amber)' : 'var(--red)';
+
   const cards = alarms.map(a => `
-    <div class="alarm-card">
-      <span class="alarm-src-badge" style="${srcStyle(a.src)}">${a.src}</span>
-      <div class="alarm-part">${a.part}</div>
-      <div class="alarm-stat">
-        <span class="alarm-stat-val" style="color:var(--red)">${Math.round(a.recentAvg).toLocaleString()}</span>
-        <span class="alarm-stat-lbl">Avg 3 วัน</span>
+    <div class="alarm-card" style="flex-direction:column;align-items:stretch;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="alarm-src-badge" style="${srcStyle(a.src)}">${a.src}</span>
+        <div class="alarm-part">${a.part}</div>
+        <div style="font-size:11px;color:var(--muted);margin-left:auto">${a.recentCount} shifts · เฉลี่ย ${f1(a.recentHr)} ชม./กะ</div>
       </div>
-      <div style="color:var(--muted2);font-size:18px;font-weight:300">vs</div>
-      <div class="alarm-stat">
-        <span class="alarm-stat-val" style="color:var(--text)">${Math.round(a.med).toLocaleString()}</span>
-        <span class="alarm-stat-lbl">ค่ากลาง</span>
+
+      <!-- PRIMARY: Out/Hour -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff0f0;border:1px solid #fecaca;border-radius:6px;flex-wrap:wrap">
+        <div style="font-size:10px;font-weight:800;color:#dc2626;letter-spacing:.5px;min-width:80px">📊 OUT / HOUR</div>
+        <div class="alarm-stat">
+          <span class="alarm-stat-val" style="color:var(--red)">${f1(a.recentOph)}</span>
+          <span class="alarm-stat-lbl">3 วันล่าสุด</span>
+        </div>
+        <div style="color:var(--muted2);font-weight:300">vs</div>
+        <div class="alarm-stat">
+          <span class="alarm-stat-val" style="color:var(--text)">${f1(a.medOph)}</span>
+          <span class="alarm-stat-lbl">ค่ากลาง</span>
+        </div>
+        <div class="alarm-gap">
+          <span>▼${f1(a.gapOphPct)}%</span>
+          <small>ต่ำกว่าปกติ</small>
+        </div>
       </div>
-      <div class="alarm-gap">
-        <span>▼${a.gapPct.toFixed(1)}%</span>
-        <small>ต่ำกว่าปกติ</small>
+
+      <!-- SUPPORTING: Raw Output -->
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;flex-wrap:wrap">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;min-width:80px">📦 RAW OUTPUT</div>
+        <div class="alarm-stat">
+          <span class="alarm-stat-val" style="color:${gapGoodColor(a)};font-size:14px">${Math.round(a.recentGood).toLocaleString()}</span>
+          <span class="alarm-stat-lbl">ชิ้น/กะ เฉลี่ย</span>
+        </div>
+        <div style="color:var(--muted2);font-weight:300">vs</div>
+        <div class="alarm-stat">
+          <span class="alarm-stat-val" style="color:var(--text2);font-size:14px">${Math.round(a.medGood).toLocaleString()}</span>
+          <span class="alarm-stat-lbl">ค่ากลาง</span>
+        </div>
+        <div style="font-size:11px;color:${gapGoodColor(a)};font-weight:700;padding:3px 8px;border-radius:6px;background:${a.gapGoodPct<5?'#dcfce7':a.gapGoodPct<15?'#fef9c3':'#fef2f2'}">
+          ${a.gapGoodPct < 5 ? '✅ ปกติ (กะสั้นกว่า)' : `▼${f1(a.gapGoodPct)}% ต่ำด้วย`}
+        </div>
       </div>
-      <div style="font-size:10px;color:var(--muted);min-width:60px;text-align:right">${a.recentCount} shifts<br>ใน 3 วัน</div>
     </div>`).join('');
 
   section.innerHTML = `<div class="alarm-panel" id="alarm-panel-main">
     <div class="alarm-hdr">
-      <h3>🚨 Flash Alarm — ยอดผลิตต่ำกว่าค่ากลาง</h3>
+      <h3>🚨 Flash Alarm — Output/Hour ต่ำกว่าค่ากลาง</h3>
       <span class="alarm-badge-flash">${alarms.length} รายการ</span>
       <em style="font-size:10px;color:var(--muted)">3 วันล่าสุด: ${fmtD(threeDayAgo)}–${fmtD(latestDate)}</em>
-      <em style="font-size:10px;color:var(--muted)">threshold ≥10% ต่ำกว่า median</em>
+      <em style="font-size:10px;color:var(--muted)">threshold ≥10% ต่ำกว่า median out/hr</em>
       <button class="alarm-dismiss" onclick="ALARM_DISMISSED=true;rAlarm()">ซ่อน</button>
     </div>
     ${cards}
