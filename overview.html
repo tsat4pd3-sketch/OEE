@@ -24,39 +24,43 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-events:none;z-index:0}
 
 /* SIDEBAR */
-#sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100;box-shadow:1px 0 8px #00000008}
+#sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100;box-shadow:1px 0 8px #00000008;transition:width .25s,min-width .25s,opacity .25s}
+#sidebar.collapsed{width:0;min-width:0;opacity:0;overflow:hidden;border-right:none}
+#sidebar-toggle{position:fixed;top:14px;left:14px;z-index:200;width:32px;height:32px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);box-shadow:0 2px 8px #00000014;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text2);transition:left .25s,background .18s}
+#sidebar-toggle:hover{background:var(--accent-dim);color:var(--accent);border-color:#2563eb30}
+body.sb-open #sidebar-toggle{left:calc(var(--sidebar) + 10px)}
 .logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
-.logo-tag{font-family:var(--font-display);font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-weight:600}
-.logo h1{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);line-height:1.1}
-.logo-sub{font-size:11px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.logo-tag{font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.logo h1{font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--text);line-height:1.1}
+.logo-sub{font-size:13px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
 .bl{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
 .bx{background:#f1f5f9;color:var(--muted);border:1px solid var(--border)}
 .nav-links{padding:10px 12px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--border)}
-.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:var(--radius-sm);font-size:14px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
 .nav-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border)}
 .nav-btn.active{background:var(--accent-dim);border-color:#2563eb30;color:var(--accent);font-weight:600}
 .ss{padding:12px 16px 4px}
-.ss-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
-.ss input,.ss select{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;margin-bottom:7px;outline:none;transition:border-color .2s}
+.ss-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+.ss input,.ss select{width:100%;padding:9px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:14px;margin-bottom:7px;outline:none;transition:border-color .2s}
 .ss input:focus,.ss select:focus{border-color:var(--accent)}
 .src-pills{display:flex;gap:5px;padding:8px 16px 0;flex-wrap:wrap}
-.src-pill{padding:4px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--muted);transition:all .15s;font-family:var(--font-body)}
+.src-pill{padding:5px 14px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--muted);transition:all .15s;font-family:var(--font-body)}
 .src-pill.pd3.active{background:var(--pd3-bg);color:var(--pd3);border-color:var(--pd3-border)}
 .src-pill.pd4.active{background:var(--pd4-bg);color:var(--pd4);border-color:var(--pd4-border)}
 .src-pill.all.active{background:var(--accent-dim);color:var(--accent);border-color:#2563eb30}
-.btn-refresh{margin:10px 16px 4px;padding:9px;background:var(--accent-dim);border:1px solid #2563eb30;border-radius:var(--radius-sm);color:var(--accent);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;width:calc(100% - 32px)}
+.btn-refresh{margin:10px 16px 4px;padding:10px;background:var(--accent-dim);border:1px solid #2563eb30;border-radius:var(--radius-sm);color:var(--accent);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;width:calc(100% - 32px)}
 .btn-refresh:hover{background:var(--accent);color:#fff}
-.auto-info{font-size:10px;color:var(--muted2);text-align:center;padding:4px 16px 12px;line-height:1.6}
+.auto-info{font-size:11px;color:var(--muted2);text-align:center;padding:4px 16px 12px;line-height:1.6}
 
 /* MAIN */
-#main{flex:1;padding:26px 28px 48px;overflow-y:auto;position:relative;z-index:1}
+#main{flex:1;padding:26px 28px 48px;overflow-y:auto;position:relative;z-index:1;transition:padding .25s}
 .topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
-.topbar h2{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text)}
-.topbar p{font-size:12px;color:var(--muted);margin-top:4px}
+.topbar h2{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--text)}
+.topbar p{font-size:14px;color:var(--muted);margin-top:4px}
 .sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;margin-top:4px}
-.sec-hdr h3{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text)}
-.sec-tag{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px}
+.sec-hdr h3{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text)}
+.sec-tag{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px}
 .sec-line{flex:1;height:1px;background:var(--border)}
 
 /* KPI GRID */
@@ -69,40 +73,40 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .k2::after{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
 .k3::after{background:linear-gradient(90deg,#16a34a,#4ade80)}
 .k4::after{background:linear-gradient(90deg,#dc2626,#f87171)}
-.kpi-lbl{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.3px;margin-bottom:7px}
-.kpi-val{font-family:var(--font-display);font-size:28px;font-weight:700;line-height:1;color:var(--text)}
-.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.kpi-lbl{font-size:13px;color:var(--muted);font-weight:500;letter-spacing:.3px;margin-bottom:7px}
+.kpi-val{font-family:var(--font-display);font-size:32px;font-weight:700;line-height:1;color:var(--text)}
+.kpi-sub{font-size:13px;color:var(--muted);margin-top:4px}
 .kpi-split{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.kpi-split span{padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700}
+.kpi-split span{padding:2px 7px;border-radius:8px;font-size:11px;font-weight:700}
 .good{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
 
 /* CARDS & CHARTS */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 3px #00000008}
 .card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
-.card-hdr h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
-.card-hdr em{font-style:normal;font-size:11px;color:var(--muted)}
+.card-hdr h3{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
+.card-hdr em{font-style:normal;font-size:13px;color:var(--muted)}
 .ch{position:relative}
 .row{display:grid;gap:16px;margin-bottom:16px}
 .r2{grid-template-columns:1fr 1fr}
 @media(max-width:900px){.r2{grid-template-columns:1fr}}
 .toggle-group{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px}
-.tg-btn{padding:4px 11px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .15s}
+.tg-btn{padding:5px 13px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .15s}
 .tg-btn.active{background:var(--card);color:var(--accent);box-shadow:0 1px 3px #00000010}
 
 /* PARETO */
-.par-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.par-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
 .par-row:last-child{border-bottom:none}
-.par-label{flex:0 0 150px;font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.par-bar-bg{flex:1;background:var(--bg3);border-radius:4px;height:6px;overflow:hidden}
+.par-label{flex:0 0 150px;font-size:13px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.par-bar-bg{flex:1;background:var(--bg3);border-radius:4px;height:7px;overflow:hidden}
 .par-bar-fill{height:100%;border-radius:4px;transition:width .5s}
-.par-pct{flex:0 0 38px;text-align:right;font-size:11px;font-weight:700;color:var(--accent)}
-.par-val{flex:0 0 55px;text-align:right;font-size:10px;color:var(--muted)}
+.par-pct{flex:0 0 40px;text-align:right;font-size:12px;font-weight:700;color:var(--accent)}
+.par-val{flex:0 0 58px;text-align:right;font-size:11px;color:var(--muted)}
 
 /* TABLES */
 .tbl-wrap{overflow-x:auto;max-height:300px;overflow-y:auto}
-.dt-tbl{width:100%;border-collapse:collapse;font-size:12px}
-.dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:700;padding:9px 12px;text-align:left;font-size:11px;position:sticky;top:0;border-bottom:2px solid var(--border2)}
-.dt-tbl td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.dt-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:700;padding:10px 12px;text-align:left;font-size:12px;position:sticky;top:0;border-bottom:2px solid var(--border2)}
+.dt-tbl td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
 .dt-tbl tr:hover td{background:#f8faff}
 .dt-tbl th.r,.dt-tbl td.r{text-align:right}
 
@@ -155,7 +159,8 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .alarm-dismiss:hover{background:#fef2f2;border-color:#fca5a5;color:#dc2626}
 </style>
 </head>
-<body>
+<body class="sb-open">
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
 
 <div id="loading">
   <div class="ld-ring"></div>
@@ -179,13 +184,13 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   </div>
 
   <div class="nav-links">
+    <a class="nav-btn active">🔭 Combined Overview</a>
     <button class="alarm-sidebar-btn" onclick="scrollToAlarm()" id="alarm-nav-btn">
       🚨 Flash Alarm
       <span class="alarm-dot" id="alarm-nav-dot" style="display:none"></span>
     </button>
-    <a class="nav-btn active">🔭 Combined Overview</a>
     <a class="nav-btn" href="summary.html">📋 Summary Dashboard</a>
-    <a class="nav-btn" href="oee_pd3.html">📊 PD3 Overview</a>
+    <a class="nav-btn" href="index.html">📊 PD3 Overview</a>
     <a class="nav-btn" href="oee_deep_pd3.html">🔍 Deep PD3</a>
     <a class="nav-btn" href="oee_pd4.html">🏭 PD4 Overview</a>
     <a class="nav-btn" href="oee_deep_pd4.html">🔎 Deep PD4</a>
@@ -523,7 +528,44 @@ function gc(){
   return{grid:dark?'rgba(28,38,64,.5)':'rgba(226,231,240,1)',tick:dark?'#526080':'#94a3b8',
     tooltip:{bg:dark?'#0d1117':'#fff',title:dark?'#dce4f0':'#0f172a',body:dark?'#94a3b8':'#64748b',border:dark?'#1c2640':'#e2e7f0'}};
 }
-function baseOpts(C){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:C.tick,font:{size:11},usePointStyle:true,padding:12}},tooltip:{backgroundColor:C.tooltip.bg,titleColor:C.tooltip.title,bodyColor:C.tooltip.body,borderColor:C.tooltip.border,borderWidth:1,mode:'index',intersect:false}},scales:{x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:10},maxRotation:45,maxTicksLimit:16}},y:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:11}}}}};}
+
+// ── "Now" annotation: finds the label index closest to today ─────────
+function getNowAnnotation(labels,period,C){
+  if(!labels||!labels.length)return{};
+  const today=new Date();
+  const todayKey=getPKey(today,period);
+  // find label index
+  let idx=labels.findIndex(l=>{
+    // reverse fmtPKey: match month label or day label
+    return l===fmtPKey(todayKey,period);
+  });
+  if(idx<0){
+    // fallback: last label
+    idx=labels.length-1;
+  }
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  return{
+    nowLine:{
+      type:'line',scaleID:'x',value:idx,
+      borderColor:dark?'#f472b6':'#db2777',
+      borderWidth:2,
+      borderDash:[4,3],
+      label:{
+        display:true,
+        content:'▼ ปัจจุบัน',
+        position:'start',
+        backgroundColor:dark?'#831843cc':'#fce7f3cc',
+        color:dark?'#f9a8d4':'#9d174d',
+        font:{size:11,weight:'bold',family:'IBM Plex Sans Thai,sans-serif'},
+        padding:{x:6,y:3},
+        borderRadius:4,
+        yAdjust:-2,
+      },
+    }
+  };
+}
+
+function baseOpts(C){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:C.tick,font:{size:13},usePointStyle:true,padding:14}},tooltip:{backgroundColor:C.tooltip.bg,titleColor:C.tooltip.title,bodyColor:C.tooltip.body,borderColor:C.tooltip.border,borderWidth:1,mode:'index',intersect:false,titleFont:{size:13},bodyFont:{size:12}}},annotation:{annotations:{}}},scales:{x:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:12},maxRotation:45,maxTicksLimit:16}},y:{grid:{color:C.grid},ticks:{color:C.tick,font:{size:13}}}}};}
 
 // ── Render KPIs ───────────────────────────────────────────────────────
 function rKPI(){
@@ -571,6 +613,7 @@ function rOEEChart(){
   if(pd4.length)datasets.push({label:'PD4 OEE',data:keys.map(k=>avgArr(m4,k)),borderColor:'#d97706',backgroundColor:'#d9770620',borderWidth:2,pointRadius:PERIOD==='day'?1:3,tension:.3,spanGaps:true});
   datasets.push({label:'Target 85%',data:keys.map(()=>85),borderColor:'#dc262660',borderWidth:1.5,borderDash:[6,4],pointRadius:0,fill:false});
   dch('c-oee');const opts=baseOpts(C);opts.scales.y.min=0;opts.scales.y.max=100;opts.scales.y.ticks.callback=v=>v+'%';
+  opts.plugins.annotation.annotations=getNowAnnotation(labels,PERIOD,C);
   CHARTS['c-oee']=new Chart(document.getElementById('c-oee'),{type:'line',data:{labels,datasets},options:opts});
 }
 
@@ -582,9 +625,18 @@ function rOEEChart(){
 // Out/Hour = good / loadingHr per shift
 function rOutputChart(){
   const {pd3,pd4}=getFiltered();const C=gc();
-  const PROD_COLORS={'GOR':'#f59e0b','LWRBAR':'#38bdf8','ASSY APRON RH 060':'#a855f7','ASSY APRON LH 061':'#22c55e'};
-  const getColor=part=>{for(const[k,v] of Object.entries(PROD_COLORS))if(part.toUpperCase().includes(k))return v;return'#94a3b8';};
+  // 6 visually distinct colors — warm/cool alternating, none close together
+  const PART_COLORS=[
+    '#2563eb', // electric blue
+    '#e11d48', // crimson
+    '#16a34a', // forest green
+    '#d97706', // amber
+    '#7c3aed', // violet
+    '#0891b2', // teal
+  ];
   const parts=[...new Set([...pd3,...pd4].map(d=>d.part))].sort();
+  // Assign a stable color per part (index-based so order stays fixed)
+  const partColorMap={};parts.forEach((p,i)=>partColorMap[p]=PART_COLORS[i%PART_COLORS.length]);
   const datasets=parts.map(part=>{
     const rows=[...pd3,...pd4].filter(d=>d.part===part);
     const m={};
@@ -596,22 +648,22 @@ function rOutputChart(){
       m[k].daySet.add(fmtIso(d.date));
     });
     const keys2=[...new Set([...pd3,...pd4].map(d=>getPKey(d.date,PERIOD_OUT)))].sort();
-    const median=arr=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const mid=Math.floor(s.length/2);return s.length%2?s[mid]:(s[mid-1]+s[mid])/2;};
+    const med=arr=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const mid=Math.floor(s.length/2);return s.length%2?s[mid]:(s[mid-1]+s[mid])/2;};
     const vals=keys2.map(k=>{
       if(!m[k])return null;
-      if(OUT_METRIC==='shift')return Math.round(median(m[k].goods));
+      if(OUT_METRIC==='shift')return Math.round(med(m[k].goods));
       if(OUT_METRIC==='hr'){const totalGood=m[k].goods.reduce((a,b)=>a+b,0);const totalHr=m[k].hrs.reduce((a,b)=>a+b,0);return totalHr>0?Math.round(totalGood/totalHr):null;}
-      // day: sum good / unique days in period
       return m[k].daySet.size>0?Math.round(m[k].goods.reduce((a,b)=>a+b)/m[k].daySet.size):null;
     });
-    const col=getColor(part);
-    return{label:part,data:vals,borderColor:col,backgroundColor:col+'25',borderWidth:2,pointRadius:PERIOD_OUT==='day'?1:3,tension:.3,spanGaps:true};
+    const col=partColorMap[part];
+    return{label:part,data:vals,borderColor:col,backgroundColor:col+'22',borderWidth:2.5,pointRadius:PERIOD_OUT==='day'?1:4,pointHoverRadius:6,tension:.3,spanGaps:true};
   });
   const keys=[...new Set([...pd3,...pd4].map(d=>getPKey(d.date,PERIOD_OUT)))].sort();
   const labels=keys.map(k=>fmtPKey(k,PERIOD_OUT));
   const unitMap={day:'ชิ้น/วัน',shift:'ชิ้น/กะ (median)',hr:'ชิ้น/ชม.'};
   dch('c-output');const opts=baseOpts(C);opts.scales.y.ticks.callback=v=>v.toLocaleString();
-  opts.scales.y.title={display:true,text:unitMap[OUT_METRIC],color:C.tick,font:{size:11}};
+  opts.scales.y.title={display:true,text:unitMap[OUT_METRIC],color:C.tick,font:{size:12}};
+  opts.plugins.annotation.annotations=getNowAnnotation(labels,PERIOD_OUT,C);
   CHARTS['c-output']=new Chart(document.getElementById('c-output'),{type:'line',data:{labels,datasets},options:opts});
 }
 
@@ -636,17 +688,21 @@ function rAPQChart(){
 }
 
 // ── DT Trend Chart ────────────────────────────────────────────────────
+// Using AVERAGE dtMin per shift (not sum) so PD3 (4 products) vs PD4 (2 products) are comparable
 function rDTChart(){
   const {pd3,pd4}=getFiltered();const C=gc();
-  const agg=(rows)=>{const m={};rows.forEach(d=>{const k=getPKey(d.date,PERIOD);if(!m[k])m[k]=0;m[k]+=d.dtMin||0;});return m;};
+  // agg: avg dtMin per period bucket (sum / count of shifts)
+  const agg=(rows)=>{const m={};rows.forEach(d=>{const k=getPKey(d.date,PERIOD);if(!m[k])m[k]={s:0,n:0};m[k].s+=d.dtMin||0;m[k].n++;});return m;};
   const m3=agg(pd3),m4=agg(pd4);
   const keys=[...new Set([...Object.keys(m3),...Object.keys(m4)])].sort();
   const labels=keys.map(k=>fmtPKey(k,PERIOD));
+  const avgHr=(m,k)=>m[k]&&m[k].n>0?Math.round(m[k].s/m[k].n/60*10)/10:0;
   const datasets=[];
-  if(pd3.length)datasets.push({label:'PD3 DT',data:keys.map(k=>Math.round((m3[k]||0)/60*10)/10),borderColor:'#0369a1',backgroundColor:'#0369a120',borderWidth:2,pointRadius:PERIOD==='day'?1:3,tension:.3,spanGaps:true,fill:true});
-  if(pd4.length)datasets.push({label:'PD4 DT',data:keys.map(k=>Math.round((m4[k]||0)/60*10)/10),borderColor:'#d97706',backgroundColor:'#d9770620',borderWidth:2,pointRadius:PERIOD==='day'?1:3,tension:.3,spanGaps:true,fill:true});
+  if(pd3.length)datasets.push({label:'PD3 DT เฉลี่ย/กะ',data:keys.map(k=>avgHr(m3,k)),borderColor:'#0369a1',backgroundColor:'#0369a120',borderWidth:2,pointRadius:PERIOD==='day'?1:3,tension:.3,spanGaps:true,fill:true});
+  if(pd4.length)datasets.push({label:'PD4 DT เฉลี่ย/กะ',data:keys.map(k=>avgHr(m4,k)),borderColor:'#d97706',backgroundColor:'#d9770620',borderWidth:2,pointRadius:PERIOD==='day'?1:3,tension:.3,spanGaps:true,fill:true});
   dch('c-dt');const opts=baseOpts(C);opts.scales.y.ticks.callback=v=>v+'h';
-  opts.scales.y.title={display:true,text:'ชั่วโมง',color:C.tick,font:{size:11}};
+  opts.scales.y.title={display:true,text:'ชม./กะ (เฉลี่ย)',color:C.tick,font:{size:12}};
+  opts.plugins.annotation.annotations=getNowAnnotation(labels,PERIOD,C);
   CHARTS['c-dt']=new Chart(document.getElementById('c-dt'),{type:'line',data:{labels,datasets},options:opts});
 }
 
@@ -851,14 +907,26 @@ async function init(){
   setBar(80);await new Promise(r=>setTimeout(r,0));
   if(results[1].status==='fulfilled'){PD4_ALL=parsePD4(results[1].value);document.getElementById('ld-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
   setBar(92);setMsg('กำลังแสดงผล...');await new Promise(r=>setTimeout(r,0));
-  // Set intersection date range
-  const pd3D=PD3_ALL.map(d=>d.date).filter(Boolean);
-  const pd4D=PD4_ALL.map(d=>d.date).filter(Boolean);
-  if(pd3D.length&&pd4D.length){
-    const fromD=new Date(Math.max(arrMin(pd3D),arrMin(pd4D)));
-    const toD=new Date(Math.min(arrMax(pd3D),arrMax(pd4D)));
-    document.getElementById('f-from').value=fmtIso(fromD<=toD?fromD:new Date(arrMin([...pd3D,...pd4D])));
-    document.getElementById('f-to').value=fmtIso(fromD<=toD?toD:new Date(arrMax([...pd3D,...pd4D])));
+  // ── Smart default date range ──────────────────────────────────────────
+  // Priority: full current year → if <3 months data, extend back 3-6m into prev year
+  const allD=[...PD3_ALL,...PD4_ALL].map(d=>d.date).filter(Boolean);
+  if(allD.length){
+    const latestDate=new Date(arrMax(allD));
+    const thisYear=latestDate.getFullYear();
+    const jan1=new Date(thisYear,0,1);
+    // Count records in current year
+    const thisYearCount=allD.filter(d=>d>=jan1).length;
+    let fromD;
+    if(thisYearCount>=60){
+      // Enough data: show full current year
+      fromD=jan1;
+    } else {
+      // Thin data: go back 6 months from latest date
+      fromD=new Date(latestDate);
+      fromD.setMonth(fromD.getMonth()-6);
+    }
+    document.getElementById('f-from').value=fmtIso(fromD);
+    document.getElementById('f-to').value=fmtIso(latestDate);
   }
   document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
   document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
@@ -868,6 +936,13 @@ async function init(){
   const el=document.getElementById('loading');el.style.opacity='0';setTimeout(()=>el.style.display='none',500);
   if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadAll,3600000);updateNextLabel();
 }
+// ── Sidebar Toggle ────────────────────────────────────────────────────
+function toggleSidebar(){
+  const open=document.body.classList.toggle('sb-open');
+  document.getElementById('sidebar').classList.toggle('collapsed',!open);
+  document.getElementById('sidebar-toggle').textContent=open?'☰':'▶';
+}
+
 init();
 </script>
 
