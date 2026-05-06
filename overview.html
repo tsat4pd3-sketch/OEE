@@ -398,7 +398,7 @@ function parsePD3(text){
   const g=(row,name)=>{const i=idx[name];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim():'';};
   const gi=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
   const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-1);cutoff.setHours(0,0,0,0);
-  const pd3Kws=['060','RH 060','RH060','061','LH 061','LH061'];
+  const pd3Kws=['060','RH 060','RH060','061','LH 061','LH061','HDF1','HDF2'];
   const rows=[];
   for(let r=1;r<lines.length;r++){
     const row=csvLine(lines[r]);if(row.length<10)continue;
