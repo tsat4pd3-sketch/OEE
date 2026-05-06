@@ -738,7 +738,7 @@ function rAlarm() {
     const gap = med - recentAvg;
     const gapPct = (gap / med) * 100;
 
-    if (gapPct >= 5) { // threshold: ≥5% below median
+    if (gapPct >= 15) { // threshold: ≥15% below median
       alarms.push({ part, src, med, recentAvg, gapPct, recentCount: recent.length });
     }
   });
