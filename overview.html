@@ -127,6 +127,32 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 [data-theme="dark"] .tg-btn.active{background:var(--bg2);box-shadow:none}
 [data-theme="dark"] .kpi:hover{box-shadow:0 4px 20px #00000050}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* FLASH ALARM */
+@keyframes flashPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 #dc262640}50%{opacity:.85;box-shadow:0 0 0 8px #dc262600}}
+@keyframes flashBadge{0%,100%{background:#dc2626;color:#fff}50%{background:#fef2f2;color:#dc2626}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.alarm-panel{background:var(--card);border:2px solid #dc2626;border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;box-shadow:0 4px 20px #dc262618;animation:slideDown .35s ease}
+.alarm-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.alarm-hdr h3{font-family:var(--font-display);font-size:14px;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:7px}
+.alarm-badge-flash{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:800;animation:flashBadge 1.2s ease-in-out infinite}
+.alarm-card{background:#fff5f5;border:1px solid #fecaca;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;animation:flashPulse 2s ease-in-out infinite;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+[data-theme="dark"] .alarm-card{background:#1f0a0a;border-color:#7f1d1d40}
+.alarm-src-badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:12px;flex-shrink:0}
+.alarm-part{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text);flex:1;min-width:120px}
+.alarm-stat{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:64px}
+.alarm-stat-val{font-family:var(--font-display);font-size:16px;font-weight:700}
+.alarm-stat-lbl{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.alarm-gap{display:flex;align-items:center;gap:4px;background:#dc262612;border:1px solid #dc262630;border-radius:8px;padding:4px 10px}
+.alarm-gap span{font-family:var(--font-display);font-size:14px;font-weight:800;color:#dc2626}
+.alarm-gap small{font-size:9px;color:#dc2626;font-weight:600}
+.alarm-no-issue{display:flex;align-items:center;gap:8px;color:var(--green);font-size:13px;font-weight:600;padding:8px 0}
+.alarm-ok-badge{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:800}
+.alarm-sidebar-btn{position:relative;display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);border:1px solid transparent;transition:all .18s;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500;cursor:pointer}
+.alarm-sidebar-btn:hover{background:var(--bg3);color:var(--text2)}
+.alarm-dot{position:absolute;top:6px;right:10px;width:8px;height:8px;border-radius:50%;background:#dc2626;animation:flashBadge 1.2s ease-in-out infinite}
+.alarm-dismiss{margin-left:auto;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:var(--font-body)}
+.alarm-dismiss:hover{background:#fef2f2;border-color:#fca5a5;color:#dc2626}
 </style>
 </head>
 <body>
@@ -154,6 +180,10 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 
   <div class="nav-links">
     <a class="nav-btn active">🔭 Combined Overview</a>
+    <button class="alarm-sidebar-btn" onclick="scrollToAlarm()" id="alarm-nav-btn">
+      🚨 Flash Alarm
+      <span class="alarm-dot" id="alarm-nav-dot" style="display:none"></span>
+    </button>
     <a class="nav-btn" href="summary.html">📋 Summary Dashboard</a>
     <a class="nav-btn" href="index.html">📊 PD3 Overview</a>
     <a class="nav-btn" href="oee_deep_pd3.html">🔍 Deep PD3</a>
@@ -216,6 +246,9 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
     </div>
     <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
   </div>
+
+  <!-- Flash Alarm Panel -->
+  <div id="alarm-section" style="scroll-margin-top:20px"></div>
 
   <!-- OEE KPIs -->
   <div class="sec-hdr">
@@ -652,6 +685,129 @@ function rRemarks(){
   </tr>`).join('');
 }
 
+// ── Flash Alarm ───────────────────────────────────────────────────────
+// Computes median production output per part, compares last 3 days avg
+// Fires alarm if last-3-day avg < median of full dataset (per part)
+
+let ALARM_DISMISSED = false;
+
+function median(arr) {
+  const s = [...arr].filter(x => x > 0).sort((a, b) => a - b);
+  if (!s.length) return 0;
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+function scrollToAlarm() {
+  document.getElementById('alarm-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function rAlarm() {
+  const { all } = getFiltered();
+  const section = document.getElementById('alarm-section');
+
+  // Group all data by part → list of { date, good } per shift
+  const byPart = {};
+  all.forEach(d => {
+    if (!byPart[d.part]) byPart[d.part] = { src: d.src, records: [] };
+    byPart[d.part].records.push({ date: d.date, good: d.good || d.total || 0 });
+  });
+
+  // Find the latest date in the dataset
+  const allDates = all.map(d => d.date.getTime()).filter(Boolean);
+  if (!allDates.length) { section.innerHTML = ''; return; }
+  const latestTs = Math.max(...allDates);
+  const latestDate = new Date(latestTs);
+  // 3-day window ending at latest date
+  const threeDayAgo = new Date(latestTs - 2 * 86400000); // inclusive: latest-2 to latest
+  threeDayAgo.setHours(0, 0, 0, 0);
+
+  const alarms = [];
+
+  Object.entries(byPart).forEach(([part, { src, records }]) => {
+    const allGoods = records.map(r => r.good).filter(x => x > 0);
+    if (allGoods.length < 4) return; // not enough data
+    const med = median(allGoods);
+    if (med <= 0) return;
+
+    // Avg good for last 3 days
+    const recent = records.filter(r => r.date >= threeDayAgo && r.date <= latestDate);
+    if (!recent.length) return;
+    const recentAvg = recent.reduce((s, r) => s + r.good, 0) / recent.length;
+
+    const gap = med - recentAvg;
+    const gapPct = (gap / med) * 100;
+
+    if (gapPct >= 5) { // threshold: ≥5% below median
+      alarms.push({ part, src, med, recentAvg, gapPct, recentCount: recent.length });
+    }
+  });
+
+  // Sort by gap desc
+  alarms.sort((a, b) => b.gapPct - a.gapPct);
+
+  // Update nav dot
+  const dot = document.getElementById('alarm-nav-dot');
+  if (dot) dot.style.display = alarms.length > 0 ? 'block' : 'none';
+
+  if (ALARM_DISMISSED && alarms.length > 0) {
+    section.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm)">
+      <span style="color:#dc2626;font-size:13px;font-weight:700">🚨 มี ${alarms.length} product ที่ต้องโฟกัส</span>
+      <button onclick="ALARM_DISMISSED=false;rAlarm()" style="padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;cursor:pointer;font-family:var(--font-body)">แสดง Alarm</button>
+    </div>`;
+    return;
+  }
+
+  const srcStyle = src => src === 'PD3'
+    ? 'background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border)'
+    : 'background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border)';
+
+  const fmtD = (date) => `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}`;
+
+  if (alarms.length === 0) {
+    section.innerHTML = `<div class="alarm-panel" style="border-color:var(--green)">
+      <div class="alarm-hdr">
+        <h3 style="color:var(--green)">✅ Flash Alarm — ทุก Product ปกติ</h3>
+        <span class="alarm-ok-badge">OK</span>
+        <em style="font-size:10px;color:var(--muted);margin-left:auto">ตรวจ 3 วันล่าสุด: ${fmtD(threeDayAgo)}–${fmtD(latestDate)}</em>
+      </div>
+      <div class="alarm-no-issue">ยอดผลิตทุก product อยู่ในระดับปกติ ≥ ค่ากลาง</div>
+    </div>`;
+    return;
+  }
+
+  const cards = alarms.map(a => `
+    <div class="alarm-card">
+      <span class="alarm-src-badge" style="${srcStyle(a.src)}">${a.src}</span>
+      <div class="alarm-part">${a.part}</div>
+      <div class="alarm-stat">
+        <span class="alarm-stat-val" style="color:var(--red)">${Math.round(a.recentAvg).toLocaleString()}</span>
+        <span class="alarm-stat-lbl">Avg 3 วัน</span>
+      </div>
+      <div style="color:var(--muted2);font-size:18px;font-weight:300">vs</div>
+      <div class="alarm-stat">
+        <span class="alarm-stat-val" style="color:var(--text)">${Math.round(a.med).toLocaleString()}</span>
+        <span class="alarm-stat-lbl">ค่ากลาง</span>
+      </div>
+      <div class="alarm-gap">
+        <span>▼${a.gapPct.toFixed(1)}%</span>
+        <small>ต่ำกว่าปกติ</small>
+      </div>
+      <div style="font-size:10px;color:var(--muted);min-width:60px;text-align:right">${a.recentCount} shifts<br>ใน 3 วัน</div>
+    </div>`).join('');
+
+  section.innerHTML = `<div class="alarm-panel" id="alarm-panel-main">
+    <div class="alarm-hdr">
+      <h3>🚨 Flash Alarm — ยอดผลิตต่ำกว่าค่ากลาง</h3>
+      <span class="alarm-badge-flash">${alarms.length} รายการ</span>
+      <em style="font-size:10px;color:var(--muted)">3 วันล่าสุด: ${fmtD(threeDayAgo)}–${fmtD(latestDate)}</em>
+      <em style="font-size:10px;color:var(--muted)">threshold ≥5% ต่ำกว่า median</em>
+      <button class="alarm-dismiss" onclick="ALARM_DISMISSED=true;rAlarm()">ซ่อน</button>
+    </div>
+    ${cards}
+  </div>`;
+}
+
 // ── Main Render ───────────────────────────────────────────────────────
 function render(){
   const {all}=getFiltered();
@@ -659,6 +815,8 @@ function render(){
   const to=document.getElementById('f-to').value;
   document.getElementById('range-lbl').textContent=`${from||'—'} — ${to||'—'}`;
   document.getElementById('rec-count').textContent=`${all.length.toLocaleString()} records`;
+  ALARM_DISMISSED=false;
+  rAlarm();
   rKPI();rOEEChart();rOutputChart();rAPQChart();rDTChart();
   const {pd3,pd4}=getFiltered();
   rPareto(pd3,'pareto-pd3');rPareto(pd4,'pareto-pd4');
