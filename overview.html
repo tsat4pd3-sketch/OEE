@@ -185,6 +185,18 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 .alarm-dot{position:absolute;top:6px;right:10px;width:8px;height:8px;border-radius:50%;background:#dc2626;animation:flashBadge 1.2s ease-in-out infinite}
 .alarm-dismiss{margin-left:auto;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:var(--font-body)}
 .alarm-dismiss:hover{background:#fef2f2;border-color:#fca5a5;color:#dc2626}
+@media(max-width:600px){
+  body{padding:0}
+  #main{padding:12px 10px 60px}
+  .card{padding:14px 12px}
+  .sec-hdr{font-size:11px}
+  .kpi-val{font-size:26px}
+  .kpi-sub{font-size:10px}
+  table{font-size:12px}
+  .tbl-wrap,.chart-wrap{overflow-x:auto}
+  .r2,.r3,.r4{grid-template-columns:1fr!important}
+  .ai-grid{grid-template-columns:1fr!important}
+}
 </style>
 </head>
 <body>
@@ -223,6 +235,7 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
     <a class="nav-btn" href="oee_deep_pd3.html">🔍 Deep PD3</a>
     <a class="nav-btn" href="oee_pd4.html">🏭 PD4 Overview</a>
     <a class="nav-btn" href="oee_deep_pd4.html">🔎 Deep PD4</a>
+    <a class="nav-btn" href="masterplan .html">📋 Masterplan</a>
   </div>
 
   <!-- Source Filter -->
