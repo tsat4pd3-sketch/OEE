@@ -238,6 +238,18 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   body.sidebar-collapsed #main{margin-left:0}
   /* default: sidebar visible, no offset needed */
 }
+@media(max-width:600px){
+  body{padding:0}
+  #main{padding:12px 10px 60px}
+  .card{padding:14px 12px}
+  .sec-hdr{font-size:11px}
+  .kpi-val{font-size:26px}
+  .kpi-sub{font-size:10px}
+  table{font-size:12px}
+  .tbl-wrap,.chart-wrap{overflow-x:auto}
+  .r2,.r3,.r4{grid-template-columns:1fr!important}
+  .ai-grid{grid-template-columns:1fr!important}
+}
 </style>
 </head>
 <body>
@@ -268,10 +280,11 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   <div class="nav-links">
     <a class="nav-btn" href="overview.html">🔭 Combined Overview</a>
     <a class="nav-btn active">📋 Summary Dashboard</a>
-    <a class="nav-btn" href="index.html">📊 PD3 Overview</a>
+    <a class="nav-btn" href="oee_pd3.html">📊 PD3 Overview</a>
     <a class="nav-btn" href="oee_deep_pd3.html">🔍 Deep Analysis PD3</a>
     <a class="nav-btn" href="oee_pd4.html">🏭 PD4 Overview</a>
     <a class="nav-btn" href="oee_deep_pd4.html">🔎 Deep Analysis PD4</a>
+    <a class="nav-btn" href="masterplan .html">📋 Masterplan</a>
   </div>
 
   <div class="ss">
