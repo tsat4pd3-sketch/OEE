@@ -14,7 +14,7 @@
   --border:#e2e7f0;--border2:#cdd5e3;
   --accent:#2563eb;--accent2:#3b82f6;--accent-dim:#2563eb12;
   --gold:#d97706;--gold2:#f59e0b;--gold-dim:#d9770612;
-  --cyan:#0891b2;--green:#16a34a;--red:#dc2626;--purple:#7c3aed;
+  --cyan:#0891b2;--green:#16a34a;--red:#dc2626;--purple:#7c3aed;--amber:#d97706;
   --text:#0f172a;--text2:#334155;--muted:#64748b;--muted2:#94a3b8;
   --sidebar:268px;--radius:12px;--radius-sm:8px;
   --font-body:'IBM Plex Sans Thai',sans-serif;--font-display:'Space Grotesk',sans-serif;
@@ -154,11 +154,25 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .act-title{font-size:13px;font-weight:600;color:var(--text)}.act-res{font-size:12px;color:var(--muted);margin-top:3px}
 .st-bar{border-left:3px solid;border-radius:0 8px 8px 0;padding:10px 16px;margin-bottom:12px}
 
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;margin-top:4px}
+.sec-hdr h3{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text)}
+.sec-tag{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px}
+.sec-line{flex:1;height:1px;background:var(--border)}
+
+/* TOGGLE GROUP */
+.toggle-group{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px}
+.tg-btn{padding:5px 13px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .15s}
+.tg-btn.active{background:var(--card);color:var(--accent);box-shadow:0 1px 3px #00000010}
+[data-theme="dark"] .tg-btn.active{background:var(--bg2);box-shadow:none}
+
 /* ─── LOADING ─── */
 #loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .5s}
 .ld-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ld-title{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.ld-bar-wrap{width:200px;height:4px;background:var(--border2);border-radius:2px;margin-top:4px}
+.ld-bar-fill{height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .4s}
 
 /* ─── SCROLLBAR ─── */
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg3)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
@@ -207,7 +221,8 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 
 /* SIDEBAR TOGGLE */
 #sidebar-toggle{
-  position:fixed;top:12px;left:12px;z-index:200;
+  position:fixed;top:50vh;left:calc(var(--sidebar) - 18px);z-index:200;
+  transform:translateY(-50%);
   width:36px;height:36px;border-radius:10px;
   background:var(--bg2);border:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;
@@ -215,6 +230,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   box-shadow:0 2px 8px #00000015;
   transition:all .2s;
 }
+body.sidebar-collapsed #sidebar-toggle{left:12px}
 #sidebar-toggle:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 #sidebar-overlay{display:none;position:fixed;inset:0;background:#00000050;z-index:150;backdrop-filter:blur(1px)}
 /* collapsed state */
@@ -255,8 +271,9 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 
 <div id="loading">
   <div class="ld-ring"></div>
-  <div style="font-family:var(--font-display);font-size:16px;color:var(--accent);letter-spacing:2px">PD3 LOADING</div>
+  <div style="font-family:var(--font-display);font-size:14px;color:var(--accent);letter-spacing:2px">PD3 OVERVIEW</div>
   <p id="ldmsg" style="font-size:11px;color:var(--muted)">กำลังโหลดข้อมูล...</p>
+  <div class="ld-bar-wrap"><div class="ld-bar-fill" id="ld-bar"></div></div>
 </div>
 
 <aside id="sidebar">
@@ -604,7 +621,7 @@ function rKPI(){
   const trend=(cur,prev)=>{
     if(!prev||prev===0)return'<span class="flat">—</span>';
     const d=((cur-prev)/prev*100);
-    return d>0.5?`<span class="up">↑ ${d.toFixed(1)}%</span>`:d<-0.5?`<span class="dn">↓ ${Math.abs(d).toFixed(1)}%</span>`:'<span class="flat">≈ คงที่</span>';
+    return d>0.5?`<span class="up">▲ +${d.toFixed(1)}%</span>`:d<-0.5?`<span class="dn">▼ -${Math.abs(d).toFixed(1)}%</span>`:'<span class="flat">— คงที่</span>';
   };
   const oee=avg(FD.map(d=>d.oee)), oeeP=avg(first.map(d=>d.oee)), oeeC=avg(second.map(d=>d.oee));
   const a=avg(FD.map(d=>d.avail)), aP=avg(first.map(d=>d.avail)), aC=avg(second.map(d=>d.avail));
@@ -616,17 +633,17 @@ function rKPI(){
   document.getElementById("ks0").textContent=`A:${a.toFixed(1)} P:${p.toFixed(1)} Q:${q.toFixed(1)}`;
   document.getElementById("kt0").innerHTML=trend(oeeC,oeeP);
   document.getElementById("kv1").textContent=a.toFixed(1)+"%";
-  document.getElementById("ks1").textContent=a>=85?"World Class ✅":a>=70?"ต้องปรับปรุง":"วิกฤต";
+  document.getElementById("ks1").textContent=a>=85?"✅ World Class":a>=70?"⚠️ ต้องปรับปรุง":"🔴 วิกฤต";
   document.getElementById("kt1").innerHTML=trend(aC,aP);
   document.getElementById("kv2").textContent=p.toFixed(1)+"%";
-  document.getElementById("ks2").textContent=p>=85?"World Class ✅":p>=70?"ต้องปรับปรุง":"วิกฤต";
+  document.getElementById("ks2").textContent=p>=85?"✅ World Class":p>=70?"⚠️ ต้องปรับปรุง":"🔴 วิกฤต";
   document.getElementById("kt2").innerHTML=trend(pC,pP);
   document.getElementById("kv3").textContent=q.toFixed(1)+"%";
-  document.getElementById("ks3").textContent=q>=99?"เยี่ยม ✅":q>=95?"ปกติ":"ต้องปรับปรุง";
+  document.getElementById("ks3").textContent=q>=99?"✅ เยี่ยม":q>=95?"ปกติ":"⚠️ ต้องปรับปรุง";
   document.getElementById("kt3").innerHTML=trend(qC,qP);
   document.getElementById("kv4").textContent=totDT>60?(totDT/60).toFixed(1)+" ชม.":totDT.toFixed(0)+" min";
   document.getElementById("ks4").textContent=`${totDT.toLocaleString()} นาที รวม`;
-  document.getElementById("kt4").innerHTML=trend(dtC,dtP).replace("↑","↑ DT เพิ่ม").replace("↓","↓ DT ลด");
+  document.getElementById("kt4").innerHTML=trend(dtC,dtP).replace("▲","▲ DT เพิ่ม").replace("▼","▼ DT ลด");
 }
 
 // ─── STATS for BAND (low/median/high) ───

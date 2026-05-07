@@ -153,11 +153,23 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .act-title{font-size:13px;font-weight:600;color:var(--text)}.act-res{font-size:12px;color:var(--muted);margin-top:3px}
 .st-bar{border-left:3px solid;border-radius:0 8px 8px 0;padding:10px 16px;margin-bottom:12px}
 
+/* ─── SECTION HEADER ─── */
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;margin-top:4px}
+.sec-hdr h3{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text)}
+.sec-tag{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px}
+.sec-line{flex:1;height:1px;background:var(--border)}
+/* ─── TOGGLE GROUP ─── */
+.toggle-group{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px}
+.tg-btn{padding:5px 13px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .15s}
+.tg-btn.active{background:var(--card);color:var(--accent);box-shadow:0 1px 3px #00000010}
+[data-theme="dark"] .tg-btn.active{background:var(--bg2);box-shadow:none}
 /* ─── LOADING ─── */
 #loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .5s}
 .ld-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ld-title{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.ld-bar-wrap{width:200px;height:4px;background:var(--border2);border-radius:2px;margin-top:4px}
+.ld-bar-fill{height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .4s}
 
 /* ─── SCROLLBAR ─── */
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg3)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
@@ -206,7 +218,8 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 
 /* SIDEBAR TOGGLE */
 #sidebar-toggle{
-  position:fixed;top:12px;left:12px;z-index:200;
+  position:fixed;top:50vh;left:calc(var(--sidebar) - 18px);z-index:200;
+  transform:translateY(-50%);
   width:36px;height:36px;border-radius:10px;
   background:var(--bg2);border:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;
@@ -214,6 +227,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   box-shadow:0 2px 8px #00000015;
   transition:all .2s;
 }
+body.sidebar-collapsed #sidebar-toggle{left:12px}
 #sidebar-toggle:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 #sidebar-overlay{display:none;position:fixed;inset:0;background:#00000050;z-index:150;backdrop-filter:blur(1px)}
 /* collapsed state */
@@ -255,6 +269,7 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   <div class="ld-ring"></div>
   <div style="font-family:var(--font-display);font-size:14px;color:var(--accent);letter-spacing:2px">PD4 DEEP ANALYSIS</div>
   <p id="ldmsg" style="font-size:11px;color:var(--muted)">กำลังโหลดข้อมูล...</p>
+  <div class="ld-bar-wrap"><div class="ld-bar-fill" id="ld-bar"></div></div>
 </div>
 
 <aside id="sidebar">
