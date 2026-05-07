@@ -40,7 +40,7 @@ DB_CONFIG = {
     "port":     3306,
     "user":     "root",
     "password": "your_password",   # ← แก้ตรงนี้
-    "database": "masterplan_db",
+    "database": "project_masterplan",
     "charset":  "utf8mb4",
 }
 
@@ -175,7 +175,7 @@ def get_connection(with_db=True):
 # SCHEMA
 # ═══════════════════════════════════════════
 
-DDL_CREATE_DB = "CREATE DATABASE IF NOT EXISTS `masterplan_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+DDL_CREATE_DB = "CREATE DATABASE IF NOT EXISTS `project_masterplan` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 DDL_TABLES = """
 -- สัปดาห์ใน sprint
