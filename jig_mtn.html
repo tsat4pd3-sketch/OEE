@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JIG MTN · Maintenance Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f2f2;--bg2:#ffffff;--bg3:#f7f7f7;--card:#ffffff;
+  --border:#e0e0e0;--border2:#cccccc;
+  --accent:#e31937;--accent-dim:rgba(227,25,55,0.08);
+  --cyan:#0066cc;--green:#22c55e;--red:#e31937;--purple:#a855f7;--amber:#f59e0b;
+  --text:#121212;--text2:#404040;--muted:#7a7a7a;--muted2:#a0a0a0;
+  --sidebar:252px;--radius:4px;--radius-sm:3px;
+  --font-body:'Sarabun',sans-serif;--font-display:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-events:none;z-index:0}
+
+#sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100;box-shadow:1px 0 12px #00000008}
+.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo-tag{font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:7px;font-weight:600}
+.logo h1{font-family:var(--font-display);font-size:25px;font-weight:700;color:var(--text);line-height:1.1}
+.logo-sub{font-size:12px;color:var(--muted);margin-top:7px;display:flex;align-items:center;gap:8px}
+.badge{padding:3px 10px;border-radius:2px;font-size:11px;font-weight:700;letter-spacing:.5px}
+.bl{background:rgba(34,197,94,0.1);color:#15803d;border:1px solid rgba(34,197,94,0.25)}
+.bc{background:#fef9c3;color:#a16207;border:1px solid #fde68a}
+.bx{background:#f1f5f9;color:var(--muted);border:1px solid var(--border)}
+.nav-links{padding:12px 14px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--border)}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:15px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;cursor:pointer;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
+.nav-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border)}
+.nav-btn.active{background:var(--accent-dim);border-color:#e3193730;color:var(--accent);font-weight:600}
+.ss{padding:14px 16px 6px}
+.ss-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.ss input{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:15px;margin-bottom:8px;outline:none;transition:border-color .2s}
+.ss input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #e3193715}
+.btn-refresh{margin:10px 16px 4px;padding:10px;background:var(--accent-dim);border:1px solid #e3193730;border-radius:var(--radius-sm);color:var(--accent);font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;width:calc(100% - 32px)}
+.btn-refresh:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.auto-info{font-size:11px;color:var(--muted2);text-align:center;padding:5px 16px 16px;line-height:1.6}
+
+#main{flex:1;padding:28px 30px 48px;overflow-y:auto;position:relative;z-index:1}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+.topbar h2{font-family:var(--font-display);font-size:25px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.topbar p{font-size:13px;color:var(--muted);margin-top:4px}
+.topbar-right{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;transition:all .2s;box-shadow:0 1px 3px #00000008}
+.kpi:hover{border-color:var(--border2);box-shadow:0 4px 12px #00000010;transform:translateY(-1px)}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
+.k0::after{background:linear-gradient(90deg,#38bdf8,#67e8f9)}
+.k1::after{background:linear-gradient(90deg,#22c55e,#4ade80)}
+.k2::after{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.k3::after{background:linear-gradient(90deg,#a855f7,#a78bfa)}
+.k4::after{background:linear-gradient(90deg,#e31937,#f87171)}
+.k5::after{background:linear-gradient(90deg,#4d9fff,#38bdf8)}
+.kpi-lbl{font-size:12px;color:var(--muted);letter-spacing:.3px;margin-bottom:8px;font-weight:500}
+.kpi-val{font-family:var(--font-display);font-size:32px;font-weight:700;line-height:1;margin-bottom:5px;color:var(--text)}
+.kpi-sub{font-size:12px;color:var(--muted)}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px;box-shadow:0 1px 3px #00000008}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.card-hdr h3{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.card-hdr em{font-style:normal;font-size:12px;color:var(--muted)}
+.row{display:grid;gap:18px;margin-bottom:18px}
+.r2{grid-template-columns:1fr 1fr}
+@media(max-width:900px){.r2{grid-template-columns:1fr}}
+.ch{position:relative}
+
+.par-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.par-row:last-child{border-bottom:none}
+.par-label{flex:0 0 155px;font-size:13px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.par-bar-bg{flex:1;background:var(--bg3);border-radius:4px;height:7px;overflow:hidden}
+.par-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.par-pct{flex:0 0 40px;text-align:right;font-size:13px;font-weight:700;color:var(--accent)}
+.par-val{flex:0 0 60px;text-align:right;font-size:12px;color:var(--muted)}
+.par-cum{flex:0 0 45px;text-align:right;font-size:11px;color:var(--muted2)}
+
+.tbl-wrap{overflow-x:auto;max-height:360px;overflow-y:auto}
+.dt-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:700;padding:10px 13px;text-align:left;font-size:12px;position:sticky;top:0;letter-spacing:.3px;border-bottom:2px solid var(--border2)}
+.dt-tbl td{padding:10px 13px;border-bottom:1px solid var(--border);color:var(--text2)}
+.dt-tbl tr:hover td{background:#f8faff}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.good{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
+
+.ai-wrap{background:linear-gradient(135deg,#f0fdf4,#f5f3ff);border:1px solid #22c55e40;border-radius:var(--radius);padding:22px;margin-bottom:18px}
+.ai-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ai-orb{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#166534,#22c55e);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ai-hdr h3{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--green);letter-spacing:.3px}
+.ai-hdr span{font-size:12px;color:var(--muted)}
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:800px){.ai-grid{grid-template-columns:1fr}}
+.ai-sec h4{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.ai-sec li{font-size:15px;color:var(--text2);padding:9px 13px;border-radius:8px;line-height:1.7;border-left:3px solid var(--border2);list-style:none;margin-bottom:4px;background:var(--bg2)}
+.ai-sec li.w{border-left-color:var(--red);background:rgba(227,25,55,0.08)}
+.ai-sec li.y{border-left-color:var(--amber);background:#fffbeb}
+.ai-sec li.g{border-left-color:var(--green);background:#f0fdf4}
+
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;margin-top:4px}
+.sec-hdr h3{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--text)}
+.sec-line{flex:1;height:1px;background:var(--border)}
+
+#loading{position:fixed;inset:0;background:#050505;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;transition:opacity .7s,visibility .7s}
+#loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.intro-letters{display:flex;gap:.03em;overflow:hidden;justify-content:center}
+.intro-letter{font-family:var(--font-display);font-size:clamp(4rem,14vw,10rem);font-weight:800;letter-spacing:-.03em;line-height:1;transform:translateY(115%);opacity:0;transition:transform .7s cubic-bezier(.16,1,.3,1),opacity .5s ease;color:#ffffff}
+.intro-letter.up{transform:translateY(0);opacity:1}
+.intro-letter.red{color:#e31937}
+.intro-letter.dim{color:rgba(255,255,255,0.22)}
+.intro-sub{font-family:var(--font-display);font-size:clamp(.5rem,1.1vw,.75rem);letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-top:1.4rem;opacity:0;transform:translateY(14px);transition:opacity .6s 1.2s,transform .6s 1.2s}
+.intro-sub.up{opacity:1;transform:translateY(0)}
+.intro-status{font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:2px;font-family:var(--font-display);text-transform:uppercase;margin-top:2.4rem}
+.ld-bar-wrap{width:160px;height:1px;background:rgba(255,255,255,0.08);margin-top:.7rem;border-radius:0}
+.ld-bar-fill{height:100%;width:0%;background:#e31937;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg3)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
+
+@media(hover:hover){body{cursor:none}}
+#cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .22s,height .22s;mix-blend-mode:difference}
+#cursor-ring{position:fixed;top:0;left:0;width:34px;height:34px;border:1px solid rgba(227,25,55,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .25s}
+body.cur-hover #cursor{width:44px;height:44px}
+body.cur-hover #cursor-ring{opacity:0}
+
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+[data-theme="dark"]{
+  --bg:#050505;--bg2:#0a0a0a;--bg3:#111111;--card:#0d0d0d;
+  --border:#1e1e1e;--border2:#2a2a2a;
+  --accent:#e31937;--accent-dim:rgba(227,25,55,0.10);
+  --text:#ffffff;--text2:#a8a8a8;--muted:#555555;--muted2:#333333;
+  --green:#22c55e;--amber:#f59e0b;--purple:#a855f7;
+}
+[data-theme="dark"] #sidebar{box-shadow:1px 0 0 var(--border)}
+[data-theme="dark"] .kpi:hover{box-shadow:0 4px 16px #00000040}
+[data-theme="dark"] .card{box-shadow:none}
+[data-theme="dark"] .dt-tbl th{background:var(--bg2)}
+[data-theme="dark"] .dt-tbl tr:hover td{background:#ffffff04}
+[data-theme="dark"] .ai-wrap{background:linear-gradient(135deg,#040d08,#0a0710) !important;border-color:#1a3a20 !important}
+[data-theme="dark"] .ai-sec li{background:var(--bg3) !important;border-left-color:var(--border2)}
+[data-theme="dark"] .ai-sec li.w{border-left-color:var(--red) !important;background:#f43f5e0d !important}
+[data-theme="dark"] .ai-sec li.y{border-left-color:var(--amber) !important;background:#f59e0b0d !important}
+[data-theme="dark"] .ai-sec li.g{border-left-color:var(--green) !important;background:#22c55e0d !important}
+[data-theme="dark"] .bl{background:#22c55e;color:#000;border-color:#22c55e}
+[data-theme="dark"] .bc{background:#f59e0b;color:#000;border-color:#f59e0b}
+[data-theme="dark"] .bx{background:#526080;color:#fff;border-color:#526080}
+[data-theme="dark"] .btn-refresh{background:var(--accent-dim);border-color:#3b82f630;color:var(--accent)}
+[data-theme="dark"] .btn-refresh:hover{background:var(--accent);color:#000}
+[data-theme="dark"] #loading{background:#050505}
+[data-theme="dark"] ::-webkit-scrollbar-track{background:var(--bg2)}
+
+#sidebar-toggle{position:fixed;top:50vh;left:calc(var(--sidebar) - 18px);z-index:200;transform:translateY(-50%);width:36px;height:36px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;box-shadow:0 2px 8px #00000015;transition:all .2s}
+body.sidebar-collapsed #sidebar-toggle{left:12px}
+#sidebar-toggle:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+#sidebar-overlay{display:none;position:fixed;inset:0;background:#00000050;z-index:150;backdrop-filter:blur(1px)}
+body.sidebar-collapsed #sidebar{transform:translateX(calc(-1 * var(--sidebar)));position:fixed}
+body.sidebar-collapsed #main{margin-left:0}
+body.sidebar-collapsed #sidebar-overlay{display:none}
+#sidebar-edge{position:fixed;left:0;top:0;bottom:0;width:24px;z-index:99;pointer-events:none}
+body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
+@media(max-width:768px){
+  #sidebar{position:fixed;top:0;left:0;height:100vh;transform:translateX(calc(-1 * var(--sidebar)));transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:160}
+  body.sidebar-open #sidebar{transform:translateX(0)}
+  body.sidebar-open #sidebar-overlay{display:block}
+  #main{margin-left:0 !important;padding-top:60px !important}
+}
+@media(min-width:769px){
+  #sidebar{transition:transform .28s cubic-bezier(.4,0,.2,1)}
+  body.sidebar-collapsed #sidebar{transform:translateX(calc(-1 * var(--sidebar)));position:fixed}
+  body.sidebar-collapsed #main{margin-left:0}
+}
+@media(max-width:600px){
+  #main{padding:12px 10px 60px}
+  .card{padding:14px 12px}
+  .kpi-val{font-size:26px}
+  .r2{grid-template-columns:1fr!important}
+  .ai-grid{grid-template-columns:1fr!important}
+}
+#noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
+
+/* Marquee */
+#marquee-bar{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 0;overflow:hidden;background:var(--bg2);margin-bottom:22px;display:none}
+#marquee-bar:hover .marquee-track{animation-play-state:paused}
+.marquee-track{display:flex;gap:0;width:max-content;animation:marquee 28s linear infinite}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.mq-item{display:flex;align-items:center;gap:10px;padding:0 28px;white-space:nowrap;font-family:var(--font-display);font-size:11px;letter-spacing:.8px;color:var(--muted);border-right:1px solid var(--border)}
+.mq-val{font-weight:700;color:var(--text)}
+.mq-dot{width:5px;height:5px;border-radius:50%}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="noise-overlay"></div>
+<div id="sidebar-edge"></div>
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu">☰</button>
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<div id="loading">
+  <div class="intro-letters">
+    <span class="intro-letter" id="il0">J</span>
+    <span class="intro-letter" id="il1">I</span>
+    <span class="intro-letter red" id="il2">G</span>
+  </div>
+  <div class="intro-letters" style="margin-top:0.3rem">
+    <span class="intro-letter dim" id="il3">M</span>
+    <span class="intro-letter dim" id="il4">T</span>
+    <span class="intro-letter dim" id="il5">N</span>
+  </div>
+  <div class="intro-sub" id="intro-sub">Maintenance Intelligence</div>
+  <p class="intro-status" id="ldmsg">กำลังโหลดข้อมูล...</p>
+  <div class="ld-bar-wrap"><div class="ld-bar-fill" id="ld-bar"></div></div>
+</div>
+
+<aside id="sidebar">
+  <div class="logo">
+    <div class="logo-tag">Maintenance</div>
+    <h1>JIG MTN</h1>
+    <div class="logo-sub">
+      <span id="mo-badge" class="badge bx">...</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-btn" href="overview.html"> Combined Overview</a>
+    <a class="nav-btn" href="summary.html"> Summary Dashboard</a>
+    <a class="nav-btn" href="oee_pd3.html"> PD3 Overview</a>
+    <a class="nav-btn" href="oee_pd4.html"> PD4 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd3.html"> Deep Analysis PD3</a>
+    <a class="nav-btn" href="oee_deep_pd4.html"> Deep Analysis PD4</a>
+    <a class="nav-btn active" href="jig_mtn.html"> JIG MTN</a>
+    <a class="nav-btn" href="masterplan .html"> Masterplan</a>
+  </div>
+  <div class="ss">
+    <div class="ss-label">ช่วงวันที่</div>
+    <input type="date" id="date-from" onchange="renderMO()">
+    <input type="date" id="date-to" onchange="renderMO()">
+  </div>
+  <button class="btn-refresh" onclick="loadMO()">🔄 โหลดข้อมูลใหม่</button>
+  <div class="auto-info">JIG MTN — PD3 + PD4<br>Maintenance Intelligence</div>
+  <div style="padding:0 14px 12px;margin-top:auto">
+    <button id="theme-toggle" onclick="toggleTheme()" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px">
+      <span id="theme-icon"></span><span id="theme-label">Dark Mode</span>
+    </button>
+  </div>
+</aside>
+
+<main id="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <h2>🔧 JIG MTN · Maintenance Intelligence</h2>
+      <p id="mo-status" style="color:var(--muted);font-size:13px">กำลังโหลดข้อมูล...</p>
+    </div>
+    <div class="topbar-right">
+      <span style="background:rgba(227,25,55,0.12);color:var(--accent);border:1px solid rgba(227,25,55,0.25);padding:4px 14px;border-radius:2px;font-size:12px;font-weight:700">PD3+PD4 JIG</span>
+    </div>
+  </div>
+
+  <!-- Marquee bar -->
+  <div id="marquee-bar">
+    <div class="marquee-track" id="mq-track"></div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid" id="mo-kpi">
+    <div class="kpi k0"><div class="kpi-lbl">Total MO</div><div class="kpi-val" id="kv-total">—</div><div class="kpi-sub" id="ks-total"></div></div>
+    <div class="kpi k1"><div class="kpi-lbl">Close Rate</div><div class="kpi-val" id="kv-close">—</div><div class="kpi-sub" id="ks-close"></div></div>
+    <div class="kpi k2"><div class="kpi-lbl">MTTR (min)</div><div class="kpi-val" id="kv-mttr">—</div><div class="kpi-sub" id="ks-mttr"></div></div>
+    <div class="kpi k3"><div class="kpi-lbl">MTBF (hrs)</div><div class="kpi-val" id="kv-mtbf">—</div><div class="kpi-sub" id="ks-mtbf"></div></div>
+    <div class="kpi k4"><div class="kpi-lbl">Unique Machines</div><div class="kpi-val" id="kv-mc">—</div><div class="kpi-sub" id="ks-mc"></div></div>
+    <div class="kpi k5"><div class="kpi-lbl">Recurring Problems</div><div class="kpi-val" id="kv-rec">—</div><div class="kpi-sub" id="ks-rec"></div></div>
+  </div>
+
+  <!-- Recurrence Analysis -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>🔄 Recurrence Analysis<em>เครื่องซ่อมซ้ำ vs หายขาด</em></h3>
+    </div>
+    <div id="mo-recurrence"><p style="color:var(--muted);font-size:13px">รอข้อมูล...</p></div>
+  </div>
+
+  <!-- Pareto row -->
+  <div class="row r2">
+    <div class="card">
+      <div class="card-hdr"><h3>📊 Top Problem Types</h3></div>
+      <div id="mo-prob-pareto"><p style="color:var(--muted);font-size:13px">รอข้อมูล...</p></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>🤖 Top Mc No. (ซ่อมบ่อยสุด)</h3></div>
+      <div id="mo-mc-pareto"><p style="color:var(--muted);font-size:13px">รอข้อมูล...</p></div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="row r2">
+    <div class="card">
+      <div class="card-hdr"><h3>⏱️ TTR Distribution<em>นาที</em></h3></div>
+      <div class="ch" style="height:160px"><canvas id="c-ttr"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>📅 MO Frequency รายเดือน</h3></div>
+      <div class="ch" style="height:160px"><canvas id="c-mo-freq"></canvas></div>
+    </div>
+  </div>
+
+  <!-- PM Alerts -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>🔮 Predictive Maintenance Alerts</h3>
+    </div>
+    <div id="pm-alerts"><p style="color:var(--muted);font-size:13px">รอข้อมูล...</p></div>
+  </div>
+
+  <!-- Technician Performance -->
+  <div class="card">
+    <div class="card-hdr"><h3>👨‍🔧 Technician Performance</h3></div>
+    <div class="tbl-wrap">
+      <table class="dt-tbl">
+        <thead><tr><th>ช่าง</th><th class="num">MO Count</th><th class="num">Close Rate</th><th class="num">Avg TTR (min)</th><th class="num">Total TTR (min)</th></tr></thead>
+        <tbody id="mo-tech-table"><tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted)">รอข้อมูล...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MO Detail Table -->
+  <div class="card">
+    <div class="card-hdr"><h3>📋 รายละเอียด MO ล่าสุด<em>30 รายการ</em></h3></div>
+    <div class="tbl-wrap">
+      <table class="dt-tbl">
+        <thead><tr><th>เปิด MO</th><th>Dept</th><th>Mc No.</th><th>Problem Type</th><th>แนวทางการแก้ไข</th><th>TTR(m)</th><th>ช่าง</th><th>สถานะ</th></tr></thead>
+        <tbody id="mo-tb"><tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted)">รอข้อมูล...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- AI Analysis -->
+  <div class="ai-wrap" style="border-color:#1a3a1a">
+    <div class="ai-hdr">
+      <div class="ai-orb"></div>
+      <div>
+        <h3>AI MAINTENANCE INTELLIGENCE — JIG MTN</h3>
+        <span>Root Cause, Effective Solutions, Predictive Maintenance สำหรับ JIG</span>
+      </div>
+      <button onclick="runMOAI()" style="margin-left:auto;padding:6px 14px;background:linear-gradient(135deg,#166534,#22c55e);border:none;border-radius:7px;color:#fff;font-size:12px;cursor:pointer;font-family:var(--font-body);font-weight:600">🤖 วิเคราะห์</button>
+    </div>
+    <div id="mo-ai-out"><p class="pulse" style="color:var(--muted);font-size:13px">กำลังรอข้อมูล MO...</p></div>
+  </div>
+</main>
+
+<script>
+// ══════════════════════════════════════════════════════
+// JIG MTN — MAINTENANCE INTELLIGENCE DASHBOARD
+// ══════════════════════════════════════════════════════
+
+const MO_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSVDNHyOb2LrXosMZG09quorOkfI9aLs8Hg_6ek8glxEQRQYL6F1rWl_cZ12A_f7SC2yDkyWroXHtM1/pub?gid=785568377&single=true&output=csv";
+let MO_ALL = [], MO_LOADED = false;
+const CH = {};
+
+function fmtDate(d) {
+  if (!d) return "—";
+  return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+}
+
+function parseMODate(s) {
+  if (!s) return null;
+  s = s.trim();
+  const parts = s.split(" ");
+  const dp = parts[0].split("/");
+  if (dp.length !== 3) return null;
+  const d = +dp[0], m = +dp[1] - 1, y = +dp[2];
+  const ce = y > 2400 ? y - 543 : y;
+  return new Date(ce, m, d, ...((parts[1] || "00:00:00").split(":").map(Number)));
+}
+
+function csvLineMO(l) {
+  const r = []; let c = "", q = false;
+  for (let i = 0; i < l.length; i++) {
+    const ch = l[i];
+    if (ch === '"') { if (q && l[i+1] === '"') { c += '"'; i++; } else q = !q; }
+    else if (ch === ',' && !q) { r.push(c); c = ""; }
+    else c += ch;
+  }
+  r.push(c); return r;
+}
+
+function parseMOCSV(text) {
+  const lines = text.split("\n").filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const hdr = csvLineMO(lines[0]);
+  const idx = {}; hdr.forEach((h, i) => idx[h.trim().replace(/\r/g,"")] = i);
+  const g = (row, name) => { const i = idx[name]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim().replace(/\r/g,"") : ""; };
+  const n = v => { if (!v) return 0; const x = parseFloat(v.replace(/,/g, "")); return isNaN(x) ? 0 : x; };
+  const rows = [];
+  for (let r = 1; r < lines.length; r++) {
+    const row = csvLineMO(lines[r]);
+    if (row.length < 8) continue;
+    const dateOpen = parseMODate(g(row, "เวลาเปิด MO"));
+    if (!dateOpen) continue;
+    const dept = g(row, "แผนก");
+    const mcType = g(row, "Mc Type");
+    // Filter: only JIG rows
+    if (dept && !dept.toUpperCase().includes("JIG") && !mcType.toUpperCase().includes("JIG")) continue;
+    const dateClose = parseMODate(g(row, "เวลาซ่อมเสร็จ"));
+    const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
+    const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
+    rows.push({
+      date: dateOpen,
+      dateClose: dateClose,
+      dateStr: fmtDate(dateOpen),
+      line: g(row, "Line การผลิต"),
+      mcType: mcType,
+      mcNo: g(row, "Mc No."),
+      probType: g(row, "Problem Type"),
+      symptom: g(row, "อาการ/สาเหตุ"),
+      solution: g(row, "แนวทางการแก้ไข"),
+      ttr: n(g(row, "TTR")),
+      moWait: n(g(row, "MO รอการแก้ไข")),
+      tech: g(row, "ช่างที่รับการแก้ไข"),
+      onOff: g(row, "Online/Offline"),
+      repairTime: n(g(row, "ระยะเวลาในการซ่อมงาน")),
+      responseTime: n(g(row, "ระยะเวลาเข้าดำเนินการ")),
+      dept: dept,
+      statusMO: statusMO,
+      isClosed: isClosed,
+    });
+  }
+  return rows;
+}
+
+async function loadMO() {
+  document.getElementById("mo-status").textContent = "📡 กำลังโหลด MO data...";
+  document.getElementById("mo-badge").textContent = "...";
+  document.getElementById("mo-badge").className = "badge bx";
+  try {
+    const res = await fetch(MO_URL + "&t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const csv = await res.text();
+    MO_ALL = parseMOCSV(csv);
+    MO_LOADED = true;
+    document.getElementById("mo-badge").textContent = "● LIVE " + MO_ALL.length + " MO";
+    document.getElementById("mo-badge").className = "badge bl";
+    document.getElementById("mo-status").textContent = "โหลดสำเร็จ — " + MO_ALL.length + " MO (JIG)";
+    renderMO();
+    runMOAI();
+  } catch (e) {
+    document.getElementById("mo-badge").textContent = "● ERR";
+    document.getElementById("mo-badge").className = "badge bx";
+    document.getElementById("mo-status").innerHTML = `<span style="color:var(--red)">โหลดไม่ได้: ${e.message} — ต้องเปิดจาก Web Server</span>`;
+  }
+}
+
+function getMOFiltered() {
+  const _fv = document.getElementById("date-from").value.split("-");
+  const from = _fv.length === 3 ? new Date(+_fv[0], +_fv[1]-1, +_fv[2]) : new Date(0);
+  const _tv = document.getElementById("date-to").value.split("-");
+  const to = _tv.length === 3 ? new Date(+_tv[0], +_tv[1]-1, +_tv[2], 23, 59, 59) : new Date(9999, 0, 1);
+  const filtered = MO_ALL.filter(d => d.date >= from && d.date <= to);
+  if (!filtered.length && MO_ALL.length > 0) {
+    const moMin = new Date(Math.min(...MO_ALL.map(d => d.date)));
+    const moMax = new Date(Math.max(...MO_ALL.map(d => d.date)));
+    document.getElementById("mo-status").textContent =
+      `ไม่มี MO ในช่วงนี้ (data: ${moMin.toLocaleDateString("th-TH")} ถึง ${moMax.toLocaleDateString("th-TH")})`;
+  } else if (MO_LOADED) {
+    document.getElementById("mo-status").textContent = `แสดง ${filtered.length} MO`;
+  }
+  return filtered;
+}
+
+function renderMO() {
+  if (!MO_LOADED) return;
+  const mo = getMOFiltered();
+  if (!mo.length) {
+    document.getElementById("mo-status").textContent = "ไม่มีข้อมูล MO ในช่วงวันที่เลือก";
+    return;
+  }
+  rMOKPI(mo);
+  rMORecurrence(mo);
+  rMOProbPareto(mo);
+  rMOMcPareto(mo);
+  rTTRDist(mo);
+  rMOFreq(mo);
+  rPMAlerts(mo);
+  renderTechTable(mo);
+  rMOTable(mo);
+  updateMarquee(mo);
+}
+
+function rMOKPI(mo) {
+  const totalMO = mo.length;
+  const closedMO = mo.filter(d => d.isClosed);
+  const closedCount = closedMO.length;
+  const openCount = totalMO - closedCount;
+  const closedPct = totalMO > 0 ? Math.round(closedCount / totalMO * 100) : 0;
+  const mttr = closedCount > 0 ? (closedMO.reduce((s,d) => s + d.ttr, 0) / closedCount).toFixed(1) : "—";
+
+  const mcMap = {};
+  mo.forEach(d => { if (!mcMap[d.mcNo]) mcMap[d.mcNo] = []; mcMap[d.mcNo].push(d.date); });
+  const intervals = [];
+  Object.values(mcMap).forEach(evts => {
+    const sorted = [...evts].sort((a,b) => a - b);
+    for (let i = 1; i < sorted.length; i++) intervals.push((sorted[i] - sorted[i-1]) / 3600000);
+  });
+  const mtbf = intervals.length ? (intervals.reduce((a,b) => a + b, 0) / intervals.length).toFixed(1) : "—";
+  const uniqMc = new Set(mo.map(d => d.mcNo)).size;
+  const mcProb = {};
+  mo.forEach(d => { const k = d.mcNo + "|" + d.probType; if (!mcProb[k]) mcProb[k] = 0; mcProb[k]++; });
+  const recurring = Object.values(mcProb).filter(v => v > 1).length;
+
+  // Update KPI cards
+  const set = (id, v, s) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = v;
+    const sel = document.getElementById(id.replace("kv-","ks-"));
+    if (sel) sel.textContent = s;
+  };
+  set("kv-total", totalMO.toLocaleString(), `ปิดแล้ว ${closedCount} | ค้าง ${openCount}`);
+  set("kv-close", closedPct + "%", `${closedCount} / ${totalMO} MO`);
+  set("kv-mttr", mttr, "นาที (Mean Time To Repair)");
+  set("kv-mtbf", mtbf, "ชั่วโมง (Mean Time Between Failures)");
+  set("kv-mc", uniqMc, "เครื่องที่ซ่อม");
+  set("kv-rec", recurring, "กรณีปัญหาซ้ำ");
+}
+
+function rMORecurrence(mo) {
+  const mcMap = {};
+  mo.forEach(d => {
+    const key = d.mcNo;
+    if (!mcMap[key]) mcMap[key] = { mc: d.mcNo, mcType: d.mcType, line: d.line, events: [] };
+    mcMap[key].events.push({ date: d.date, prob: d.probType, symptom: d.symptom||"", solution: d.solution||"", ttr: d.ttr });
+  });
+  const sorted = Object.values(mcMap).sort((a,b) => b.events.length - a.events.length).slice(0, 10);
+  const maxC = sorted[0]?.events.length || 1;
+  const rows = sorted.map(mc => {
+    const probCounts = {};
+    mc.events.forEach(e => { probCounts[e.prob] = (probCounts[e.prob] || 0) + 1; });
+    const topProb = Object.entries(probCounts).sort((a,b) => b[1] - a[1])[0];
+    const isRecurring = topProb && topProb[1] > 1;
+    const avgTTR = (mc.events.reduce((s,e) => s + e.ttr, 0) / mc.events.length).toFixed(1);
+    const lastDate = new Date(Math.max(...mc.events.map(e => e.date)));
+    const daysSince = Math.floor((Date.now() - lastDate) / 86400000);
+    const tag = isRecurring
+      ? `<span style="background:#f43f5e22;color:#f43f5e;padding:2px 8px;border-radius:2px;font-size:9px;font-weight:700">🔄 RECURRING</span>`
+      : `<span style="background:#22c55e22;color:#22c55e;padding:2px 8px;border-radius:2px;font-size:9px;font-weight:700">✅ RESOLVED</span>`;
+    const w = Math.round(mc.events.length / maxC * 100);
+    return `<div style="display:grid;grid-template-columns:160px 1fr 90px 70px 70px 80px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${mc.mc}">${mc.mc}</div>
+      <div style="background:var(--bg3);border-radius:3px;height:6px;overflow:hidden"><div style="width:${w}%;height:100%;background:${isRecurring?"#f43f5e":"#22c55e"};border-radius:3px"></div></div>
+      <div style="font-size:11px;color:${isRecurring?"#f43f5e":"#22c55e"};font-weight:700;text-align:center">${mc.events.length} ครั้ง</div>
+      <div style="font-size:10px;color:var(--muted)">${avgTTR}m avg</div>
+      <div style="font-size:10px;color:var(--muted)">${daysSince}d ago</div>
+      <div>${tag}</div>
+    </div>`;
+  });
+  document.getElementById("mo-recurrence").innerHTML = `
+    <div style="display:grid;grid-template-columns:160px 1fr 90px 70px 70px 80px;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:9px;color:var(--muted)">Mc No.</div><div style="font-size:9px;color:var(--muted)">ความถี่</div>
+      <div style="font-size:9px;color:var(--muted);text-align:center">จำนวน</div>
+      <div style="font-size:9px;color:var(--muted)">TTR avg</div>
+      <div style="font-size:9px;color:var(--muted)">ซ่อมล่าสุด</div>
+      <div style="font-size:9px;color:var(--muted)">สถานะ</div>
+    </div>
+    ${rows.join("")}`;
+}
+
+const MO_COLORS = ["#f43f5e","#f59e0b","#38bdf8","#a855f7","#22c55e","#fb923c","#e31937","#e879f9","#34d399","#fbbf24"];
+
+function dtIcon(t) {
+  const s = (t||'').toLowerCase();
+  if (s.includes('plc')||s.includes('sensor')||s.includes('เซนเซอร์')) return '💡';
+  if (s.includes('robot')||s.includes('โรบอท')) return '🤖';
+  if (s.includes('หลัก')) return '⚙️';
+  if (s.includes('รอง')) return '🔧';
+  if (s.includes('พิมพ์')||s.includes('จิ๊ก')||s.includes('กริ๊ป')) return '🗜️';
+  if (s.includes('คุณภาพ')||s.includes('quality')) return '🔍';
+  if (s.includes('setup')||s.includes('ตั้ง')) return '🔩';
+  if (s.includes('ไฟ')||s.includes('power')) return '⚡';
+  return '🔧';
+}
+
+function rMOProbPareto(mo) {
+  const sums = {}; mo.forEach(d => { sums[d.probType] = (sums[d.probType] || 0) + 1; });
+  const sorted = Object.entries(sums).sort((a,b) => b[1] - a[1]).slice(0, 8);
+  const total = sorted.reduce((s,[,v]) => s + v, 0) || 1; let cum = 0;
+  document.getElementById("mo-prob-pareto").innerHTML = sorted.map(([l,v],i) => {
+    cum += v; const pct = (v/total*100).toFixed(1); const cumPct = (cum/total*100).toFixed(1);
+    return `<div class="par-row"><div class="par-label" title="${l}" style="flex:0 0 145px">${dtIcon(l)} ${l}</div>
+      <div class="par-bar-bg"><div class="par-bar-fill" style="width:${(v/total*100).toFixed(0)}%;background:${MO_COLORS[i]}"></div></div>
+      <div class="par-pct">${pct}%</div><div class="par-val">${v} MO</div><div class="par-cum">∑${cumPct}%</div></div>`;
+  }).join("") || '<p style="color:var(--muted);font-size:12px">ไม่มีข้อมูล</p>';
+}
+
+function rMOMcPareto(mo) {
+  const sums = {}; mo.forEach(d => { sums[d.mcNo] = (sums[d.mcNo] || 0) + 1; });
+  const sorted = Object.entries(sums).sort((a,b) => b[1] - a[1]).slice(0, 8);
+  const total = sorted.reduce((s,[,v]) => s + v, 0) || 1; let cum = 0;
+  document.getElementById("mo-mc-pareto").innerHTML = sorted.map(([l,v],i) => {
+    cum += v; const pct = (v/total*100).toFixed(1); const cumPct = (cum/total*100).toFixed(1);
+    return `<div class="par-row"><div class="par-label" title="${l}" style="flex:0 0 145px;font-size:10px">${l}</div>
+      <div class="par-bar-bg"><div class="par-bar-fill" style="width:${(v/total*100).toFixed(0)}%;background:${MO_COLORS[i]}"></div></div>
+      <div class="par-pct">${pct}%</div><div class="par-val">${v} ครั้ง</div><div class="par-cum">∑${cumPct}%</div></div>`;
+  }).join("") || '<p style="color:var(--muted);font-size:12px">ไม่มีข้อมูล</p>';
+}
+
+const dch = id => { if (CH[id]) { CH[id].destroy(); delete CH[id]; } };
+
+function rTTRDist(mo) {
+  const buckets = { "0-5m":0, "5-15m":0, "15-30m":0, "30-60m":0, "1-2h":0, ">2h":0 };
+  mo.forEach(d => {
+    const t = d.ttr;
+    if (t <= 5) buckets["0-5m"]++;
+    else if (t <= 15) buckets["5-15m"]++;
+    else if (t <= 30) buckets["15-30m"]++;
+    else if (t <= 60) buckets["30-60m"]++;
+    else if (t <= 120) buckets["1-2h"]++;
+    else buckets[">2h"]++;
+  });
+  dch("c-ttr");
+  CH["c-ttr"] = new Chart(document.getElementById("c-ttr"), {
+    type:"bar",
+    data:{ labels:Object.keys(buckets), datasets:[{ data:Object.values(buckets), backgroundColor:MO_COLORS.map(c=>c+"88"), borderColor:MO_COLORS, borderWidth:1, borderRadius:4 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:"#0d1117", titleColor:"#dce4f0", bodyColor:"#526080", borderColor:"#1c2640", borderWidth:1 } }, scales:{ x:{ grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#526080", font:{ size:9 } } }, y:{ grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#526080", font:{ size:9 } } } } }
+  });
+}
+
+function rMOFreq(mo) {
+  const wk = {};
+  mo.forEach(d => {
+    const dt = new Date(d.date);
+    const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+    wk[key] = (wk[key] || 0) + 1;
+  });
+  const months = Object.keys(wk).sort().slice(-12);
+  const labels = months.map(m => { const [yr,mn] = m.split('-'); return `${mn}/${yr.slice(2)}`; });
+  dch("c-mo-freq");
+  CH["c-mo-freq"] = new Chart(document.getElementById("c-mo-freq"), {
+    type:"bar",
+    data:{ labels:labels, datasets:[{ data:months.map(m=>wk[m]), backgroundColor:"#38bdf844", borderColor:"#38bdf8", borderWidth:1, borderRadius:3 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:"#0d1117", titleColor:"#dce4f0", bodyColor:"#526080", borderColor:"#1c2640", borderWidth:1 } }, scales:{ x:{ grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#526080", font:{ size:9 }, maxRotation:45 } }, y:{ grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#526080", font:{ size:9 } } } } }
+  });
+}
+
+function rPMAlerts(mo) {
+  const mcMap = {};
+  mo.forEach(d => {
+    if (!mcMap[d.mcNo]) mcMap[d.mcNo] = { mc:d.mcNo, mcType:d.mcType, line:d.line, events:[], totalTTR:0 };
+    mcMap[d.mcNo].events.push(d.date);
+    mcMap[d.mcNo].totalTTR += d.ttr;
+  });
+  const alerts = [];
+  Object.values(mcMap).forEach(mc => {
+    if (mc.events.length < 2) return;
+    const sorted = [...mc.events].sort((a,b) => a - b);
+    const intervals = [];
+    for (let i = 1; i < sorted.length; i++) intervals.push((sorted[i]-sorted[i-1])/86400000);
+    const avgInterval = intervals.reduce((a,b) => a+b,0)/intervals.length;
+    const lastBreakdown = sorted[sorted.length-1];
+    const daysSince = (Date.now()-lastBreakdown)/86400000;
+    const avgTTR = (mc.totalTTR/mc.events.length).toFixed(1);
+    const overdueRatio = daysSince/avgInterval;
+    const likelyResolved = overdueRatio > 3;
+    const daysUntilNext = avgInterval - daysSince;
+    let risk = "LOW", riskColor = "#22c55e", status = "WATCH";
+    if (likelyResolved) { status="RESOLVED"; risk="LOW"; riskColor="#22c55e"; }
+    else if (daysUntilNext <= 0) {
+      status="OVERDUE";
+      const overdueDays = Math.abs(daysUntilNext);
+      if (overdueDays <= avgInterval*0.5) { risk="HIGH"; riskColor="#f87171"; } else { risk="MEDIUM"; riskColor="#f59e0b"; }
+    } else if (daysUntilNext <= 3) { status="ACTIVE"; risk="HIGH"; riskColor="#f87171"; }
+    else if (daysUntilNext <= 7) { status="WATCH"; risk="MEDIUM"; riskColor="#f59e0b"; }
+    else { status="WATCH"; risk="LOW"; riskColor="#22c55e"; }
+    alerts.push({ mc:mc.mc, mcType:mc.mcType, line:mc.line, count:mc.events.length, avgInterval:avgInterval.toFixed(1), daysSince:Math.round(daysSince), daysUntilNext:daysUntilNext.toFixed(0), overdueRatio:overdueRatio.toFixed(1), avgTTR, risk, riskColor, status, likelyResolved });
+  });
+  const riskOrder = { CRITICAL:0, HIGH:1, MEDIUM:2, LOW:3 };
+  alerts.sort((a,b) => { if (a.likelyResolved!==b.likelyResolved) return a.likelyResolved?1:-1; return (riskOrder[a.risk]||3)-(riskOrder[b.risk]||3)||(+a.daysUntilNext-+b.daysUntilNext); });
+  if (!alerts.length) { document.getElementById("pm-alerts").innerHTML='<p style="color:var(--muted);font-size:12px">ต้องมีข้อมูล MO อย่างน้อย 2 รายการต่อเครื่อง</p>'; return; }
+
+  function alertCard(a) {
+    const isRes = a.likelyResolved;
+    const isOver = !isRes && +a.daysUntilNext <= 0;
+    const bc = isRes ? "#22c55e" : a.riskColor;
+    const intColor = +a.avgInterval<=3?"#f87171":+a.avgInterval<=14?"#fbbf24":"#4ade80";
+    const intLabel = +a.avgInterval<=3?"เสียบ่อย":+a.avgInterval<=14?"ปานกลาง":"นานๆครั้ง";
+    let timelineBar = "";
+    if (!isRes) {
+      const total = +a.avgInterval||1;
+      const elapsed = Math.min(+a.daysSince,total);
+      const pct = Math.min(Math.round(elapsed/total*100),100);
+      const barColor = pct>=100?"#f43f5e":pct>=75?"#f59e0b":"#4ade80";
+      timelineBar = `<div style="padding:8px 14px 4px;border-top:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:#526080;margin-bottom:3px">
+          <span>ซ่อมล่าสุด</span><span style="color:${barColor};font-weight:700">${pct}% ของรอบ</span><span>คาดว่าจะเสียอีกครั้ง</span>
+        </div>
+        <div style="background:var(--bg);border-radius:2px;height:7px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#22c55e,${barColor});border-radius:2px"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:#526080;margin-top:2px">
+          <span>${a.daysSince}วันที่แล้ว</span>
+          ${pct<100?`<span style="color:${barColor}">อีก ~${a.daysUntilNext}วัน</span>`:`<span style="color:var(--red)">เกิน ${Math.abs(+a.daysUntilNext)}วัน</span>`}
+        </div>
+      </div>`;
+    }
+    let badge;
+    if (isRes) {
+      badge = `<span style="background:#22c55e22;color:var(--green);font-size:10px;font-weight:700;padding:3px 10px;border-radius:2px;border:1px solid #22c55e40">✅ RESOLVED — ไม่เสียซ้ำ ${a.daysSince}d (${a.overdueRatio}×)</span>`;
+    } else if (isOver) {
+      badge = `<span style="background:${bc}22;color:${bc};font-size:10px;font-weight:700;padding:3px 10px;border-radius:2px;border:1px solid ${bc}50;animation:pulse 1.5s infinite">⚠️ ${a.risk} — เกิน ${Math.abs(+a.daysUntilNext)}d</span>`;
+    } else {
+      badge = `<span style="background:${bc}18;color:${bc};font-size:10px;font-weight:700;padding:3px 10px;border-radius:2px;border:1px solid ${bc}40">${a.risk} — อีก ~${a.daysUntilNext}d</span>`;
+    }
+    return `<div style="background:var(--bg3);border:1px solid ${bc}30;border-left:3px solid ${bc};border-radius:11px;overflow:hidden;margin-bottom:8px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:11px 14px 8px;gap:8px;flex-wrap:wrap">
+        <div>
+          <div style="margin-bottom:4px">${badge}</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">${a.mc}</div>
+          <div style="font-size:11px;color:#64748b;margin-top:1px">${a.mcType} · ${a.line}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+        <div style="flex:1;text-align:center;padding:7px 4px;border-right:1px solid var(--border)">
+          <div style="font-size:9px;color:#526080">ซ่อมมาแล้ว</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text);line-height:1.2">${a.count}</div>
+          <div style="font-size:9px;color:#526080">ครั้ง</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:7px 4px;border-right:1px solid var(--border)">
+          <div style="font-size:9px;color:#526080">MTTR avg</div>
+          <div style="font-size:16px;font-weight:700;color:#f59e0b;line-height:1.2">${a.avgTTR}</div>
+          <div style="font-size:9px;color:#526080">นาที</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:7px 4px;border-right:1px solid var(--border)">
+          <div style="font-size:9px;color:#526080">ซ่อมล่าสุด</div>
+          <div style="font-size:16px;font-weight:700;color:var(--muted);line-height:1.2">${a.daysSince}</div>
+          <div style="font-size:9px;color:#526080">วันที่แล้ว</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:7px 4px">
+          <div style="font-size:9px;color:#526080">interval</div>
+          <div style="font-size:16px;font-weight:700;color:${intColor};line-height:1.2">${a.avgInterval}</div>
+          <div style="font-size:9px;color:${intColor}">${intLabel}</div>
+        </div>
+      </div>
+      ${timelineBar}
+    </div>`;
+  }
+
+  const needAttn = alerts.filter(a => !a.likelyResolved && (+a.daysUntilNext<=7||a.status==="OVERDUE"));
+  const watching = alerts.filter(a => !a.likelyResolved && +a.daysUntilNext>7);
+  const resolved = alerts.filter(a => a.likelyResolved);
+  let html2 = "";
+  if (needAttn.length) html2 += `<div style="font-size:11px;font-weight:700;color:var(--red);margin:0 0 8px;padding:6px 10px;background:#f43f5e12;border-radius:6px;border-left:3px solid #f43f5e">⚠️ ต้องการความสนใจ — ตรวจสอบหรือวาง PM (${needAttn.length} เครื่อง)</div>${needAttn.map(alertCard).join("")}`;
+  if (watching.length) html2 += `<div style="font-size:11px;font-weight:700;color:var(--amber);margin:12px 0 8px;padding:6px 10px;background:#f59e0b12;border-radius:6px;border-left:3px solid #f59e0b">👁 เฝ้าระวัง (${watching.length} เครื่อง)</div>${watching.map(alertCard).join("")}`;
+  if (resolved.length) html2 += `<div style="font-size:11px;font-weight:700;color:var(--green);margin:12px 0 8px;padding:6px 10px;background:#22c55e12;border-radius:6px;border-left:3px solid #22c55e">✅ น่าจะแก้หายขาดแล้ว (${resolved.length} เครื่อง)</div>${resolved.map(alertCard).join("")}`;
+  if (!html2) html2 = '<p style="color:var(--muted);font-size:12px">ต้องมีข้อมูล MO อย่างน้อย 2 รายการต่อเครื่อง</p>';
+  document.getElementById("pm-alerts").innerHTML = html2;
+}
+
+function renderTechTable(mo) {
+  const techMap = {};
+  mo.forEach(d => {
+    const tech = d.tech || "ไม่ระบุ";
+    if (!techMap[tech]) techMap[tech] = { count:0, totalTTR:0, closed:0 };
+    techMap[tech].count++;
+    techMap[tech].totalTTR += d.ttr;
+    if (d.isClosed) techMap[tech].closed++;
+  });
+  const techs = Object.entries(techMap)
+    .map(([n,v]) => ({ n, count:v.count, avgTTR:(v.totalTTR/v.count).toFixed(1), closedPct:Math.round(v.closed/v.count*100), totalTTR:v.totalTTR }))
+    .sort((a,b) => b.count - a.count);
+  document.getElementById("mo-tech-table").innerHTML = techs.map((t,i) => {
+    const cpColor = t.closedPct >= 80 ? "var(--green)" : t.closedPct >= 50 ? "var(--amber)" : "var(--red)";
+    const ttrColor = +t.avgTTR > 60 ? "var(--red)" : +t.avgTTR > 30 ? "var(--amber)" : "var(--green)";
+    return `<tr>
+      <td style="font-size:13px;font-weight:600;color:var(--text)">${i===0?'🏆 ':''}${t.n}</td>
+      <td class="num" style="font-size:14px;font-weight:700;color:#38bdf8">${t.count}</td>
+      <td class="num" style="font-weight:700;color:${cpColor}">${t.closedPct}%</td>
+      <td class="num" style="font-weight:700;color:${ttrColor}">${t.avgTTR}</td>
+      <td class="num" style="color:var(--muted)">${t.totalTTR.toLocaleString()}</td>
+    </tr>`;
+  }).join("") || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted)">ไม่มีข้อมูล</td></tr>';
+}
+
+function rMOTable(mo) {
+  const rows = [...mo].sort((a,b) => b.date - a.date).slice(0, 30);
+  document.getElementById("mo-tb").innerHTML = rows.map(d => {
+    const ttrColor = d.ttr>60?"#f87171":d.ttr>30?"#fbbf24":"#4ade80";
+    const ttrBadge = d.ttr>60?`<span style="background:#f43f5e25;color:var(--red);padding:2px 7px;border-radius:2px;font-size:10px;font-weight:700">HIGH</span>`:
+      d.ttr>30?`<span style="background:#f59e0b25;color:var(--amber);padding:2px 7px;border-radius:2px;font-size:10px">MED</span>`:
+      `<span style="background:#22c55e25;color:var(--green);padding:2px 7px;border-radius:2px;font-size:10px">OK</span>`;
+    const statusBadge = d.isClosed
+      ? `<span style="background:#22c55e25;color:var(--green);padding:2px 8px;border-radius:2px;font-size:10px;font-weight:600">✓ ปิด</span>`
+      : `<span style="background:#f43f5e25;color:var(--red);padding:2px 8px;border-radius:2px;font-size:10px;font-weight:600">⏳ ค้าง</span>`;
+    const solText = d.solution || d.symptom || "—";
+    return `<tr>
+      <td style="white-space:nowrap;font-size:11px;color:var(--text2)">${d.dateStr}</td>
+      <td style="font-size:11px;color:#e2e8f0;font-weight:600">${d.dept||d.line}</td>
+      <td style="font-size:11px;color:#e2e8f0;white-space:nowrap;font-weight:600">${d.mcNo}</td>
+      <td style="font-size:12px;color:var(--text)">${d.probType}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${solText}">${solText}</td>
+      <td style="font-weight:700;font-size:13px;color:${ttrColor}">${d.ttr} ${ttrBadge}</td>
+      <td style="font-size:11px;color:var(--muted)">${(d.tech||"").split(" ").slice(0,2).join(" ")}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  }).join("") || '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted)">ไม่มีข้อมูล</td></tr>';
+}
+
+function updateMarquee(mo) {
+  const bar = document.getElementById("marquee-bar");
+  const track = document.getElementById("mq-track");
+  if (!mo.length) return;
+  const closed = mo.filter(d => d.isClosed);
+  const avgTTR = mo.length ? (mo.reduce((s,d)=>s+d.ttr,0)/mo.length).toFixed(1) : "—";
+  const uniqMc = new Set(mo.map(d=>d.mcNo)).size;
+  const items = [
+    { label:"TOTAL MO", val:mo.length },
+    { label:"CLOSED", val:closed.length + " (" + Math.round(closed.length/mo.length*100) + "%)" },
+    { label:"AVG TTR", val:avgTTR + "m" },
+    { label:"MACHINES", val:uniqMc },
+    { label:"JIG MTN", val:"LIVE" },
+  ];
+  const html = items.map(it => `<div class="mq-item"><div class="mq-dot" style="background:var(--accent)"></div><span>${it.label}</span><span class="mq-val">${it.val}</span></div>`).join("") +
+               items.map(it => `<div class="mq-item"><div class="mq-dot" style="background:var(--accent)"></div><span>${it.label}</span><span class="mq-val">${it.val}</span></div>`).join("");
+  track.innerHTML = html;
+  bar.style.display = "block";
+}
+
+// ── AI MAINTENANCE ANALYSIS ──
+async function runMOAI() {
+  if (!MO_LOADED || !MO_ALL.length) {
+    document.getElementById("mo-ai-out").innerHTML = '<p style="color:var(--muted);font-size:12px">กรุณาโหลด MO data ก่อน</p>';
+    return;
+  }
+  document.getElementById("mo-ai-out").innerHTML = '<p class="pulse" style="color:var(--green);font-size:12px">🔧 AI กำลังวิเคราะห์ JIG Maintenance data...</p>';
+  const mo = getMOFiltered();
+  if (!mo.length) { document.getElementById("mo-ai-out").innerHTML = '<p style="color:var(--muted)">ไม่มีข้อมูลในช่วงที่เลือก</p>'; return; }
+
+  const totalMO = mo.length;
+  const closedMO = mo.filter(d => d.isClosed);
+  const avgTTR = (mo.reduce((s,d)=>s+d.ttr,0)/mo.length).toFixed(1);
+  const probSums = {}; mo.forEach(d => { probSums[d.probType] = (probSums[d.probType]||0)+1; });
+  const topProbs = Object.entries(probSums).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const mcMap = {};
+  mo.forEach(d => {
+    if (!mcMap[d.mcNo]) mcMap[d.mcNo] = { mc:d.mcNo, mcType:d.mcType, line:d.line, events:[], totalTTR:0, probs:{} };
+    mcMap[d.mcNo].events.push(d.date); mcMap[d.mcNo].totalTTR += d.ttr;
+    mcMap[d.mcNo].probs[d.probType] = (mcMap[d.mcNo].probs[d.probType]||0)+1;
+  });
+  const topMcs = Object.values(mcMap).sort((a,b)=>b.events.length-a.events.length).slice(0,6);
+  const recurring = topMcs.filter(mc=>mc.events.length>=3).map(mc=>{
+    const topProb = Object.entries(mc.probs).sort((a,b)=>b[1]-a[1])[0];
+    const sorted = [...mc.events].sort((a,b)=>a-b);
+    const ivals = [];
+    for(let i=1;i<sorted.length;i++) ivals.push(Math.round((sorted[i]-sorted[i-1])/86400000));
+    const avgInt = Math.round(ivals.reduce((a,b)=>a+b,0)/ivals.length);
+    return `${mc.mc}(${mc.mcType}): ซ่อม${mc.events.length}ครั้ง, ปัญหาหลัก="${topProb[0]}"${topProb[1]}ครั้ง, interval เฉลี่ย${avgInt}วัน, TTRavg${(mc.totalTTR/mc.events.length).toFixed(1)}m`;
+  });
+  const highTTR = mo.filter(d=>d.ttr>60).sort((a,b)=>b.ttr-a.ttr).slice(0,5)
+    .map(d=>`${d.mcNo}(${d.mcType}): "${d.probType}" TTR=${d.ttr}m อาการ="${d.symptom}" แก้ไข="${d.solution}"`);
+  const techMap2 = {}; mo.forEach(d=>{
+    if(!techMap2[d.tech]) techMap2[d.tech]={count:0,totalTTR:0,closed:0};
+    techMap2[d.tech].count++; techMap2[d.tech].totalTTR+=d.ttr;
+    if(d.isClosed) techMap2[d.tech].closed++;
+  });
+  const topTechs = Object.entries(techMap2)
+    .map(([n,v])=>({n,count:v.count,avgTTR:(v.totalTTR/v.count).toFixed(1),closedPct:Math.round(v.closed/v.count*100)}))
+    .sort((a,b)=>b.count-a.count).slice(0,5);
+
+  const prompt = `คุณเป็น JIG Maintenance Expert และ Reliability Engineer ระดับสูง วิเคราะห์ข้อมูล Maintenance Order ของแผนก JIG MTN ต่อไปนี้อย่างละเอียด แล้วตอบเป็น JSON เท่านั้น (ไม่มี markdown):
+
+**JIG MTN MO Summary: ${totalMO} รายการ | Avg TTR: ${avgTTR}m | ปิดแล้ว: ${closedMO.length} (${Math.round(closedMO.length/totalMO*100)}%)**
+
+**Top Problem Types:**
+${topProbs.map(([k,v],i)=>`${i+1}. ${k}: ${v}ครั้ง (${(v/totalMO*100).toFixed(1)}%)`).join("\n")}
+
+**เครื่อง JIG ที่ซ่อมบ่อย (Recurring):**
+${recurring.slice(0,6).join("\n") || "ไม่มี"}
+
+**High TTR Cases (ซ่อมนาน >60m):**
+${highTTR.join("\n") || "ไม่มี"}
+
+**Technician Performance:**
+${topTechs.map(t=>`${t.n}: ${t.count}งาน, avgTTR ${t.avgTTR}m, ปิด MO ${t.closedPct}%`).join("; ")}
+
+วิเคราะห์เชิงลึกสำหรับ JIG MTN และตอบ JSON:
+{
+  "root_causes": [{"rank":1,"problem":"ชื่อปัญหา","frequency":"X ครั้ง","root_cause":"สาเหตุรากที่แท้จริง","evidence":"หลักฐาน"}],
+  "effective_solutions": [{"problem":"ชื่อปัญหา","solution":"วิธีแก้ไขที่ได้ผลดีที่สุด","effectiveness":"HIGH|MEDIUM","avg_ttr":"Xm","why":"เหตุผล"}],
+  "resolved_patterns": [{"mc_or_prob":"ชื่อ","status":"RESOLVED|RECURRING","resolution":"วิธีที่ทำให้หายขาด","recommendation":"คำแนะนำ"}],
+  "predictive_rules": [{"trigger":"สัญญาณเตือนที่ควรเฝ้าระวัง","action":"สิ่งที่ต้องทำทันที","urgency":"HIGH|MED"}],
+  "tech_insights": "วิเคราะห์ประสิทธิภาพช่าง JIG",
+  "summary": "สรุปภาพรวม JIG MTN 2-3 ประโยค",
+  "critical_actions": [{"priority":"1","action":"action ด่วนที่สุด","impact":"ผลที่คาดหวัง"}]
+}`;
+
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2500, messages:[{role:"user",content:prompt}] })
+    });
+    const data = await r.json();
+    const txt = data.content?.map(c=>c.text||"").join("").replace(/```json|```/g,"").trim();
+    let ai; try{ai=JSON.parse(txt);}catch{ai=null;}
+    ai ? renderMOAI(ai) : fallbackMOAI(topProbs,recurring,highTTR,avgTTR);
+  } catch(e) { fallbackMOAI(topProbs,recurring,highTTR,avgTTR); }
+}
+
+function renderMOAI(a) {
+  const eff={HIGH:"#22c55e",MEDIUM:"#f59e0b"};
+  const urg={HIGH:"#f43f5e",MED:"#f59e0b"};
+  const sta={RESOLVED:"#22c55e",RECURRING:"#f43f5e"};
+  const rcHtml=(a.root_causes||[]).map((rc,i)=>`
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:13px 14px;margin-bottom:9px;border-left:3px solid #f43f5e">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+        <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:#f43f5e;opacity:.5">${String(rc.rank||i+1).padStart(2,"0")}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--text)">${rc.problem}</span>
+        <span style="margin-left:auto;font-size:10px;color:#7a8faa;background:var(--bg);padding:2px 9px;border-radius:2px">${rc.frequency||""}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7"><b style="color:var(--amber)">Root Cause:</b> ${rc.root_cause}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px;padding:5px 9px;background:var(--bg);border-radius:6px;border-left:2px solid #334155">📎 ${rc.evidence}</div>
+    </div>`).join("");
+  const solHtml=(a.effective_solutions||[]).map(s=>`
+    <div style="display:flex;gap:10px;align-items:flex-start;background:${eff[s.effectiveness]||'#22c55e'}10;border:1px solid ${eff[s.effectiveness]||'#22c55e'}30;border-radius:8px;padding:10px 12px;margin-bottom:6px">
+      <span style="flex:0 0 50px;font-size:9px;font-weight:700;color:${eff[s.effectiveness]||'#22c55e'};padding:2px 6px;background:${eff[s.effectiveness]||'#22c55e'}20;border-radius:2px;text-align:center;margin-top:1px">${s.effectiveness}</span>
+      <div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">${s.problem}</div>
+      <div style="font-size:12px;color:var(--green)">✓ ${s.solution}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">→ ${s.why} ${s.avg_ttr?"(TTR avg: "+s.avg_ttr+")":""}</div></div>
+    </div>`).join("");
+  const patHtml=(a.resolved_patterns||[]).map(p=>`
+    <div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:0 0 70px;font-size:9px;font-weight:700;padding:2px 6px;background:${sta[p.status]||'#526080'}22;color:${sta[p.status]||'#526080'};border-radius:2px;text-align:center">${p.status}</span>
+      <div><div style="font-size:12px;font-weight:700;color:var(--text)">${p.mc_or_prob}</div>
+      <div style="font-size:11px;color:var(--muted)">${p.resolution||""}</div>
+      <div style="font-size:11px;color:#38bdf8;margin-top:3px">→ ${p.recommendation}</div></div>
+    </div>`).join("");
+  const predHtml=(a.predictive_rules||[]).map(p=>`
+    <div style="display:flex;gap:10px;align-items:flex-start;background:${urg[p.urgency]||'#526080'}10;border:1px solid ${urg[p.urgency]||'#526080'}30;border-radius:8px;padding:9px 12px;margin-bottom:5px">
+      <span style="font-size:9px;font-weight:700;color:${urg[p.urgency]||'#526080'};flex:0 0 36px">🔮 ${p.urgency}</span>
+      <div><div style="font-size:11px;font-weight:600;color:var(--text)">${p.trigger}</div>
+      <div style="font-size:11px;color:var(--green);margin-top:2px">→ ${p.action}</div></div>
+    </div>`).join("");
+  const actHtml=(a.critical_actions||[]).map(ac=>`
+    <div style="display:flex;gap:10px;align-items:flex-start;background:#f43f5e08;border:1px solid #f43f5e30;border-radius:8px;padding:9px 12px;margin-bottom:5px">
+      <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:#f43f5e;opacity:.5;flex:0 0 24px">${ac.priority}</span>
+      <div><div style="font-size:12px;font-weight:700;color:var(--text)">${ac.action}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">→ ${ac.impact}</div></div>
+    </div>`).join("");
+  document.getElementById("mo-ai-out").innerHTML = `
+    <div style="background:#22c55e12;border-left:3px solid #22c55e;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px">
+      <p style="color:var(--green);font-size:13px;font-weight:700;margin-bottom:4px">📋 สรุปภาพรวม JIG MTN</p>
+      <p style="color:var(--text2);font-size:12px;line-height:1.7">${a.summary||""}</p>
+    </div>
+    <div class="ai-grid" style="margin-bottom:16px">
+      <div><h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔴 Root Causes</h4>${rcHtml}</div>
+      <div>
+        <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">✅ Effective Solutions</h4>${solHtml}
+        <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">🔄 Resolved / Recurring Patterns</h4>${patHtml}
+        <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">👨‍🔧 Tech Insights</h4>
+        <p style="font-size:12px;color:var(--text2);line-height:1.7">${a.tech_insights||""}</p>
+      </div>
+    </div>
+    <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔮 Predictive Rules</h4>
+    ${predHtml}
+    <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">🚨 Critical Actions ด่วน</h4>
+    ${actHtml}`;
+}
+
+function fallbackMOAI(topProbs,recurring,highTTR,avgTTR) {
+  const mo = getMOFiltered();
+  const csMap = {};
+  mo.forEach(d => {
+    const k = (d.probType||"?")+"|"+(d.symptom||"").slice(0,30);
+    if(!csMap[k]) csMap[k]={prob:d.probType,symptom:d.symptom||"",solutions:{},count:0};
+    csMap[k].count++;
+    if(d.solution){const sk=d.solution.slice(0,50);if(!csMap[k].solutions[sk])csMap[k].solutions[sk]={count:0,ttrs:[]};csMap[k].solutions[sk].count++;csMap[k].solutions[sk].ttrs.push(d.ttr);}
+  });
+  const csList = Object.values(csMap).sort((a,b)=>b.count-a.count).slice(0,6).map(c=>{
+    const bestSol=Object.entries(c.solutions).sort((a,b)=>b[1].count-a[1].count)[0];
+    const sol=bestSol?bestSol[0]:"ไม่มีข้อมูลวิธีแก้ไข";
+    const solAvgTTR=bestSol?(bestSol[1].ttrs.reduce((a,b)=>a+b,0)/bestSol[1].ttrs.length).toFixed(0)+"m":"—";
+    return `<li class="${c.count>=5?"w":"y"}"><b>${c.prob}</b>${c.symptom?` — <span style="color:var(--amber)">อาการ: ${c.symptom}</span>`:""}
+      <div style="color:var(--green);font-size:11px;margin-top:2px">✓ วิธีแก้: ${sol} (avg ${solAvgTTR})</div></li>`;
+  }).join("");
+  document.getElementById("mo-ai-out").innerHTML = `
+    <div style="background:#f59e0b15;border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px">
+      <span style="font-size:20px">⚠️</span>
+      <div><p style="color:#fcd34d;font-size:13px;font-weight:700;margin-bottom:4px">AI API ต้องการ Web Server</p>
+      <p style="color:var(--muted);font-size:11px;line-height:1.6">อัปโหลดไฟล์ขึ้น <b style="color:var(--text)">GitHub Pages</b> หรือ <b style="color:var(--text)">Netlify</b> เพื่อใช้งาน AI Analysis</p></div>
+    </div>
+    <div class="ai-grid">
+      <div class="ai-sec">
+        <h4>🔴 Top JIG Problems + วิธีแก้ไข</h4>
+        <ul>${csList||topProbs.map(([k,v],i)=>`<li class="${i===0?"w":"y"}">${k}: ${v}ครั้ง</li>`).join("")}</ul>
+      </div>
+      <div class="ai-sec">
+        <h4>🔄 Recurring JIG Machines</h4>
+        <ul>${recurring.slice(0,5).map((r,i)=>`<li class="${i===0?"w":"y"}">${r}</li>`).join("")||"<li>ไม่มีข้อมูลเพียงพอ</li>"}</ul>
+        <h4 style="margin-top:10px">⏱️ High TTR Cases</h4>
+        <ul>${highTTR.map((r,i)=>`<li class="${i===0?"w":"y"}">${r}</li>`).join("")||"<li>ไม่มี</li>"}</ul>
+      </div>
+    </div>`;
+}
+</script>
+
+<!-- Theme + Sidebar Scripts -->
+<script>
+(function(){
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  function updateBtn(){
+    const dark = document.documentElement.getAttribute('data-theme')==='dark';
+    const ic = document.getElementById('theme-icon');
+    const lb = document.getElementById('theme-label');
+    if(ic) ic.textContent = dark ? '☀️' : '🌙';
+    if(lb) lb.textContent = dark ? 'Light Mode' : 'Dark Mode';
+  }
+  window.toggleTheme = function(){
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateBtn();
+  };
+  document.addEventListener('DOMContentLoaded', updateBtn);
+})();
+
+(function(){
+  var closeTimer=null;
+  var pinned=localStorage.getItem('sidebarPinned')==='1';
+  var sb=document.getElementById('sidebar');
+  var toggle=document.getElementById('sidebar-toggle');
+  var edge=document.getElementById('sidebar-edge');
+  var overlay=document.getElementById('sidebar-overlay');
+  function openSB(){clearTimeout(closeTimer);if(window.innerWidth>768){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-open');}}
+  function closeSB(now){if(pinned&&window.innerWidth>768)return;if(window.innerWidth<=768){document.body.classList.remove('sidebar-open');return;}if(now){document.body.classList.add('sidebar-collapsed');}else{closeTimer=setTimeout(()=>document.body.classList.add('sidebar-collapsed'),380);}}
+  if(edge)edge.addEventListener('mouseenter',openSB);
+  if(sb){sb.addEventListener('mouseenter',()=>clearTimeout(closeTimer));sb.addEventListener('mouseleave',()=>closeSB(false));}
+  if(overlay)overlay.addEventListener('click',()=>closeSB(true));
+  window.toggleSidebar=function(){if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');return;}pinned=!pinned;localStorage.setItem('sidebarPinned',pinned?'1':'0');if(toggle)toggle.title=pinned?'Unpin sidebar':'Pin sidebar';if(pinned)openSB();else closeSB(true);};
+  if(window.innerWidth>768){if(pinned){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-collapsed');}}
+})();
+</script>
+
+<!-- Intro Animation + Auto-load -->
+<script>
+(function(){
+  // Animate letters in
+  [0,1,2].forEach((i)=>{
+    setTimeout(()=>{
+      const el=document.getElementById('il'+i);
+      if(el)el.classList.add('up');
+    }, 120 + i*100);
+  });
+  [3,4,5].forEach((i)=>{
+    setTimeout(()=>{
+      const el=document.getElementById('il'+i);
+      if(el)el.classList.add('up');
+    }, 400 + (i-3)*100);
+  });
+  setTimeout(()=>{
+    const sub=document.getElementById('intro-sub');
+    if(sub)sub.classList.add('up');
+  }, 800);
+
+  function enterDashboard(){
+    const ld=document.getElementById('loading');
+    if(ld)ld.classList.add('hidden');
+  }
+
+  // Auto-close splash after 800ms then load data
+  setTimeout(()=>{
+    enterDashboard();
+    // Set default date range (last 90 days)
+    const now = new Date();
+    const from = new Date(now);
+    from.setDate(from.getDate() - 90);
+    const pad = n => String(n).padStart(2,'0');
+    const fmtISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const dfrom = document.getElementById('date-from');
+    const dto = document.getElementById('date-to');
+    if(dfrom && !dfrom.value) dfrom.value = fmtISO(from);
+    if(dto && !dto.value) dto.value = fmtISO(now);
+    loadMO();
+  }, 800);
+})();
+</script>
+
+<!-- Custom Cursor -->
+<script>
+(function(){
+  const dot=document.getElementById('cursor');
+  const ring=document.getElementById('cursor-ring');
+  if(!dot||!ring)return;
+  if(!window.matchMedia('(hover:hover)').matches)return;
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    dot.style.left=mx+'px';dot.style.top=my+'px';
+  });
+  (function animRing(){
+    rx+=(mx-rx)*.11;ry+=(my-ry)*.11;
+    ring.style.left=rx+'px';ring.style.top=ry+'px';
+    requestAnimationFrame(animRing);
+  })();
+  document.querySelectorAll('a,button,.card,.kpi,.nav-btn').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('cur-hover'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('cur-hover'));
+  });
+})();
+</script>
+</body>
+</html>
