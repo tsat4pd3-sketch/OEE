@@ -167,6 +167,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 [data-theme="dark"] .tg-btn.active{background:var(--bg2);box-shadow:none}
 /*  LOADING  */
 #loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .5s}
+#loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .ld-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ld-title{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--accent);letter-spacing:2px}
@@ -572,14 +573,14 @@ function boot(){PARTS=[...new Set(ALL.map(d=>d.part))].filter(Boolean).sort();in
   document.getElementById("date-from").addEventListener("change",applyFilter);
   document.getElementById("date-to").addEventListener("change",applyFilter);
   document.getElementById("shift-sel").addEventListener("change",applyFilter);
-  applyFilter();hideLd();startAutoRefresh();}
+  applyFilter();window.enterDashboard();startAutoRefresh();}
 let arTimer=null;
 function startAutoRefresh(){if(arTimer)clearInterval(arTimer);updateNextLabel();arTimer=setInterval(()=>refreshLive(),3600000);}
 function updateNextLabel(){const el=document.getElementById("next-refresh");if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})+" น.";}
 function setMsg(t){const p=document.getElementById("ldmsg");if(p)p.textContent=t;}
 function setBadge(t,cls){const b=document.getElementById("src-badge");if(b){b.textContent=t;b.className="badge "+cls;}}
 function setUpdate(t){document.getElementById("last-update").textContent=t;}
-function hideLd(){const el=document.getElementById("loading");el.style.opacity="0";setTimeout(()=>el.style.display="none",500);}
+window.enterDashboard=function(){const el=document.getElementById("loading");if(el)el.classList.add("hidden");setTimeout(()=>{if(el)el.style.display="none";},500);};
 function initParts(){
   const sel=document.getElementById("part-select");
   if(!sel)return;
@@ -838,13 +839,13 @@ function rKPI(){
   const worstPart=Object.entries(pm).map(([l,v])=>({l,ppm:v.t>0?Math.round((v.d/v.t)*1e6):0})).sort((a,b)=>b.ppm-a.ppm)[0]||{l:"—",ppm:0};
   const bdd={};FD.forEach(d=>{const k=fmtIso(d.date);if(!bdd[k])bdd[k]=0;bdd[k]+=(d.dtMin||0);});
   const worstDay=Object.entries(bdd).sort((a,b)=>b[1]-a[1])[0]||["—",0];
-  document.getElementById("kdt").textContent=(totDT/60).toFixed(1)+" ชม.";
+  const el_kdt=document.getElementById("kdt");el_kdt.dataset.end=(totDT/60).toFixed(1);el_kdt.dataset.suffix=" ชม.";el_kdt.textContent="0 ชม.";
   document.getElementById("kdt-s").textContent=totDT.toLocaleString()+" นาที";
   document.getElementById("kdtmax").textContent=topDT[0];
   document.getElementById("kdtmax-s").textContent=topDT[1].toLocaleString()+" นาที";
-  document.getElementById("kdef").textContent=totDef.toLocaleString();
+  const el_kdef=document.getElementById("kdef");el_kdef.dataset.end=totDef;el_kdef.dataset.suffix="";el_kdef.textContent="0";
   document.getElementById("kdef-s").textContent="PPM: "+ppm.toLocaleString();
-  document.getElementById("kppm").textContent=worstPart.ppm.toLocaleString();
+  const el_kppm=document.getElementById("kppm");el_kppm.dataset.end=worstPart.ppm;el_kppm.dataset.suffix="";el_kppm.textContent="0";
   document.getElementById("kppm-s").textContent=worstPart.l;
   document.getElementById("kworst").textContent=worstDay[0].slice(5)||"—";
   document.getElementById("kworst-s").textContent=worstDay[1]+" m";
@@ -857,10 +858,11 @@ function rKPI(){
   // Median Output/Shift = median of good output per shift record
   const outPerShift=FD.map(d=>d.total-d.defect);
   const medOutShift=Math.round(median(outPerShift));
-  document.getElementById("kjobhr").textContent=medOutHr.toLocaleString();
+  const el_kjobhr=document.getElementById("kjobhr");el_kjobhr.dataset.end=medOutHr;el_kjobhr.dataset.suffix="";el_kjobhr.textContent="0";
   document.getElementById("kjobhr-s").textContent=`median จาก ${FD.length} กะ`;
-  document.getElementById("koutday").textContent=medOutShift.toLocaleString();
+  const el_koutday=document.getElementById("koutday");el_koutday.dataset.end=medOutShift;el_koutday.dataset.suffix="";el_koutday.textContent="0";
   document.getElementById("koutday-s").textContent=`median จาก ${FD.length} กะ`;
+  if(typeof window.animateKPIs==='function')window.animateKPIs();
 }
 
 const copts=(extra={})=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#ffffff",titleColor:"#0f172a",bodyColor:"#64748b",borderColor:"#e2e7f0",borderWidth:1}},scales:{x:{grid:{color:"rgba(226,231,240,1)"},ticks:{color:"#94a3b8",font:{size:9},maxRotation:45,maxTicksLimit:14}},y:{grid:{color:"rgba(226,231,240,1)"},ticks:{color:"#94a3b8",font:{size:9}},...(extra.y||{})}}});
@@ -2112,6 +2114,9 @@ window.addEventListener("load",()=>setTimeout(loadMO, 2000));
   window.toggleSidebar=function(){if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');return;}pinned=!pinned;localStorage.setItem('sidebarPinned',pinned?'1':'0');if(toggle)toggle.title=pinned?'Unpin sidebar':'Pin sidebar';if(pinned)openSB();else closeSB(true);};
   if(window.innerWidth>768){if(pinned){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-collapsed');}}
 })();
+
+/* KPI Count-up animation with toLocaleString support */
+window.animateKPIs=function(){document.querySelectorAll('.kpi-val[data-end]').forEach(el=>{const end=parseFloat(el.dataset.end);const suffix=el.dataset.suffix||'';const decimals=(el.dataset.end.includes('.'))?el.dataset.end.split('.')[1].length:0;if(isNaN(end))return;el.classList.add('counting');const dur=900;const start=performance.now();function step(now){const t=Math.min((now-start)/dur,1);const ease=1-Math.pow(1-t,3);const val=(end*ease).toFixed(decimals);const formatted=parseInt(val)>999?parseInt(val).toLocaleString('en-US'):val;el.textContent=formatted+suffix;if(t<1)requestAnimationFrame(step);else{const finalVal=end.toFixed(decimals);const finalFormatted=parseInt(finalVal)>999?parseInt(finalVal).toLocaleString('en-US'):finalVal;el.textContent=finalFormatted+suffix;el.classList.remove('counting');}}requestAnimationFrame(step);});};
 </script>
 </body>
 </html>

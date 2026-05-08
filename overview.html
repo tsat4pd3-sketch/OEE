@@ -1400,11 +1400,10 @@ async function init(){
   document.getElementById('f-from').addEventListener('change',render);
   document.getElementById('f-to').addEventListener('change',render);
   setBar(100);render();
-  setMsg('พร้อมแล้ว — กด Enter');
+  setMsg('พร้อมแล้ว');
   setTimeout(()=>{
-    const btn=document.getElementById('enter-btn');
-    if(btn)btn.style.display='block';
-  },500);
+    window.enterDashboard();
+  },800);
   if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadAll,3600000);updateNextLabel();
 }
 // ── Sidebar: Hover auto-open, click to pin ────────────────────────────
