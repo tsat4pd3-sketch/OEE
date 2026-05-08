@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html lang="th" data-theme="light">
+<html lang="th" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Production Summary Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f0f2f7;--bg2:#ffffff;--bg3:#f5f7fb;--card:#ffffff;
-  --border:#e2e7f0;--border2:#cdd5e3;
-  --accent:#2563eb;--accent2:#3b82f6;--accent-dim:#2563eb12;
-  --gold:#d97706;--gold2:#f59e0b;
-  --cyan:#0891b2;--green:#16a34a;--red:#dc2626;--purple:#7c3aed;--amber:#d97706;
-  --text:#0f172a;--text2:#334155;--muted:#64748b;--muted2:#94a3b8;
-  --sidebar:268px;--radius:12px;--radius-sm:8px;
-  --font-body:'IBM Plex Sans Thai',sans-serif;--font-display:'Space Grotesk',sans-serif;
+ --bg:#f2f2f2;--bg2:#ffffff;--bg3:#f7f7f7;--card:#ffffff;
+ --border:#e0e0e0;--border2:#cccccc;
+ --accent:#e31937;--accent-dim:rgba(227,25,55,0.08);
+ --cyan:#0066cc;--green:#22c55e;--red:#e31937;--purple:#a855f7;--amber:#f59e0b;
+ --text:#121212;--text2:#404040;--muted:#7a7a7a;--muted2:#a0a0a0;
+ --pd3:#1a6dcc;--pd3-bg:#f0f5ff;--pd3-border:#d0e2fc;
+ --pd4:#cc8800;--pd4-bg:#fdf6ee;--pd4-border:#f0ddb0;
+ --sidebar:252px;--radius:4px;--radius-sm:3px;
+ --font-body:'Sarabun',sans-serif;--font-display:'Inter',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh;overflow-x:hidden}
@@ -24,47 +25,47 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 /* SIDEBAR */
 #sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100;box-shadow:1px 0 8px #00000008}
 .logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
-.logo-tag{font-family:var(--font-display);font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-weight:600}
-.logo h1{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);line-height:1.1}
-.logo-sub{font-size:11px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px}
-.badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px}
-.bl{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
+.logo-tag{font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.logo h1{font-family:var(--font-display);font-size:25px;font-weight:700;color:var(--text);line-height:1.1}
+.logo-sub{font-size:12px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px}
+.badge{padding:3px 10px;border-radius:2px;font-size:11px;font-weight:700;letter-spacing:.5px}
+.bl{background:rgba(34,197,94,0.1);color:#15803d;border:1px solid #bbf7d0}
 .bx{background:#f1f5f9;color:var(--muted);border:1px solid var(--border)}
 .nav-links{padding:10px 12px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--border)}
-.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:15px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
 .nav-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border)}
-.nav-btn.active{background:var(--accent-dim);border-color:#2563eb30;color:var(--accent);font-weight:600}
+.nav-btn.active{background:var(--accent-dim);border-color:#e3193730;color:var(--accent);font-weight:600}
 .ss{padding:12px 16px 4px}
-.ss-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
-.ss input,.ss select{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;margin-bottom:7px;outline:none;transition:border-color .2s}
+.ss-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+.ss input,.ss select{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:15px;margin-bottom:7px;outline:none;transition:border-color .2s}
 .ss input:focus,.ss select:focus{border-color:var(--accent)}
 .src-status{display:flex;gap:6px;padding:8px 16px 0;flex-wrap:wrap}
-.src-pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
-.sp-pd3{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
+.src-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:2px}
+.sp-pd3{background:#e0f2fe;color:#4d9fff;border:1px solid #bae6fd}
 .sp-pd4{background:#fef9c3;color:#a16207;border:1px solid #fde68a}
-.btn-refresh{margin:10px 16px 4px;padding:9px;background:var(--accent-dim);border:1px solid #2563eb30;border-radius:var(--radius-sm);color:var(--accent);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;width:calc(100% - 32px)}
+.btn-refresh{margin:10px 16px 4px;padding:9px;background:var(--accent-dim);border:1px solid #e3193730;border-radius:var(--radius-sm);color:var(--accent);font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;width:calc(100% - 32px)}
 .btn-refresh:hover{background:var(--accent);color:#fff}
-.auto-info{font-size:10px;color:var(--muted2);text-align:center;padding:4px 16px 12px;line-height:1.6}
+.auto-info{font-size:11px;color:var(--muted2);text-align:center;padding:4px 16px 12px;line-height:1.6}
 
 /* MAIN */
 #main{flex:1;padding:26px 28px 48px;overflow-y:auto;position:relative;z-index:1}
 .topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
-.topbar h2{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px}
-.topbar p{font-size:12px;color:var(--muted);margin-top:4px}
+.topbar h2{font-family:var(--font-display);font-size:25px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.topbar p{font-size:13px;color:var(--muted);margin-top:4px}
 
 /* MODE TOGGLE */
 .mode-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.mode-lbl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
-.mode-pills{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px}
-.mode-pill{padding:5px 14px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .18s;letter-spacing:.2px}
+.mode-lbl{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.mode-pills{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:3px}
+.mode-pill{padding:5px 14px;border-radius:2px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .18s;letter-spacing:.2px}
 .mode-pill.active{background:var(--card);color:var(--accent);box-shadow:0 1px 4px #00000014}
-.mode-pill.m-max.active{background:#dcfce7;color:#15803d}
+.mode-pill.m-max.active{background:rgba(34,197,94,0.1);color:#15803d}
 [data-theme="dark"] .mode-pill.active{background:var(--bg3)}
 
 /* SECTION HEADER */
 .sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.sec-hdr h3{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text)}
-.sec-tag{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;letter-spacing:.3px;background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
+.sec-hdr h3{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text)}
+.sec-tag{font-size:11px;font-weight:600;padding:2px 9px;border-radius:2px;letter-spacing:.3px;background:rgba(34,197,94,0.1);color:#15803d;border:1px solid #bbf7d0}
 .sec-line{flex:1;height:1px;background:var(--border)}
 
 /* PRODUCT CARDS */
@@ -74,44 +75,44 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .prod-card-accent{position:absolute;top:0;left:0;right:0;height:3px;z-index:1}
 .pc-gor .prod-card-accent{background:linear-gradient(90deg,#f59e0b,#f97316)}
 .pc-lwr .prod-card-accent{background:linear-gradient(90deg,#38bdf8,#0ea5e9)}
-.pc-60  .prod-card-accent{background:linear-gradient(90deg,#a855f7,#c084fc)}
-.pc-61  .prod-card-accent{background:linear-gradient(90deg,#22c55e,#34d399)}
+.pc-60 .prod-card-accent{background:linear-gradient(90deg,#a855f7,#c084fc)}
+.pc-61 .prod-card-accent{background:linear-gradient(90deg,#22c55e,#34d399)}
 .pc-head{padding:14px 16px 11px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border)}
-.pc-name{font-family:var(--font-display);font-size:20px;font-weight:700;line-height:1}
-.pc-sub{font-size:11px;color:var(--muted);margin-top:4px}
-.src-badge{font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.3px}
+.pc-name{font-family:var(--font-display);font-size:22px;font-weight:700;line-height:1}
+.pc-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.src-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:2px;letter-spacing:.3px}
 .pc-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
 .pc-kpi{background:var(--card);padding:11px 13px}
-.pc-kpi-lbl{font-size:9px;color:var(--muted);letter-spacing:.4px;margin-bottom:4px;font-weight:600;text-transform:uppercase}
-.pc-kpi-val{font-family:var(--font-display);font-size:19px;font-weight:700;line-height:1}
-.pc-kpi-unit{font-size:10px;color:var(--muted);margin-top:3px}
+.pc-kpi-lbl{font-size:10px;color:var(--muted);letter-spacing:.4px;margin-bottom:4px;font-weight:600;text-transform:uppercase}
+.pc-kpi-val{font-family:var(--font-display);font-size:21px;font-weight:700;line-height:1}
+.pc-kpi-unit{font-size:11px;color:var(--muted);margin-top:3px}
 .good{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
 .oee-bar-wrap{padding:12px 16px;border-top:1px solid var(--border)}
 .oee-bar-lbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.oee-bar-lbl span{font-size:10px;color:var(--muted)}
+.oee-bar-lbl span{font-size:11px;color:var(--muted)}
 .oee-segments{display:flex;gap:2px;height:7px;border-radius:3px;overflow:hidden;background:var(--bg3)}
 .pc-trends{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-top:1px solid var(--border)}
 .pc-trend{background:var(--card);padding:10px 14px}
-.pc-trend-lbl{font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center}
+.pc-trend-lbl{font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center}
 .mom-row{display:flex;gap:4px;align-items:flex-end}
 .mom-cell{flex:1;text-align:center}
-.mom-lbl{font-size:9px;color:var(--muted);margin-bottom:3px}
-.mom-val{font-family:var(--font-display);font-size:14px;font-weight:700;line-height:1}
+.mom-lbl{font-size:10px;color:var(--muted);margin-bottom:3px}
+.mom-val{font-family:var(--font-display);font-size:16px;font-weight:700;line-height:1}
 .mom-bar{height:3px;border-radius:2px;margin-top:4px}
-.mom-unit{font-size:9px;color:var(--muted2);text-align:right;margin-top:5px}
+.mom-unit{font-size:10px;color:var(--muted2);text-align:right;margin-top:5px}
 .arr-up{color:var(--green)}.arr-dn{color:var(--red)}.arr-flat{color:var(--muted)}
 
 /* COMPARISON TABLE */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 3px #00000008}
 .card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.card-hdr h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text)}
+.card-hdr h3{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text)}
 .tbl-wrap{overflow-x:auto}
-.dt-tbl{width:100%;border-collapse:collapse;font-size:12px}
-.dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:700;padding:10px 12px;text-align:left;font-size:11px;position:sticky;top:0;border-bottom:2px solid var(--border2)}
+.dt-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:700;padding:10px 12px;text-align:left;font-size:12px;position:sticky;top:0;border-bottom:2px solid var(--border2)}
 .dt-tbl td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
 .dt-tbl tr:hover td{background:#f8faff}
 .dt-tbl th.num,.dt-tbl td.num{text-align:right}
-.tbl-prod{font-family:var(--font-display);font-size:13px;font-weight:700}
+.tbl-prod{font-family:var(--font-display);font-size:15px;font-weight:700}
 .mini-bar{height:4px;border-radius:2px;background:var(--bg3);overflow:hidden;margin-top:3px}
 .mini-bar-fill{height:100%;border-radius:2px}
 
@@ -124,30 +125,32 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 
 /* DARK THEME */
 [data-theme="dark"]{
-  --bg:#07090f;--bg2:#0d1117;--bg3:#13192a;--card:#0f1520;
-  --border:#1c2640;--border2:#243050;
-  --accent:#60a5fa;--accent2:#93c5fd;--accent-dim:#3b82f618;
-  --amber:#fbbf24;
-  --text:#dce4f0;--text2:#94a3b8;--muted:#526080;--muted2:#334155;
+ --bg:#050505;--bg2:#0a0a0a;--bg3:#111111;--card:#0d0d0d;
+ --border:#1e1e1e;--border2:#2a2a2a;
+ --accent:#e31937;--accent-dim:rgba(227,25,55,0.10);
+ --text:#ffffff;--text2:#a8a8a8;--muted:#555555;--muted2:#333333;
+ --pd3:#4d9fff;--pd3-bg:rgba(77,159,255,0.08);--pd3-border:rgba(77,159,255,0.22);
+ --pd4:#ffaa40;--pd4-bg:rgba(255,170,64,0.08);--pd4-border:rgba(255,170,64,0.22);
+ --green:#22c55e;--amber:#f59e0b;
 }
 [data-theme="dark"] .prod-card:hover{box-shadow:0 4px 20px #00000050}
 [data-theme="dark"] .dt-tbl tr:hover td{background:#ffffff04}
-[data-theme="dark"] .sp-pd3{background:#0c2a3a;color:#38bdf8;border-color:#0ea5e940}
-[data-theme="dark"] .sp-pd4{background:#2a1f00;color:#fbbf24;border-color:#f59e0b40}
-[data-theme="dark"] .src-badge.sp-pd3{background:#0c2a3a;color:#38bdf8;border-color:#0ea5e940}
-[data-theme="dark"] .src-badge.sp-pd4{background:#2a1f00;color:#fbbf24;border-color:#f59e0b40}
-[data-theme="dark"] .bl{background:#22c55e;color:#000;border-color:#22c55e}
+[data-theme="dark"] .sp-pd3{background:var(--pd3-bg);color:var(--pd3);border-color:var(--pd3-border)}
+[data-theme="dark"] .sp-pd4{background:var(--pd4-bg);color:var(--pd4);border-color:var(--pd4-border)}
+[data-theme="dark"] .src-badge.sp-pd3{background:var(--pd3-bg);color:var(--pd3);border-color:var(--pd3-border)}
+[data-theme="dark"] .src-badge.sp-pd4{background:var(--pd4-bg);color:var(--pd4);border-color:var(--pd4-border)}
+[data-theme="dark"] .bl{background:rgba(34,197,94,0.12);color:#22c55e;border-color:rgba(34,197,94,0.25)}
 
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
 /* TREND CHART SECTION */
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 3px #00000008}
 .chart-card-hdr{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
-.chart-card-hdr h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text)}
-.chart-card-hdr .sub{font-size:11px;color:var(--muted);margin-top:3px}
+.chart-card-hdr h3{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text)}
+.chart-card-hdr .sub{font-size:12px;color:var(--muted);margin-top:3px}
 .chart-wrap{position:relative;height:280px}
-.toggle-group{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px}
-.tg-btn{padding:4px 12px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .15s}
+.toggle-group{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:3px}
+.tg-btn{padding:4px 12px;border-radius:2px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .15s}
 .tg-btn.active{background:var(--card);color:var(--accent);box-shadow:0 1px 4px #00000012}
 [data-theme="dark"] .tg-btn.active{background:var(--bg2)}
 
@@ -155,12 +158,12 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .wt-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
 .wt-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;position:relative;overflow:hidden}
 .wt-kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
-.wt-normal::after{background:linear-gradient(90deg,#16a34a,#4ade80)}
-.wt-ot::after{background:linear-gradient(90deg,#d97706,#fbbf24)}
-.wt-holiday::after{background:linear-gradient(90deg,#dc2626,#f87171)}
-.wt-kpi-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
-.wt-kpi-val{font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--text);line-height:1}
-.wt-kpi-sub{font-size:10px;color:var(--muted);margin-top:4px}
+.wt-normal::after{background:linear-gradient(90deg,#22c55e,#4ade80)}
+.wt-ot::after{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.wt-holiday::after{background:linear-gradient(90deg,#e31937,#f87171)}
+.wt-kpi-lbl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.wt-kpi-val{font-family:var(--font-display);font-size:27px;font-weight:700;color:var(--text);line-height:1}
+.wt-kpi-sub{font-size:11px;color:var(--muted);margin-top:4px}
 .wt-bar{height:4px;border-radius:2px;background:var(--bg3);overflow:hidden;margin-top:8px}
 .wt-bar-fill{height:100%;border-radius:2px}
 
@@ -168,238 +171,243 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 /* AI Q&A */
 .qa-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px #00000008}
 .qa-header{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
-.qa-orb{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.qa-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text)}
-.qa-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.qa-orb{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.qa-title{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text)}
+.qa-sub{font-size:12px;color:var(--muted);margin-top:2px}
 .qa-chips{padding:10px 16px 0;display:flex;gap:6px;flex-wrap:wrap}
-.qa-chip{padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;background:var(--bg3);border:1px solid var(--border);color:var(--text2);transition:all .15s;font-family:var(--font-body);white-space:nowrap}
+.qa-chip{padding:5px 12px;border-radius:2px;font-size:12px;cursor:pointer;background:var(--bg3);border:1px solid var(--border);color:var(--text2);transition:all .15s;font-family:var(--font-body);white-space:nowrap}
 .qa-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
 .qa-messages{padding:14px 16px;display:flex;flex-direction:column;gap:10px;max-height:380px;overflow-y:auto}
 .qa-msg{display:flex;gap:9px;align-items:flex-start}
 .qa-msg.user{flex-direction:row-reverse}
-.qa-avatar{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px}
+.qa-avatar{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;margin-top:2px}
 .qa-avatar.user{background:var(--accent-dim);color:var(--accent)}
 .qa-avatar.ai{background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff}
-.qa-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.7;max-width:82%}
-.qa-bubble.user{background:var(--accent);color:#fff;border-radius:12px 12px 4px 12px}
-.qa-bubble.ai{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:12px 12px 12px 4px}
+.qa-bubble{padding:10px 14px;border-radius:2px;font-size:15px;line-height:1.7;max-width:82%}
+.qa-bubble.user{background:var(--accent);color:#fff;border-radius:2px 12px 4px 12px}
+.qa-bubble.ai{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:2px 12px 12px 4px}
 .qa-bubble.ai.thinking{color:var(--muted);font-style:italic}
 .qa-bubble.ai.thinking::after{content:'';display:inline-block;width:8px;animation:dots 1.2s steps(3,end) infinite}
 @keyframes dots{0%,100%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
 .qa-input-row{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
-.qa-input{flex:1;padding:9px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s}
-.qa-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #2563eb15}
-.qa-send{padding:9px 18px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#fff;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;flex-shrink:0}
+.qa-input{flex:1;padding:9px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:15px;outline:none;transition:border-color .2s}
+.qa-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #e3193715}
+.qa-send{padding:9px 18px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#fff;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;flex-shrink:0}
 .qa-send:hover{background:var(--accent2)}.qa-send:disabled{opacity:.5;cursor:not-allowed}
 [data-theme="dark"] .qa-bubble.ai{background:var(--bg2)}
 
 
+#sidebar-edge{position:fixed;left:0;top:0;bottom:0;width:24px;z-index:99;pointer-events:none;}
+body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 /* SIDEBAR TOGGLE */
 #sidebar-toggle{
-  position:fixed;top:50vh;left:calc(var(--sidebar) - 18px);z-index:200;
-  transform:translateY(-50%);
-  width:36px;height:36px;border-radius:10px;
-  background:var(--bg2);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:18px;
-  box-shadow:0 2px 8px #00000015;
-  transition:all .2s;
+ position:fixed;top:50vh;left:calc(var(--sidebar) - 18px);z-index:200;
+ transform:translateY(-50%);
+ width:36px;height:36px;border-radius:10px;
+ background:var(--bg2);border:1px solid var(--border);
+ display:flex;align-items:center;justify-content:center;
+ cursor:pointer;font-size:20px;
+ box-shadow:0 2px 8px #00000015;
+ transition:all .2s;
 }
 body.sidebar-collapsed #sidebar-toggle{left:12px}
 #sidebar-toggle:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 #sidebar-overlay{display:none;position:fixed;inset:0;background:#00000050;z-index:150;backdrop-filter:blur(1px)}
 /* collapsed state */
 body.sidebar-collapsed #sidebar{
-  transform:translateX(calc(-1 * var(--sidebar)));
-  position:fixed;
+ transform:translateX(calc(-1 * var(--sidebar)));
+ position:fixed;
 }
 body.sidebar-collapsed #main{margin-left:0}
 body.sidebar-collapsed #sidebar-overlay{display:none}
 /* mobile: sidebar is overlay by default */
 @media(max-width:768px){
-  #sidebar{
-    position:fixed;
-    top:0;left:0;height:100vh;
-    transform:translateX(calc(-1 * var(--sidebar)));
-    transition:transform .28s cubic-bezier(.4,0,.2,1);
-    z-index:160;
-  }
-  body.sidebar-open #sidebar{transform:translateX(0)}
-  body.sidebar-open #sidebar-overlay{display:block}
-  #main{margin-left:0 !important;padding-top:60px !important}
-  #sidebar-toggle{display:flex}
+ #sidebar{
+ position:fixed;
+ top:0;left:0;height:100vh;
+ transform:translateX(calc(-1 * var(--sidebar)));
+ transition:transform .28s cubic-bezier(.4,0,.2,1);
+ z-index:160;
+ }
+ body.sidebar-open #sidebar{transform:translateX(0)}
+ body.sidebar-open #sidebar-overlay{display:block}
+ #main{margin-left:0 !important;padding-top:60px !important}
+ #sidebar-toggle{display:flex}
 }
 @media(min-width:769px){
-  #sidebar{
-    transition:transform .28s cubic-bezier(.4,0,.2,1);
-  }
-  #sidebar-toggle{display:flex}
-  body.sidebar-collapsed #sidebar{transform:translateX(calc(-1 * var(--sidebar)));position:fixed}
-  body.sidebar-collapsed #main{margin-left:0}
-  /* default: sidebar visible, no offset needed */
+ #sidebar{
+ transition:transform .28s cubic-bezier(.4,0,.2,1);
+ }
+ #sidebar-toggle{display:flex}
+ body.sidebar-collapsed #sidebar{transform:translateX(calc(-1 * var(--sidebar)));position:fixed}
+ body.sidebar-collapsed #main{margin-left:0}
+ /* default: sidebar visible, no offset needed */
 }
 @media(max-width:600px){
-  body{padding:0}
-  #main{padding:12px 10px 60px}
-  .card{padding:14px 12px}
-  .sec-hdr{font-size:11px}
-  .kpi-val{font-size:26px}
-  .kpi-sub{font-size:10px}
-  table{font-size:12px}
-  .tbl-wrap,.chart-wrap{overflow-x:auto}
-  .r2,.r3,.r4{grid-template-columns:1fr!important}
-  .ai-grid{grid-template-columns:1fr!important}
+ body{padding:0}
+ #main{padding:12px 10px 60px}
+ .card{padding:14px 12px}
+ .sec-hdr{font-size:12px}
+ .kpi-val{font-size:29px}
+ .kpi-sub{font-size:11px}
+ table{font-size:13px}
+ .tbl-wrap,.chart-wrap{overflow-x:auto}
+ .r2,.r3,.r4{grid-template-columns:1fr!important}
+ .ai-grid{grid-template-columns:1fr!important}
 }
+#noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px;}[data-theme="light"] #noise-overlay{opacity:.014}
 </style>
 </head>
 <body>
-<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu">☰</button>
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu"></button>
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
+<div id="noise-overlay"></div>
+
 <div id="loading">
-  <div class="ld-ring"></div>
-  <div style="font-family:var(--font-display);font-size:14px;color:var(--accent);letter-spacing:2px">SUMMARY DASHBOARD</div>
-  <p id="ld-msg" style="font-size:11px;color:var(--muted)">กำลังดึงข้อมูล...</p>
-  <div class="ld-bar-wrap"><div class="ld-bar-fill" id="ld-bar"></div></div>
-  <div style="display:flex;gap:8px;margin-top:4px">
-    <span class="src-pill sp-pd3" id="ld-pd3">PD3 ...</span>
-    <span class="src-pill sp-pd4" id="ld-pd4">PD4 ...</span>
-  </div>
+ <div class="ld-ring"></div>
+ <div style="font-family:var(--font-display);font-size:16px;color:var(--accent);letter-spacing:2px">SUMMARY DASHBOARD</div>
+ <p id="ld-msg" style="font-size:12px;color:var(--muted)">กำลังดึงข้อมูล...</p>
+ <div class="ld-bar-wrap"><div class="ld-bar-fill" id="ld-bar"></div></div>
+ <div style="display:flex;gap:8px;margin-top:4px">
+ <span class="src-pill sp-pd3" id="ld-pd3">PD3 ...</span>
+ <span class="src-pill sp-pd4" id="ld-pd4">PD4 ...</span>
+ </div>
 </div>
 
 <aside id="sidebar">
-  <div class="logo">
-    <div class="logo-tag">Production Summary</div>
-    <h1>ALL<br>PRODUCTS</h1>
-    <div class="logo-sub">
-      <span id="src-badge" class="badge bx">...</span>
-      <span id="last-update" style="font-size:9px;color:var(--muted)"></span>
-    </div>
-  </div>
+ <div class="logo">
+ <div class="logo-tag">Production Summary</div>
+ <h1>ALL<br>PRODUCTS</h1>
+ <div class="logo-sub">
+ <span id="src-badge" class="badge bx">...</span>
+ <span id="last-update" style="font-size:10px;color:var(--muted)"></span>
+ </div>
+ </div>
 
-  <div class="nav-links">
-    <a class="nav-btn" href="overview.html">🔭 Combined Overview</a>
-    <a class="nav-btn active">📋 Summary Dashboard</a>
-    <a class="nav-btn" href="oee_pd3.html">📊 PD3 Overview</a>
-    <a class="nav-btn" href="oee_deep_pd3.html">🔍 Deep Analysis PD3</a>
-    <a class="nav-btn" href="oee_pd4.html">🏭 PD4 Overview</a>
-    <a class="nav-btn" href="oee_deep_pd4.html">🔎 Deep Analysis PD4</a>
-    <a class="nav-btn" href="masterplan .html">📋 Masterplan</a>
-  </div>
+ <div class="nav-links">
+ <a class="nav-btn" href="overview.html"> Combined Overview</a>
+ <a class="nav-btn active"> Summary Dashboard</a>
+ <a class="nav-btn" href="oee_pd3.html"> PD3 Overview</a>
+ <a class="nav-btn" href="oee_deep_pd3.html"> Deep Analysis PD3</a>
+ <a class="nav-btn" href="oee_pd4.html"> PD4 Overview</a>
+ <a class="nav-btn" href="oee_deep_pd4.html"> Deep Analysis PD4</a>
+ <a class="nav-btn" href="masterplan .html"> Masterplan</a>
+ </div>
 
-  <div class="ss">
-    <div class="ss-label">📅 ช่วงวันที่</div>
-    <input type="date" id="f-from">
-    <input type="date" id="f-to">
-  </div>
+ <div class="ss">
+ <div class="ss-label"> ช่วงวันที่</div>
+ <input type="date" id="f-from">
+ <input type="date" id="f-to">
+ </div>
 
-  <div class="ss">
-    <div class="ss-label">กะ</div>
-    <select id="shift-sel" onchange="applyFilter()">
-      <option value="all">ทุกกะ</option>
-      <optgroup label="PD3">
-        <option value="Shift 01">Shift 01 (Day)</option>
-        <option value="Shift 02">Shift 02 (Night)</option>
-      </optgroup>
-      <optgroup label="PD4">
-        <option value="เช้า">เช้า</option>
-        <option value="กลางคืน">กลางคืน</option>
-      </optgroup>
-    </select>
-  </div>
+ <div class="ss">
+ <div class="ss-label">กะ</div>
+ <select id="shift-sel" onchange="applyFilter()">
+ <option value="all">ทุกกะ</option>
+ <optgroup label="PD3">
+ <option value="Shift 01">Shift 01 (Day)</option>
+ <option value="Shift 02">Shift 02 (Night)</option>
+ </optgroup>
+ <optgroup label="PD4">
+ <option value="เช้า">เช้า</option>
+ <option value="กลางคืน">กลางคืน</option>
+ </optgroup>
+ </select>
+ </div>
 
-  <div class="src-status">
-    <span class="src-pill sp-pd3" id="pill-pd3">PD3 ...</span>
-    <span class="src-pill sp-pd4" id="pill-pd4">PD4 ...</span>
-  </div>
+ <div class="src-status">
+ <span class="src-pill sp-pd3" id="pill-pd3">PD3 ...</span>
+ <span class="src-pill sp-pd4" id="pill-pd4">PD4 ...</span>
+ </div>
 
-  <button class="btn-refresh" onclick="reloadData()">🌐 ดึงข้อมูลใหม่</button>
-  <div class="auto-info">🔄 Auto-refresh ทุก 1 ชม.<br>ครั้งถัดไป: <span id="next-refresh">—</span></div>
+ <button class="btn-refresh" onclick="reloadData()"> ดึงข้อมูลใหม่</button>
+ <div class="auto-info"> Auto-refresh ทุก 1 ชม.<br>ครั้งถัดไป: <span id="next-refresh">—</span></div>
 
-  <div style="padding:0 16px 14px;margin-top:auto">
-    <button id="theme-toggle" onclick="toggleTheme()" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px">
-      <span id="theme-icon">🌙</span><span id="theme-label">Dark Mode</span>
-    </button>
-  </div>
+ <div style="padding:0 16px 14px;margin-top:auto">
+ <button id="theme-toggle" onclick="toggleTheme()" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px">
+ <span id="theme-icon"></span><span id="theme-label">Dark Mode</span>
+ </button>
+ </div>
 </aside>
 
 <main id="main">
-  <div class="topbar">
-    <div>
-      <h2>📋 Summary Dashboard</h2>
-      <p id="range-lbl">—</p>
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-      <div style="font-size:11px;color:var(--muted)" id="rec-count">—</div>
-      <div class="mode-bar">
-        <span class="mode-lbl">แสดงผลแบบ</span>
-        <div class="mode-pills">
-          <button class="mode-pill active" onclick="setMode('median',this)">Median</button>
-          <button class="mode-pill" onclick="setMode('avg',this)">Average</button>
-          <button class="mode-pill m-max" onclick="setMode('max',this)">Max</button>
-        </div>
-      </div>
-    </div>
-  </div>
+ <div class="topbar">
+ <div>
+ <h2> Summary Dashboard</h2>
+ <p id="range-lbl">—</p>
+ </div>
+ <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+ <div style="font-size:12px;color:var(--muted)" id="rec-count">—</div>
+ <div class="mode-bar">
+ <span class="mode-lbl">แสดงผลแบบ</span>
+ <div class="mode-pills">
+ <button class="mode-pill active" onclick="setMode('median',this)">Median</button>
+ <button class="mode-pill" onclick="setMode('avg',this)">Average</button>
+ <button class="mode-pill m-max" onclick="setMode('max',this)">Max</button>
+ </div>
+ </div>
+ </div>
+ </div>
 
-  <div class="sec-hdr">
-    <h3>PRODUCT OVERVIEW</h3>
-    <span class="sec-tag">4 PRODUCTS</span>
-    <div class="sec-line"></div>
-  </div>
-  <div class="products-grid" id="products-grid"></div>
+ <div class="sec-hdr">
+ <h3>PRODUCT OVERVIEW</h3>
+ <span class="sec-tag">4 PRODUCTS</span>
+ <div class="sec-line"></div>
+ </div>
+ <div class="products-grid" id="products-grid"></div>
 
 
-  <!-- WORK TYPE KPI STRIP -->
-  <div class="sec-hdr">
-    <h3>WORK TYPE SUMMARY</h3>
-    <span class="sec-tag">Normal / OT / Holiday</span>
-    <div class="sec-line"></div>
-  </div>
-  <div id="wt-strip-container"></div>
+ <!-- WORK TYPE KPI STRIP -->
+ <div class="sec-hdr">
+ <h3>WORK TYPE SUMMARY</h3>
+ <span class="sec-tag">Normal / OT / Holiday</span>
+ <div class="sec-line"></div>
+ </div>
+ <div id="wt-strip-container"></div>
 
-  <!-- TREND CHART -->
-  <div class="sec-hdr">
-    <h3>OUTPUT TREND</h3>
-    <span class="sec-tag">ทุก Product</span>
-    <div class="sec-line"></div>
-  </div>
-  <div class="chart-card">
-    <div class="chart-card-hdr">
-      <div>
-        <h3 id="trend-title">Output / Day รายวัน</h3>
-        <div class="sub">เปรียบเทียบทุก product ตามช่วงที่เลือก</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:7px;align-items:flex-end">
-        <div class="toggle-group">
-          <button class="tg-btn active" onclick="setTrendMetric('day',this)">Out/Day</button>
-          <button class="tg-btn" onclick="setTrendMetric('hr',this)">Out/Hour</button>
-          <button class="tg-btn" onclick="setTrendMetric('oee',this)">%OEE</button>
-        </div>
-        <div class="toggle-group">
-          <button class="tg-btn active" onclick="setTrendPeriod('day',this)">วัน</button>
-          <button class="tg-btn" onclick="setTrendPeriod('week',this)">สัปดาห์</button>
-          <button class="tg-btn" onclick="setTrendPeriod('month',this)">เดือน</button>
-          <button class="tg-btn" onclick="setTrendPeriod('year',this)">ปี</button>
-        </div>
-      </div>
-    </div>
-    <div class="chart-wrap"><canvas id="c-trend"></canvas></div>
-  </div>
+ <!-- TREND CHART -->
+ <div class="sec-hdr">
+ <h3>OUTPUT TREND</h3>
+ <span class="sec-tag">ทุก Product</span>
+ <div class="sec-line"></div>
+ </div>
+ <div class="chart-card">
+ <div class="chart-card-hdr">
+ <div>
+ <h3 id="trend-title">Output / Day รายวัน</h3>
+ <div class="sub">เปรียบเทียบทุก product ตามช่วงที่เลือก</div>
+ </div>
+ <div style="display:flex;flex-direction:column;gap:7px;align-items:flex-end">
+ <div class="toggle-group">
+ <button class="tg-btn active" onclick="setTrendMetric('day',this)">Out/Day</button>
+ <button class="tg-btn" onclick="setTrendMetric('hr',this)">Out/Hour</button>
+ <button class="tg-btn" onclick="setTrendMetric('oee',this)">%OEE</button>
+ </div>
+ <div class="toggle-group">
+ <button class="tg-btn active" onclick="setTrendPeriod('day',this)">วัน</button>
+ <button class="tg-btn" onclick="setTrendPeriod('week',this)">สัปดาห์</button>
+ <button class="tg-btn" onclick="setTrendPeriod('month',this)">เดือน</button>
+ <button class="tg-btn" onclick="setTrendPeriod('year',this)">ปี</button>
+ </div>
+ </div>
+ </div>
+ <div class="chart-wrap"><canvas id="c-trend"></canvas></div>
+ </div>
 
-  <div class="sec-hdr">
-    <h3>COMPARISON TABLE</h3>
-    <span class="sec-tag">ALL LINES</span>
-    <div class="sec-line"></div>
-  </div>
-  <div class="card">
-    <div class="tbl-wrap">
-      <table class="dt-tbl">
-        <thead><tr id="tbl-thead"></tr></thead>
-        <tbody id="sum-tbody"></tbody>
-      </table>
-    </div>
-  </div>
+ <div class="sec-hdr">
+ <h3>COMPARISON TABLE</h3>
+ <span class="sec-tag">ALL LINES</span>
+ <div class="sec-line"></div>
+ </div>
+ <div class="card">
+ <div class="tbl-wrap">
+ <table class="dt-tbl">
+ <thead><tr id="tbl-thead"></tr></thead>
+ <tbody id="sum-tbody"></tbody>
+ </table>
+ </div>
+ </div>
 
 </main>
 
@@ -408,20 +416,20 @@ const PD3_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vToehKwHXa32rnaE0
 const PD4_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSs034o0M970g62tL1jkU4CU6HpAbVkER87uw3OzI97ueA6xXdBdwXd1Gcd0GrgaKOuIrTl-F75q3nz/pub?gid=122174819&single=true&output=csv";
 
 const PRODUCTS=[
-  {id:'gor', label:'GOR',    cls:'pc-gor',color:'#f59e0b',src:'PD4',keywords:['GOR']},
-  {id:'lwr', label:'LWRBAR', cls:'pc-lwr',color:'#38bdf8',src:'PD4',keywords:['LWRBAR','LWR BAR','LWR_BAR']},
-  {id:'p60', label:'60',     cls:'pc-60', color:'#a855f7',src:'PD3',keywords:['060','RH 060','RH060']},
-  {id:'p61', label:'61',     cls:'pc-61', color:'#22c55e',src:'PD3',keywords:['061','LH 061','LH061']},
+ {id:'gor', label:'GOR', cls:'pc-gor',color:'#f59e0b',src:'PD4',keywords:['GOR']},
+ {id:'lwr', label:'LWRBAR', cls:'pc-lwr',color:'#38bdf8',src:'PD4',keywords:['LWRBAR','LWR BAR','LWR_BAR']},
+ {id:'p60', label:'60', cls:'pc-60', color:'#a855f7',src:'PD3',keywords:['060','RH 060','RH060']},
+ {id:'p61', label:'61', cls:'pc-61', color:'#22c55e',src:'PD3',keywords:['061','LH 061','LH061']},
 ];
 
 // Exclude list — part names ที่มี keyword แต่ไม่ต้องการ
 const EXCLUDES=['LASER','BENDING','BEND'];
 
 function matchProduct(part,kws){
-  const p=part.toUpperCase().trim();
-  // ถ้ามีคำใน EXCLUDES ให้ skip เลย
-  if(EXCLUDES.some(ex=>p.includes(ex)))return false;
-  return kws.some(k=>p.includes(k.toUpperCase()));
+ const p=part.toUpperCase().trim();
+ // ถ้ามีคำใน EXCLUDES ให้ skip เลย
+ if(EXCLUDES.some(ex=>p.includes(ex)))return false;
+ return kws.some(k=>p.includes(k.toUpperCase()));
 }
 
 let PD3_ALL=[],PD4_ALL=[],arTimer=null;
@@ -440,34 +448,34 @@ const DT_KEYS_PD3={'เครื่องจักรหลัก':'เครื
 function parsePD3Date(s){if(!s)return null;s=s.trim().replace(/"/g,'');const p=s.split('/');if(p.length!==3)return null;const dd=+p[0],mm=+p[1]-1,yyyy=+p[2];if(isNaN(dd)||yyyy<2000)return null;return new Date(yyyy,mm,dd);}
 
 function parsePD3(text){
-  const lines=text.split('\n').filter(l=>l.trim());
-  if(lines.length<2)return[];
-  const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
-  const g=(row,name)=>{const i=idx[name];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim():'';};
-  const gi=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
-  // Pre-filters
-  const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-1);cutoff.setHours(0,0,0,0);
-  const pd3Keys=PRODUCTS.filter(p=>p.src==='PD3').flatMap(p=>p.keywords.map(k=>k.toUpperCase()));
-  const rows=[];
-  for(let r=1;r<lines.length;r++){
-    const row=csvLine(lines[r]);if(row.length<10)continue;
-    const line=g(row,'เลือกไลน์การผลิต');
-    if(!line||!pd3Keys.some(k=>line.toUpperCase().includes(k)))continue;
-    const date=parsePD3Date(gi(row,43));
-    if(!date||date<cutoff)continue;
-    const dtTypes=[];Object.entries(DT_KEYS_PD3).forEach(([label,col])=>{const v=n(g(row,col));if(v>0)dtTypes.push({type:label,val:v});});
-    // คำนวณ loadingHr จากเวลาจริง เริ่มการผลิต/สิ้นสุดการผลิต
-    const loadingHrActual=calcShiftHours(g(row,'เริ่มการผลิต'),g(row,'สิ้นสุดการผลิต'));
-    const loadingHrCol=n(g(row,'Loading Time fx'));
-    const loadingHr=loadingHrActual>0?loadingHrActual:(loadingHrCol>0?loadingHrCol:0);
-    rows.push({src:'PD3',date,dateStr:fmtDate(date),part:line,shift:g(row,'กะทำงาน')||'_',
-      total:n(g(row,'ยอดผลิตรวมทั้งวัน')),defect:n(g(row,'Defect')),
-      dtMin:dtTypes.reduce((s,t)=>s+t.val,0),
-      avail:n(g(row,'Availbility')),perf:n(g(row,'Performance')),qual:n(g(row,'Quality')),oee:n(g(row,'OEE')),
-      loadingHr});
-  }
-  const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+r.shift;seen.set(k,r);});
-  return[...seen.values()];
+ const lines=text.split('\n').filter(l=>l.trim());
+ if(lines.length<2)return[];
+ const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
+ const g=(row,name)=>{const i=idx[name];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim():'';};
+ const gi=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
+ // Pre-filters
+ const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-1);cutoff.setHours(0,0,0,0);
+ const pd3Keys=PRODUCTS.filter(p=>p.src==='PD3').flatMap(p=>p.keywords.map(k=>k.toUpperCase()));
+ const rows=[];
+ for(let r=1;r<lines.length;r++){
+ const row=csvLine(lines[r]);if(row.length<10)continue;
+ const line=g(row,'เลือกไลน์การผลิต');
+ if(!line||!pd3Keys.some(k=>line.toUpperCase().includes(k)))continue;
+ const date=parsePD3Date(gi(row,43));
+ if(!date||date<cutoff)continue;
+ const dtTypes=[];Object.entries(DT_KEYS_PD3).forEach(([label,col])=>{const v=n(g(row,col));if(v>0)dtTypes.push({type:label,val:v});});
+ // คำนวณ loadingHr จากเวลาจริง เริ่มการผลิต/สิ้นสุดการผลิต
+ const loadingHrActual=calcShiftHours(g(row,'เริ่มการผลิต'),g(row,'สิ้นสุดการผลิต'));
+ const loadingHrCol=n(g(row,'Loading Time fx'));
+ const loadingHr=loadingHrActual>0?loadingHrActual:(loadingHrCol>0?loadingHrCol:0);
+ rows.push({src:'PD3',date,dateStr:fmtDate(date),part:line,shift:g(row,'กะทำงาน')||'_',
+ total:n(g(row,'ยอดผลิตรวมทั้งวัน')),defect:n(g(row,'Defect')),
+ dtMin:dtTypes.reduce((s,t)=>s+t.val,0),
+ avail:n(g(row,'Availbility')),perf:n(g(row,'Performance')),qual:n(g(row,'Quality')),oee:n(g(row,'OEE')),
+ loadingHr});
+ }
+ const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+r.shift;seen.set(k,r);});
+ return[...seen.values()];
 }
 
 // ── PD4 Parser ───────────────────────────────────────────────────────
@@ -475,188 +483,188 @@ function parseThaiDate(s){if(!s)return null;s=s.trim().split(' ')[0];const p=s.s
 
 // แปลง HH:MM → decimal hours เช่น "08:00" → 8.0, "17:30" → 17.5
 function parseHHMM(s){
-  if(!s)return null;
-  s=s.trim().replace(/[^0-9:]/g,'');
-  const p=s.split(':');
-  if(p.length<2)return null;
-  const h=+p[0],m=+p[1];
-  if(isNaN(h)||isNaN(m))return null;
-  return h+m/60;
+ if(!s)return null;
+ s=s.trim().replace(/[^0-9:]/g,'');
+ const p=s.split(':');
+ if(p.length<2)return null;
+ const h=+p[0],m=+p[1];
+ if(isNaN(h)||isNaN(m))return null;
+ return h+m/60;
 }
 
 // คำนวณชั่วโมงทำงานจริงจากเวลาเริ่ม/จบ
 // รองรับกะข้ามคืน เช่น เริ่ม 22:30 จบ 08:00 วันถัดไป
 function calcShiftHours(startStr,endStr){
-  const s=parseHHMM(startStr);
-  const e=parseHHMM(endStr);
-  if(s===null||e===null)return 0;
-  let diff=e-s;
-  if(diff<=0)diff+=24; // ข้ามคืน
-  return diff;
+ const s=parseHHMM(startStr);
+ const e=parseHHMM(endStr);
+ if(s===null||e===null)return 0;
+ let diff=e-s;
+ if(diff<=0)diff+=24; // ข้ามคืน
+ return diff;
 }
 
 function parsePD4(text){
-  const lines=text.split('\n').filter(l=>l.trim());
-  if(lines.length<2)return[];
-  const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
-  const g=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
-  const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-1);cutoff.setHours(0,0,0,0);
-  const pd4Keys=PRODUCTS.filter(p=>p.src==='PD4').flatMap(p=>p.keywords.map(k=>k.toUpperCase()));
-  const rows=[];
-  for(let r=1;r<lines.length;r++){
-    const row=csvLine(lines[r]);if(row.length<10)continue;
-    const part=g(row,1);
-    if(!part||EXCLUDES.some(ex=>part.toUpperCase().includes(ex)))continue;
-    if(!pd4Keys.some(k=>part.toUpperCase().includes(k)))continue;
-    const date=parseThaiDate(g(row,59)||g(row,0));
-    if(!date||date<cutoff)continue;
-    const dtTypes=[];
-    for(let i=0;i<7;i++){const flag=g(row,21+i*3).toUpperCase();const type=g(row,22+i*3);const val=n(g(row,23+i*3));if((flag==='TRUE'||flag==='1')&&type&&val>0)dtTypes.push({type,val});}
-    const defTypes=[];
-    for(let i=0;i<3;i++){const flag=g(row,7+i*4).toUpperCase();const type=g(row,8+i*4);const qty=n(g(row,9+i*4));if((flag==='TRUE'||flag==='1')&&type&&qty>0)defTypes.push({type,qty});}
-    const _ltIdx=idx['ชม.+เศษ'];const loadingHrCol=_ltIdx!==undefined?n(g(row,_ltIdx)):0;
-    // คำนวณจากเวลาจริง เริ่มผลิต/ผลิตจบ (แม่นกว่า ชม.+เศษ)
-    const _siIdx=idx['เริ่มผลิต'],_eiIdx=idx['ผลิตจบ'];
-    const startStr=_siIdx!==undefined&&row[_siIdx]!==undefined?String(row[_siIdx]).trim():'';
-    const endStr=_eiIdx!==undefined&&row[_eiIdx]!==undefined?String(row[_eiIdx]).trim():'';
-    const loadingHrActual=calcShiftHours(startStr,endStr);
-    // ใช้เวลาจริงถ้าคำนวณได้ ไม่งั้น fallback ไป ชม.+เศษ หรือ 0
-    const loadingHr=loadingHrActual>0?loadingHrActual:(loadingHrCol>0?loadingHrCol:0);
-    rows.push({src:'PD4',date,dateStr:fmtDate(date),part,shift:g(row,5)||'_',
-      total:n(g(row,6)),defect:defTypes.reduce((s,d)=>s+d.qty,0),
-      dtMin:Math.round(n(g(row,74))*60),
-      avail:n(g(row,77)),perf:n(g(row,80)),qual:n(g(row,82)),oee:n(g(row,83)),loadingHr});
-  }
-  const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+r.shift;seen.set(k,r);});
-  return[...seen.values()];
+ const lines=text.split('\n').filter(l=>l.trim());
+ if(lines.length<2)return[];
+ const hdr=csvLine(lines[0]);const idx={};hdr.forEach((h,i)=>idx[h.trim()]=i);
+ const g=(row,i)=>row[i]!==undefined?String(row[i]).trim():'';
+ const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-1);cutoff.setHours(0,0,0,0);
+ const pd4Keys=PRODUCTS.filter(p=>p.src==='PD4').flatMap(p=>p.keywords.map(k=>k.toUpperCase()));
+ const rows=[];
+ for(let r=1;r<lines.length;r++){
+ const row=csvLine(lines[r]);if(row.length<10)continue;
+ const part=g(row,1);
+ if(!part||EXCLUDES.some(ex=>part.toUpperCase().includes(ex)))continue;
+ if(!pd4Keys.some(k=>part.toUpperCase().includes(k)))continue;
+ const date=parseThaiDate(g(row,59)||g(row,0));
+ if(!date||date<cutoff)continue;
+ const dtTypes=[];
+ for(let i=0;i<7;i++){const flag=g(row,21+i*3).toUpperCase();const type=g(row,22+i*3);const val=n(g(row,23+i*3));if((flag==='TRUE'||flag==='1')&&type&&val>0)dtTypes.push({type,val});}
+ const defTypes=[];
+ for(let i=0;i<3;i++){const flag=g(row,7+i*4).toUpperCase();const type=g(row,8+i*4);const qty=n(g(row,9+i*4));if((flag==='TRUE'||flag==='1')&&type&&qty>0)defTypes.push({type,qty});}
+ const _ltIdx=idx['ชม.+เศษ'];const loadingHrCol=_ltIdx!==undefined?n(g(row,_ltIdx)):0;
+ // คำนวณจากเวลาจริง เริ่มผลิต/ผลิตจบ (แม่นกว่า ชม.+เศษ)
+ const _siIdx=idx['เริ่มผลิต'],_eiIdx=idx['ผลิตจบ'];
+ const startStr=_siIdx!==undefined&&row[_siIdx]!==undefined?String(row[_siIdx]).trim():'';
+ const endStr=_eiIdx!==undefined&&row[_eiIdx]!==undefined?String(row[_eiIdx]).trim():'';
+ const loadingHrActual=calcShiftHours(startStr,endStr);
+ // ใช้เวลาจริงถ้าคำนวณได้ ไม่งั้น fallback ไป ชม.+เศษ หรือ 0
+ const loadingHr=loadingHrActual>0?loadingHrActual:(loadingHrCol>0?loadingHrCol:0);
+ rows.push({src:'PD4',date,dateStr:fmtDate(date),part,shift:g(row,5)||'_',
+ total:n(g(row,6)),defect:defTypes.reduce((s,d)=>s+d.qty,0),
+ dtMin:Math.round(n(g(row,74))*60),
+ avail:n(g(row,77)),perf:n(g(row,80)),qual:n(g(row,82)),oee:n(g(row,83)),loadingHr});
+ }
+ const seen=new Map();rows.forEach(r=>{const k=r.dateStr+'|'+r.part+'|'+r.shift;seen.set(k,r);});
+ return[...seen.values()];
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────
 let STAT_MODE='median'; // median | avg | max | min
 
 function setMode(mode,btn){
-  if(mode==='min')return;
-  STAT_MODE=mode;
-  document.querySelectorAll('.mode-pill').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  applyFilter();
+ if(mode==='min')return;
+ STAT_MODE=mode;
+ document.querySelectorAll('.mode-pill').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+ applyFilter();
 }
 
 function calcStats(rows){
-  if(!rows.length)return null;
-  const goodArr=rows.map(d=>d.total-d.defect);
-  const totalOut=rows.reduce((s,d)=>s+d.total,0);
-  const totalGood=goodArr.reduce((a,b)=>a+b,0);
-  const totalDef=rows.reduce((s,d)=>s+d.defect,0);
-  const totalDTMin=rows.reduce((s,d)=>s+(d.dtMin||0),0);
-  const ppm=totalOut>0?Math.round((totalDef/totalOut)*1e6):0;
+ if(!rows.length)return null;
+ const goodArr=rows.map(d=>d.total-d.defect);
+ const totalOut=rows.reduce((s,d)=>s+d.total,0);
+ const totalGood=goodArr.reduce((a,b)=>a+b,0);
+ const totalDef=rows.reduce((s,d)=>s+d.defect,0);
+ const totalDTMin=rows.reduce((s,d)=>s+(d.dtMin||0),0);
+ const ppm=totalOut>0?Math.round((totalDef/totalOut)*1e6):0;
 
-  // Output/shift — all modes
-  const medShift=Math.round(median(goodArr));
-  const avgShift=Math.round(totalGood/(rows.length||1));
-  const totShift=totalGood;
-  const maxShift=goodArr.length?Math.round(goodArr.reduce((a,b)=>a>b?a:b,0)):0;
-  const minShift=goodArr.filter(v=>v>0).length?Math.round(goodArr.filter(v=>v>0).reduce((a,b)=>a<b?a:b,Infinity)):0;
+ // Output/shift — all modes
+ const medShift=Math.round(median(goodArr));
+ const avgShift=Math.round(totalGood/(rows.length||1));
+ const totShift=totalGood;
+ const maxShift=goodArr.length?Math.round(goodArr.reduce((a,b)=>a>b?a:b,0)):0;
+ const minShift=goodArr.filter(v=>v>0).length?Math.round(goodArr.filter(v=>v>0).reduce((a,b)=>a<b?a:b,Infinity)):0;
 
-  const _lhSample=rows.slice(0,5).map(d=>({part:d.part,src:d.src,loadingHr:d.loadingHr,total:d.total,good:d.total-d.defect}));
-  console.log('[calcStats] loadingHr sample:',_lhSample);
-  const _lhZeros=rows.filter(d=>!d.loadingHr||d.loadingHr<=0).length;
-  console.log('[calcStats] loadingHr zeros:',_lhZeros,'of',rows.length);
-  // เก็บ debug info ไว้แสดงใน UI
-  const lhVals=rows.map(d=>d.loadingHr).filter(v=>v>0);
-  const lhAvg=lhVals.length?Math.round(lhVals.reduce((a,b)=>a+b,0)/lhVals.length*10)/10:0;
-  const lhMin=lhVals.length?Math.round(arrMin(lhVals)*10)/10:0;
-  const lhMax=lhVals.length?Math.round(arrMax(lhVals)*10)/10:0;
-  const lhMissing=rows.length-lhVals.length;
-  const lhOtCount=lhVals.filter(v=>v>=10).length;
-  // loadingHr คือเวลาทำงานที่หัก plan downtime แล้ว (Loading Time)
-  // ถ้าไม่มีค่า ให้ใช้ 8h เป็น fallback (ไม่ใช่ avail% เพราะ avail หัก unplan DT ออกด้วย)
-  // หมายเหตุ: ถ้ามี OT loadingHr จะสูงกว่า 8h ซึ่งถูกต้องตามที่บันทึกไว้
-  const outHrArr=rows.map(d=>{
-    const h=d.loadingHr>0?d.loadingHr:8;
-    const good=d.total-d.defect;
-    return good>0&&h>0?good/h:0;
-  }).filter(v=>v>0);
-  const medHr=Math.round(median(outHrArr));
-  const avgHr=Math.round(outHrArr.reduce((a,b)=>a+b,0)/(outHrArr.length||1));
-  const totHr=Math.round(outHrArr.reduce((a,b)=>a+b,0));
-  const maxHr=outHrArr.length?Math.round(outHrArr.reduce((a,b)=>a>b?a:b,0)):0;
-  const minHr=outHrArr.length?Math.round(outHrArr.reduce((a,b)=>a<b?a:b,Infinity)):0;
+ const _lhSample=rows.slice(0,5).map(d=>({part:d.part,src:d.src,loadingHr:d.loadingHr,total:d.total,good:d.total-d.defect}));
+ console.log('[calcStats] loadingHr sample:',_lhSample);
+ const _lhZeros=rows.filter(d=>!d.loadingHr||d.loadingHr<=0).length;
+ console.log('[calcStats] loadingHr zeros:',_lhZeros,'of',rows.length);
+ // เก็บ debug info ไว้แสดงใน UI
+ const lhVals=rows.map(d=>d.loadingHr).filter(v=>v>0);
+ const lhAvg=lhVals.length?Math.round(lhVals.reduce((a,b)=>a+b,0)/lhVals.length*10)/10:0;
+ const lhMin=lhVals.length?Math.round(arrMin(lhVals)*10)/10:0;
+ const lhMax=lhVals.length?Math.round(arrMax(lhVals)*10)/10:0;
+ const lhMissing=rows.length-lhVals.length;
+ const lhOtCount=lhVals.filter(v=>v>=10).length;
+ // loadingHr คือเวลาทำงานที่หัก plan downtime แล้ว (Loading Time)
+ // ถ้าไม่มีค่า ให้ใช้ 8h เป็น fallback (ไม่ใช่ avail% เพราะ avail หัก unplan DT ออกด้วย)
+ // หมายเหตุ: ถ้ามี OT loadingHr จะสูงกว่า 8h ซึ่งถูกต้องตามที่บันทึกไว้
+ const outHrArr=rows.map(d=>{
+ const h=d.loadingHr>0?d.loadingHr:8;
+ const good=d.total-d.defect;
+ return good>0&&h>0?good/h:0;
+ }).filter(v=>v>0);
+ const medHr=Math.round(median(outHrArr));
+ const avgHr=Math.round(outHrArr.reduce((a,b)=>a+b,0)/(outHrArr.length||1));
+ const totHr=Math.round(outHrArr.reduce((a,b)=>a+b,0));
+ const maxHr=outHrArr.length?Math.round(outHrArr.reduce((a,b)=>a>b?a:b,0)):0;
+ const minHr=outHrArr.length?Math.round(outHrArr.reduce((a,b)=>a<b?a:b,Infinity)):0;
 
-  // Output/day = output/shift × 2 (2 shifts/day) — all modes
-  const medDay=medShift*2;
-  const avgDay=avgShift*2;
-  const totDay=totShift;
-  const maxDay=maxShift*2;
-  const minDay=minShift*2;
+ // Output/day = output/shift × 2 (2 shifts/day) — all modes
+ const medDay=medShift*2;
+ const avgDay=avgShift*2;
+ const totDay=totShift;
+ const maxDay=maxShift*2;
+ const minDay=minShift*2;
 
-  // OEE components — avg เหมือนเดิม (% ไม่ sum)
-  const avg=arr=>arr.filter(v=>v>0).reduce((a,b)=>a+b,0)/(arr.filter(v=>v>0).length||1);
-  const avgOEE=avg(rows.map(d=>d.oee));
-  const avgAvail=avg(rows.map(d=>d.avail));
-  const avgPerf=avg(rows.map(d=>d.perf));
-  const avgQual=avg(rows.map(d=>d.qual));
+ // OEE components — avg เหมือนเดิม (% ไม่ sum)
+ const avg=arr=>arr.filter(v=>v>0).reduce((a,b)=>a+b,0)/(arr.filter(v=>v>0).length||1);
+ const avgOEE=avg(rows.map(d=>d.oee));
+ const avgAvail=avg(rows.map(d=>d.avail));
+ const avgPerf=avg(rows.map(d=>d.perf));
+ const avgQual=avg(rows.map(d=>d.qual));
 
-  // Month-over-Month: 3 เดือนล่าสุด avg output/day + avg OEE
-  const MN_TH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const byMon={};
-  rows.forEach(d=>{
-    const k=`${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;
-    if(!byMon[k])byMon[k]={shiftGoods:[],oeeArr:[]};
-    byMon[k].shiftGoods.push(d.total-d.defect);
-    if(d.oee>0)byMon[k].oeeArr.push(d.oee);
-  });
-  const last3=Object.keys(byMon).sort().slice(-3);
-  const _med=arr=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;};
-  const monthTrend=last3.map(k=>{
-    const mo=byMon[k];const[y,mn]=k.split('-');
-    const sg=mo.shiftGoods;const fsg=sg.filter(v=>v>0);
-    return{label:MN_TH[+mn-1],year:y.slice(2),
-      medShift:Math.round(_med(sg)),
-      avgShift:sg.length?Math.round(sg.reduce((a,b)=>a+b)/sg.length):0,
-      maxShift:fsg.length?Math.round(fsg.reduce((a,b)=>a>b?a:b,0)):0,
-      minShift:fsg.length?Math.round(fsg.reduce((a,b)=>a<b?a:b,Infinity)):0,
-      avgOEE:mo.oeeArr.length?+(mo.oeeArr.reduce((a,b)=>a+b)/mo.oeeArr.length).toFixed(1):0};
-  });
-  const trendDir=(arr,f)=>{if(arr.length<2)return'flat';const d=arr[arr.length-1][f]-arr[arr.length-2][f];const base=arr[arr.length-2][f]||1;return d/base*100>2?'up':d/base*100<-2?'dn':'flat';};
-  const _mfMap={median:'medShift',avg:'avgShift',max:'maxShift',min:'minShift'};
-  const outArrow=trendDir(monthTrend,_mfMap[STAT_MODE]||'medShift');
-  const oeeArrow=trendDir(monthTrend,'avgOEE');
-  const outTrend=[];const oeeTrend=[]; // unused, kept for compat
+ // Month-over-Month: 3 เดือนล่าสุด avg output/day + avg OEE
+ const MN_TH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+ const byMon={};
+ rows.forEach(d=>{
+ const k=`${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;
+ if(!byMon[k])byMon[k]={shiftGoods:[],oeeArr:[]};
+ byMon[k].shiftGoods.push(d.total-d.defect);
+ if(d.oee>0)byMon[k].oeeArr.push(d.oee);
+ });
+ const last3=Object.keys(byMon).sort().slice(-3);
+ const _med=arr=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+ const monthTrend=last3.map(k=>{
+ const mo=byMon[k];const[y,mn]=k.split('-');
+ const sg=mo.shiftGoods;const fsg=sg.filter(v=>v>0);
+ return{label:MN_TH[+mn-1],year:y.slice(2),
+ medShift:Math.round(_med(sg)),
+ avgShift:sg.length?Math.round(sg.reduce((a,b)=>a+b)/sg.length):0,
+ maxShift:fsg.length?Math.round(fsg.reduce((a,b)=>a>b?a:b,0)):0,
+ minShift:fsg.length?Math.round(fsg.reduce((a,b)=>a<b?a:b,Infinity)):0,
+ avgOEE:mo.oeeArr.length?+(mo.oeeArr.reduce((a,b)=>a+b)/mo.oeeArr.length).toFixed(1):0};
+ });
+ const trendDir=(arr,f)=>{if(arr.length<2)return'flat';const d=arr[arr.length-1][f]-arr[arr.length-2][f];const base=arr[arr.length-2][f]||1;return d/base*100>2?'up':d/base*100<-2?'dn':'flat';};
+ const _mfMap={median:'medShift',avg:'avgShift',max:'maxShift',min:'minShift'};
+ const outArrow=trendDir(monthTrend,_mfMap[STAT_MODE]||'medShift');
+ const oeeArrow=trendDir(monthTrend,'avgOEE');
+ const outTrend=[];const oeeTrend=[]; // unused, kept for compat
 
-  const wt=calcWorkTypes(rows);
-  return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,totalDTMin,
-    outShift:{median:medShift,avg:avgShift,total:totShift,max:maxShift,min:minShift},
-    outHr:{median:medHr,avg:avgHr,total:totHr,max:maxHr,min:minHr},
-    outDay:{median:medDay,avg:avgDay,total:totDay,max:maxDay,min:minDay},
-    avgOEE,avgAvail,avgPerf,avgQual,wt,
-    lhDebug:{avg:lhAvg,min:lhMin,max:lhMax,missing:lhMissing,total:rows.length,otCount:lhOtCount},
-    monthTrend,outArrow,oeeArrow};
+ const wt=calcWorkTypes(rows);
+ return{shifts:rows.length,totalOut,totalGood,totalDef,ppm,totalDTMin,
+ outShift:{median:medShift,avg:avgShift,total:totShift,max:maxShift,min:minShift},
+ outHr:{median:medHr,avg:avgHr,total:totHr,max:maxHr,min:minHr},
+ outDay:{median:medDay,avg:avgDay,total:totDay,max:maxDay,min:minDay},
+ avgOEE,avgAvail,avgPerf,avgQual,wt,
+ lhDebug:{avg:lhAvg,min:lhMin,max:lhMax,missing:lhMissing,total:rows.length,otCount:lhOtCount},
+ monthTrend,outArrow,oeeArrow};
 }
 
 // ── Month-over-Month widget (Option C) ───────────────────────────────
 function renderMoM(el,data,field,label,arrow,color,unit){
-  if(!el||!data||!data.length)return;
-  const arrowEl={up:`<span class="arr-up">↑</span>`,dn:`<span class="arr-dn">↓</span>`,flat:`<span class="arr-flat">—</span>`}[arrow]||'';
-  const vals=data.map(m=>m[field]);
-  const maxVal=vals.reduce((a,b)=>a>b?a:b,0)||1;
-  el.innerHTML=`
-    <div class="pc-trend-lbl"><span>${label}</span>${arrowEl}</div>
-    <div class="mom-row">
-      ${data.map((m,i)=>{
-        const v=m[field];
-        const isLast=i===data.length-1;
-        const barW=Math.round(v/maxVal*100);
-        const displayCol=isLast?color:'var(--muted2)';
-        const vFmt=unit==='%'?v.toFixed(1)+'%':v.toLocaleString();
-        return`<div class="mom-cell">
-          <div class="mom-lbl">${m.label}<span style="font-size:8px">'${m.year}</span></div>
-          <div class="mom-val" style="color:${displayCol};font-size:${isLast?'15px':'13px'}">${vFmt}</div>
-          <div class="mom-bar" style="width:${barW}%;background:${isLast?color:color+'55'};margin:4px auto 0"></div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div class="mom-unit">${unit}</div>`;
+ if(!el||!data||!data.length)return;
+ const arrowEl={up:`<span class="arr-up">↑</span>`,dn:`<span class="arr-dn">↓</span>`,flat:`<span class="arr-flat">—</span>`}[arrow]||'';
+ const vals=data.map(m=>m[field]);
+ const maxVal=vals.reduce((a,b)=>a>b?a:b,0)||1;
+ el.innerHTML=`
+ <div class="pc-trend-lbl"><span>${label}</span>${arrowEl}</div>
+ <div class="mom-row">
+ ${data.map((m,i)=>{
+ const v=m[field];
+ const isLast=i===data.length-1;
+ const barW=Math.round(v/maxVal*100);
+ const displayCol=isLast?color:'var(--muted2)';
+ const vFmt=unit==='%'?v.toFixed(1)+'%':v.toLocaleString();
+ return`<div class="mom-cell">
+ <div class="mom-lbl">${m.label}<span style="font-size:8px">'${m.year}</span></div>
+ <div class="mom-val" style="color:${displayCol};font-size:${isLast?'15px':'13px'}">${vFmt}</div>
+ <div class="mom-bar" style="width:${barW}%;background:${isLast?color:color+'55'};margin:4px auto 0"></div>
+ </div>`;
+ }).join('')}
+ </div>
+ <div class="mom-unit">${unit}</div>`;
 }
 
 // ── Render ────────────────────────────────────────────────────────────
@@ -665,292 +673,292 @@ function oeeClass(v){return v>=85?'good':v>=70?'warn':'bad';}
 function fmt1(v){return(+v||0).toFixed(1);}
 
 function renderCard(prod,stats){
-  const el=document.getElementById('card-'+prod.id);if(!el)return;
-  if(!stats){
-    el.innerHTML=`<div class="prod-card-accent"></div><div style="padding:24px;color:var(--muted);font-size:12px">ไม่พบข้อมูล ${prod.label}</div>`;
-    return;
-  }
-  const o=stats.avgOEE,a=stats.avgAvail,p=stats.avgPerf,q=stats.avgQual;
-  const srcCls=prod.src==='PD3'?'sp-pd3':'sp-pd4';
-  const m=STAT_MODE;
-  const vShift=stats.outShift[m];
-  const vHr=stats.outHr[m];
-  const vDay=stats.outDay[m];
-  const modeLabel={median:'MED',avg:'AVG',max:'MAX',min:'MIN'}[m]||'MED';
-  const unitShift='ชิ้น/กะ';
-  const unitHr='ชิ้น/ชม.';
-  const unitDay='ชิ้น/วัน';
-  el.innerHTML=`
-    <div class="prod-card-accent"></div>
-    <div class="pc-head">
-      <div><div class="pc-name" style="color:${prod.color}">${prod.label}</div><div class="pc-sub">${stats.shifts} กะ · <span style="color:var(--accent);font-weight:600">${modeLabel}</span></div></div>
-      <span class="src-badge ${srcCls}">${prod.src}</span>
-    </div>
-    <div class="pc-kpis">
-      <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/SHIFT</div><div class="pc-kpi-val" style="color:${prod.color}">${vShift.toLocaleString()}</div><div class="pc-kpi-unit">${unitShift}</div></div>
-      <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/HOUR</div><div class="pc-kpi-val" style="color:var(--cyan)">${vHr.toLocaleString()}</div><div class="pc-kpi-unit">${unitHr}</div></div>
-      <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/DAY</div><div class="pc-kpi-val" style="color:var(--purple)">${vDay.toLocaleString()}</div><div class="pc-kpi-unit">${unitDay}</div></div>
-      <div class="pc-kpi"><div class="pc-kpi-lbl">AVAILABILITY</div><div class="pc-kpi-val ${oeeClass(a)}">${fmt1(a)}%</div><div class="pc-kpi-unit">avg</div></div>
-      <div class="pc-kpi"><div class="pc-kpi-lbl">PERFORMANCE</div><div class="pc-kpi-val ${oeeClass(p)}">${fmt1(p)}%</div><div class="pc-kpi-unit">avg</div></div>
-      <div class="pc-kpi"><div class="pc-kpi-lbl">OEE</div><div class="pc-kpi-val ${oeeClass(o)}">${fmt1(o)}%</div><div class="pc-kpi-unit">avg</div></div>
-    </div>
-    <div class="oee-bar-wrap">
-      <div class="oee-bar-lbl">
-        <span>OEE BREAKDOWN</span>
-        <span style="color:${oeeColor(o)};font-weight:700">${fmt1(o)}%</span>
-      </div>
-      <div class="oee-segments">
-        <div style="width:${a}%;height:7px;background:#0891b255;border-radius:2px" title="A ${fmt1(a)}%"></div>
-        <div style="width:${p*(a/100)}%;height:7px;background:#d9770655;border-radius:2px" title="P ${fmt1(p)}%"></div>
-        <div style="width:${q*(p/100)*(a/100)}%;height:7px;background:#16a34a77;border-radius:2px" title="Q ${fmt1(q)}%"></div>
-      </div>
-      <div style="display:flex;gap:12px;margin-top:5px">
-        <span style="font-size:9px;color:var(--cyan)">■ A ${fmt1(a)}%</span>
-        <span style="font-size:9px;color:var(--amber)">■ P ${fmt1(p)}%</span>
-        <span style="font-size:9px;color:var(--green)">■ Q ${fmt1(q)}%</span>
-        <span style="font-size:9px;color:var(--muted);margin-left:auto">DT ${(stats.totalDTMin/60).toFixed(1)}h · PPM ${stats.ppm.toLocaleString()}</span>
-      </div>
-    </div>
-    <div class="pc-trends">
-      <div class="pc-trend" id="mom-out-${prod.id}"></div>
-      <div class="pc-trend" id="mom-oee-${prod.id}"></div>
-    </div>
-    <div style="padding:8px 16px;background:var(--bg3);border-top:1px solid var(--border);font-size:10px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap">
-      <span>🕐 Loading Time: avg <b style="color:var(--text2)">${stats.lhDebug.avg}h</b> (${stats.lhDebug.min}–${stats.lhDebug.max}h)</span>
-      <span style="color:${stats.lhDebug.otCount>0?'var(--amber)':'var(--muted)'}">⏱ OT: ${stats.lhDebug.otCount} กะ (≥10h)</span>
-      ${stats.lhDebug.missing>0?`<span style="color:var(--red)">⚠️ fallback 8h: ${stats.lhDebug.missing}/${stats.lhDebug.total} กะ</span>`:`<span style="color:var(--green)">✓ มีค่าครบ ${stats.lhDebug.total} กะ</span>`}
-    </div>`;
-  requestAnimationFrame(()=>{
-    const oeeCol=oeeColor(o).replace('var(--green)','#16a34a').replace('var(--amber)','#d97706').replace('var(--red)','#dc2626');
-    const _mfM={median:'medShift',avg:'avgShift',max:'maxShift',min:'minShift'};
-    const _mlM={median:'MED OUT/SHIFT',avg:'AVG OUT/SHIFT',max:'MAX OUT/SHIFT',min:'MIN OUT/SHIFT'};
-    const momF=_mfM[STAT_MODE]||'medShift';
-    const momL=_mlM[STAT_MODE]||'MED OUT/SHIFT';
-    renderMoM(document.getElementById('mom-out-'+prod.id),stats.monthTrend,momF,momL,stats.outArrow,prod.color,'ชิ้น/กะ');
-    renderMoM(document.getElementById('mom-oee-'+prod.id),stats.monthTrend,'avgOEE','OEE %',stats.oeeArrow,oeeCol,'%');
-  });
+ const el=document.getElementById('card-'+prod.id);if(!el)return;
+ if(!stats){
+ el.innerHTML=`<div class="prod-card-accent"></div><div style="padding:24px;color:var(--muted);font-size:12px">ไม่พบข้อมูล ${prod.label}</div>`;
+ return;
+ }
+ const o=stats.avgOEE,a=stats.avgAvail,p=stats.avgPerf,q=stats.avgQual;
+ const srcCls=prod.src==='PD3'?'sp-pd3':'sp-pd4';
+ const m=STAT_MODE;
+ const vShift=stats.outShift[m];
+ const vHr=stats.outHr[m];
+ const vDay=stats.outDay[m];
+ const modeLabel={median:'MED',avg:'AVG',max:'MAX',min:'MIN'}[m]||'MED';
+ const unitShift='ชิ้น/กะ';
+ const unitHr='ชิ้น/ชม.';
+ const unitDay='ชิ้น/วัน';
+ el.innerHTML=`
+ <div class="prod-card-accent"></div>
+ <div class="pc-head">
+ <div><div class="pc-name" style="color:${prod.color}">${prod.label}</div><div class="pc-sub">${stats.shifts} กะ · <span style="color:var(--accent);font-weight:600">${modeLabel}</span></div></div>
+ <span class="src-badge ${srcCls}">${prod.src}</span>
+ </div>
+ <div class="pc-kpis">
+ <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/SHIFT</div><div class="pc-kpi-val" style="color:${prod.color}">${vShift.toLocaleString()}</div><div class="pc-kpi-unit">${unitShift}</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/HOUR</div><div class="pc-kpi-val" style="color:var(--cyan)">${vHr.toLocaleString()}</div><div class="pc-kpi-unit">${unitHr}</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/DAY</div><div class="pc-kpi-val" style="color:var(--purple)">${vDay.toLocaleString()}</div><div class="pc-kpi-unit">${unitDay}</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">AVAILABILITY</div><div class="pc-kpi-val ${oeeClass(a)}">${fmt1(a)}%</div><div class="pc-kpi-unit">avg</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">PERFORMANCE</div><div class="pc-kpi-val ${oeeClass(p)}">${fmt1(p)}%</div><div class="pc-kpi-unit">avg</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">OEE</div><div class="pc-kpi-val ${oeeClass(o)}">${fmt1(o)}%</div><div class="pc-kpi-unit">avg</div></div>
+ </div>
+ <div class="oee-bar-wrap">
+ <div class="oee-bar-lbl">
+ <span>OEE BREAKDOWN</span>
+ <span style="color:${oeeColor(o)};font-weight:700">${fmt1(o)}%</span>
+ </div>
+ <div class="oee-segments">
+ <div style="width:${a}%;height:7px;background:#4d9fff55;border-radius:2px" title="A ${fmt1(a)}%"></div>
+ <div style="width:${p*(a/100)}%;height:7px;background:#f59e0b55;border-radius:2px" title="P ${fmt1(p)}%"></div>
+ <div style="width:${q*(p/100)*(a/100)}%;height:7px;background:#22c55e77;border-radius:2px" title="Q ${fmt1(q)}%"></div>
+ </div>
+ <div style="display:flex;gap:12px;margin-top:5px">
+ <span style="font-size:9px;color:var(--cyan)">■ A ${fmt1(a)}%</span>
+ <span style="font-size:9px;color:var(--amber)">■ P ${fmt1(p)}%</span>
+ <span style="font-size:9px;color:var(--green)">■ Q ${fmt1(q)}%</span>
+ <span style="font-size:9px;color:var(--muted);margin-left:auto">DT ${(stats.totalDTMin/60).toFixed(1)}h · PPM ${stats.ppm.toLocaleString()}</span>
+ </div>
+ </div>
+ <div class="pc-trends">
+ <div class="pc-trend" id="mom-out-${prod.id}"></div>
+ <div class="pc-trend" id="mom-oee-${prod.id}"></div>
+ </div>
+ <div style="padding:8px 16px;background:var(--bg3);border-top:1px solid var(--border);font-size:10px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap">
+ <span>🕐 Loading Time: avg <b style="color:var(--text2)">${stats.lhDebug.avg}h</b> (${stats.lhDebug.min}–${stats.lhDebug.max}h)</span>
+ <span style="color:${stats.lhDebug.otCount>0?'var(--amber)':'var(--muted)'}">⏱ OT: ${stats.lhDebug.otCount} กะ (≥10h)</span>
+ ${stats.lhDebug.missing>0?`<span style="color:var(--red)">⚠️ fallback 8h: ${stats.lhDebug.missing}/${stats.lhDebug.total} กะ</span>`:`<span style="color:var(--green)">✓ มีค่าครบ ${stats.lhDebug.total} กะ</span>`}
+ </div>`;
+ requestAnimationFrame(()=>{
+ const oeeCol=oeeColor(o).replace('var(--green)','#22c55e').replace('var(--amber)','#f59e0b').replace('var(--red)','#e31937');
+ const _mfM={median:'medShift',avg:'avgShift',max:'maxShift',min:'minShift'};
+ const _mlM={median:'MED OUT/SHIFT',avg:'AVG OUT/SHIFT',max:'MAX OUT/SHIFT',min:'MIN OUT/SHIFT'};
+ const momF=_mfM[STAT_MODE]||'medShift';
+ const momL=_mlM[STAT_MODE]||'MED OUT/SHIFT';
+ renderMoM(document.getElementById('mom-out-'+prod.id),stats.monthTrend,momF,momL,stats.outArrow,prod.color,'ชิ้น/กะ');
+ renderMoM(document.getElementById('mom-oee-'+prod.id),stats.monthTrend,'avgOEE','OEE %',stats.oeeArrow,oeeCol,'%');
+ });
 }
 
 function renderTable(allStats){
-  const m=STAT_MODE;
-  const mLabel={median:'Med',avg:'Avg',max:'Max',min:'Min'}[m]||'Med';
-  const maxOut=allStats.reduce((a,b)=>Math.max(a,b.stats?.totalOut||0),1);
-  document.getElementById('tbl-thead').innerHTML=`
-    <th>Product</th><th>Source</th>
-    <th class="num">Shifts</th>
-    <th class="num" style="color:var(--green)">Normal</th>
-    <th class="num" style="color:var(--amber)">OT</th>
-    <th class="num" style="color:var(--red)">Holiday</th>
-    <th class="num">Output รวม</th>
-    <th class="num">${mLabel} Out/Shift</th>
-    <th class="num">${mLabel} Out/Hour</th>
-    <th class="num">${mLabel} Out/Day</th>
-    <th class="num">OEE</th>
-    <th class="num">Avail</th>
-    <th class="num">Perf</th>
-    <th class="num">Quality</th>
-    <th class="num">PPM</th>
-    <th class="num">DT รวม</th>`;
-  document.getElementById('sum-tbody').innerHTML=allStats.map(({prod,stats})=>{
-    if(!stats)return`<tr><td class="tbl-prod" style="color:${prod.color}">${prod.label}</td><td colspan="15" style="color:var(--muted)">ไม่พบข้อมูล</td></tr>`;
-    const bar=Math.round(stats.totalOut/maxOut*100);
-    return`<tr>
-      <td><span class="tbl-prod" style="color:${prod.color}">${prod.label}</span></td>
-      <td><span class="src-badge ${prod.src==='PD3'?'sp-pd3':'sp-pd4'}">${prod.src}</span></td>
-      <td class="num">${stats.shifts.toLocaleString()}</td>
-      <td class="num" style="color:var(--green)">${stats.wt.normal}</td>
-      <td class="num" style="color:var(--amber)">${stats.wt.ot}</td>
-      <td class="num" style="color:var(--red)">${stats.wt.holiday}</td>
-      <td class="num">${stats.totalOut.toLocaleString()}<div class="mini-bar"><div class="mini-bar-fill" style="width:${bar}%;background:${prod.color}88"></div></div></td>
-      <td class="num">${stats.outShift[m].toLocaleString()}</td>
-      <td class="num">${stats.outHr[m].toLocaleString()}</td>
-      <td class="num" style="color:var(--purple);font-weight:600">${stats.outDay[m].toLocaleString()}</td>
-      <td class="num ${oeeClass(stats.avgOEE)}">${fmt1(stats.avgOEE)}%</td>
-      <td class="num ${oeeClass(stats.avgAvail)}">${fmt1(stats.avgAvail)}%</td>
-      <td class="num ${oeeClass(stats.avgPerf)}">${fmt1(stats.avgPerf)}%</td>
-      <td class="num ${oeeClass(stats.avgQual)}">${fmt1(stats.avgQual)}%</td>
-      <td class="num ${stats.ppm>5000?'bad':stats.ppm>2000?'warn':'good'}">${stats.ppm.toLocaleString()}</td>
-      <td class="num">${(stats.totalDTMin/60).toFixed(1)}h</td>
-    </tr>`;
-  }).join('');
+ const m=STAT_MODE;
+ const mLabel={median:'Med',avg:'Avg',max:'Max',min:'Min'}[m]||'Med';
+ const maxOut=allStats.reduce((a,b)=>Math.max(a,b.stats?.totalOut||0),1);
+ document.getElementById('tbl-thead').innerHTML=`
+ <th>Product</th><th>Source</th>
+ <th class="num">Shifts</th>
+ <th class="num" style="color:var(--green)">Normal</th>
+ <th class="num" style="color:var(--amber)">OT</th>
+ <th class="num" style="color:var(--red)">Holiday</th>
+ <th class="num">Output รวม</th>
+ <th class="num">${mLabel} Out/Shift</th>
+ <th class="num">${mLabel} Out/Hour</th>
+ <th class="num">${mLabel} Out/Day</th>
+ <th class="num">OEE</th>
+ <th class="num">Avail</th>
+ <th class="num">Perf</th>
+ <th class="num">Quality</th>
+ <th class="num">PPM</th>
+ <th class="num">DT รวม</th>`;
+ document.getElementById('sum-tbody').innerHTML=allStats.map(({prod,stats})=>{
+ if(!stats)return`<tr><td class="tbl-prod" style="color:${prod.color}">${prod.label}</td><td colspan="15" style="color:var(--muted)">ไม่พบข้อมูล</td></tr>`;
+ const bar=Math.round(stats.totalOut/maxOut*100);
+ return`<tr>
+ <td><span class="tbl-prod" style="color:${prod.color}">${prod.label}</span></td>
+ <td><span class="src-badge ${prod.src==='PD3'?'sp-pd3':'sp-pd4'}">${prod.src}</span></td>
+ <td class="num">${stats.shifts.toLocaleString()}</td>
+ <td class="num" style="color:var(--green)">${stats.wt.normal}</td>
+ <td class="num" style="color:var(--amber)">${stats.wt.ot}</td>
+ <td class="num" style="color:var(--red)">${stats.wt.holiday}</td>
+ <td class="num">${stats.totalOut.toLocaleString()}<div class="mini-bar"><div class="mini-bar-fill" style="width:${bar}%;background:${prod.color}88"></div></div></td>
+ <td class="num">${stats.outShift[m].toLocaleString()}</td>
+ <td class="num">${stats.outHr[m].toLocaleString()}</td>
+ <td class="num" style="color:var(--purple);font-weight:600">${stats.outDay[m].toLocaleString()}</td>
+ <td class="num ${oeeClass(stats.avgOEE)}">${fmt1(stats.avgOEE)}%</td>
+ <td class="num ${oeeClass(stats.avgAvail)}">${fmt1(stats.avgAvail)}%</td>
+ <td class="num ${oeeClass(stats.avgPerf)}">${fmt1(stats.avgPerf)}%</td>
+ <td class="num ${oeeClass(stats.avgQual)}">${fmt1(stats.avgQual)}%</td>
+ <td class="num ${stats.ppm>5000?'bad':stats.ppm>2000?'warn':'good'}">${stats.ppm.toLocaleString()}</td>
+ <td class="num">${(stats.totalDTMin/60).toFixed(1)}h</td>
+ </tr>`;
+ }).join('');
 }
 
 function applyFilter(){
-  const from=document.getElementById('f-from').value;
-  const to=document.getElementById('f-to').value;
-  const fDate=from?new Date(from):new Date(0);
-  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
-  const sh=document.getElementById('shift-sel').value;
-  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
-  document.getElementById('range-lbl').textContent=`${from||'—'} — ${to||'—'}`;
-  document.getElementById('rec-count').textContent=`${all.length.toLocaleString()} records`;
-  const allStats=PRODUCTS.map(prod=>({prod,stats:calcStats(all.filter(d=>matchProduct(d.part,prod.keywords)))}));
-  renderTable(allStats);
-  allStats.forEach(({prod,stats})=>renderCard(prod,stats));
-  renderWorkTypeStrip(allStats);
-  renderTrendChart();
+ const from=document.getElementById('f-from').value;
+ const to=document.getElementById('f-to').value;
+ const fDate=from?new Date(from):new Date(0);
+ const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
+ const sh=document.getElementById('shift-sel').value;
+ const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
+ document.getElementById('range-lbl').textContent=`${from||'—'} — ${to||'—'}`;
+ document.getElementById('rec-count').textContent=`${all.length.toLocaleString()} records`;
+ const allStats=PRODUCTS.map(prod=>({prod,stats:calcStats(all.filter(d=>matchProduct(d.part,prod.keywords)))}));
+ renderTable(allStats);
+ allStats.forEach(({prod,stats})=>renderCard(prod,stats));
+ renderWorkTypeStrip(allStats);
+ renderTrendChart();
 }
 
 async function reloadData(){
-  document.getElementById('src-badge').className='badge bx';document.getElementById('src-badge').textContent='...';
-  const r=await Promise.allSettled([
-    fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
-    fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
-  ]);
-  if(r[0].status==='fulfilled'){PD3_ALL=parsePD3(r[0].value);document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
-  if(r[1].status==='fulfilled'){PD4_ALL=parsePD4(r[1].value);document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
-  document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
-  document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
-  updateNextLabel();applyFilter();
+ document.getElementById('src-badge').className='badge bx';document.getElementById('src-badge').textContent='...';
+ const r=await Promise.allSettled([
+ fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
+ fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
+ ]);
+ if(r[0].status==='fulfilled'){PD3_ALL=parsePD3(r[0].value);document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
+ if(r[1].status==='fulfilled'){PD4_ALL=parsePD4(r[1].value);document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
+ document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
+ document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
+ updateNextLabel();applyFilter();
 }
 
 function updateNextLabel(){const el=document.getElementById('next-refresh');if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';}
 
 async function init(){
-  document.getElementById('products-grid').innerHTML=PRODUCTS.map(p=>`<div class="prod-card ${p.cls}" id="card-${p.id}"><div class="prod-card-accent"></div><div style="padding:24px;color:var(--muted);font-size:12px">Loading ${p.label}...</div></div>`).join('');
-  const setBar=p=>{const b=document.getElementById('ld-bar');if(b)b.style.width=p+'%';};
-  const setMsg=t=>{const m=document.getElementById('ld-msg');if(m)m.textContent=t;};
-  // Safety timeout — ซ่อน loading ถ้าค้างนานเกิน 20 วินาที
-  const safetyTimer=setTimeout(()=>{
-    setMsg('หมดเวลา — แสดงข้อมูลที่มี');
-    const el=document.getElementById('loading');if(el){el.style.opacity='0';setTimeout(()=>el.style.display='none',500);}
-  },20000);
-  try{
-    setMsg('กำลังดึงข้อมูล...');setBar(15);
-    const results=await Promise.allSettled([
-      fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
-      fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
-    ]);
-    setBar(60);setMsg('กำลัง parse ข้อมูล...');
-    await new Promise(r=>setTimeout(r,0));
-    if(results[0].status==='fulfilled'){PD3_ALL=parsePD3(results[0].value);document.getElementById('ld-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
-    setBar(80);await new Promise(r=>setTimeout(r,0));
-    if(results[1].status==='fulfilled'){PD4_ALL=parsePD4(results[1].value);document.getElementById('ld-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
-    setBar(90);setMsg('กำลังแสดงผล...');await new Promise(r=>setTimeout(r,0));
-    // Set intersection date range
-    const pd3D=PD3_ALL.map(d=>d.date).filter(Boolean);
-    const pd4D=PD4_ALL.map(d=>d.date).filter(Boolean);
-    if(pd3D.length&&pd4D.length){
-      const from=new Date(Math.max(arrMin(pd3D),arrMin(pd4D)));
-      const to=new Date(Math.min(arrMax(pd3D),arrMax(pd4D)));
-      document.getElementById('f-from').value=fmtIso(from<=to?from:new Date(arrMin([...pd3D,...pd4D])));
-      document.getElementById('f-to').value=fmtIso(from<=to?to:new Date(arrMax([...pd3D,...pd4D])));
-    }
-    document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
-    document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
-    document.getElementById('f-from').addEventListener('change',applyFilter);
-    document.getElementById('f-to').addEventListener('change',applyFilter);
-    setBar(100);
-    try{applyFilter();}catch(e){console.warn('applyFilter error',e);}
-  }catch(e){
-    console.error('init error',e);
-    setMsg('เกิดข้อผิดพลาด: '+e.message);
-  }finally{
-    clearTimeout(safetyTimer);
-    const el=document.getElementById('loading');if(el){el.style.opacity='0';setTimeout(()=>el.style.display='none',500);}
-    if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadData,3600000);updateNextLabel();
-  }
+ document.getElementById('products-grid').innerHTML=PRODUCTS.map(p=>`<div class="prod-card ${p.cls}" id="card-${p.id}"><div class="prod-card-accent"></div><div style="padding:24px;color:var(--muted);font-size:12px">Loading ${p.label}...</div></div>`).join('');
+ const setBar=p=>{const b=document.getElementById('ld-bar');if(b)b.style.width=p+'%';};
+ const setMsg=t=>{const m=document.getElementById('ld-msg');if(m)m.textContent=t;};
+ // Safety timeout — ซ่อน loading ถ้าค้างนานเกิน 20 วินาที
+ const safetyTimer=setTimeout(()=>{
+ setMsg('หมดเวลา — แสดงข้อมูลที่มี');
+ const el=document.getElementById('loading');if(el){el.style.opacity='0';setTimeout(()=>el.style.display='none',500);}
+ },20000);
+ try{
+ setMsg('กำลังดึงข้อมูล...');setBar(15);
+ const results=await Promise.allSettled([
+ fetch(PD3_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
+ fetch(PD4_URL+'&t='+Date.now(),{cache:'no-store',mode:'cors'}).then(r=>r.text()),
+ ]);
+ setBar(60);setMsg('กำลัง parse ข้อมูล...');
+ await new Promise(r=>setTimeout(r,0));
+ if(results[0].status==='fulfilled'){PD3_ALL=parsePD3(results[0].value);document.getElementById('ld-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;document.getElementById('pill-pd3').textContent=`PD3 ✓ ${PD3_ALL.length}`;}
+ setBar(80);await new Promise(r=>setTimeout(r,0));
+ if(results[1].status==='fulfilled'){PD4_ALL=parsePD4(results[1].value);document.getElementById('ld-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;document.getElementById('pill-pd4').textContent=`PD4 ✓ ${PD4_ALL.length}`;}
+ setBar(90);setMsg('กำลังแสดงผล...');await new Promise(r=>setTimeout(r,0));
+ // Set intersection date range
+ const pd3D=PD3_ALL.map(d=>d.date).filter(Boolean);
+ const pd4D=PD4_ALL.map(d=>d.date).filter(Boolean);
+ if(pd3D.length&&pd4D.length){
+ const from=new Date(Math.max(arrMin(pd3D),arrMin(pd4D)));
+ const to=new Date(Math.min(arrMax(pd3D),arrMax(pd4D)));
+ document.getElementById('f-from').value=fmtIso(from<=to?from:new Date(arrMin([...pd3D,...pd4D])));
+ document.getElementById('f-to').value=fmtIso(from<=to?to:new Date(arrMax([...pd3D,...pd4D])));
+ }
+ document.getElementById('src-badge').className='badge bl';document.getElementById('src-badge').textContent='● LIVE';
+ document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
+ document.getElementById('f-from').addEventListener('change',applyFilter);
+ document.getElementById('f-to').addEventListener('change',applyFilter);
+ setBar(100);
+ try{applyFilter();}catch(e){console.warn('applyFilter error',e);}
+ }catch(e){
+ console.error('init error',e);
+ setMsg('เกิดข้อผิดพลาด: '+e.message);
+ }finally{
+ clearTimeout(safetyTimer);
+ const el=document.getElementById('loading');if(el){el.style.opacity='0';setTimeout(()=>el.style.display='none',500);}
+ if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadData,3600000);updateNextLabel();
+ }
 }
 
 if(typeof Chart==='undefined'){
-  const _wc=setInterval(()=>{if(typeof Chart!=='undefined'){clearInterval(_wc);init();}},50);
-  setTimeout(()=>{clearInterval(_wc);init();},5000);
+ const _wc=setInterval(()=>{if(typeof Chart!=='undefined'){clearInterval(_wc);init();}},50);
+ setTimeout(()=>{clearInterval(_wc);init();},5000);
 }else{init();}
 
 // ── WORK TYPE CLASSIFICATION ─────────────────────────────────────────
 // Normal = Mon-Fri, loadingHr ≤ 9.5h
-// OT     = Mon-Fri, loadingHr > 9.5h
+// OT = Mon-Fri, loadingHr > 9.5h
 // Holiday = Sat-Sun
 const OT_THRESHOLD = 9.5; // ชั่วโมง — เกินนี้ถือว่ามี OT
 
 function getWorkType(row){
-  const dow = row.date ? row.date.getDay() : -1; // 0=Sun, 6=Sat
-  if(dow===0||dow===6) return 'holiday';
-  return (row.loadingHr > OT_THRESHOLD) ? 'ot' : 'normal';
+ const dow = row.date ? row.date.getDay() : -1; // 0=Sun, 6=Sat
+ if(dow===0||dow===6) return 'holiday';
+ return (row.loadingHr > OT_THRESHOLD) ? 'ot' : 'normal';
 }
 
 function calcWorkTypes(rows){
-  let normal=0,ot=0,holiday=0;
-  let normalOut=0,otOut=0,holidayOut=0;
-  rows.forEach(d=>{
-    const wt=getWorkType(d);
-    const good=d.total-d.defect;
-    if(wt==='normal'){normal++;normalOut+=good;}
-    else if(wt==='ot'){ot++;otOut+=good;}
-    else{holiday++;holidayOut+=good;}
-  });
-  return{normal,ot,holiday,normalOut,otOut,holidayOut,total:rows.length};
+ let normal=0,ot=0,holiday=0;
+ let normalOut=0,otOut=0,holidayOut=0;
+ rows.forEach(d=>{
+ const wt=getWorkType(d);
+ const good=d.total-d.defect;
+ if(wt==='normal'){normal++;normalOut+=good;}
+ else if(wt==='ot'){ot++;otOut+=good;}
+ else{holiday++;holidayOut+=good;}
+ });
+ return{normal,ot,holiday,normalOut,otOut,holidayOut,total:rows.length};
 }
 
 // ── WORK TYPE KPI STRIP ───────────────────────────────────────────────
 function renderWorkTypeStrip(allStats){
-  const container=document.getElementById('wt-strip-container');
-  if(!container)return;
-  // รวมทุก product
-  let n=0,o=0,h=0,nOut=0,oOut=0,hOut=0,tot=0;
-  allStats.forEach(({stats})=>{
-    if(!stats)return;
-    n+=stats.wt.normal;o+=stats.wt.ot;h+=stats.wt.holiday;
-    nOut+=stats.wt.normalOut;oOut+=stats.wt.otOut;hOut+=stats.wt.holidayOut;
-    tot+=stats.wt.total;
-  });
-  const pct=v=>tot?Math.round(v/tot*100):0;
-  const m=STAT_MODE;
-  // Output per shift per type (avg)
-  const nAvg=n?Math.round(nOut/n):0;
-  const oAvg=o?Math.round(oOut/o):0;
-  const hAvg=h?Math.round(hOut/h):0;
+ const container=document.getElementById('wt-strip-container');
+ if(!container)return;
+ // รวมทุก product
+ let n=0,o=0,h=0,nOut=0,oOut=0,hOut=0,tot=0;
+ allStats.forEach(({stats})=>{
+ if(!stats)return;
+ n+=stats.wt.normal;o+=stats.wt.ot;h+=stats.wt.holiday;
+ nOut+=stats.wt.normalOut;oOut+=stats.wt.otOut;hOut+=stats.wt.holidayOut;
+ tot+=stats.wt.total;
+ });
+ const pct=v=>tot?Math.round(v/tot*100):0;
+ const m=STAT_MODE;
+ // Output per shift per type (avg)
+ const nAvg=n?Math.round(nOut/n):0;
+ const oAvg=o?Math.round(oOut/o):0;
+ const hAvg=h?Math.round(hOut/h):0;
 
-  container.innerHTML=`
-  
-    <!-- แยกต่อ product -->
-    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px">แยกตามชิ้นงาน</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:16px">
-    ${allStats.map(({prod,stats})=>{
-      if(!stats)return'';
-      const wt=stats.wt;
-      const ptot=wt.total||1;
-      const pn=Math.round(wt.normal/ptot*100);
-      const po=Math.round(wt.ot/ptot*100);
-      const ph=Math.round(wt.holiday/ptot*100);
-      const nAvgP=wt.normal?Math.round(wt.normalOut/wt.normal):0;
-      const oAvgP=wt.ot?Math.round(wt.otOut/wt.ot):0;
-      const hAvgP=wt.holiday?Math.round(wt.holidayOut/wt.holiday):0;
-      return`<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
-        <!-- header -->
-        <div style="padding:11px 14px 9px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-          <span style="font-family:var(--font-display);font-size:16px;font-weight:700;color:${prod.color}">${prod.label}</span>
-          <span style="font-size:10px;color:var(--muted)">${wt.total} กะทั้งหมด</span>
-        </div>
-        <!-- stacked bar -->
-        <div style="padding:10px 14px 4px">
-          <div style="display:flex;gap:2px;height:10px;border-radius:5px;overflow:hidden;background:var(--bg3);margin-bottom:6px">
-            <div style="width:${pn}%;background:#16a34a" title="Normal ${wt.normal}กะ"></div>
-            <div style="width:${po}%;background:#d97706" title="OT ${wt.ot}กะ"></div>
-            <div style="width:${ph}%;background:#dc2626" title="Holiday ${wt.holiday}กะ"></div>
-          </div>
-        </div>
-        <!-- 3 mini kpis -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)">
-          <div style="background:var(--card);padding:9px 12px">
-            <div style="font-size:9px;color:#16a34a;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">Normal</div>
-            <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text)">${wt.normal}</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px">${pn}% · ${nAvgP.toLocaleString()} ชิ้น/กะ</div>
-          </div>
-          <div style="background:var(--card);padding:9px 12px">
-            <div style="font-size:9px;color:#d97706;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">OT</div>
-            <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text)">${wt.ot}</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px">${po}% · ${oAvgP.toLocaleString()} ชิ้น/กะ</div>
-          </div>
-          <div style="background:var(--card);padding:9px 12px">
-            <div style="font-size:9px;color:#dc2626;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">Holiday</div>
-            <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text)">${wt.holiday}</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px">${ph}% · ${hAvgP.toLocaleString()} ชิ้น/กะ</div>
-          </div>
-        </div>
-      </div>`;
-    }).join('')}
-    </div>`;
+ container.innerHTML=`
+ 
+ <!-- แยกต่อ product -->
+ <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px">แยกตามชิ้นงาน</div>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:16px">
+ ${allStats.map(({prod,stats})=>{
+ if(!stats)return'';
+ const wt=stats.wt;
+ const ptot=wt.total||1;
+ const pn=Math.round(wt.normal/ptot*100);
+ const po=Math.round(wt.ot/ptot*100);
+ const ph=Math.round(wt.holiday/ptot*100);
+ const nAvgP=wt.normal?Math.round(wt.normalOut/wt.normal):0;
+ const oAvgP=wt.ot?Math.round(wt.otOut/wt.ot):0;
+ const hAvgP=wt.holiday?Math.round(wt.holidayOut/wt.holiday):0;
+ return`<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+ <!-- header -->
+ <div style="padding:11px 14px 9px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+ <span style="font-family:var(--font-display);font-size:16px;font-weight:700;color:${prod.color}">${prod.label}</span>
+ <span style="font-size:10px;color:var(--muted)">${wt.total} กะทั้งหมด</span>
+ </div>
+ <!-- stacked bar -->
+ <div style="padding:10px 14px 4px">
+ <div style="display:flex;gap:2px;height:10px;border-radius:5px;overflow:hidden;background:var(--bg3);margin-bottom:6px">
+ <div style="width:${pn}%;background:#22c55e" title="Normal ${wt.normal}กะ"></div>
+ <div style="width:${po}%;background:#f59e0b" title="OT ${wt.ot}กะ"></div>
+ <div style="width:${ph}%;background:#e31937" title="Holiday ${wt.holiday}กะ"></div>
+ </div>
+ </div>
+ <!-- 3 mini kpis -->
+ <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)">
+ <div style="background:var(--card);padding:9px 12px">
+ <div style="font-size:9px;color:#22c55e;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">Normal</div>
+ <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text)">${wt.normal}</div>
+ <div style="font-size:10px;color:var(--muted);margin-top:2px">${pn}% · ${nAvgP.toLocaleString()} ชิ้น/กะ</div>
+ </div>
+ <div style="background:var(--card);padding:9px 12px">
+ <div style="font-size:9px;color:#f59e0b;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">OT</div>
+ <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text)">${wt.ot}</div>
+ <div style="font-size:10px;color:var(--muted);margin-top:2px">${po}% · ${oAvgP.toLocaleString()} ชิ้น/กะ</div>
+ </div>
+ <div style="background:var(--card);padding:9px 12px">
+ <div style="font-size:9px;color:#e31937;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">Holiday</div>
+ <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text)">${wt.holiday}</div>
+ <div style="font-size:10px;color:var(--muted);margin-top:2px">${ph}% · ${hAvgP.toLocaleString()} ชิ้น/กะ</div>
+ </div>
+ </div>
+ </div>`;
+ }).join('')}
+ </div>`;
 }
 
 // ── TREND CHART ───────────────────────────────────────────────────────
@@ -960,146 +968,146 @@ let TREND_CHART=null;
 const MN=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
 function setTrendMetric(m,btn){
-  TREND_METRIC=m;
-  document.querySelectorAll('[onclick^="setTrendMetric"]').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTrendChart();
+ TREND_METRIC=m;
+ document.querySelectorAll('[onclick^="setTrendMetric"]').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+ renderTrendChart();
 }
 function setTrendPeriod(p,btn){
-  TREND_PERIOD=p;
-  document.querySelectorAll('[onclick^="setTrendPeriod"]').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTrendChart();
+ TREND_PERIOD=p;
+ document.querySelectorAll('[onclick^="setTrendPeriod"]').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+ renderTrendChart();
 }
 
 function getPeriodKey(date){
-  const y=date.getFullYear(),m=date.getMonth(),d=date.getDate();
-  if(TREND_PERIOD==='day')return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-  if(TREND_PERIOD==='week'){
-    // ISO week: Monday-based
-    const tmp=new Date(date);tmp.setHours(0,0,0,0);
-    const dow=(tmp.getDay()+6)%7; // Mon=0
-    tmp.setDate(tmp.getDate()-dow);
-    return`${tmp.getFullYear()}-W${String(Math.ceil((tmp.getDate()+new Date(tmp.getFullYear(),0,1).getDay())/7)).padStart(2,'0')}-${String(tmp.getMonth()+1).padStart(2,'0')}-${String(tmp.getDate()).padStart(2,'0')}`;
-  }
-  if(TREND_PERIOD==='month')return`${y}-${String(m+1).padStart(2,'0')}`;
-  return`${y}`;
+ const y=date.getFullYear(),m=date.getMonth(),d=date.getDate();
+ if(TREND_PERIOD==='day')return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+ if(TREND_PERIOD==='week'){
+ // ISO week: Monday-based
+ const tmp=new Date(date);tmp.setHours(0,0,0,0);
+ const dow=(tmp.getDay()+6)%7; // Mon=0
+ tmp.setDate(tmp.getDate()-dow);
+ return`${tmp.getFullYear()}-W${String(Math.ceil((tmp.getDate()+new Date(tmp.getFullYear(),0,1).getDay())/7)).padStart(2,'0')}-${String(tmp.getMonth()+1).padStart(2,'0')}-${String(tmp.getDate()).padStart(2,'0')}`;
+ }
+ if(TREND_PERIOD==='month')return`${y}-${String(m+1).padStart(2,'0')}`;
+ return`${y}`;
 }
 function fmtPeriodLabel(key){
-  const p=key.split('-');
-  if(TREND_PERIOD==='day')return`${p[2]}/${p[1]}`;
-  if(TREND_PERIOD==='week')return`W${p[1].replace('W','')} ${p[2]}/${p[3]||''}`.trim();
-  if(TREND_PERIOD==='month')return`${MN[+p[1]-1]} ${p[0].slice(2)}`;
-  return key;
+ const p=key.split('-');
+ if(TREND_PERIOD==='day')return`${p[2]}/${p[1]}`;
+ if(TREND_PERIOD==='week')return`W${p[1].replace('W','')} ${p[2]}/${p[3]||''}`.trim();
+ if(TREND_PERIOD==='month')return`${MN[+p[1]-1]} ${p[0].slice(2)}`;
+ return key;
 }
 
 function renderTrendChart(){
-  const from=document.getElementById('f-from').value;
-  const to=document.getElementById('f-to').value;
-  const fDate=from?new Date(from):new Date(0);
-  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
-  const sh=document.getElementById('shift-sel').value;
-  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
+ const from=document.getElementById('f-from').value;
+ const to=document.getElementById('f-to').value;
+ const fDate=from?new Date(from):new Date(0);
+ const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
+ const sh=document.getElementById('shift-sel').value;
+ const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
 
-  // Build per-period data for each product
-  const periodSets=new Set();
-  const prodData={};
-  PRODUCTS.forEach(p=>{
-    prodData[p.id]={};
-    const rows=all.filter(d=>matchProduct(d.part,p.keywords));
-    rows.forEach(d=>{
-      const key=getPeriodKey(d.date);
-      periodSets.add(key);
-      if(!prodData[p.id][key])prodData[p.id][key]={goodSum:0,hrSum:0,dayMap:new Set(),oeeArr:[]};
-      const good=d.total-d.defect;
-      const h=d.loadingHr>0?d.loadingHr:8;
-      prodData[p.id][key].goodSum+=good;
-      prodData[p.id][key].hrSum+=h;
-      prodData[p.id][key].dayMap.add(fmtIso(d.date));
-      if(d.oee>0)prodData[p.id][key].oeeArr.push(d.oee);
-    });
-  });
+ // Build per-period data for each product
+ const periodSets=new Set();
+ const prodData={};
+ PRODUCTS.forEach(p=>{
+ prodData[p.id]={};
+ const rows=all.filter(d=>matchProduct(d.part,p.keywords));
+ rows.forEach(d=>{
+ const key=getPeriodKey(d.date);
+ periodSets.add(key);
+ if(!prodData[p.id][key])prodData[p.id][key]={goodSum:0,hrSum:0,dayMap:new Set(),oeeArr:[]};
+ const good=d.total-d.defect;
+ const h=d.loadingHr>0?d.loadingHr:8;
+ prodData[p.id][key].goodSum+=good;
+ prodData[p.id][key].hrSum+=h;
+ prodData[p.id][key].dayMap.add(fmtIso(d.date));
+ if(d.oee>0)prodData[p.id][key].oeeArr.push(d.oee);
+ });
+ });
 
-  const periods=[...periodSets].sort();
-  const labels=periods.map(fmtPeriodLabel);
-  const dark=document.documentElement.getAttribute('data-theme')==='dark';
-  const gridC=dark?'rgba(28,38,64,.5)':'rgba(226,231,240,1)';
-  const tickC=dark?'#526080':'#94a3b8';
-  const isOEE=TREND_METRIC==='oee';
+ const periods=[...periodSets].sort();
+ const labels=periods.map(fmtPeriodLabel);
+ const dark=document.documentElement.getAttribute('data-theme')==='dark';
+ const gridC=dark?'rgba(28,38,64,.5)':'rgba(226,231,240,1)';
+ const tickC=dark?'#526080':'#94a3b8';
+ const isOEE=TREND_METRIC==='oee';
 
-  const datasets=PRODUCTS.map(p=>({
-    label:p.label,
-    yAxisID: isOEE ? 'yOEE' : 'y',
-    data:periods.map(k=>{
-      const d=prodData[p.id][k];
-      if(!d)return null;
-      if(TREND_METRIC==='day'){
-        return d.dayMap.size>0?Math.round(d.goodSum/d.dayMap.size):null;
-      } else if(TREND_METRIC==='hr'){
-        return d.hrSum>0?Math.round(d.goodSum/d.hrSum):null;
-      } else {
-        // %OEE — avg of all shifts in period
-        return d.oeeArr.length>0?parseFloat((d.oeeArr.reduce((a,b)=>a+b,0)/d.oeeArr.length).toFixed(1)):null;
-      }
-    }),
-    borderColor:p.color,
-    backgroundColor:p.color+'25',
-    borderWidth:isOEE?2.5:2,
-    pointRadius:TREND_PERIOD==='day'?2:4,
-    pointHoverRadius:6,
-    tension:.35,
-    spanGaps:true,
-    fill:false,
-  }));
+ const datasets=PRODUCTS.map(p=>({
+ label:p.label,
+ yAxisID: isOEE ? 'yOEE' : 'y',
+ data:periods.map(k=>{
+ const d=prodData[p.id][k];
+ if(!d)return null;
+ if(TREND_METRIC==='day'){
+ return d.dayMap.size>0?Math.round(d.goodSum/d.dayMap.size):null;
+ } else if(TREND_METRIC==='hr'){
+ return d.hrSum>0?Math.round(d.goodSum/d.hrSum):null;
+ } else {
+ // %OEE — avg of all shifts in period
+ return d.oeeArr.length>0?parseFloat((d.oeeArr.reduce((a,b)=>a+b,0)/d.oeeArr.length).toFixed(1)):null;
+ }
+ }),
+ borderColor:p.color,
+ backgroundColor:p.color+'25',
+ borderWidth:isOEE?2.5:2,
+ pointRadius:TREND_PERIOD==='day'?2:4,
+ pointHoverRadius:6,
+ tension:.35,
+ spanGaps:true,
+ fill:false,
+ }));
 
-  // OEE reference lines at 85% and 70%
-  const oeeAnnotationDatasets = isOEE ? [
-    {label:'เป้า 85%',yAxisID:'yOEE',data:periods.map(()=>85),borderColor:'#16a34a55',backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,4],pointRadius:0,pointHoverRadius:0,tension:0,spanGaps:true,fill:false},
-    {label:'ขั้นต่ำ 70%',yAxisID:'yOEE',data:periods.map(()=>70),borderColor:'#dc262655',backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,4],pointRadius:0,pointHoverRadius:0,tension:0,spanGaps:true,fill:false},
-  ] : [];
+ // OEE reference lines at 85% and 70%
+ const oeeAnnotationDatasets = isOEE ? [
+ {label:'เป้า 85%',yAxisID:'yOEE',data:periods.map(()=>85),borderColor:'#22c55e55',backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,4],pointRadius:0,pointHoverRadius:0,tension:0,spanGaps:true,fill:false},
+ {label:'ขั้นต่ำ 70%',yAxisID:'yOEE',data:periods.map(()=>70),borderColor:'#e3193755',backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,4],pointRadius:0,pointHoverRadius:0,tension:0,spanGaps:true,fill:false},
+ ] : [];
 
-  const yLabel = TREND_METRIC==='day'?'ชิ้น/วัน': TREND_METRIC==='hr'?'ชิ้น/ชม.':'%OEE';
-  const titleMap={day:'วัน',week:'สัปดาห์',month:'เดือน',year:'ปี'};
-  const metricMap={day:'Output / Day',hr:'Output / Hour',oee:'%OEE Trend'};
-  document.getElementById('trend-title').textContent=`${metricMap[TREND_METRIC]} ราย${titleMap[TREND_PERIOD]}`;
+ const yLabel = TREND_METRIC==='day'?'ชิ้น/วัน': TREND_METRIC==='hr'?'ชิ้น/ชม.':'%OEE';
+ const titleMap={day:'วัน',week:'สัปดาห์',month:'เดือน',year:'ปี'};
+ const metricMap={day:'Output / Day',hr:'Output / Hour',oee:'%OEE Trend'};
+ document.getElementById('trend-title').textContent=`${metricMap[TREND_METRIC]} ราย${titleMap[TREND_PERIOD]}`;
 
-  if(TREND_CHART){TREND_CHART.destroy();TREND_CHART=null;}
-  const ctx=document.getElementById('c-trend');
-  if(!ctx)return;
-  TREND_CHART=new Chart(ctx,{
-    type:'line',
-    data:{labels,datasets:[...datasets,...oeeAnnotationDatasets]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:true,position:'bottom',labels:{color:tickC,font:{size:11},usePointStyle:true,pointStyleWidth:10,padding:14,
-          filter: item => !['เป้า 85%','ขั้นต่ำ 70%'].includes(item.text) || isOEE
-        }},
-        tooltip:{backgroundColor:dark?'#0d1117':'#fff',titleColor:dark?'#dce4f0':'#0f172a',bodyColor:tickC,borderColor:dark?'#1c2640':'#e2e7f0',borderWidth:1,mode:'index',intersect:false,
-          callbacks:{label:c=>{
-            if(['เป้า 85%','ขั้นต่ำ 70%'].includes(c.dataset.label))return null;
-            if(c.raw==null)return null;
-            return isOEE?` ${c.dataset.label}: ${c.raw.toFixed(1)}%`:` ${c.dataset.label}: ${c.raw.toLocaleString()} ${yLabel}`;
-          }}
-        }
-      },
-      scales:{
-        x:{grid:{color:gridC},ticks:{color:tickC,font:{size:10},maxRotation:45,maxTicksLimit:20}},
-        y: isOEE ? {display:false} : {
-          id:'y',grid:{color:gridC},
-          ticks:{color:tickC,font:{size:11},callback:v=>v.toLocaleString()},
-          title:{display:true,text:yLabel,color:tickC,font:{size:11}},
-          beginAtZero:false
-        },
-        yOEE: isOEE ? {
-          id:'yOEE',grid:{color:gridC},
-          min:0,max:100,
-          ticks:{color:tickC,font:{size:11},callback:v=>v+'%',stepSize:10},
-          title:{display:true,text:'%OEE',color:tickC,font:{size:11}},
-        } : {display:false}
-      }
-    }
-  });
+ if(TREND_CHART){TREND_CHART.destroy();TREND_CHART=null;}
+ const ctx=document.getElementById('c-trend');
+ if(!ctx)return;
+ TREND_CHART=new Chart(ctx,{
+ type:'line',
+ data:{labels,datasets:[...datasets,...oeeAnnotationDatasets]},
+ options:{
+ responsive:true,maintainAspectRatio:false,
+ plugins:{
+ legend:{display:true,position:'bottom',labels:{color:tickC,font:{size:11},usePointStyle:true,pointStyleWidth:10,padding:14,
+ filter: item => !['เป้า 85%','ขั้นต่ำ 70%'].includes(item.text) || isOEE
+ }},
+ tooltip:{backgroundColor:dark?'#0d1117':'#fff',titleColor:dark?'#dce4f0':'#0f172a',bodyColor:tickC,borderColor:dark?'#1c2640':'#e2e7f0',borderWidth:1,mode:'index',intersect:false,
+ callbacks:{label:c=>{
+ if(['เป้า 85%','ขั้นต่ำ 70%'].includes(c.dataset.label))return null;
+ if(c.raw==null)return null;
+ return isOEE?` ${c.dataset.label}: ${c.raw.toFixed(1)}%`:` ${c.dataset.label}: ${c.raw.toLocaleString()} ${yLabel}`;
+ }}
+ }
+ },
+ scales:{
+ x:{grid:{color:gridC},ticks:{color:tickC,font:{size:10},maxRotation:45,maxTicksLimit:20}},
+ y: isOEE ? {display:false} : {
+ id:'y',grid:{color:gridC},
+ ticks:{color:tickC,font:{size:11},callback:v=>v.toLocaleString()},
+ title:{display:true,text:yLabel,color:tickC,font:{size:11}},
+ beginAtZero:false
+ },
+ yOEE: isOEE ? {
+ id:'yOEE',grid:{color:gridC},
+ min:0,max:100,
+ ticks:{color:tickC,font:{size:11},callback:v=>v+'%',stepSize:10},
+ title:{display:true,text:'%OEE',color:tickC,font:{size:11}},
+ } : {display:false}
+ }
+ }
+ });
 }
 
 
@@ -1108,76 +1116,76 @@ let _qaHistory=[];
 let _msgId=0;
 
 function buildDataSummary(){
-  // สร้าง context จากข้อมูลจริง สั้น compact สำหรับ API
-  const from=document.getElementById('f-from').value;
-  const to=document.getElementById('f-to').value;
-  const fDate=from?new Date(from):new Date(0);
-  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
-  const sh=document.getElementById('shift-sel').value;
-  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
+ // สร้าง context จากข้อมูลจริง สั้น compact สำหรับ API
+ const from=document.getElementById('f-from').value;
+ const to=document.getElementById('f-to').value;
+ const fDate=from?new Date(from):new Date(0);
+ const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
+ const sh=document.getElementById('shift-sel').value;
+ const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
 
-  const lines=[];
-  lines.push(`ช่วงข้อมูล: ${from||'—'} ถึง ${to||'—'} | กะ: ${sh==='all'?'ทั้งหมด':sh}`);
+ const lines=[];
+ lines.push(`ช่วงข้อมูล: ${from||'—'} ถึง ${to||'—'} | กะ: ${sh==='all'?'ทั้งหมด':sh}`);
 
-  PRODUCTS.forEach(p=>{
-    const rows=all.filter(d=>matchProduct(d.part,p.keywords));
-    if(!rows.length){lines.push(`${p.label}: ไม่มีข้อมูล`);return;}
-    const s=calcStats(rows);
-    const wt=s.wt;
-    lines.push(
-      `${p.label} (${p.src}): ${s.shifts}กะ | `+
-      `Med Out/Shift=${s.outShift.median.toLocaleString()} | `+
-      `Med Out/Hr=${s.outHr.median.toLocaleString()} | `+
-      `Med Out/Day=${s.outDay.median.toLocaleString()} | `+
-      `OEE=${s.avgOEE.toFixed(1)}% | A=${s.avgAvail.toFixed(1)}% P=${s.avgPerf.toFixed(1)}% Q=${s.avgQual.toFixed(1)}% | `+
-      `Normal=${wt.normal}กะ OT=${wt.ot}กะ Holiday=${wt.holiday}กะ | `+
-      `DT=${(s.totalDTMin/60).toFixed(0)}h | PPM=${s.ppm.toLocaleString()} | `+
-      `LoadingHr avg=${s.lhDebug.avg}h (${s.lhDebug.min}–${s.lhDebug.max}h OT=${s.lhDebug.otCount}กะ)`
-    );
-  });
-  return lines.join('\n');
+ PRODUCTS.forEach(p=>{
+ const rows=all.filter(d=>matchProduct(d.part,p.keywords));
+ if(!rows.length){lines.push(`${p.label}: ไม่มีข้อมูล`);return;}
+ const s=calcStats(rows);
+ const wt=s.wt;
+ lines.push(
+ `${p.label} (${p.src}): ${s.shifts}กะ | `+
+ `Med Out/Shift=${s.outShift.median.toLocaleString()} | `+
+ `Med Out/Hr=${s.outHr.median.toLocaleString()} | `+
+ `Med Out/Day=${s.outDay.median.toLocaleString()} | `+
+ `OEE=${s.avgOEE.toFixed(1)}% | A=${s.avgAvail.toFixed(1)}% P=${s.avgPerf.toFixed(1)}% Q=${s.avgQual.toFixed(1)}% | `+
+ `Normal=${wt.normal}กะ OT=${wt.ot}กะ Holiday=${wt.holiday}กะ | `+
+ `DT=${(s.totalDTMin/60).toFixed(0)}h | PPM=${s.ppm.toLocaleString()} | `+
+ `LoadingHr avg=${s.lhDebug.avg}h (${s.lhDebug.min}–${s.lhDebug.max}h OT=${s.lhDebug.otCount}กะ)`
+ );
+ });
+ return lines.join('\n');
 }
 
 function addMsg(text,role,loading=false){
-  const id='qm-'+(++_msgId);
-  const msgs=document.getElementById('qa-messages');
-  const div=document.createElement('div');
-  div.className=`qa-msg ${role}`;div.id=id;
-  const bubble=`<div class="qa-bubble ${role}${loading?' thinking':''}">
-    ${loading?'กำลังวิเคราะห์ข้อมูล':text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')}
-  </div>`;
-  div.innerHTML=`<div class="qa-avatar ${role}">${role==='user'?'👤':'🤖'}</div>${bubble}`;
-  msgs.appendChild(div);
-  msgs.scrollTop=msgs.scrollHeight;
-  return id;
+ const id='qm-'+(++_msgId);
+ const msgs=document.getElementById('qa-messages');
+ const div=document.createElement('div');
+ div.className=`qa-msg ${role}`;div.id=id;
+ const bubble=`<div class="qa-bubble ${role}${loading?' thinking':''}">
+ ${loading?'กำลังวิเคราะห์ข้อมูล':text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')}
+ </div>`;
+ div.innerHTML=`<div class="qa-avatar ${role}">${role==='user'?'👤':'🤖'}</div>${bubble}`;
+ msgs.appendChild(div);
+ msgs.scrollTop=msgs.scrollHeight;
+ return id;
 }
 
 function updateMsg(id,text){
-  const el=document.getElementById(id);
-  if(!el)return;
-  const b=el.querySelector('.qa-bubble');
-  b.classList.remove('thinking');
-  b.innerHTML=text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
-  document.getElementById('qa-messages').scrollTop=9999;
+ const el=document.getElementById(id);
+ if(!el)return;
+ const b=el.querySelector('.qa-bubble');
+ b.classList.remove('thinking');
+ b.innerHTML=text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
+ document.getElementById('qa-messages').scrollTop=9999;
 }
 
 async function sendQA(){
-  const inp=document.getElementById('qa-input');
-  const q=inp.value.trim();
-  if(!q)return;
-  inp.value='';
+ const inp=document.getElementById('qa-input');
+ const q=inp.value.trim();
+ if(!q)return;
+ inp.value='';
 
-  addMsg(q,'user');
-  const loadId=addMsg('','ai',true);
-  const sendBtn=document.getElementById('qa-send-btn');
-  sendBtn.disabled=true;
+ addMsg(q,'user');
+ const loadId=addMsg('','ai',true);
+ const sendBtn=document.getElementById('qa-send-btn');
+ sendBtn.disabled=true;
 
-  // Add to history
-  _qaHistory.push({role:'user',content:q});
+ // Add to history
+ _qaHistory.push({role:'user',content:q});
 
-  try{
-    const ctx=buildDataSummary();
-    const systemPrompt=`คุณเป็น Production Intelligence AI ผู้เชี่ยวชาญด้านการวิเคราะห์ข้อมูลโรงงาน
+ try{
+ const ctx=buildDataSummary();
+ const systemPrompt=`คุณเป็น Production Intelligence AI ผู้เชี่ยวชาญด้านการวิเคราะห์ข้อมูลโรงงาน
 ตอบเป็นภาษาไทย กระชับ ชัดเจน มีตัวเลขสนับสนุน เหมาะสำหรับนำเสนอผู้บริหาร
 ใช้ **bold** เพื่อเน้นตัวเลขสำคัญ จัดเป็นข้อๆ ถ้าเนื้อหาซับซ้อน
 
@@ -1186,88 +1194,88 @@ ${ctx}
 
 หมายเหตุ: Med=Median, OT=กะที่มีโอที (loading>9.5h), Holiday=เสาร์อาทิตย์, DT=Downtime`;
 
-    const historyToSend=_qaHistory.slice(-6);
-    const messages=[...historyToSend];
+ const historyToSend=_qaHistory.slice(-6);
+ const messages=[...historyToSend];
 
-    // ใช้ Anthropic API ผ่าน fetch พร้อม CORS header ที่ถูกต้อง
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:800,
-        system:systemPrompt,
-        messages
-      })
-    });
+ // ใช้ Anthropic API ผ่าน fetch พร้อม CORS header ที่ถูกต้อง
+ const res=await fetch('https://api.anthropic.com/v1/messages',{
+ method:'POST',
+ headers:{
+ 'Content-Type':'application/json',
+ 'anthropic-version':'2023-06-01',
+ 'anthropic-dangerous-direct-browser-access':'true'
+ },
+ body:JSON.stringify({
+ model:'claude-sonnet-4-20250514',
+ max_tokens:800,
+ system:systemPrompt,
+ messages
+ })
+ });
 
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.error?.message||`HTTP ${res.status}`);
-    const ans=data.content?.[0]?.text||'ไม่สามารถตอบได้ในขณะนี้';
+ const data=await res.json();
+ if(!res.ok)throw new Error(data.error?.message||`HTTP ${res.status}`);
+ const ans=data.content?.[0]?.text||'ไม่สามารถตอบได้ในขณะนี้';
 
-    _qaHistory.push({role:'assistant',content:ans});
-    updateMsg(loadId,ans);
-  }catch(e){
-    _qaHistory.pop(); // remove failed user message
-    updateMsg(loadId,`⚠️ เกิดข้อผิดพลาด: ${e.message}`);
-  }
-  sendBtn.disabled=false;
-  inp.focus();
+ _qaHistory.push({role:'assistant',content:ans});
+ updateMsg(loadId,ans);
+ }catch(e){
+ _qaHistory.pop(); // remove failed user message
+ updateMsg(loadId,`⚠️ เกิดข้อผิดพลาด: ${e.message}`);
+ }
+ sendBtn.disabled=false;
+ inp.focus();
 }
 
 function askPreset(el){
-  document.getElementById('qa-input').value=el.textContent.trim();
-  sendQA();
+ document.getElementById('qa-input').value=el.textContent.trim();
+ sendQA();
 }
 
 function clearQA(){
-  _qaHistory=[];
-  document.getElementById('qa-messages').innerHTML=`
-    <div class="qa-msg">
-      <div class="qa-avatar ai">🤖</div>
-      <div class="qa-bubble ai">ล้างประวัติแล้วครับ พร้อมตอบคำถามใหม่ 😊</div>
-    </div>`;
+ _qaHistory=[];
+ document.getElementById('qa-messages').innerHTML=`
+ <div class="qa-msg">
+ <div class="qa-avatar ai">🤖</div>
+ <div class="qa-bubble ai">ล้างประวัติแล้วครับ พร้อมตอบคำถามใหม่ 😊</div>
+ </div>`;
 }
 
 </script>
 
 <script>
 (function(){
-  const saved=localStorage.getItem('theme')||'light';
-  document.documentElement.setAttribute('data-theme',saved);
-  function updateBtn(){
-    const dark=document.documentElement.getAttribute('data-theme')==='dark';
-    const ic=document.getElementById('theme-icon');const lb=document.getElementById('theme-label');
-    if(ic)ic.textContent=dark?'☀️':'🌙';if(lb)lb.textContent=dark?'Light Mode':'Dark Mode';
-  }
-  window.toggleTheme=function(){
-    const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
-    document.documentElement.setAttribute('data-theme',next);
-    localStorage.setItem('theme',next);updateBtn();
-  };
-  document.addEventListener('DOMContentLoaded',updateBtn);
+ const saved=localStorage.getItem('theme')||'dark';
+ document.documentElement.setAttribute('data-theme',saved);
+ function updateBtn(){
+ const dark=document.documentElement.getAttribute('data-theme')==='dark';
+ const ic=document.getElementById('theme-icon');const lb=document.getElementById('theme-label');
+ if(ic)ic.textContent=dark?'☀️':'🌙';if(lb)lb.textContent=dark?'Light Mode':'Dark Mode';
+ }
+ window.toggleTheme=function(){
+ const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+ document.documentElement.setAttribute('data-theme',next);
+ localStorage.setItem('theme',next);updateBtn();
+ };
+ document.addEventListener('DOMContentLoaded',updateBtn);
 })();
 
-  // Sidebar toggle
-  window.toggleSidebar = function() {
-    var isMobile = window.innerWidth <= 768;
-    if (isMobile) {
-      document.body.classList.toggle('sidebar-open');
-    } else {
-      document.body.classList.toggle('sidebar-collapsed');
-      localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
-    }
-  };
-  // Restore desktop state
-  (function(){
-    if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === '1') {
-      document.body.classList.add('sidebar-collapsed');
-    }
-  })();
+ // Sidebar toggle
+ window.toggleSidebar = function() {
+ var isMobile = window.innerWidth <= 768;
+ if (isMobile) {
+ document.body.classList.toggle('sidebar-open');
+ } else {
+ document.body.classList.toggle('sidebar-collapsed');
+ localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
+ }
+ };
+ // Restore desktop state
+ (function(){
+ if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === '1') {
+ document.body.classList.add('sidebar-collapsed');
+ }
+ })();
 </script>
 </body>
 </html>

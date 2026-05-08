@@ -1,103 +1,101 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>JIG MTN · KPI Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg:      #07090f;
-  --bg2:     #0c0f1a;
-  --bg3:     #111520;
-  --bg4:     #161b28;
-  --border:  #1e2840;
-  --border2: #2a3550;
-  --text:    #e8edf8;
-  --muted:   #4a5880;
-  --dim:     #2a3550;
-
-  --cyan:    #00e5ff;
-  --blue:    #3b82f6;
-  --indigo:  #6366f1;
-  --green:   #00e676;
-  --amber:   #ffab00;
-  --red:     #ff5252;
-  --purple:  #b388ff;
-
-  --font-display: 'Chakra Petch', sans-serif;
-  --font-body:    'Sarabun', sans-serif;
+:root{
+ --bg:#f2f2f2;--bg2:#ffffff;--bg3:#f7f7f7;--card:#ffffff;
+ --border:#e0e0e0;--border2:#cccccc;
+ --accent:#e31937;--accent-dim:rgba(227,25,55,0.08);
+ --cyan:#0066cc;--green:#22c55e;--red:#e31937;--purple:#a855f7;--amber:#f59e0b;
+ --text:#121212;--text2:#404040;--muted:#7a7a7a;--muted2:#a0a0a0;
+ --pd3:#1a6dcc;--pd3-bg:#f0f5ff;--pd3-border:#d0e2fc;
+ --pd4:#cc8800;--pd4-bg:#fdf6ee;--pd4-border:#f0ddb0;
+ --sidebar:252px;--radius:4px;--radius-sm:3px;
+ --font-body:'Sarabun',sans-serif;--font-display:'Inter',sans-serif;
+}
+[data-theme="dark"]{
+ --bg:#050505;--bg2:#0a0a0a;--bg3:#111111;--card:#0d0d0d;
+ --border:#1e1e1e;--border2:#2a2a2a;
+ --accent:#e31937;--accent-dim:rgba(227,25,55,0.10);
+ --text:#ffffff;--text2:#a8a8a8;--muted:#555555;--muted2:#333333;
+ --pd3:#4d9fff;--pd3-bg:rgba(77,159,255,0.08);--pd3-border:rgba(77,159,255,0.22);
+ --pd4:#ffaa40;--pd4-bg:rgba(255,170,64,0.08);--pd4-border:rgba(255,170,64,0.22);
+ --green:#22c55e;--amber:#f59e0b;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  min-height: 100vh;
-  overflow-x: hidden;
+ background: var(--bg);
+ color: var(--text);
+ font-family: var(--font-body);
+ min-height: 100vh;
+ overflow-x: hidden;
 }
 
 /* ── SCAN LINE OVERLAY ── */
 body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,.012) 2px, rgba(0,229,255,.012) 4px);
-  pointer-events: none; z-index: 1000;
+ content: '';
+ position: fixed; inset: 0;
+ background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,.012) 2px, rgba(0,229,255,.012) 4px);
+ pointer-events: none; z-index: 1000;
 }
 
 /* ── HEADER ── */
 .header {
-  background: linear-gradient(180deg, #0a0e1a 0%, var(--bg) 100%);
-  border-bottom: 1px solid var(--border);
-  padding: 0 28px;
-  position: sticky; top: 0; z-index: 100;
-  display: flex; align-items: center; gap: 20px; height: 58px;
+ background: linear-gradient(180deg, #0a0e1a 0%, var(--bg) 100%);
+ border-bottom: 1px solid var(--border);
+ padding: 0 28px;
+ position: sticky; top: 0; z-index: 100;
+ display: flex; align-items: center; gap: 20px; height: 58px;
 }
 .header-logo {
-  display: flex; align-items: center; gap: 10px;
+ display: flex; align-items: center; gap: 10px;
 }
 .logo-icon {
-  width: 34px; height: 34px;
-  background: linear-gradient(135deg, #001529, #003366);
-  border: 1px solid var(--cyan);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  box-shadow: 0 0 12px rgba(0,229,255,.3);
+ width: 34px; height: 34px;
+ background: linear-gradient(135deg, #001529, #003366);
+ border: 1px solid var(--cyan);
+ border-radius: 8px;
+ display: flex; align-items: center; justify-content: center;
+ font-size: 18px;
+ box-shadow: 0 0 12px rgba(0,229,255,.3);
 }
 .header h1 {
-  font-family: var(--font-display);
-  font-size: 14px; font-weight: 700; letter-spacing: 2px;
-  color: var(--cyan);
+ font-family: var(--font-display);
+ font-size: 16px; font-weight: 700; letter-spacing: 2px;
+ color: var(--cyan);
 }
 .header h1 span { color: var(--muted); font-weight: 400; }
 .header-right {
-  margin-left: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+ margin-left: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
 .badge-live {
-  font-family: var(--font-display); font-size: 9px; font-weight: 700;
-  padding: 3px 10px; border-radius: 20px; letter-spacing: 1px;
-  background: rgba(0,230,118,.12); color: var(--green);
-  border: 1px solid rgba(0,230,118,.35);
-  animation: pulse-badge 2s infinite;
+ font-family: var(--font-display); font-size: 10px; font-weight: 700;
+ padding: 3px 10px; border-radius:2px; letter-spacing: 1px;
+ background: rgba(0,230,118,.12); color: var(--green);
+ border: 1px solid rgba(0,230,118,.35);
+ animation: pulse-badge 2s infinite;
 }
 @keyframes pulse-badge { 0%,100%{opacity:1} 50%{opacity:.55} }
 
 /* ── TABS ── */
 .tabs {
-  display: flex; gap: 0; border-bottom: 1px solid var(--border);
-  padding: 0 28px; background: var(--bg2);
-  overflow-x: auto;
+ display: flex; gap: 0; border-bottom: 1px solid var(--border);
+ padding: 0 28px; background: var(--bg2);
+ overflow-x: auto;
 }
 .tab {
-  font-family: var(--font-display); font-size: 10px; font-weight: 600;
-  letter-spacing: 1px; padding: 14px 20px;
-  cursor: pointer; border: none; background: transparent;
-  color: var(--muted); border-bottom: 2px solid transparent;
-  white-space: nowrap; transition: all .2s;
+ font-family: var(--font-display); font-size: 11px; font-weight: 600;
+ letter-spacing: 1px; padding: 14px 20px;
+ cursor: pointer; border: none; background: transparent;
+ color: var(--muted); border-bottom: 2px solid transparent;
+ white-space: nowrap; transition: all .2s;
 }
 .tab:hover { color: var(--text); }
 .tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
@@ -109,30 +107,30 @@ main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
 
 /* ── FILTER BAR ── */
 .filter-bar {
-  display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
-  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px;
+ display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+ background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px;
 }
-.filter-bar label { font-size: 10px; color: var(--muted); letter-spacing: .5px; }
+.filter-bar label { font-size: 11px; color: var(--muted); letter-spacing: .5px; }
 .filter-bar select, .filter-bar input {
-  padding: 6px 10px; background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 7px; color: var(--text); font-family: var(--font-body); font-size: 12px; outline: none;
+ padding: 6px 10px; background: var(--bg3); border: 1px solid var(--border);
+ border-radius: 7px; color: var(--text); font-family: var(--font-body); font-size: 13px; outline: none;
 }
 .filter-bar select:focus, .filter-bar input:focus { border-color: var(--cyan); }
 .btn-load {
-  padding: 7px 18px; background: linear-gradient(135deg, #003344, #006688);
-  border: 1px solid var(--cyan); border-radius: 7px; color: var(--cyan);
-  font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 1px;
-  cursor: pointer; transition: all .2s; white-space: nowrap;
+ padding: 7px 18px; background: linear-gradient(135deg, #003344, #006688);
+ border: 1px solid var(--cyan); border-radius: 7px; color: var(--cyan);
+ font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 1px;
+ cursor: pointer; transition: all .2s; white-space: nowrap;
 }
 .btn-load:hover { background: linear-gradient(135deg, #004455, #0088aa); box-shadow: 0 0 12px rgba(0,229,255,.25); }
 .btn-ai {
-  padding: 7px 18px; background: linear-gradient(135deg, #1a0d3a, #3b0a85);
-  border: 1px solid var(--purple); border-radius: 7px; color: var(--purple);
-  font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 1px;
-  cursor: pointer; transition: all .2s;
+ padding: 7px 18px; background: linear-gradient(135deg, #1a0d3a, #3b0a85);
+ border: 1px solid var(--purple); border-radius: 7px; color: var(--purple);
+ font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 1px;
+ cursor: pointer; transition: all .2s;
 }
-.status-txt { font-size: 11px; color: var(--muted); }
-.badge { font-size: 10px; padding: 2px 10px; border-radius: 20px; font-family: var(--font-display); font-weight: 700; }
+.status-txt { font-size: 12px; color: var(--muted); }
+.badge { font-size: 11px; padding: 2px 10px; border-radius:2px; font-family: var(--font-display); font-weight: 700; }
 .badge.bl { background: rgba(0,229,255,.12); color: var(--cyan); border: 1px solid rgba(0,229,255,.3); }
 .badge.bo { background: rgba(255,171,0,.12); color: var(--amber); border: 1px solid rgba(255,171,0,.3); }
 .badge.bx { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
@@ -141,33 +139,33 @@ main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; margin-bottom: 22px; }
 
 .kpi-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 18px;
-  position: relative; overflow: hidden;
-  transition: transform .2s, box-shadow .2s;
+ background: var(--bg2);
+ border: 1px solid var(--border);
+ border-radius:2px;
+ padding: 16px 18px;
+ position: relative; overflow: hidden;
+ transition: transform .2s, box-shadow .2s;
 }
 .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
 .kpi-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+ content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
 }
-.kpi-card.cyan::before  { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
+.kpi-card.cyan::before { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
 .kpi-card.green::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
 .kpi-card.amber::before { background: linear-gradient(90deg, transparent, var(--amber), transparent); }
-.kpi-card.red::before   { background: linear-gradient(90deg, transparent, var(--red), transparent); }
+.kpi-card.red::before { background: linear-gradient(90deg, transparent, var(--red), transparent); }
 .kpi-card.purple::before{ background: linear-gradient(90deg, transparent, var(--purple), transparent); }
-.kpi-card.blue::before  { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+.kpi-card.blue::before { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
 
-.kpi-label { font-size: 10px; color: var(--muted); letter-spacing: .5px; margin-bottom: 8px; text-transform: uppercase; }
-.kpi-value { font-family: var(--font-display); font-size: 30px; font-weight: 700; line-height: 1; }
-.kpi-unit  { font-size: 11px; font-weight: 400; color: var(--muted); margin-left: 3px; }
-.kpi-sub   { font-size: 10px; color: var(--muted); margin-top: 6px; }
-.kpi-target{ display: inline-flex; align-items: center; gap: 4px; font-size: 10px; margin-top: 5px; padding: 2px 8px; border-radius: 20px; }
-.kpi-target.hit  { background: rgba(0,230,118,.1); color: var(--green); }
+.kpi-label { font-size: 11px; color: var(--muted); letter-spacing: .5px; margin-bottom: 8px; text-transform: uppercase; }
+.kpi-value { font-family: var(--font-display); font-size: 34px; font-weight: 700; line-height: 1; }
+.kpi-unit { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 3px; }
+.kpi-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+.kpi-target{ display: inline-flex; align-items: center; gap: 4px; font-size: 11px; margin-top: 5px; padding: 2px 8px; border-radius:2px; }
+.kpi-target.hit { background: rgba(0,230,118,.1); color: var(--green); }
 .kpi-target.miss { background: rgba(255,82,82,.1); color: var(--red); }
 .kpi-target.warn { background: rgba(255,171,0,.1); color: var(--amber); }
-.kpi-icon { position: absolute; right: 14px; top: 14px; font-size: 22px; opacity: .15; }
+.kpi-icon { position: absolute; right: 14px; top: 14px; font-size: 25px; opacity: .15; }
 
 /* ── GAUGE ── */
 .gauge-wrap { position: relative; width: 100px; height: 60px; margin: 0 auto 4px; }
@@ -179,63 +177,63 @@ main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
 @media(max-width:900px){ .chart-grid,.chart-grid-3 { grid-template-columns: 1fr; } }
 
 .panel {
-  background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px;
-  position: relative;
+ background: var(--bg2); border: 1px solid var(--border); border-radius:2px; padding: 18px;
+ position: relative;
 }
 .panel-hdr {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 8px;
+ display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 8px;
 }
 .panel-title {
-  font-family: var(--font-display); font-size: 10px; font-weight: 700;
-  color: var(--cyan); letter-spacing: 1px; text-transform: uppercase;
+ font-family: var(--font-display); font-size: 11px; font-weight: 700;
+ color: var(--cyan); letter-spacing: 1px; text-transform: uppercase;
 }
-.panel-sub { font-size: 10px; color: var(--muted); }
+.panel-sub { font-size: 11px; color: var(--muted); }
 .chart-box { position: relative; height: 200px; }
 .chart-box-sm { position: relative; height: 160px; }
 .chart-box-lg { position: relative; height: 260px; }
 
 /* ── SECTION HEADINGS ── */
 .sec-hdr {
-  font-family: var(--font-display); font-size: 10px; font-weight: 700;
-  color: var(--muted); letter-spacing: 2px; text-transform: uppercase;
-  margin: 22px 0 12px; padding-bottom: 6px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
+ font-family: var(--font-display); font-size: 11px; font-weight: 700;
+ color: var(--muted); letter-spacing: 2px; text-transform: uppercase;
+ margin: 22px 0 12px; padding-bottom: 6px;
+ border-bottom: 1px solid var(--border);
+ display: flex; align-items: center; gap: 8px;
 }
 .sec-hdr::before { content: ''; width: 24px; height: 2px; background: var(--cyan); border-radius: 2px; }
 
 /* ── TECH PERFORMANCE TABLE ── */
 .tech-table { width: 100%; border-collapse: collapse; }
 .tech-table th {
-  font-family: var(--font-display); font-size: 9px; color: var(--muted);
-  letter-spacing: .5px; text-align: left; padding: 7px 10px;
-  border-bottom: 1px solid var(--border2); white-space: nowrap;
+ font-family: var(--font-display); font-size: 10px; color: var(--muted);
+ letter-spacing: .5px; text-align: left; padding: 7px 10px;
+ border-bottom: 1px solid var(--border2); white-space: nowrap;
 }
-.tech-table td { font-size: 11px; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.tech-table td { font-size: 12px; padding: 8px 10px; border-bottom: 1px solid var(--border); }
 .tech-table tr:last-child td { border-bottom: none; }
 .tech-table tr:hover td { background: rgba(255,255,255,.02); }
-.perf-bar { background: var(--bg3); border-radius: 20px; height: 5px; overflow: hidden; min-width: 60px; }
-.perf-bar-fill { height: 100%; border-radius: 20px; }
+.perf-bar { background: var(--bg3); border-radius:2px; height: 5px; overflow: hidden; min-width: 60px; }
+.perf-bar-fill { height: 100%; border-radius:2px; }
 
 /* ── PENDING MO TABLE ── */
-.mo-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.mo-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .mo-table th {
-  font-family: var(--font-display); font-size: 9px; color: var(--muted); letter-spacing: .5px;
-  padding: 7px 10px; border-bottom: 1px solid var(--border2); text-align: left; white-space: nowrap;
+ font-family: var(--font-display); font-size: 10px; color: var(--muted); letter-spacing: .5px;
+ padding: 7px 10px; border-bottom: 1px solid var(--border2); text-align: left; white-space: nowrap;
 }
 .mo-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 .mo-table tr:hover td { background: rgba(0,229,255,.03); }
-.badge-ttr { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; font-family: var(--font-display); }
+.badge-ttr { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius:2px; font-family: var(--font-display); }
 .badge-hi { background: rgba(255,82,82,.15); color: var(--red); border:1px solid rgba(255,82,82,.3); }
 .badge-md { background: rgba(255,171,0,.12); color: var(--amber); border:1px solid rgba(255,171,0,.3); }
 .badge-ok { background: rgba(0,230,118,.1); color: var(--green); border:1px solid rgba(0,230,118,.3); }
-.badge-pend { background: rgba(255,82,82,.1); color: var(--red); font-size:9px; padding:2px 7px; border-radius:20px; font-weight:700; }
+.badge-pend { background: rgba(255,82,82,.1); color: var(--red); font-size:10px; padding:2px 7px; border-radius:2px; font-weight:700; }
 
 /* ── LOADING ── */
 .ld-spin {
-  width: 36px; height: 36px; border: 2px solid var(--border2);
-  border-top-color: var(--cyan); border-radius: 50%;
-  animation: spin 1s linear infinite; margin: 40px auto;
+ width: 36px; height: 36px; border: 2px solid var(--border2);
+ border-top-color: var(--cyan); border-radius: 50%;
+ animation: spin 1s linear infinite; margin: 40px auto;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .pulse-txt { animation: ptxt 1.5s ease-in-out infinite; }
@@ -243,18 +241,18 @@ main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
 
 /* ── AI SECTION ── */
 .ai-wrap {
-  background: var(--bg2); border: 1px solid #1a2a1a; border-radius: 12px; padding: 18px;
-  margin-top: 16px;
+ background: var(--bg2); border: 1px solid #1a2a1a; border-radius:2px; padding: 18px;
+ margin-top: 16px;
 }
 .ai-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.ai-orb { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-.ai-hdr h3 { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+.ai-orb { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.ai-hdr h3 { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 1px; }
 .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media(max-width:700px) { .ai-grid { grid-template-columns: 1fr; } }
 .ai-sec { background: var(--bg3); border: 1px solid var(--border); border-radius: 9px; padding: 14px; }
-.ai-sec h4 { font-family: var(--font-display); font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+.ai-sec h4 { font-family: var(--font-display); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
 .ai-sec ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
-.ai-sec li { font-size: 12px; color: #dce4f0; padding: 8px 11px; border-radius: 6px; line-height: 1.6; border-left: 2px solid var(--border2); }
+.ai-sec li { font-size: 13px; color: #dce4f0; padding: 8px 11px; border-radius: 6px; line-height: 1.6; border-left: 2px solid var(--border2); }
 .ai-sec li.w { border-left-color: var(--red); }
 .ai-sec li.y { border-left-color: var(--amber); }
 .ai-sec li.g { border-left-color: var(--green); }
@@ -262,23 +260,23 @@ main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
 /* ── RADIAL GAUGE ── */
 .radial-gauge { position: relative; }
 .radial-value {
-  position: absolute; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  font-family: var(--font-display); font-weight: 700;
+ position: absolute; inset: 0; display: flex; flex-direction: column;
+ align-items: center; justify-content: center;
+ font-family: var(--font-display); font-weight: 700;
 }
 
 /* ── SPARKLINE CHIP ── */
 .spark-chip {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
-  padding: 5px 10px;
+ display: flex; align-items: center; gap: 6px;
+ background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+ padding: 5px 10px;
 }
 
 /* ── MONTH TABS for trend ── */
 .mtabs { display: flex; gap: 4px; flex-wrap: wrap; }
-.mtab { font-size: 9px; padding: 3px 9px; border-radius: 20px; cursor: pointer;
-  background: var(--bg3); border: 1px solid var(--border); color: var(--muted);
-  font-family: var(--font-display); transition: all .15s; }
+.mtab { font-size: 10px; padding: 3px 9px; border-radius:2px; cursor: pointer;
+ background: var(--bg3); border: 1px solid var(--border); color: var(--muted);
+ font-family: var(--font-display); transition: all .15s; }
 .mtab.active { background: rgba(0,229,255,.12); border-color: rgba(0,229,255,.4); color: var(--cyan); }
 
 /* ── SCROLLBAR ── */
@@ -289,233 +287,235 @@ main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
 /* ── HEAT STRIP ── */
 .heat-strip { display: flex; gap: 3px; flex-wrap: wrap; }
 .heat-cell {
-  width: 28px; height: 28px; border-radius: 5px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px; font-weight: 700; cursor: default;
-  transition: transform .15s;
+ width: 28px; height: 28px; border-radius: 5px;
+ display: flex; align-items: center; justify-content: center;
+ font-size: 10px; font-weight: 700; cursor: default;
+ transition: transform .15s;
 }
 .heat-cell:hover { transform: scale(1.2); z-index: 10; }
 
 /* ── ANIM ── */
 @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 .fade-up { animation: fadeUp .4s ease both; }
+#noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px;}[data-theme="light"] #noise-overlay{opacity:.014}
 </style>
 </head>
 <body>
+<div id="noise-overlay"></div>
 
 <!-- HEADER -->
 <header class="header">
-  <div class="header-logo">
-    <div class="logo-icon">⚙</div>
-    <h1>JIG MTN <span>· KPI DASHBOARD</span></h1>
-  </div>
-  <div class="header-right">
-    <span id="mo-badge" class="badge bx">— ยังไม่โหลด</span>
-    <span id="mo-status" class="status-txt"></span>
-  </div>
+ <div class="header-logo">
+ <div class="logo-icon"></div>
+ <h1>JIG MTN <span>· KPI DASHBOARD</span></h1>
+ </div>
+ <div class="header-right">
+ <span id="mo-badge" class="badge bx">— ยังไม่โหลด</span>
+ <span id="mo-status" class="status-txt"></span>
+ </div>
 </header>
 
 <!-- TABS -->
 <nav class="tabs">
-  <button class="tab active" onclick="switchTab('overview')">📊 KPI Overview</button>
-  <button class="tab" onclick="switchTab('mtbf_mttr')">⏱ MTBF / MTTR</button>
-  <button class="tab" onclick="switchTab('pending')">⏳ MO ค้าง</button>
-  <button class="tab" onclick="switchTab('tech')">👨‍🔧 ช่าง Performance</button>
-  <button class="tab" onclick="switchTab('ai')">🤖 AI Analysis</button>
+ <button class="tab active" onclick="switchTab('overview')"> KPI Overview</button>
+ <button class="tab" onclick="switchTab('mtbf_mttr')"> MTBF / MTTR</button>
+ <button class="tab" onclick="switchTab('pending')"> MO ค้าง</button>
+ <button class="tab" onclick="switchTab('tech')"> ช่าง Performance</button>
+ <button class="tab" onclick="switchTab('ai')"> AI Analysis</button>
 </nav>
 
 <main>
 
 <!-- ═══════════════════ FILTER BAR ═══════════════════ -->
 <div class="filter-bar">
-  <div>
-    <label>CSV URL (MO Data)</label>
-    <input id="mo-url-inp" style="width:420px" placeholder="https://docs.google.com/spreadsheets/.../pub?output=csv&gid=..." value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSVDNHyOb2LrXosMZG09quorOkfI9aLs8Hg_6ek8glxEQRQYL6F1rWl_cZ12A_f7SC2yDkyWroXHtM1/pub?gid=785568377&single=true&output=csv">
-  </div>
-  <div>
-    <label>เดือน</label>
-    <select id="flt-month" onchange="applyFilter()">
-      <option value="all">ทั้งหมด</option>
-      <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option><option value="3">มีนาคม</option>
-      <option value="4">เมษายน</option><option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
-      <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option><option value="9">กันยายน</option>
-      <option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
-    </select>
-  </div>
-  <div>
-    <label>Line</label>
-    <select id="flt-line" onchange="applyFilter()"><option value="all">ทุก Line</option></select>
-  </div>
-  <button class="btn-load" onclick="loadMO()">⚡ โหลดข้อมูล</button>
-  <button class="btn-ai" onclick="runAI()">🤖 AI วิเคราะห์</button>
+ <div>
+ <label>CSV URL (MO Data)</label>
+ <input id="mo-url-inp" style="width:420px" placeholder="https://docs.google.com/spreadsheets/.../pub?output=csv&gid=..." value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSVDNHyOb2LrXosMZG09quorOkfI9aLs8Hg_6ek8glxEQRQYL6F1rWl_cZ12A_f7SC2yDkyWroXHtM1/pub?gid=785568377&single=true&output=csv">
+ </div>
+ <div>
+ <label>เดือน</label>
+ <select id="flt-month" onchange="applyFilter()">
+ <option value="all">ทั้งหมด</option>
+ <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option><option value="3">มีนาคม</option>
+ <option value="4">เมษายน</option><option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
+ <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option><option value="9">กันยายน</option>
+ <option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+ </select>
+ </div>
+ <div>
+ <label>Line</label>
+ <select id="flt-line" onchange="applyFilter()"><option value="all">ทุก Line</option></select>
+ </div>
+ <button class="btn-load" onclick="loadMO()"> โหลดข้อมูล</button>
+ <button class="btn-ai" onclick="runAI()"> AI วิเคราะห์</button>
 </div>
 
 <!-- ═══════════════════ PAGE: OVERVIEW ═══════════════════ -->
 <div id="page-overview" class="page active fade-up">
 
-  <!-- KPI CARDS -->
-  <div class="kpi-grid" id="kpi-grid">
-    <!-- filled by JS -->
-    <div class="kpi-card cyan" style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;height:80px">
-      <p class="pulse-txt" style="color:var(--muted);font-size:12px">⚡ กด "โหลดข้อมูล" เพื่อเริ่มต้น</p>
-    </div>
-  </div>
+ <!-- KPI CARDS -->
+ <div class="kpi-grid" id="kpi-grid">
+ <!-- filled by JS -->
+ <div class="kpi-card cyan" style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;height:80px">
+ <p class="pulse-txt" style="color:var(--muted);font-size:13px"> กด "โหลดข้อมูล" เพื่อเริ่มต้น</p>
+ </div>
+ </div>
 
-  <!-- TREND CHARTS -->
-  <div class="sec-hdr">📈 Monthly Trend</div>
-  <div class="chart-grid">
-    <div class="panel">
-      <div class="panel-hdr">
-        <span class="panel-title">MO Total &amp; Close Rate %</span>
-        <span class="panel-sub" id="avg-close-lbl">—</span>
-      </div>
-      <div class="chart-box"><canvas id="ch-close"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-hdr">
-        <span class="panel-title">MTBF (hrs) vs Target</span>
-        <span class="panel-sub">Target: ≥ 150 hr</span>
-      </div>
-      <div class="chart-box"><canvas id="ch-mtbf"></canvas></div>
-    </div>
-  </div>
-  <div class="chart-grid">
-    <div class="panel">
-      <div class="panel-hdr">
-        <span class="panel-title">MTTR (hrs) vs Target</span>
-        <span class="panel-sub">Target: ≤ 0.25 hr</span>
-      </div>
-      <div class="chart-box"><canvas id="ch-mttr"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-hdr">
-        <span class="panel-title">Problem Type Pareto</span>
-      </div>
-      <div class="chart-box"><canvas id="ch-pareto"></canvas></div>
-    </div>
-  </div>
+ <!-- TREND CHARTS -->
+ <div class="sec-hdr"> Monthly Trend</div>
+ <div class="chart-grid">
+ <div class="panel">
+ <div class="panel-hdr">
+ <span class="panel-title">MO Total &amp; Close Rate %</span>
+ <span class="panel-sub" id="avg-close-lbl">—</span>
+ </div>
+ <div class="chart-box"><canvas id="ch-close"></canvas></div>
+ </div>
+ <div class="panel">
+ <div class="panel-hdr">
+ <span class="panel-title">MTBF (hrs) vs Target</span>
+ <span class="panel-sub">Target: ≥ 150 hr</span>
+ </div>
+ <div class="chart-box"><canvas id="ch-mtbf"></canvas></div>
+ </div>
+ </div>
+ <div class="chart-grid">
+ <div class="panel">
+ <div class="panel-hdr">
+ <span class="panel-title">MTTR (hrs) vs Target</span>
+ <span class="panel-sub">Target: ≤ 0.25 hr</span>
+ </div>
+ <div class="chart-box"><canvas id="ch-mttr"></canvas></div>
+ </div>
+ <div class="panel">
+ <div class="panel-hdr">
+ <span class="panel-title">Problem Type Pareto</span>
+ </div>
+ <div class="chart-box"><canvas id="ch-pareto"></canvas></div>
+ </div>
+ </div>
 
-  <!-- PROBLEM HEATMAP -->
-  <div class="sec-hdr">🌡 Problem Heatmap — ปัญหาตามเดือน</div>
-  <div class="panel" style="margin-bottom:20px">
-    <div id="heatmap-wrap">
-      <p style="color:var(--muted);font-size:12px">โหลดข้อมูลก่อนครับ</p>
-    </div>
-  </div>
+ <!-- PROBLEM HEATMAP -->
+ <div class="sec-hdr"> Problem Heatmap — ปัญหาตามเดือน</div>
+ <div class="panel" style="margin-bottom:20px">
+ <div id="heatmap-wrap">
+ <p style="color:var(--muted);font-size:13px">โหลดข้อมูลก่อนครับ</p>
+ </div>
+ </div>
 </div>
 
 <!-- ═══════════════════ PAGE: MTBF/MTTR ═══════════════════ -->
 <div id="page-mtbf_mttr" class="page fade-up">
-  <div class="sec-hdr">⏱ MTBF &amp; MTTR ละเอียดรายเครื่อง</div>
-  <div class="chart-grid">
-    <div class="panel">
-      <div class="panel-hdr">
-        <span class="panel-title">MTBF By Machine (Top 15)</span>
-        <span class="panel-sub">หน่วย: ชั่วโมง</span>
-      </div>
-      <div class="chart-box-lg"><canvas id="ch-mtbf-mc"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-hdr">
-        <span class="panel-title">MTTR Distribution</span>
-        <span class="panel-sub">หน่วย: ชั่วโมง</span>
-      </div>
-      <div class="chart-box-lg"><canvas id="ch-mttr-dist"></canvas></div>
-    </div>
-  </div>
-  <div class="panel" style="margin-bottom:20px">
-    <div class="panel-hdr">
-      <span class="panel-title">MTBF Trend รายเดือน (Line)</span>
-    </div>
-    <div class="chart-box-lg"><canvas id="ch-mtbf-trend"></canvas></div>
-  </div>
-  <div class="sec-hdr">📋 Machine MTBF / MTTR Summary</div>
-  <div class="panel">
-    <div id="mc-summary-table"><p style="color:var(--muted);font-size:12px">ยังไม่มีข้อมูล</p></div>
-  </div>
+ <div class="sec-hdr"> MTBF &amp; MTTR ละเอียดรายเครื่อง</div>
+ <div class="chart-grid">
+ <div class="panel">
+ <div class="panel-hdr">
+ <span class="panel-title">MTBF By Machine (Top 15)</span>
+ <span class="panel-sub">หน่วย: ชั่วโมง</span>
+ </div>
+ <div class="chart-box-lg"><canvas id="ch-mtbf-mc"></canvas></div>
+ </div>
+ <div class="panel">
+ <div class="panel-hdr">
+ <span class="panel-title">MTTR Distribution</span>
+ <span class="panel-sub">หน่วย: ชั่วโมง</span>
+ </div>
+ <div class="chart-box-lg"><canvas id="ch-mttr-dist"></canvas></div>
+ </div>
+ </div>
+ <div class="panel" style="margin-bottom:20px">
+ <div class="panel-hdr">
+ <span class="panel-title">MTBF Trend รายเดือน (Line)</span>
+ </div>
+ <div class="chart-box-lg"><canvas id="ch-mtbf-trend"></canvas></div>
+ </div>
+ <div class="sec-hdr"> Machine MTBF / MTTR Summary</div>
+ <div class="panel">
+ <div id="mc-summary-table"><p style="color:var(--muted);font-size:13px">ยังไม่มีข้อมูล</p></div>
+ </div>
 </div>
 
 <!-- ═══════════════════ PAGE: PENDING MO ═══════════════════ -->
 <div id="page-pending" class="page fade-up">
-  <div class="sec-hdr" style="justify-content:space-between">
-    <span>⏳ MO ค้างอยู่ (ยังไม่ปิด)</span>
-    <span id="pend-count" style="font-size:12px;color:var(--red);font-family:var(--font-display)"></span>
-  </div>
-  <div class="chart-grid">
-    <div class="panel">
-      <div class="panel-hdr"><span class="panel-title">MO ค้าง by Problem Type</span></div>
-      <div class="chart-box"><canvas id="ch-pend-prob"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-hdr"><span class="panel-title">MO ค้าง by Line</span></div>
-      <div class="chart-box"><canvas id="ch-pend-line"></canvas></div>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="panel-hdr">
-      <span class="panel-title">รายการ MO ค้าง</span>
-      <span class="panel-sub">เรียงตาม TTR สูงสุด</span>
-    </div>
-    <div style="overflow-x:auto">
-      <table class="mo-table" id="pend-table">
-        <thead><tr>
-          <th>วันที่เปิด</th><th>Line</th><th>Mc No.</th>
-          <th>Problem Type</th><th>อาการ</th>
-          <th>TTR (hr)</th><th>รอมานาน (วัน)</th><th>ช่าง</th>
-        </tr></thead>
-        <tbody id="pend-tbody"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">ยังไม่มีข้อมูล</td></tr></tbody>
-      </table>
-    </div>
-  </div>
+ <div class="sec-hdr" style="justify-content:space-between">
+ <span> MO ค้างอยู่ (ยังไม่ปิด)</span>
+ <span id="pend-count" style="font-size:13px;color:var(--red);font-family:var(--font-display)"></span>
+ </div>
+ <div class="chart-grid">
+ <div class="panel">
+ <div class="panel-hdr"><span class="panel-title">MO ค้าง by Problem Type</span></div>
+ <div class="chart-box"><canvas id="ch-pend-prob"></canvas></div>
+ </div>
+ <div class="panel">
+ <div class="panel-hdr"><span class="panel-title">MO ค้าง by Line</span></div>
+ <div class="chart-box"><canvas id="ch-pend-line"></canvas></div>
+ </div>
+ </div>
+ <div class="panel">
+ <div class="panel-hdr">
+ <span class="panel-title">รายการ MO ค้าง</span>
+ <span class="panel-sub">เรียงตาม TTR สูงสุด</span>
+ </div>
+ <div style="overflow-x:auto">
+ <table class="mo-table" id="pend-table">
+ <thead><tr>
+ <th>วันที่เปิด</th><th>Line</th><th>Mc No.</th>
+ <th>Problem Type</th><th>อาการ</th>
+ <th>TTR (hr)</th><th>รอมานาน (วัน)</th><th>ช่าง</th>
+ </tr></thead>
+ <tbody id="pend-tbody"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">ยังไม่มีข้อมูล</td></tr></tbody>
+ </table>
+ </div>
+ </div>
 </div>
 
 <!-- ═══════════════════ PAGE: TECH PERFORMANCE ═══════════════════ -->
 <div id="page-tech" class="page fade-up">
-  <div class="sec-hdr">👨‍🔧 ช่าง Performance Scorecard</div>
-  <div class="kpi-grid" id="tech-kpi-grid"></div>
-  <div class="chart-grid">
-    <div class="panel">
-      <div class="panel-hdr"><span class="panel-title">MO Count by ช่าง</span></div>
-      <div class="chart-box-lg"><canvas id="ch-tech-count"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-hdr"><span class="panel-title">Avg TTR by ช่าง (hr)</span></div>
-      <div class="chart-box-lg"><canvas id="ch-tech-ttr"></canvas></div>
-    </div>
-  </div>
-  <div class="panel" style="margin-bottom:20px">
-    <div class="panel-hdr"><span class="panel-title">Closure Rate % by ช่าง</span><span class="panel-sub">เป้าหมาย ≥ 90%</span></div>
-    <div class="chart-box"><canvas id="ch-tech-close"></canvas></div>
-  </div>
-  <div class="panel">
-    <div class="panel-hdr"><span class="panel-title">ตาราง Performance ช่าง</span></div>
-    <div style="overflow-x:auto">
-      <table class="tech-table">
-        <thead><tr>
-          <th>#</th><th>ชื่อช่าง</th><th>MO ทั้งหมด</th>
-          <th>ปิดแล้ว</th><th>Close Rate</th>
-          <th>Avg MTTR (hr)</th><th>Min MTTR</th><th>Max MTTR</th>
-          <th>TTR &gt;1hr</th><th>Trend</th>
-        </tr></thead>
-        <tbody id="tech-tbody"><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">ยังไม่มีข้อมูล</td></tr></tbody>
-      </table>
-    </div>
-  </div>
+ <div class="sec-hdr"> ช่าง Performance Scorecard</div>
+ <div class="kpi-grid" id="tech-kpi-grid"></div>
+ <div class="chart-grid">
+ <div class="panel">
+ <div class="panel-hdr"><span class="panel-title">MO Count by ช่าง</span></div>
+ <div class="chart-box-lg"><canvas id="ch-tech-count"></canvas></div>
+ </div>
+ <div class="panel">
+ <div class="panel-hdr"><span class="panel-title">Avg TTR by ช่าง (hr)</span></div>
+ <div class="chart-box-lg"><canvas id="ch-tech-ttr"></canvas></div>
+ </div>
+ </div>
+ <div class="panel" style="margin-bottom:20px">
+ <div class="panel-hdr"><span class="panel-title">Closure Rate % by ช่าง</span><span class="panel-sub">เป้าหมาย ≥ 90%</span></div>
+ <div class="chart-box"><canvas id="ch-tech-close"></canvas></div>
+ </div>
+ <div class="panel">
+ <div class="panel-hdr"><span class="panel-title">ตาราง Performance ช่าง</span></div>
+ <div style="overflow-x:auto">
+ <table class="tech-table">
+ <thead><tr>
+ <th>#</th><th>ชื่อช่าง</th><th>MO ทั้งหมด</th>
+ <th>ปิดแล้ว</th><th>Close Rate</th>
+ <th>Avg MTTR (hr)</th><th>Min MTTR</th><th>Max MTTR</th>
+ <th>TTR &gt;1hr</th><th>Trend</th>
+ </tr></thead>
+ <tbody id="tech-tbody"><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">ยังไม่มีข้อมูล</td></tr></tbody>
+ </table>
+ </div>
+ </div>
 </div>
 
 <!-- ═══════════════════ PAGE: AI ═══════════════════ -->
 <div id="page-ai" class="page fade-up">
-  <div class="ai-wrap" style="border-color:#1a2a3a">
-    <div class="ai-hdr">
-      <div class="ai-orb" style="background:linear-gradient(135deg,#0a1a2a,#0088bb)">🤖</div>
-      <div>
-        <h3 style="color:var(--cyan)">AI MAINTENANCE INTELLIGENCE</h3>
-        <span style="font-size:10px;color:var(--muted)">Root Cause · MTBF/MTTR Analysis · Predictive Maintenance · ช่าง Performance</span>
-      </div>
-      <button class="btn-ai" style="margin-left:auto" onclick="runAI()">🤖 วิเคราะห์ใหม่</button>
-    </div>
-    <div id="ai-out"><p style="color:var(--muted);font-size:12px">กด "🤖 AI วิเคราะห์" หรือ "วิเคราะห์ใหม่" เพื่อเริ่ม</p></div>
-  </div>
+ <div class="ai-wrap" style="border-color:#1a2a3a">
+ <div class="ai-hdr">
+ <div class="ai-orb" style="background:linear-gradient(135deg,#0a1a2a,#0088bb)"></div>
+ <div>
+ <h3 style="color:var(--cyan)">AI MAINTENANCE INTELLIGENCE</h3>
+ <span style="font-size:11px;color:var(--muted)">Root Cause · MTBF/MTTR Analysis · Predictive Maintenance · ช่าง Performance</span>
+ </div>
+ <button class="btn-ai" style="margin-left:auto" onclick="runAI()"> วิเคราะห์ใหม่</button>
+ </div>
+ <div id="ai-out"><p style="color:var(--muted);font-size:13px">กด " AI วิเคราะห์" หรือ "วิเคราะห์ใหม่" เพื่อเริ่ม</p></div>
+ </div>
 </div>
 
 </main>
@@ -532,569 +532,569 @@ const CHARTS = {};
 // TAB SWITCHING
 // ════════════════════════════════════════════════════════
 function switchTab(id) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    const ids = ['overview','mtbf_mttr','pending','tech','ai'];
-    t.classList.toggle('active', ids[i] === id);
-  });
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  if (MO_LOADED) setTimeout(renderCharts, 50);
+ document.querySelectorAll('.tab').forEach((t,i) => {
+ const ids = ['overview','mtbf_mttr','pending','tech','ai'];
+ t.classList.toggle('active', ids[i] === id);
+ });
+ document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+ document.getElementById('page-'+id).classList.add('active');
+ if (MO_LOADED) setTimeout(renderCharts, 50);
 }
 
 // ════════════════════════════════════════════════════════
 // CSV PARSER
 // ════════════════════════════════════════════════════════
 function csvLine(l) {
-  const cells = []; let cur = '', inQ = false;
-  for (let i = 0; i < l.length; i++) {
-    const c = l[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
-    else cur += c;
-  }
-  cells.push(cur.trim()); return cells;
+ const cells = []; let cur = '', inQ = false;
+ for (let i = 0; i < l.length; i++) {
+ const c = l[i];
+ if (c === '"') { inQ = !inQ; }
+ else if (c === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+ else cur += c;
+ }
+ cells.push(cur.trim()); return cells;
 }
 
 function parseMODate(s) {
-  if (!s) return null;
-  s = s.trim().replace(/\r/g,'');
-  // Try DD/MM/YYYY HH:MM or DD/MM/YYYY
-  const m = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
-  if (!m) return null;
-  let [, d, mo, y] = m;
-  if (y.length === 2) y = '25' + y;
-  if (parseInt(y) > 2400) y = String(parseInt(y) - 543);
-  const dt = new Date(`${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`);
-  return isNaN(dt) ? null : dt;
+ if (!s) return null;
+ s = s.trim().replace(/\r/g,'');
+ // Try DD/MM/YYYY HH:MM or DD/MM/YYYY
+ const m = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+ if (!m) return null;
+ let [, d, mo, y] = m;
+ if (y.length === 2) y = '25' + y;
+ if (parseInt(y) > 2400) y = String(parseInt(y) - 543);
+ const dt = new Date(`${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`);
+ return isNaN(dt) ? null : dt;
 }
 
 function parseMO(text) {
-  const lines = text.split('\n').filter(l => l.trim());
-  if (lines.length < 2) return [];
-  const hdr = csvLine(lines[0]);
-  const idx = {}; hdr.forEach((h,i) => idx[h.trim().replace(/\r/g,'')] = i);
-  const g = (row,n) => { const i=idx[n]; return (i!==undefined&&row[i]!==undefined)?String(row[i]).trim().replace(/\r/g,''):''; };
-  const num = v => { if(!v)return 0; const x=parseFloat(v.replace(/,/g,'')); return isNaN(x)?0:x; };
-  const rows = [];
-  for (let r = 1; r < lines.length; r++) {
-    const row = csvLine(lines[r]);
-    if (row.length < 6) continue;
-    const dateOpen = parseMODate(g(row,'เวลาเปิด MO'));
-    if (!dateOpen) continue;
-    // JIG filter
-    const dept = g(row,'แผนก');
-    const mcType = g(row,'Mc Type');
-    if (dept && !dept.toUpperCase().includes('JIG') && !mcType.toUpperCase().includes('JIG')) continue;
-    const dateClose = parseMODate(g(row,'เวลาซ่อมเสร็จ'));
-    const status = g(row,'Status MO').toLowerCase();
-    const isClosed = !!dateClose || status.includes('เสร็จ') || status.includes('close') || status.includes('done');
-    const ttr = num(g(row,'TTR'));
-    rows.push({
-      date: dateOpen, dateClose,
-      dateStr: dateOpen.toLocaleDateString('th-TH'),
-      month: dateOpen.getMonth()+1, year: dateOpen.getFullYear(),
-      line: g(row,'Line การผลิต'),
-      mcType, mcNo: g(row,'Mc No.'),
-      probType: g(row,'Problem Type'),
-      symptom: g(row,'อาการ/สาเหตุ'),
-      solution: g(row,'แนวทางการแก้ไข'),
-      ttr, ttrHr: +(ttr/60).toFixed(3),
-      tech: g(row,'ช่างที่รับการแก้ไข'),
-      isClosed, status: g(row,'Status MO'),
-      daysPending: !isClosed ? Math.floor((Date.now()-dateOpen)/86400000) : 0,
-    });
-  }
-  return rows;
+ const lines = text.split('\n').filter(l => l.trim());
+ if (lines.length < 2) return [];
+ const hdr = csvLine(lines[0]);
+ const idx = {}; hdr.forEach((h,i) => idx[h.trim().replace(/\r/g,'')] = i);
+ const g = (row,n) => { const i=idx[n]; return (i!==undefined&&row[i]!==undefined)?String(row[i]).trim().replace(/\r/g,''):''; };
+ const num = v => { if(!v)return 0; const x=parseFloat(v.replace(/,/g,'')); return isNaN(x)?0:x; };
+ const rows = [];
+ for (let r = 1; r < lines.length; r++) {
+ const row = csvLine(lines[r]);
+ if (row.length < 6) continue;
+ const dateOpen = parseMODate(g(row,'เวลาเปิด MO'));
+ if (!dateOpen) continue;
+ // JIG filter
+ const dept = g(row,'แผนก');
+ const mcType = g(row,'Mc Type');
+ if (dept && !dept.toUpperCase().includes('JIG') && !mcType.toUpperCase().includes('JIG')) continue;
+ const dateClose = parseMODate(g(row,'เวลาซ่อมเสร็จ'));
+ const status = g(row,'Status MO').toLowerCase();
+ const isClosed = !!dateClose || status.includes('เสร็จ') || status.includes('close') || status.includes('done');
+ const ttr = num(g(row,'TTR'));
+ rows.push({
+ date: dateOpen, dateClose,
+ dateStr: dateOpen.toLocaleDateString('th-TH'),
+ month: dateOpen.getMonth()+1, year: dateOpen.getFullYear(),
+ line: g(row,'Line การผลิต'),
+ mcType, mcNo: g(row,'Mc No.'),
+ probType: g(row,'Problem Type'),
+ symptom: g(row,'อาการ/สาเหตุ'),
+ solution: g(row,'แนวทางการแก้ไข'),
+ ttr, ttrHr: +(ttr/60).toFixed(3),
+ tech: g(row,'ช่างที่รับการแก้ไข'),
+ isClosed, status: g(row,'Status MO'),
+ daysPending: !isClosed ? Math.floor((Date.now()-dateOpen)/86400000) : 0,
+ });
+ }
+ return rows;
 }
 
 // ════════════════════════════════════════════════════════
 // LOAD
 // ════════════════════════════════════════════════════════
 async function loadMO() {
-  const url = document.getElementById('mo-url-inp').value.trim();
-  if (!url) { alert('กรุณากรอก URL'); return; }
-  const badge = document.getElementById('mo-badge');
-  const status = document.getElementById('mo-status');
-  badge.textContent = '⏳ กำลังโหลด...'; badge.className = 'badge bo';
-  status.textContent = '📡 กำลังดึงข้อมูล MO...';
-  try {
-    const res = await fetch(url + '&t=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const csv = await res.text();
-    MO_ALL = parseMO(csv);
-    if (!MO_ALL.length) throw new Error('ไม่พบข้อมูล JIG — ตรวจสอบ URL หรือ filter แผนก/Mc Type');
-    MO_LOADED = true;
-    badge.textContent = '● LIVE ' + MO_ALL.length + ' MO';
-    badge.className = 'badge bl';
-    status.textContent = '';
-    initLineFilter();
-    applyFilter();
-  } catch(e) {
-    badge.textContent = '✗ ล้มเหลว'; badge.className = 'badge bx';
-    status.textContent = '❌ ' + e.message;
-  }
+ const url = document.getElementById('mo-url-inp').value.trim();
+ if (!url) { alert('กรุณากรอก URL'); return; }
+ const badge = document.getElementById('mo-badge');
+ const status = document.getElementById('mo-status');
+ badge.textContent = '⏳ กำลังโหลด...'; badge.className = 'badge bo';
+ status.textContent = '📡 กำลังดึงข้อมูล MO...';
+ try {
+ const res = await fetch(url + '&t=' + Date.now(), { cache: 'no-store' });
+ if (!res.ok) throw new Error('HTTP ' + res.status);
+ const csv = await res.text();
+ MO_ALL = parseMO(csv);
+ if (!MO_ALL.length) throw new Error('ไม่พบข้อมูล JIG — ตรวจสอบ URL หรือ filter แผนก/Mc Type');
+ MO_LOADED = true;
+ badge.textContent = '● LIVE ' + MO_ALL.length + ' MO';
+ badge.className = 'badge bl';
+ status.textContent = '';
+ initLineFilter();
+ applyFilter();
+ } catch(e) {
+ badge.textContent = '✗ ล้มเหลว'; badge.className = 'badge bx';
+ status.textContent = '❌ ' + e.message;
+ }
 }
 
 function initLineFilter() {
-  const sel = document.getElementById('flt-line');
-  const lines = [...new Set(MO_ALL.map(d=>d.line).filter(Boolean))].sort();
-  sel.innerHTML = '<option value="all">ทุก Line</option>' +
-    lines.map(l=>`<option value="${l}">${l}</option>`).join('');
+ const sel = document.getElementById('flt-line');
+ const lines = [...new Set(MO_ALL.map(d=>d.line).filter(Boolean))].sort();
+ sel.innerHTML = '<option value="all">ทุก Line</option>' +
+ lines.map(l=>`<option value="${l}">${l}</option>`).join('');
 }
 
 function applyFilter() {
-  if (!MO_LOADED) return;
-  const mo = document.getElementById('flt-month').value;
-  const ln = document.getElementById('flt-line').value;
-  FLT = MO_ALL.filter(d =>
-    (mo === 'all' || d.month === +mo) &&
-    (ln === 'all' || d.line === ln)
-  );
-  renderAll();
+ if (!MO_LOADED) return;
+ const mo = document.getElementById('flt-month').value;
+ const ln = document.getElementById('flt-line').value;
+ FLT = MO_ALL.filter(d =>
+ (mo === 'all' || d.month === +mo) &&
+ (ln === 'all' || d.line === ln)
+ );
+ renderAll();
 }
 
 // ════════════════════════════════════════════════════════
 // METRICS CALC
 // ════════════════════════════════════════════════════════
 function calcMetrics(mo) {
-  if (!mo.length) return {};
-  const total  = mo.length;
-  const closed = mo.filter(d=>d.isClosed);
-  const open   = mo.filter(d=>!d.isClosed);
-  const closeRate = total ? (closed.length/total*100) : 0;
-  const avgTTRhr  = total ? mo.reduce((s,d)=>s+d.ttrHr,0)/total : 0;
-  const closedTTR = closed.length ? closed.reduce((s,d)=>s+d.ttrHr,0)/closed.length : 0;
+ if (!mo.length) return {};
+ const total = mo.length;
+ const closed = mo.filter(d=>d.isClosed);
+ const open = mo.filter(d=>!d.isClosed);
+ const closeRate = total ? (closed.length/total*100) : 0;
+ const avgTTRhr = total ? mo.reduce((s,d)=>s+d.ttrHr,0)/total : 0;
+ const closedTTR = closed.length ? closed.reduce((s,d)=>s+d.ttrHr,0)/closed.length : 0;
 
-  // MTTR = avg TTR of closed MOs (hours)
-  const mttr = closedTTR;
+ // MTTR = avg TTR of closed MOs (hours)
+ const mttr = closedTTR;
 
-  // MTBF: total operational time / # of failures
-  // Estimate: use date range of data, assume 24h/day, subtract total TTR downtime
-  const dates  = mo.map(d=>d.date.getTime());
-  const span   = dates.length > 1 ? (Math.max(...dates)-Math.min(...dates))/3600000 : 720; // hours
-  const totalTTRhr = mo.reduce((s,d)=>s+d.ttrHr,0);
-  const uptime = Math.max(span - totalTTRhr, 1);
-  const mtbf   = total > 0 ? uptime/total : 0;
+ // MTBF: total operational time / # of failures
+ // Estimate: use date range of data, assume 24h/day, subtract total TTR downtime
+ const dates = mo.map(d=>d.date.getTime());
+ const span = dates.length > 1 ? (Math.max(...dates)-Math.min(...dates))/3600000 : 720; // hours
+ const totalTTRhr = mo.reduce((s,d)=>s+d.ttrHr,0);
+ const uptime = Math.max(span - totalTTRhr, 1);
+ const mtbf = total > 0 ? uptime/total : 0;
 
-  // High TTR
-  const highTTR = mo.filter(d=>d.ttrHr>1).length;
+ // High TTR
+ const highTTR = mo.filter(d=>d.ttrHr>1).length;
 
-  // Unique machines
-  const uniqMc = new Set(mo.map(d=>d.mcNo)).size;
+ // Unique machines
+ const uniqMc = new Set(mo.map(d=>d.mcNo)).size;
 
-  return { total, closed:closed.length, open:open.length, closeRate, mttr, mtbf, avgTTRhr, highTTR, uniqMc, openMOs: open };
+ return { total, closed:closed.length, open:open.length, closeRate, mttr, mtbf, avgTTRhr, highTTR, uniqMc, openMOs: open };
 }
 
 // Per-month metrics
 function monthlyMetrics(mo) {
-  const map = {};
-  mo.forEach(d => {
-    const k = `${d.year}-${d.month}`;
-    if (!map[k]) map[k] = { label: MONTHS[d.month-1], month:d.month, year:d.year, items:[] };
-    map[k].items.push(d);
-  });
-  return Object.values(map).sort((a,b)=>a.year-b.year||a.month-b.month)
-    .map(m => ({ ...m, ...calcMetrics(m.items) }));
+ const map = {};
+ mo.forEach(d => {
+ const k = `${d.year}-${d.month}`;
+ if (!map[k]) map[k] = { label: MONTHS[d.month-1], month:d.month, year:d.year, items:[] };
+ map[k].items.push(d);
+ });
+ return Object.values(map).sort((a,b)=>a.year-b.year||a.month-b.month)
+ .map(m => ({ ...m, ...calcMetrics(m.items) }));
 }
 
 // Tech metrics
 function techMetrics(mo) {
-  const map = {};
-  mo.forEach(d => {
-    const t = d.tech || 'ไม่ระบุ';
-    if (!map[t]) map[t] = { name:t, items:[], closed:0 };
-    map[t].items.push(d);
-    if (d.isClosed) map[t].closed++;
-  });
-  return Object.values(map).map(t => {
-    const avg = t.items.length ? t.items.reduce((s,d)=>s+d.ttrHr,0)/t.items.length : 0;
-    const min = Math.min(...t.items.map(d=>d.ttrHr));
-    const max = Math.max(...t.items.map(d=>d.ttrHr));
-    const hi  = t.items.filter(d=>d.ttrHr>1).length;
-    return { name:t.name, count:t.items.length, closed:t.closed,
-      closeRate:t.items.length?t.closed/t.items.length*100:0,
-      avgTTR:avg, minTTR:min, maxTTR:max, highTTR:hi };
-  }).sort((a,b)=>b.count-a.count);
+ const map = {};
+ mo.forEach(d => {
+ const t = d.tech || 'ไม่ระบุ';
+ if (!map[t]) map[t] = { name:t, items:[], closed:0 };
+ map[t].items.push(d);
+ if (d.isClosed) map[t].closed++;
+ });
+ return Object.values(map).map(t => {
+ const avg = t.items.length ? t.items.reduce((s,d)=>s+d.ttrHr,0)/t.items.length : 0;
+ const min = Math.min(...t.items.map(d=>d.ttrHr));
+ const max = Math.max(...t.items.map(d=>d.ttrHr));
+ const hi = t.items.filter(d=>d.ttrHr>1).length;
+ return { name:t.name, count:t.items.length, closed:t.closed,
+ closeRate:t.items.length?t.closed/t.items.length*100:0,
+ avgTTR:avg, minTTR:min, maxTTR:max, highTTR:hi };
+ }).sort((a,b)=>b.count-a.count);
 }
 
 // ════════════════════════════════════════════════════════
 // RENDER ALL
 // ════════════════════════════════════════════════════════
 function renderAll() {
-  renderKPICards();
-  renderCharts();
-  renderPending();
-  renderTech();
-  renderHeatmap();
+ renderKPICards();
+ renderCharts();
+ renderPending();
+ renderTech();
+ renderHeatmap();
 }
 
 // ─── KPI CARDS ───
 function renderKPICards() {
-  const m = calcMetrics(FLT);
-  if (!m.total) {
-    document.getElementById('kpi-grid').innerHTML = '<div class="kpi-card" style="grid-column:1/-1;padding:24px;text-align:center"><p style="color:var(--muted)">ไม่มีข้อมูลในช่วงที่เลือก</p></div>';
-    return;
-  }
-  const crColor = m.closeRate >= 95 ? 'var(--green)' : m.closeRate >= 80 ? 'var(--amber)' : 'var(--red)';
-  const crLabel = m.closeRate >= 95 ? '✓ hit' : '✗ miss';
-  const mtbrColor = m.mtbf >= 150 ? 'var(--green)' : m.mtbf >= 100 ? 'var(--amber)' : 'var(--red)';
-  const mttrColor = m.mttr <= 0.25 ? 'var(--green)' : m.mttr <= 0.5 ? 'var(--amber)' : 'var(--red)';
+ const m = calcMetrics(FLT);
+ if (!m.total) {
+ document.getElementById('kpi-grid').innerHTML = '<div class="kpi-card" style="grid-column:1/-1;padding:24px;text-align:center"><p style="color:var(--muted)">ไม่มีข้อมูลในช่วงที่เลือก</p></div>';
+ return;
+ }
+ const crColor = m.closeRate >= 95 ? 'var(--green)' : m.closeRate >= 80 ? 'var(--amber)' : 'var(--red)';
+ const crLabel = m.closeRate >= 95 ? '✓ hit' : '✗ miss';
+ const mtbrColor = m.mtbf >= 150 ? 'var(--green)' : m.mtbf >= 100 ? 'var(--amber)' : 'var(--red)';
+ const mttrColor = m.mttr <= 0.25 ? 'var(--green)' : m.mttr <= 0.5 ? 'var(--amber)' : 'var(--red)';
 
-  document.getElementById('kpi-grid').innerHTML = `
-    <div class="kpi-card cyan">
-      <span class="kpi-icon">📋</span>
-      <div class="kpi-label">Total MO</div>
-      <div class="kpi-value" style="color:var(--cyan)">${m.total}<span class="kpi-unit">งาน</span></div>
-      <div class="kpi-sub">ปิด ${m.closed} · ค้าง ${m.open}</div>
-    </div>
-    <div class="kpi-card ${m.closeRate>=95?'green':m.closeRate>=80?'amber':'red'}">
-      <span class="kpi-icon">✅</span>
-      <div class="kpi-label">Close MO Rate</div>
-      <div class="kpi-value" style="color:${crColor}">${m.closeRate.toFixed(1)}<span class="kpi-unit">%</span></div>
-      <div class="kpi-target ${m.closeRate>=95?'hit':'miss'}">${crLabel} target ≥95%</div>
-    </div>
-    <div class="kpi-card ${m.mtbf>=150?'green':m.mtbf>=100?'amber':'red'}">
-      <span class="kpi-icon">⏰</span>
-      <div class="kpi-label">MTBF</div>
-      <div class="kpi-value" style="color:${mtbrColor}">${m.mtbf.toFixed(1)}<span class="kpi-unit">hr</span></div>
-      <div class="kpi-target ${m.mtbf>=150?'hit':'miss'}">${m.mtbf>=150?'✓ hit':'✗ miss'} target ≥150 hr</div>
-    </div>
-    <div class="kpi-card ${m.mttr<=0.25?'green':m.mttr<=0.5?'amber':'red'}">
-      <span class="kpi-icon">🔧</span>
-      <div class="kpi-label">MTTR</div>
-      <div class="kpi-value" style="color:${mttrColor}">${m.mttr.toFixed(2)}<span class="kpi-unit">hr</span></div>
-      <div class="kpi-target ${m.mttr<=0.25?'hit':'miss'}">${m.mttr<=0.25?'✓ hit':'✗ miss'} target ≤0.25 hr</div>
-    </div>
-    <div class="kpi-card amber">
-      <span class="kpi-icon">⚠️</span>
-      <div class="kpi-label">MO ค้าง</div>
-      <div class="kpi-value" style="color:${m.open>0?'var(--amber)':'var(--green)'}">${m.open}<span class="kpi-unit">งาน</span></div>
-      <div class="kpi-sub">${m.open>0?'⏳ รอการปิด':'✅ ปิดหมดแล้ว'}</div>
-    </div>
-    <div class="kpi-card purple">
-      <span class="kpi-icon">🔴</span>
-      <div class="kpi-label">TTR &gt; 1 hr</div>
-      <div class="kpi-value" style="color:var(--purple)">${m.highTTR}<span class="kpi-unit">กรณี</span></div>
-      <div class="kpi-sub">${m.total?((m.highTTR/m.total*100).toFixed(0)):'0'}% ของทั้งหมด</div>
-    </div>
-    <div class="kpi-card blue">
-      <span class="kpi-icon">⚙️</span>
-      <div class="kpi-label">เครื่องที่ซ่อม</div>
-      <div class="kpi-value" style="color:var(--blue)">${m.uniqMc}<span class="kpi-unit">เครื่อง</span></div>
-      <div class="kpi-sub">avg ${m.avgTTRhr.toFixed(2)} hr/งาน</div>
-    </div>`;
+ document.getElementById('kpi-grid').innerHTML = `
+ <div class="kpi-card cyan">
+ <span class="kpi-icon">📋</span>
+ <div class="kpi-label">Total MO</div>
+ <div class="kpi-value" style="color:var(--cyan)">${m.total}<span class="kpi-unit">งาน</span></div>
+ <div class="kpi-sub">ปิด ${m.closed} · ค้าง ${m.open}</div>
+ </div>
+ <div class="kpi-card ${m.closeRate>=95?'green':m.closeRate>=80?'amber':'red'}">
+ <span class="kpi-icon">✅</span>
+ <div class="kpi-label">Close MO Rate</div>
+ <div class="kpi-value" style="color:${crColor}">${m.closeRate.toFixed(1)}<span class="kpi-unit">%</span></div>
+ <div class="kpi-target ${m.closeRate>=95?'hit':'miss'}">${crLabel} target ≥95%</div>
+ </div>
+ <div class="kpi-card ${m.mtbf>=150?'green':m.mtbf>=100?'amber':'red'}">
+ <span class="kpi-icon">⏰</span>
+ <div class="kpi-label">MTBF</div>
+ <div class="kpi-value" style="color:${mtbrColor}">${m.mtbf.toFixed(1)}<span class="kpi-unit">hr</span></div>
+ <div class="kpi-target ${m.mtbf>=150?'hit':'miss'}">${m.mtbf>=150?'✓ hit':'✗ miss'} target ≥150 hr</div>
+ </div>
+ <div class="kpi-card ${m.mttr<=0.25?'green':m.mttr<=0.5?'amber':'red'}">
+ <span class="kpi-icon">🔧</span>
+ <div class="kpi-label">MTTR</div>
+ <div class="kpi-value" style="color:${mttrColor}">${m.mttr.toFixed(2)}<span class="kpi-unit">hr</span></div>
+ <div class="kpi-target ${m.mttr<=0.25?'hit':'miss'}">${m.mttr<=0.25?'✓ hit':'✗ miss'} target ≤0.25 hr</div>
+ </div>
+ <div class="kpi-card amber">
+ <span class="kpi-icon">⚠️</span>
+ <div class="kpi-label">MO ค้าง</div>
+ <div class="kpi-value" style="color:${m.open>0?'var(--amber)':'var(--green)'}">${m.open}<span class="kpi-unit">งาน</span></div>
+ <div class="kpi-sub">${m.open>0?'⏳ รอการปิด':'✅ ปิดหมดแล้ว'}</div>
+ </div>
+ <div class="kpi-card purple">
+ <span class="kpi-icon">🔴</span>
+ <div class="kpi-label">TTR &gt; 1 hr</div>
+ <div class="kpi-value" style="color:var(--purple)">${m.highTTR}<span class="kpi-unit">กรณี</span></div>
+ <div class="kpi-sub">${m.total?((m.highTTR/m.total*100).toFixed(0)):'0'}% ของทั้งหมด</div>
+ </div>
+ <div class="kpi-card blue">
+ <span class="kpi-icon">⚙️</span>
+ <div class="kpi-label">เครื่องที่ซ่อม</div>
+ <div class="kpi-value" style="color:var(--blue)">${m.uniqMc}<span class="kpi-unit">เครื่อง</span></div>
+ <div class="kpi-sub">avg ${m.avgTTRhr.toFixed(2)} hr/งาน</div>
+ </div>`;
 }
 
 // ─── CHARTS ───
 const PALETTE = ['#00e5ff','#3b82f6','#6366f1','#00e676','#ffab00','#ff5252','#b388ff','#f472b6','#34d399','#fbbf24'];
 
 function mkChart(id, cfg) {
-  if (CHARTS[id]) CHARTS[id].destroy();
-  const ctx = document.getElementById(id);
-  if (!ctx) return;
-  CHARTS[id] = new Chart(ctx, cfg);
-  return CHARTS[id];
+ if (CHARTS[id]) CHARTS[id].destroy();
+ const ctx = document.getElementById(id);
+ if (!ctx) return;
+ CHARTS[id] = new Chart(ctx, cfg);
+ return CHARTS[id];
 }
 
 function renderCharts() {
-  if (!FLT.length) return;
-  const monthly = monthlyMetrics(FLT);
-  const labels  = monthly.map(m=>m.label);
+ if (!FLT.length) return;
+ const monthly = monthlyMetrics(FLT);
+ const labels = monthly.map(m=>m.label);
 
-  // Close rate + MO count
-  mkChart('ch-close', {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label:'MO (งาน)', data:monthly.map(m=>m.total), backgroundColor:'rgba(59,130,246,.4)', borderColor:'#3b82f6', borderWidth:1, yAxisID:'y2' },
-        { label:'Close Rate (%)', data:monthly.map(m=>+m.closeRate.toFixed(1)), type:'line', borderColor:'#00e676', backgroundColor:'rgba(0,230,118,.1)', tension:.4, pointRadius:4, pointBackgroundColor:'#00e676', yAxisID:'y', fill:true }
-      ]
-    },
-    options: chartOpts({ y:{min:0,max:110,title:{display:true,text:'Close Rate (%)'}}, y2:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'MO Count'}} }, true)
-  });
-  document.getElementById('avg-close-lbl').textContent = 'เฉลี่ย ' + (monthly.reduce((s,m)=>s+m.closeRate,0)/monthly.length).toFixed(1) + '%';
+ // Close rate + MO count
+ mkChart('ch-close', {
+ type: 'bar',
+ data: {
+ labels,
+ datasets: [
+ { label:'MO (งาน)', data:monthly.map(m=>m.total), backgroundColor:'rgba(59,130,246,.4)', borderColor:'#3b82f6', borderWidth:1, yAxisID:'y2' },
+ { label:'Close Rate (%)', data:monthly.map(m=>+m.closeRate.toFixed(1)), type:'line', borderColor:'#00e676', backgroundColor:'rgba(0,230,118,.1)', tension:.4, pointRadius:4, pointBackgroundColor:'#00e676', yAxisID:'y', fill:true }
+ ]
+ },
+ options: chartOpts({ y:{min:0,max:110,title:{display:true,text:'Close Rate (%)'}}, y2:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'MO Count'}} }, true)
+ });
+ document.getElementById('avg-close-lbl').textContent = 'เฉลี่ย ' + (monthly.reduce((s,m)=>s+m.closeRate,0)/monthly.length).toFixed(1) + '%';
 
-  // MTBF monthly
-  mkChart('ch-mtbf', {
-    type:'line',
-    data:{
-      labels,
-      datasets:[
-        { label:'MTBF (hr)', data:monthly.map(m=>+m.mtbf.toFixed(1)), borderColor:'var(--cyan)', backgroundColor:'rgba(0,229,255,.08)', tension:.4, pointRadius:5, pointBackgroundColor:'var(--cyan)', fill:true },
-        { label:'Target 150hr', data:monthly.map(()=>150), borderColor:'rgba(255,82,82,.5)', borderDash:[6,4], pointRadius:0, borderWidth:1.5 }
-      ]
-    }, options: chartOpts()
-  });
+ // MTBF monthly
+ mkChart('ch-mtbf', {
+ type:'line',
+ data:{
+ labels,
+ datasets:[
+ { label:'MTBF (hr)', data:monthly.map(m=>+m.mtbf.toFixed(1)), borderColor:'var(--cyan)', backgroundColor:'rgba(0,229,255,.08)', tension:.4, pointRadius:5, pointBackgroundColor:'var(--cyan)', fill:true },
+ { label:'Target 150hr', data:monthly.map(()=>150), borderColor:'rgba(255,82,82,.5)', borderDash:[6,4], pointRadius:0, borderWidth:1.5 }
+ ]
+ }, options: chartOpts()
+ });
 
-  // MTTR monthly
-  mkChart('ch-mttr', {
-    type:'line',
-    data:{
-      labels,
-      datasets:[
-        { label:'MTTR (hr)', data:monthly.map(m=>+m.mttr.toFixed(3)), borderColor:'var(--amber)', backgroundColor:'rgba(255,171,0,.08)', tension:.4, pointRadius:5, pointBackgroundColor:'var(--amber)', fill:true },
-        { label:'Target 0.25hr', data:monthly.map(()=>0.25), borderColor:'rgba(0,230,118,.5)', borderDash:[6,4], pointRadius:0, borderWidth:1.5 }
-      ]
-    }, options: chartOpts()
-  });
+ // MTTR monthly
+ mkChart('ch-mttr', {
+ type:'line',
+ data:{
+ labels,
+ datasets:[
+ { label:'MTTR (hr)', data:monthly.map(m=>+m.mttr.toFixed(3)), borderColor:'var(--amber)', backgroundColor:'rgba(255,171,0,.08)', tension:.4, pointRadius:5, pointBackgroundColor:'var(--amber)', fill:true },
+ { label:'Target 0.25hr', data:monthly.map(()=>0.25), borderColor:'rgba(0,230,118,.5)', borderDash:[6,4], pointRadius:0, borderWidth:1.5 }
+ ]
+ }, options: chartOpts()
+ });
 
-  // Pareto
-  const probSums = {}; FLT.forEach(d=>{ probSums[d.probType]=(probSums[d.probType]||0)+1; });
-  const paretoSorted = Object.entries(probSums).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const ptotal = paretoSorted.reduce((s,[,v])=>s+v,0)||1;
-  let cum2 = 0;
-  mkChart('ch-pareto', {
-    type:'bar',
-    data:{
-      labels: paretoSorted.map(([k])=>k.length>16?k.slice(0,14)+'…':k),
-      datasets:[
-        { label:'MO', data:paretoSorted.map(([,v])=>v), backgroundColor:PALETTE, borderRadius:4 },
-        { label:'Cumulative %', data:paretoSorted.map(([,v])=>{ cum2+=v; return +(cum2/ptotal*100).toFixed(1); }), type:'line', borderColor:'rgba(255,255,255,.5)', borderDash:[4,3], pointRadius:4, yAxisID:'y2' }
-      ]
-    },
-    options: chartOpts({ y:{title:{display:true,text:'Count'}}, y2:{position:'right',max:110,grid:{drawOnChartArea:false},title:{display:true,text:'Cumulative %'}} }, true)
-  });
+ // Pareto
+ const probSums = {}; FLT.forEach(d=>{ probSums[d.probType]=(probSums[d.probType]||0)+1; });
+ const paretoSorted = Object.entries(probSums).sort((a,b)=>b[1]-a[1]).slice(0,8);
+ const ptotal = paretoSorted.reduce((s,[,v])=>s+v,0)||1;
+ let cum2 = 0;
+ mkChart('ch-pareto', {
+ type:'bar',
+ data:{
+ labels: paretoSorted.map(([k])=>k.length>16?k.slice(0,14)+'…':k),
+ datasets:[
+ { label:'MO', data:paretoSorted.map(([,v])=>v), backgroundColor:PALETTE, borderRadius:4 },
+ { label:'Cumulative %', data:paretoSorted.map(([,v])=>{ cum2+=v; return +(cum2/ptotal*100).toFixed(1); }), type:'line', borderColor:'rgba(255,255,255,.5)', borderDash:[4,3], pointRadius:4, yAxisID:'y2' }
+ ]
+ },
+ options: chartOpts({ y:{title:{display:true,text:'Count'}}, y2:{position:'right',max:110,grid:{drawOnChartArea:false},title:{display:true,text:'Cumulative %'}} }, true)
+ });
 
-  // ── MTBF/MTTR page ──
-  // MTBF by machine
-  const mcMap = {}; FLT.forEach(d=>{ if(!mcMap[d.mcNo])mcMap[d.mcNo]={items:[],ttrSum:0}; mcMap[d.mcNo].items.push(d); mcMap[d.mcNo].ttrSum+=d.ttrHr; });
-  const mcArr = Object.entries(mcMap).map(([k,v])=>{
-    const dates=v.items.map(d=>d.date.getTime());
-    const span=dates.length>1?(Math.max(...dates)-Math.min(...dates))/3600000:720;
-    const uptime=Math.max(span-v.ttrSum,1);
-    return { mc:k, count:v.items.length, mtbf:v.items.length>0?+(uptime/v.items.length).toFixed(1):0, avgTTR:+(v.ttrSum/v.items.length).toFixed(3) };
-  }).sort((a,b)=>b.count-a.count).slice(0,15);
+ // ── MTBF/MTTR page ──
+ // MTBF by machine
+ const mcMap = {}; FLT.forEach(d=>{ if(!mcMap[d.mcNo])mcMap[d.mcNo]={items:[],ttrSum:0}; mcMap[d.mcNo].items.push(d); mcMap[d.mcNo].ttrSum+=d.ttrHr; });
+ const mcArr = Object.entries(mcMap).map(([k,v])=>{
+ const dates=v.items.map(d=>d.date.getTime());
+ const span=dates.length>1?(Math.max(...dates)-Math.min(...dates))/3600000:720;
+ const uptime=Math.max(span-v.ttrSum,1);
+ return { mc:k, count:v.items.length, mtbf:v.items.length>0?+(uptime/v.items.length).toFixed(1):0, avgTTR:+(v.ttrSum/v.items.length).toFixed(3) };
+ }).sort((a,b)=>b.count-a.count).slice(0,15);
 
-  mkChart('ch-mtbf-mc',{
-    type:'bar',
-    data:{
-      labels:mcArr.map(m=>m.mc),
-      datasets:[{label:'MTBF (hr)',data:mcArr.map(m=>m.mtbf),backgroundColor:mcArr.map(m=>m.mtbf>=150?'rgba(0,230,118,.5)':m.mtbf>=80?'rgba(255,171,0,.5)':'rgba(255,82,82,.5)'),borderRadius:4}]
-    },
-    options:{...chartOpts(),indexAxis:'y',plugins:{legend:{display:false}}}
-  });
+ mkChart('ch-mtbf-mc',{
+ type:'bar',
+ data:{
+ labels:mcArr.map(m=>m.mc),
+ datasets:[{label:'MTBF (hr)',data:mcArr.map(m=>m.mtbf),backgroundColor:mcArr.map(m=>m.mtbf>=150?'rgba(0,230,118,.5)':m.mtbf>=80?'rgba(255,171,0,.5)':'rgba(255,82,82,.5)'),borderRadius:4}]
+ },
+ options:{...chartOpts(),indexAxis:'y',plugins:{legend:{display:false}}}
+ });
 
-  // MTTR dist
-  const buckets = {'<0.1hr':0,'0.1–0.25':0,'0.25–0.5':0,'0.5–1hr':0,'1–2hr':0,'>2hr':0};
-  FLT.forEach(d=>{
-    const h=d.ttrHr;
-    if(h<0.1)buckets['<0.1hr']++;
-    else if(h<0.25)buckets['0.1–0.25']++;
-    else if(h<0.5)buckets['0.25–0.5']++;
-    else if(h<1)buckets['0.5–1hr']++;
-    else if(h<2)buckets['1–2hr']++;
-    else buckets['>2hr']++;
-  });
-  mkChart('ch-mttr-dist',{
-    type:'doughnut',
-    data:{labels:Object.keys(buckets),datasets:[{data:Object.values(buckets),backgroundColor:['#00e676','#3b82f6','#00e5ff','#ffab00','#f472b6','#ff5252'],borderWidth:2,borderColor:'var(--bg2)'}]},
-    options:{plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{size:10},boxWidth:12}}},cutout:'62%'}
-  });
+ // MTTR dist
+ const buckets = {'<0.1hr':0,'0.1–0.25':0,'0.25–0.5':0,'0.5–1hr':0,'1–2hr':0,'>2hr':0};
+ FLT.forEach(d=>{
+ const h=d.ttrHr;
+ if(h<0.1)buckets['<0.1hr']++;
+ else if(h<0.25)buckets['0.1–0.25']++;
+ else if(h<0.5)buckets['0.25–0.5']++;
+ else if(h<1)buckets['0.5–1hr']++;
+ else if(h<2)buckets['1–2hr']++;
+ else buckets['>2hr']++;
+ });
+ mkChart('ch-mttr-dist',{
+ type:'doughnut',
+ data:{labels:Object.keys(buckets),datasets:[{data:Object.values(buckets),backgroundColor:['#00e676','#3b82f6','#00e5ff','#ffab00','#f472b6','#ff5252'],borderWidth:2,borderColor:'var(--bg2)'}]},
+ options:{plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{size:10},boxWidth:12}}},cutout:'62%'}
+ });
 
-  // MTBF trend by line
-  const lineSet = [...new Set(FLT.map(d=>d.line).filter(Boolean))].slice(0,5);
-  const lineDatasets = lineSet.map((ln,i)=>{
-    return {
-      label:ln, borderColor:PALETTE[i], backgroundColor:'transparent', tension:.4,
-      data:monthly.map(m=>{ const sub=m.items.filter(d=>d.line===ln); if(!sub.length)return null;
-        const dates2=sub.map(d=>d.date.getTime()); const sp=dates2.length>1?(Math.max(...dates2)-Math.min(...dates2))/3600000:720;
-        const ttrS=sub.reduce((s,d)=>s+d.ttrHr,0); return +((Math.max(sp-ttrS,1))/sub.length).toFixed(1); })
-    };
-  });
-  mkChart('ch-mtbf-trend',{type:'line',data:{labels,datasets:lineDatasets},options:chartOpts()});
+ // MTBF trend by line
+ const lineSet = [...new Set(FLT.map(d=>d.line).filter(Boolean))].slice(0,5);
+ const lineDatasets = lineSet.map((ln,i)=>{
+ return {
+ label:ln, borderColor:PALETTE[i], backgroundColor:'transparent', tension:.4,
+ data:monthly.map(m=>{ const sub=m.items.filter(d=>d.line===ln); if(!sub.length)return null;
+ const dates2=sub.map(d=>d.date.getTime()); const sp=dates2.length>1?(Math.max(...dates2)-Math.min(...dates2))/3600000:720;
+ const ttrS=sub.reduce((s,d)=>s+d.ttrHr,0); return +((Math.max(sp-ttrS,1))/sub.length).toFixed(1); })
+ };
+ });
+ mkChart('ch-mtbf-trend',{type:'line',data:{labels,datasets:lineDatasets},options:chartOpts()});
 
-  // MC Summary Table
-  document.getElementById('mc-summary-table').innerHTML = `
-    <table class="tech-table"><thead><tr>
-      <th>Mc No.</th><th>Line</th><th>Count</th><th>MTBF (hr)</th><th>Avg MTTR (hr)</th><th>Status</th>
-    </tr></thead><tbody>
-    ${mcArr.map(m=>{
-      const mtbfColor=m.mtbf>=150?'var(--green)':m.mtbf>=80?'var(--amber)':'var(--red)';
-      const mttrColor=m.avgTTR<=0.25?'var(--green)':m.avgTTR<=0.5?'var(--amber)':'var(--red)';
-      const item=FLT.find(d=>d.mcNo===m.mc)||{};
-      return `<tr>
-        <td style="font-weight:700">${m.mc}</td>
-        <td style="color:var(--muted)">${item.line||'—'}</td>
-        <td>${m.count}</td>
-        <td style="color:${mtbfColor};font-weight:700">${m.mtbf}</td>
-        <td style="color:${mttrColor};font-weight:700">${m.avgTTR}</td>
-        <td>${m.mtbf>=150?'<span class="badge-ttr badge-ok">✓ ดี</span>':m.mtbf>=80?'<span class="badge-ttr badge-md">⚠ ปานกลาง</span>':'<span class="badge-ttr badge-hi">✗ ต่ำ</span>'}</td>
-      </tr>`;
-    }).join('')}
-    </tbody></table>`;
+ // MC Summary Table
+ document.getElementById('mc-summary-table').innerHTML = `
+ <table class="tech-table"><thead><tr>
+ <th>Mc No.</th><th>Line</th><th>Count</th><th>MTBF (hr)</th><th>Avg MTTR (hr)</th><th>Status</th>
+ </tr></thead><tbody>
+ ${mcArr.map(m=>{
+ const mtbfColor=m.mtbf>=150?'var(--green)':m.mtbf>=80?'var(--amber)':'var(--red)';
+ const mttrColor=m.avgTTR<=0.25?'var(--green)':m.avgTTR<=0.5?'var(--amber)':'var(--red)';
+ const item=FLT.find(d=>d.mcNo===m.mc)||{};
+ return `<tr>
+ <td style="font-weight:700">${m.mc}</td>
+ <td style="color:var(--muted)">${item.line||'—'}</td>
+ <td>${m.count}</td>
+ <td style="color:${mtbfColor};font-weight:700">${m.mtbf}</td>
+ <td style="color:${mttrColor};font-weight:700">${m.avgTTR}</td>
+ <td>${m.mtbf>=150?'<span class="badge-ttr badge-ok">✓ ดี</span>':m.mtbf>=80?'<span class="badge-ttr badge-md">⚠ ปานกลาง</span>':'<span class="badge-ttr badge-hi">✗ ต่ำ</span>'}</td>
+ </tr>`;
+ }).join('')}
+ </tbody></table>`;
 
-  // Pending charts
-  renderPendingCharts();
-  renderTechCharts();
+ // Pending charts
+ renderPendingCharts();
+ renderTechCharts();
 }
 
 function chartOpts(scales={}, multi=false) {
-  const baseScale = {
-    grid:{color:'rgba(255,255,255,.04)'},
-    ticks:{color:'#4a5880',font:{size:10}}
-  };
-  return {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{labels:{color:'#7a8faa',font:{size:10},boxWidth:12}}},
-    scales:multi?{y:{...baseScale,...(scales.y||{})},y2:{...baseScale,...(scales.y2||{})},...(!scales.y&&!scales.y2?{x:baseScale}:{}), x:baseScale}
-      :{x:baseScale,y:{...baseScale,...(scales.y||{})}}
-  };
+ const baseScale = {
+ grid:{color:'rgba(255,255,255,.04)'},
+ ticks:{color:'#4a5880',font:{size:10}}
+ };
+ return {
+ responsive:true, maintainAspectRatio:false,
+ plugins:{legend:{labels:{color:'#7a8faa',font:{size:10},boxWidth:12}}},
+ scales:multi?{y:{...baseScale,...(scales.y||{})},y2:{...baseScale,...(scales.y2||{})},...(!scales.y&&!scales.y2?{x:baseScale}:{}), x:baseScale}
+ :{x:baseScale,y:{...baseScale,...(scales.y||{})}}
+ };
 }
 
 // ─── PENDING MO ───
 function renderPending() {
-  if (!FLT.length) return;
-  const open = FLT.filter(d=>!d.isClosed).sort((a,b)=>b.daysPending-a.daysPending);
-  document.getElementById('pend-count').textContent = open.length + ' รายการ';
-  const tbody = document.getElementById('pend-tbody');
-  if (!open.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--green)">✅ ไม่มี MO ค้าง</td></tr>';
-    return;
-  }
-  tbody.innerHTML = open.map(d=>{
-    const ttrColor = d.ttrHr>1?'badge-hi':d.ttrHr>0.25?'badge-md':'badge-ok';
-    const age = d.daysPending;
-    const ageColor = age>14?'var(--red)':age>7?'var(--amber)':'var(--muted)';
-    return `<tr>
-      <td style="color:var(--muted)">${d.dateStr}</td>
-      <td style="font-weight:600">${d.line||'—'}</td>
-      <td style="font-weight:700;color:var(--cyan)">${d.mcNo||'—'}</td>
-      <td>${d.probType||'—'}</td>
-      <td style="color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.symptom}">${d.symptom||'—'}</td>
-      <td><span class="badge-ttr ${ttrColor}">${d.ttrHr.toFixed(2)} hr</span></td>
-      <td style="font-weight:700;color:${ageColor}">${age} วัน</td>
-      <td style="color:var(--muted)">${d.tech||'—'}</td>
-    </tr>`;
-  }).join('');
+ if (!FLT.length) return;
+ const open = FLT.filter(d=>!d.isClosed).sort((a,b)=>b.daysPending-a.daysPending);
+ document.getElementById('pend-count').textContent = open.length + ' รายการ';
+ const tbody = document.getElementById('pend-tbody');
+ if (!open.length) {
+ tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--green)">✅ ไม่มี MO ค้าง</td></tr>';
+ return;
+ }
+ tbody.innerHTML = open.map(d=>{
+ const ttrColor = d.ttrHr>1?'badge-hi':d.ttrHr>0.25?'badge-md':'badge-ok';
+ const age = d.daysPending;
+ const ageColor = age>14?'var(--red)':age>7?'var(--amber)':'var(--muted)';
+ return `<tr>
+ <td style="color:var(--muted)">${d.dateStr}</td>
+ <td style="font-weight:600">${d.line||'—'}</td>
+ <td style="font-weight:700;color:var(--cyan)">${d.mcNo||'—'}</td>
+ <td>${d.probType||'—'}</td>
+ <td style="color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.symptom}">${d.symptom||'—'}</td>
+ <td><span class="badge-ttr ${ttrColor}">${d.ttrHr.toFixed(2)} hr</span></td>
+ <td style="font-weight:700;color:${ageColor}">${age} วัน</td>
+ <td style="color:var(--muted)">${d.tech||'—'}</td>
+ </tr>`;
+ }).join('');
 }
 
 function renderPendingCharts() {
-  const open = FLT.filter(d=>!d.isClosed);
-  if (!open.length) return;
-  const prob = {}; open.forEach(d=>{ prob[d.probType]=(prob[d.probType]||0)+1; });
-  const pArr = Object.entries(prob).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  mkChart('ch-pend-prob',{type:'bar',data:{labels:pArr.map(([k])=>k.length>14?k.slice(0,12)+'…':k),datasets:[{label:'ค้าง',data:pArr.map(([,v])=>v),backgroundColor:'rgba(255,82,82,.45)',borderRadius:4}]},options:{...chartOpts(),plugins:{legend:{display:false}}}});
-  const line2={}; open.forEach(d=>{ line2[d.line||'—']=(line2[d.line||'—']||0)+1; });
-  const lArr=Object.entries(line2).sort((a,b)=>b[1]-a[1]);
-  mkChart('ch-pend-line',{type:'doughnut',data:{labels:lArr.map(([k])=>k),datasets:[{data:lArr.map(([,v])=>v),backgroundColor:PALETTE,borderWidth:2,borderColor:'var(--bg2)'}]},options:{plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{size:10},boxWidth:12}}},cutout:'55%'}});
+ const open = FLT.filter(d=>!d.isClosed);
+ if (!open.length) return;
+ const prob = {}; open.forEach(d=>{ prob[d.probType]=(prob[d.probType]||0)+1; });
+ const pArr = Object.entries(prob).sort((a,b)=>b[1]-a[1]).slice(0,8);
+ mkChart('ch-pend-prob',{type:'bar',data:{labels:pArr.map(([k])=>k.length>14?k.slice(0,12)+'…':k),datasets:[{label:'ค้าง',data:pArr.map(([,v])=>v),backgroundColor:'rgba(255,82,82,.45)',borderRadius:4}]},options:{...chartOpts(),plugins:{legend:{display:false}}}});
+ const line2={}; open.forEach(d=>{ line2[d.line||'—']=(line2[d.line||'—']||0)+1; });
+ const lArr=Object.entries(line2).sort((a,b)=>b[1]-a[1]);
+ mkChart('ch-pend-line',{type:'doughnut',data:{labels:lArr.map(([k])=>k),datasets:[{data:lArr.map(([,v])=>v),backgroundColor:PALETTE,borderWidth:2,borderColor:'var(--bg2)'}]},options:{plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{size:10},boxWidth:12}}},cutout:'55%'}});
 }
 
 // ─── TECH PERFORMANCE ───
 function renderTech() {
-  if (!FLT.length) return;
-  const techs = techMetrics(FLT);
-  if (!techs.length) return;
+ if (!FLT.length) return;
+ const techs = techMetrics(FLT);
+ if (!techs.length) return;
 
-  // KPI cards for top 3 techs by close rate
-  const top3 = [...techs].sort((a,b)=>b.closeRate-a.closeRate).slice(0,3);
-  document.getElementById('tech-kpi-grid').innerHTML = top3.map((t,i)=>`
-    <div class="kpi-card ${['green','cyan','blue'][i]}">
-      <div class="kpi-label">${['🥇','🥈','🥉'][i]} Close Rate สูงสุด</div>
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">${t.name.split(' ').slice(0,3).join(' ')}</div>
-      <div class="kpi-value" style="color:${['var(--green)','var(--cyan)','var(--blue)'][i]};font-size:26px">${t.closeRate.toFixed(1)}<span class="kpi-unit">%</span></div>
-      <div class="kpi-sub">${t.count} งาน · MTTR ${t.avgTTR.toFixed(2)} hr</div>
-    </div>`).join('');
+ // KPI cards for top 3 techs by close rate
+ const top3 = [...techs].sort((a,b)=>b.closeRate-a.closeRate).slice(0,3);
+ document.getElementById('tech-kpi-grid').innerHTML = top3.map((t,i)=>`
+ <div class="kpi-card ${['green','cyan','blue'][i]}">
+ <div class="kpi-label">${['🥇','🥈','🥉'][i]} Close Rate สูงสุด</div>
+ <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">${t.name.split(' ').slice(0,3).join(' ')}</div>
+ <div class="kpi-value" style="color:${['var(--green)','var(--cyan)','var(--blue)'][i]};font-size:26px">${t.closeRate.toFixed(1)}<span class="kpi-unit">%</span></div>
+ <div class="kpi-sub">${t.count} งาน · MTTR ${t.avgTTR.toFixed(2)} hr</div>
+ </div>`).join('');
 
-  // Table
-  document.getElementById('tech-tbody').innerHTML = techs.map((t,i)=>{
-    const cr = t.closeRate;
-    const crColor = cr>=95?'var(--green)':cr>=80?'var(--amber)':'var(--red)';
-    const barColor = cr>=95?'var(--green)':cr>=80?'var(--amber)':'var(--red)';
-    const mttrColor = t.avgTTR<=0.25?'var(--green)':t.avgTTR<=0.5?'var(--amber)':'var(--red)';
-    return `<tr>
-      <td style="color:var(--muted)">${i+1}</td>
-      <td style="font-weight:700">${t.name}</td>
-      <td style="text-align:center">${t.count}</td>
-      <td style="text-align:center;color:var(--green)">${t.closed}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:6px">
-          <div class="perf-bar" style="width:70px"><div class="perf-bar-fill" style="width:${cr.toFixed(0)}%;background:${barColor}"></div></div>
-          <span style="font-weight:700;color:${crColor}">${cr.toFixed(1)}%</span>
-        </div>
-      </td>
-      <td style="font-weight:700;color:${mttrColor}">${t.avgTTR.toFixed(2)}</td>
-      <td style="color:var(--muted)">${t.minTTR.toFixed(2)}</td>
-      <td style="color:var(--red)">${t.maxTTR.toFixed(2)}</td>
-      <td style="color:${t.highTTR>0?'var(--amber)':'var(--green)'}">${t.highTTR}</td>
-      <td><span class="${cr>=95?'badge-ttr badge-ok':cr>=80?'badge-ttr badge-md':'badge-ttr badge-hi'}">${cr>=95?'✓ ดี':cr>=80?'⚠ ปานกลาง':'✗ ต้องปรับ'}</span></td>
-    </tr>`;
-  }).join('');
+ // Table
+ document.getElementById('tech-tbody').innerHTML = techs.map((t,i)=>{
+ const cr = t.closeRate;
+ const crColor = cr>=95?'var(--green)':cr>=80?'var(--amber)':'var(--red)';
+ const barColor = cr>=95?'var(--green)':cr>=80?'var(--amber)':'var(--red)';
+ const mttrColor = t.avgTTR<=0.25?'var(--green)':t.avgTTR<=0.5?'var(--amber)':'var(--red)';
+ return `<tr>
+ <td style="color:var(--muted)">${i+1}</td>
+ <td style="font-weight:700">${t.name}</td>
+ <td style="text-align:center">${t.count}</td>
+ <td style="text-align:center;color:var(--green)">${t.closed}</td>
+ <td>
+ <div style="display:flex;align-items:center;gap:6px">
+ <div class="perf-bar" style="width:70px"><div class="perf-bar-fill" style="width:${cr.toFixed(0)}%;background:${barColor}"></div></div>
+ <span style="font-weight:700;color:${crColor}">${cr.toFixed(1)}%</span>
+ </div>
+ </td>
+ <td style="font-weight:700;color:${mttrColor}">${t.avgTTR.toFixed(2)}</td>
+ <td style="color:var(--muted)">${t.minTTR.toFixed(2)}</td>
+ <td style="color:var(--red)">${t.maxTTR.toFixed(2)}</td>
+ <td style="color:${t.highTTR>0?'var(--amber)':'var(--green)'}">${t.highTTR}</td>
+ <td><span class="${cr>=95?'badge-ttr badge-ok':cr>=80?'badge-ttr badge-md':'badge-ttr badge-hi'}">${cr>=95?'✓ ดี':cr>=80?'⚠ ปานกลาง':'✗ ต้องปรับ'}</span></td>
+ </tr>`;
+ }).join('');
 
-  renderTechCharts();
+ renderTechCharts();
 }
 
 function renderTechCharts() {
-  const techs = techMetrics(FLT);
-  if (!techs.length) return;
-  const top12 = techs.slice(0,12);
-  const labels = top12.map(t=>t.name.split(' ')[0]);
+ const techs = techMetrics(FLT);
+ if (!techs.length) return;
+ const top12 = techs.slice(0,12);
+ const labels = top12.map(t=>t.name.split(' ')[0]);
 
-  mkChart('ch-tech-count',{type:'bar',data:{labels,datasets:[{label:'MO ทั้งหมด',data:top12.map(t=>t.count),backgroundColor:'rgba(99,102,241,.5)',borderRadius:4},{label:'ปิดแล้ว',data:top12.map(t=>t.closed),backgroundColor:'rgba(0,230,118,.5)',borderRadius:4}]},options:chartOpts()});
-  mkChart('ch-tech-ttr',{type:'bar',data:{labels,datasets:[{label:'Avg MTTR (hr)',data:top12.map(t=>+t.avgTTR.toFixed(3)),backgroundColor:top12.map(t=>t.avgTTR<=0.25?'rgba(0,230,118,.5)':t.avgTTR<=0.5?'rgba(255,171,0,.5)':'rgba(255,82,82,.5)'),borderRadius:4}]},options:{...chartOpts(),plugins:{legend:{display:false}}}});
-  mkChart('ch-tech-close',{type:'bar',data:{labels,datasets:[{label:'Close Rate %',data:top12.map(t=>+t.closeRate.toFixed(1)),backgroundColor:top12.map(t=>t.closeRate>=95?'rgba(0,230,118,.6)':t.closeRate>=80?'rgba(255,171,0,.6)':'rgba(255,82,82,.6)'),borderRadius:4}]},options:{...chartOpts({y:{min:0,max:110}}),plugins:{legend:{display:false}}}});
+ mkChart('ch-tech-count',{type:'bar',data:{labels,datasets:[{label:'MO ทั้งหมด',data:top12.map(t=>t.count),backgroundColor:'rgba(99,102,241,.5)',borderRadius:4},{label:'ปิดแล้ว',data:top12.map(t=>t.closed),backgroundColor:'rgba(0,230,118,.5)',borderRadius:4}]},options:chartOpts()});
+ mkChart('ch-tech-ttr',{type:'bar',data:{labels,datasets:[{label:'Avg MTTR (hr)',data:top12.map(t=>+t.avgTTR.toFixed(3)),backgroundColor:top12.map(t=>t.avgTTR<=0.25?'rgba(0,230,118,.5)':t.avgTTR<=0.5?'rgba(255,171,0,.5)':'rgba(255,82,82,.5)'),borderRadius:4}]},options:{...chartOpts(),plugins:{legend:{display:false}}}});
+ mkChart('ch-tech-close',{type:'bar',data:{labels,datasets:[{label:'Close Rate %',data:top12.map(t=>+t.closeRate.toFixed(1)),backgroundColor:top12.map(t=>t.closeRate>=95?'rgba(0,230,118,.6)':t.closeRate>=80?'rgba(255,171,0,.6)':'rgba(255,82,82,.6)'),borderRadius:4}]},options:{...chartOpts({y:{min:0,max:110}}),plugins:{legend:{display:false}}}});
 }
 
 // ─── HEATMAP ───
 function renderHeatmap() {
-  const MONTH_LABELS = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const probs = [...new Set(FLT.map(d=>d.probType).filter(Boolean))].slice(0,12);
-  const months = [...new Set(FLT.map(d=>d.month))].sort();
-  const matrix = {}; FLT.forEach(d=>{ const k=d.probType+'|'+d.month; matrix[k]=(matrix[k]||0)+1; });
-  const maxV = Math.max(...Object.values(matrix),1);
+ const MONTH_LABELS = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+ const probs = [...new Set(FLT.map(d=>d.probType).filter(Boolean))].slice(0,12);
+ const months = [...new Set(FLT.map(d=>d.month))].sort();
+ const matrix = {}; FLT.forEach(d=>{ const k=d.probType+'|'+d.month; matrix[k]=(matrix[k]||0)+1; });
+ const maxV = Math.max(...Object.values(matrix),1);
 
-  const wrap = document.getElementById('heatmap-wrap');
-  wrap.innerHTML = `
-    <div style="overflow-x:auto">
-      <table style="border-collapse:collapse;width:100%">
-        <thead><tr>
-          <th style="font-size:9px;color:var(--muted);padding:4px 8px;text-align:left;min-width:120px">Problem Type</th>
-          ${months.map(m=>`<th style="font-size:9px;color:var(--muted);padding:4px 8px;text-align:center;min-width:42px">${MONTH_LABELS[m]}</th>`).join('')}
-        </tr></thead>
-        <tbody>
-          ${probs.map(p=>`<tr>
-            <td style="font-size:10px;color:var(--text);padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px" title="${p}">${p.length>20?p.slice(0,18)+'…':p}</td>
-            ${months.map(m=>{
-              const v=matrix[p+'|'+m]||0;
-              const pct=v/maxV;
-              const bg=v===0?'var(--bg3)':`rgba(0,229,255,${0.08+pct*0.7})`;
-              const color=v===0?'var(--muted)':pct>0.6?'#000':'var(--cyan)';
-              return `<td style="padding:3px"><div title="${p} - ${MONTH_LABELS[m]}: ${v} ครั้ง" style="width:36px;height:28px;border-radius:5px;background:${bg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${color};cursor:default;margin:auto">${v||''}</div></td>`;
-            }).join('')}
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`;
+ const wrap = document.getElementById('heatmap-wrap');
+ wrap.innerHTML = `
+ <div style="overflow-x:auto">
+ <table style="border-collapse:collapse;width:100%">
+ <thead><tr>
+ <th style="font-size:9px;color:var(--muted);padding:4px 8px;text-align:left;min-width:120px">Problem Type</th>
+ ${months.map(m=>`<th style="font-size:9px;color:var(--muted);padding:4px 8px;text-align:center;min-width:42px">${MONTH_LABELS[m]}</th>`).join('')}
+ </tr></thead>
+ <tbody>
+ ${probs.map(p=>`<tr>
+ <td style="font-size:10px;color:var(--text);padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px" title="${p}">${p.length>20?p.slice(0,18)+'…':p}</td>
+ ${months.map(m=>{
+ const v=matrix[p+'|'+m]||0;
+ const pct=v/maxV;
+ const bg=v===0?'var(--bg3)':`rgba(0,229,255,${0.08+pct*0.7})`;
+ const color=v===0?'var(--muted)':pct>0.6?'#000':'var(--cyan)';
+ return `<td style="padding:3px"><div title="${p} - ${MONTH_LABELS[m]}: ${v} ครั้ง" style="width:36px;height:28px;border-radius:5px;background:${bg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${color};cursor:default;margin:auto">${v||''}</div></td>`;
+ }).join('')}
+ </tr>`).join('')}
+ </tbody>
+ </table>
+ </div>`;
 }
 
 // ════════════════════════════════════════════════════════
 // AI ANALYSIS
 // ════════════════════════════════════════════════════════
 async function runAI() {
-  switchTab('ai');
-  const el = document.getElementById('ai-out');
-  if (!MO_LOADED || !FLT.length) {
-    el.innerHTML = '<p style="color:var(--muted);font-size:12px">กรุณาโหลดข้อมูล MO ก่อนครับ</p>'; return;
-  }
-  el.innerHTML = '<div class="ld-spin"></div><p class="pulse-txt" style="text-align:center;color:var(--cyan);font-size:12px;margin-top:8px">🤖 AI กำลังวิเคราะห์ JIG KPI...</p>';
+ switchTab('ai');
+ const el = document.getElementById('ai-out');
+ if (!MO_LOADED || !FLT.length) {
+ el.innerHTML = '<p style="color:var(--muted);font-size:12px">กรุณาโหลดข้อมูล MO ก่อนครับ</p>'; return;
+ }
+ el.innerHTML = '<div class="ld-spin"></div><p class="pulse-txt" style="text-align:center;color:var(--cyan);font-size:12px;margin-top:8px">🤖 AI กำลังวิเคราะห์ JIG KPI...</p>';
 
-  const m = calcMetrics(FLT);
-  const monthly = monthlyMetrics(FLT);
-  const techs = techMetrics(FLT);
+ const m = calcMetrics(FLT);
+ const monthly = monthlyMetrics(FLT);
+ const techs = techMetrics(FLT);
 
-  // Top problems
-  const prob = {}; FLT.forEach(d=>{ prob[d.probType]=(prob[d.probType]||0)+1; });
-  const topProbs = Object.entries(prob).sort((a,b)=>b[1]-a[1]).slice(0,8);
+ // Top problems
+ const prob = {}; FLT.forEach(d=>{ prob[d.probType]=(prob[d.probType]||0)+1; });
+ const topProbs = Object.entries(prob).sort((a,b)=>b[1]-a[1]).slice(0,8);
 
-  // Recurring machines
-  const mcFreq = {}; FLT.forEach(d=>{ mcFreq[d.mcNo]=(mcFreq[d.mcNo]||0)+1; });
-  const topMc = Object.entries(mcFreq).sort((a,b)=>b[1]-a[1]).slice(0,8);
+ // Recurring machines
+ const mcFreq = {}; FLT.forEach(d=>{ mcFreq[d.mcNo]=(mcFreq[d.mcNo]||0)+1; });
+ const topMc = Object.entries(mcFreq).sort((a,b)=>b[1]-a[1]).slice(0,8);
 
-  // Pending
-  const open = FLT.filter(d=>!d.isClosed).sort((a,b)=>b.daysPending-a.daysPending).slice(0,8);
-  const highTTR = FLT.filter(d=>d.ttrHr>1).sort((a,b)=>b.ttrHr-a.ttrHr).slice(0,5);
+ // Pending
+ const open = FLT.filter(d=>!d.isClosed).sort((a,b)=>b.daysPending-a.daysPending).slice(0,8);
+ const highTTR = FLT.filter(d=>d.ttrHr>1).sort((a,b)=>b.ttrHr-a.ttrHr).slice(0,5);
 
-  const prompt = `คุณเป็น Maintenance Engineer ระดับผู้เชี่ยวชาญสำหรับงาน JIG Maintenance วิเคราะห์ข้อมูลต่อไปนี้แล้วตอบ JSON เท่านั้น (ไม่มี markdown):
+ const prompt = `คุณเป็น Maintenance Engineer ระดับผู้เชี่ยวชาญสำหรับงาน JIG Maintenance วิเคราะห์ข้อมูลต่อไปนี้แล้วตอบ JSON เท่านั้น (ไม่มี markdown):
 
 **JIG KPI Summary:**
 - Total MO: ${m.total} งาน | Closed: ${m.closed} (${m.closeRate.toFixed(1)}%) | Pending: ${m.open}
@@ -1121,145 +1121,145 @@ ${monthly.map(m=>`${m.label}: MO=${m.total}, Close=${m.closeRate.toFixed(0)}%, M
 
 ตอบ JSON:
 {
-  "kpi_status": {
-    "close_rate": {"status":"GREEN|YELLOW|RED","note":"สรุป"},
-    "mtbf": {"status":"GREEN|YELLOW|RED","note":"สรุป"},
-    "mttr": {"status":"GREEN|YELLOW|RED","note":"สรุป"}
-  },
-  "top_issues": [{"rank":1,"problem":"","count":0,"root_cause":"","recommendation":""}],
-  "pending_urgency": [{"mc":"","problem":"","days":0,"urgency":"HIGH|MED","action":""}],
-  "tech_insights": [{"name":"","strength":"","weakness":"","recommendation":""}],
-  "predictive_alerts": [{"machine":"","signal":"","action":"","urgency":"HIGH|MED"}],
-  "quick_wins": [{"action":"","expected_impact":"","effort":"LOW|MED"}],
-  "monthly_trend_analysis": "วิเคราะห์แนวโน้ม 2-3 ประโยค",
-  "summary": "สรุปภาพรวม JIG MTN Performance 2-3 ประโยค"
+ "kpi_status": {
+ "close_rate": {"status":"GREEN|YELLOW|RED","note":"สรุป"},
+ "mtbf": {"status":"GREEN|YELLOW|RED","note":"สรุป"},
+ "mttr": {"status":"GREEN|YELLOW|RED","note":"สรุป"}
+ },
+ "top_issues": [{"rank":1,"problem":"","count":0,"root_cause":"","recommendation":""}],
+ "pending_urgency": [{"mc":"","problem":"","days":0,"urgency":"HIGH|MED","action":""}],
+ "tech_insights": [{"name":"","strength":"","weakness":"","recommendation":""}],
+ "predictive_alerts": [{"machine":"","signal":"","action":"","urgency":"HIGH|MED"}],
+ "quick_wins": [{"action":"","expected_impact":"","effort":"LOW|MED"}],
+ "monthly_trend_analysis": "วิเคราะห์แนวโน้ม 2-3 ประโยค",
+ "summary": "สรุปภาพรวม JIG MTN Performance 2-3 ประโยค"
 }`;
 
-  try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2500,messages:[{role:'user',content:prompt}]})
-    });
-    const data = await r.json();
-    const txt = data.content?.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
-    let ai; try{ai=JSON.parse(txt);}catch{ai=null;}
-    ai ? renderAI(ai, m) : fallbackAI(m, topProbs, topMc, open, techs);
-  } catch(e) { fallbackAI(m, topProbs, topMc, open, techs); }
+ try {
+ const r = await fetch('https://api.anthropic.com/v1/messages', {
+ method:'POST', headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2500,messages:[{role:'user',content:prompt}]})
+ });
+ const data = await r.json();
+ const txt = data.content?.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+ let ai; try{ai=JSON.parse(txt);}catch{ai=null;}
+ ai ? renderAI(ai, m) : fallbackAI(m, topProbs, topMc, open, techs);
+ } catch(e) { fallbackAI(m, topProbs, topMc, open, techs); }
 }
 
 function renderAI(a, m) {
-  const sc = {GREEN:'var(--green)',YELLOW:'var(--amber)',RED:'var(--red)'};
-  const ks = a.kpi_status||{};
+ const sc = {GREEN:'var(--green)',YELLOW:'var(--amber)',RED:'var(--red)'};
+ const ks = a.kpi_status||{};
 
-  const kpiStatus = Object.entries(ks).map(([k,v])=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--bg);border-radius:7px;margin-bottom:5px">
-      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">${k.replace(/_/g,' ')}</span>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:10px;color:${sc[v.status]||'var(--muted)'}">${v.note||''}</span>
-        <span style="font-size:11px;font-weight:700;color:${sc[v.status]||'var(--muted)'}">● ${v.status}</span>
-      </div>
-    </div>`).join('');
+ const kpiStatus = Object.entries(ks).map(([k,v])=>`
+ <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--bg);border-radius:7px;margin-bottom:5px">
+ <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">${k.replace(/_/g,' ')}</span>
+ <div style="display:flex;align-items:center;gap:8px">
+ <span style="font-size:10px;color:${sc[v.status]||'var(--muted)'}">${v.note||''}</span>
+ <span style="font-size:11px;font-weight:700;color:${sc[v.status]||'var(--muted)'}">● ${v.status}</span>
+ </div>
+ </div>`).join('');
 
-  const issuesHtml = (a.top_issues||[]).map((is,i)=>`
-    <div style="background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:9px;padding:12px 14px;margin-bottom:8px">
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
-        <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--red);opacity:.4">${String(i+1).padStart(2,'0')}</span>
-        <span style="font-size:13px;font-weight:700">${is.problem}</span>
-        <span style="margin-left:auto;font-size:10px;color:var(--muted)">${is.count} ครั้ง</span>
-      </div>
-      <div style="font-size:11px;color:#94a3b8;margin-bottom:5px"><b style="color:var(--amber)">Root Cause:</b> ${is.root_cause}</div>
-      <div style="font-size:11px;color:var(--green);padding:5px 9px;background:rgba(0,230,118,.06);border-radius:6px;border-left:2px solid var(--green)">→ ${is.recommendation}</div>
-    </div>`).join('');
+ const issuesHtml = (a.top_issues||[]).map((is,i)=>`
+ <div style="background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:9px;padding:12px 14px;margin-bottom:8px">
+ <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+ <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--red);opacity:.4">${String(i+1).padStart(2,'0')}</span>
+ <span style="font-size:13px;font-weight:700">${is.problem}</span>
+ <span style="margin-left:auto;font-size:10px;color:var(--muted)">${is.count} ครั้ง</span>
+ </div>
+ <div style="font-size:11px;color:#94a3b8;margin-bottom:5px"><b style="color:var(--amber)">Root Cause:</b> ${is.root_cause}</div>
+ <div style="font-size:11px;color:var(--green);padding:5px 9px;background:rgba(0,230,118,.06);border-radius:6px;border-left:2px solid var(--green)">→ ${is.recommendation}</div>
+ </div>`).join('');
 
-  const pendHtml = (a.pending_urgency||[]).map(p=>`
-    <div style="display:flex;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:7px;margin-bottom:5px;border-left:2px solid ${p.urgency==='HIGH'?'var(--red)':'var(--amber)'}">
-      <span style="font-size:10px;font-weight:700;color:${p.urgency==='HIGH'?'var(--red)':'var(--amber)'};flex:0 0 36px">⚠️ ${p.urgency}</span>
-      <div><div style="font-size:11px;font-weight:700">${p.mc} — ${p.problem}</div>
-      <div style="font-size:10px;color:var(--muted)">รอ ${p.days} วัน → ${p.action}</div></div>
-    </div>`).join('');
+ const pendHtml = (a.pending_urgency||[]).map(p=>`
+ <div style="display:flex;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:7px;margin-bottom:5px;border-left:2px solid ${p.urgency==='HIGH'?'var(--red)':'var(--amber)'}">
+ <span style="font-size:10px;font-weight:700;color:${p.urgency==='HIGH'?'var(--red)':'var(--amber)'};flex:0 0 36px">⚠️ ${p.urgency}</span>
+ <div><div style="font-size:11px;font-weight:700">${p.mc} — ${p.problem}</div>
+ <div style="font-size:10px;color:var(--muted)">รอ ${p.days} วัน → ${p.action}</div></div>
+ </div>`).join('');
 
-  const techHtml = (a.tech_insights||[]).map(t=>`
-    <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:5px">
-      <div style="font-size:12px;font-weight:700;margin-bottom:4px">${t.name}</div>
-      <div style="font-size:10px;color:var(--green)">✓ ${t.strength}</div>
-      ${t.weakness?`<div style="font-size:10px;color:var(--amber)">△ ${t.weakness}</div>`:''}
-      <div style="font-size:10px;color:var(--cyan);margin-top:3px">→ ${t.recommendation}</div>
-    </div>`).join('');
+ const techHtml = (a.tech_insights||[]).map(t=>`
+ <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:5px">
+ <div style="font-size:12px;font-weight:700;margin-bottom:4px">${t.name}</div>
+ <div style="font-size:10px;color:var(--green)">✓ ${t.strength}</div>
+ ${t.weakness?`<div style="font-size:10px;color:var(--amber)">△ ${t.weakness}</div>`:''}
+ <div style="font-size:10px;color:var(--cyan);margin-top:3px">→ ${t.recommendation}</div>
+ </div>`).join('');
 
-  const alertHtml = (a.predictive_alerts||[]).map(p=>`
-    <div style="display:flex;gap:8px;background:${p.urgency==='HIGH'?'rgba(255,82,82,.06)':'rgba(255,171,0,.06)'};border:1px solid ${p.urgency==='HIGH'?'rgba(255,82,82,.25)':'rgba(255,171,0,.25)'};border-radius:8px;padding:9px 12px;margin-bottom:5px">
-      <span style="font-size:9px;font-weight:700;color:${p.urgency==='HIGH'?'var(--red)':'var(--amber)'};flex:0 0 30px">🔮 ${p.urgency}</span>
-      <div><div style="font-size:11px;font-weight:600">${p.machine}</div>
-      <div style="font-size:11px;color:#94a3b8">${p.signal}</div>
-      <div style="font-size:11px;color:var(--cyan);margin-top:2px">→ ${p.action}</div></div>
-    </div>`).join('');
+ const alertHtml = (a.predictive_alerts||[]).map(p=>`
+ <div style="display:flex;gap:8px;background:${p.urgency==='HIGH'?'rgba(255,82,82,.06)':'rgba(255,171,0,.06)'};border:1px solid ${p.urgency==='HIGH'?'rgba(255,82,82,.25)':'rgba(255,171,0,.25)'};border-radius:8px;padding:9px 12px;margin-bottom:5px">
+ <span style="font-size:9px;font-weight:700;color:${p.urgency==='HIGH'?'var(--red)':'var(--amber)'};flex:0 0 30px">🔮 ${p.urgency}</span>
+ <div><div style="font-size:11px;font-weight:600">${p.machine}</div>
+ <div style="font-size:11px;color:#94a3b8">${p.signal}</div>
+ <div style="font-size:11px;color:var(--cyan);margin-top:2px">→ ${p.action}</div></div>
+ </div>`).join('');
 
-  const qwHtml = (a.quick_wins||[]).map(q=>`
-    <div style="display:flex;gap:8px;align-items:flex-start;padding:8px 10px;background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.12);border-radius:7px;margin-bottom:5px">
-      <span style="font-size:14px">⚡</span>
-      <div><div style="font-size:12px;font-weight:600">${q.action}</div>
-      <div style="font-size:10px;color:var(--cyan);margin-top:2px">→ ${q.expected_impact}</div>
-      <span style="font-size:9px;padding:1px 7px;background:var(--bg3);border-radius:20px;color:var(--muted)">${q.effort} effort</span></div>
-    </div>`).join('');
+ const qwHtml = (a.quick_wins||[]).map(q=>`
+ <div style="display:flex;gap:8px;align-items:flex-start;padding:8px 10px;background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.12);border-radius:7px;margin-bottom:5px">
+ <span style="font-size:14px">⚡</span>
+ <div><div style="font-size:12px;font-weight:600">${q.action}</div>
+ <div style="font-size:10px;color:var(--cyan);margin-top:2px">→ ${q.expected_impact}</div>
+ <span style="font-size:9px;padding:1px 7px;background:var(--bg3);border-radius:2px;color:var(--muted)">${q.effort} effort</span></div>
+ </div>`).join('');
 
-  document.getElementById('ai-out').innerHTML = `
-    <div style="background:rgba(0,229,255,.06);border-left:3px solid var(--cyan);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px">
-      <p style="color:var(--cyan);font-size:13px;font-weight:700;margin-bottom:5px">📊 JIG MTN Performance Summary</p>
-      <p style="color:#cbd5e1;font-size:12px;line-height:1.7">${a.summary||''}</p>
-    </div>
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:14px">
-      <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">🎯 KPI STATUS</h4>
-      ${kpiStatus}
-    </div>
-    <div class="ai-grid">
-      <div>
-        <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">🔴 TOP ISSUES</h4>
-        ${issuesHtml}
-        <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin:12px 0 8px">⏳ PENDING URGENCY</h4>
-        ${pendHtml||'<p style="color:var(--muted);font-size:11px">ไม่มี MO ค้าง</p>'}
-        <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin:12px 0 8px">📈 TREND ANALYSIS</h4>
-        <p style="font-size:12px;color:#cbd5e1;line-height:1.7;background:var(--bg3);border-radius:8px;padding:10px 12px">${a.monthly_trend_analysis||''}</p>
-      </div>
-      <div>
-        <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">👨‍🔧 TECH INSIGHTS</h4>
-        ${techHtml}
-        <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin:12px 0 8px">🔮 PREDICTIVE ALERTS</h4>
-        ${alertHtml}
-        <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin:12px 0 8px">⚡ QUICK WINS</h4>
-        ${qwHtml}
-      </div>
-    </div>`;
+ document.getElementById('ai-out').innerHTML = `
+ <div style="background:rgba(0,229,255,.06);border-left:3px solid var(--cyan);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px">
+ <p style="color:var(--cyan);font-size:13px;font-weight:700;margin-bottom:5px">📊 JIG MTN Performance Summary</p>
+ <p style="color:#cbd5e1;font-size:12px;line-height:1.7">${a.summary||''}</p>
+ </div>
+ <div style="background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:14px">
+ <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">🎯 KPI STATUS</h4>
+ ${kpiStatus}
+ </div>
+ <div class="ai-grid">
+ <div>
+ <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">🔴 TOP ISSUES</h4>
+ ${issuesHtml}
+ <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin:12px 0 8px">⏳ PENDING URGENCY</h4>
+ ${pendHtml||'<p style="color:var(--muted);font-size:11px">ไม่มี MO ค้าง</p>'}
+ <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin:12px 0 8px">📈 TREND ANALYSIS</h4>
+ <p style="font-size:12px;color:#cbd5e1;line-height:1.7;background:var(--bg3);border-radius:8px;padding:10px 12px">${a.monthly_trend_analysis||''}</p>
+ </div>
+ <div>
+ <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">👨‍🔧 TECH INSIGHTS</h4>
+ ${techHtml}
+ <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin:12px 0 8px">🔮 PREDICTIVE ALERTS</h4>
+ ${alertHtml}
+ <h4 style="font-family:var(--font-display);font-size:9px;color:var(--muted);letter-spacing:1px;margin:12px 0 8px">⚡ QUICK WINS</h4>
+ ${qwHtml}
+ </div>
+ </div>`;
 }
 
 function fallbackAI(m, topProbs, topMc, open, techs) {
-  document.getElementById('ai-out').innerHTML = `
-    <div style="background:rgba(255,171,0,.08);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px">
-      <p style="color:var(--amber);font-size:13px;font-weight:700;margin-bottom:4px">⚠️ AI API ต้องการ Web Server</p>
-      <p style="color:#94a3b8;font-size:11px">อัปโหลดขึ้น GitHub Pages / Netlify เพื่อใช้ AI Analysis</p>
-    </div>
-    <div class="ai-grid">
-      <div class="ai-sec">
-        <h4>📋 KPI Summary</h4>
-        <ul>
-          <li class="${m.closeRate>=95?'g':m.closeRate>=80?'y':'w'}">Close Rate: <b>${m.closeRate.toFixed(1)}%</b> ${m.closeRate>=95?'✓':'✗ ต่ำกว่าเป้า 95%'}</li>
-          <li class="${m.mtbf>=150?'g':m.mtbf>=100?'y':'w'}">MTBF: <b>${m.mtbf.toFixed(1)} hr</b> ${m.mtbf>=150?'✓':'✗ ต่ำกว่าเป้า 150hr'}</li>
-          <li class="${m.mttr<=0.25?'g':m.mttr<=0.5?'y':'w'}">MTTR: <b>${m.mttr.toFixed(2)} hr</b> ${m.mttr<=0.25?'✓':'✗ สูงกว่าเป้า 0.25hr'}</li>
-          <li class="${m.open===0?'g':'w'}">MO ค้าง: <b>${m.open} งาน</b></li>
-        </ul>
-      </div>
-      <div class="ai-sec">
-        <h4>🔴 Top Problems</h4>
-        <ul>${topProbs.map(([k,v],i)=>`<li class="${i===0?'w':'y'}">${k}: ${v} ครั้ง</li>`).join('')}</ul>
-      </div>
-      <div class="ai-sec">
-        <h4>👨‍🔧 ช่าง Performance</h4>
-        <ul>${techs.slice(0,5).map(t=>`<li class="${t.closeRate>=95?'g':t.closeRate>=80?'y':'w'}">${t.name}: Close ${t.closeRate.toFixed(0)}% · MTTR ${t.avgTTR.toFixed(2)}hr</li>`).join('')}</ul>
-      </div>
-      <div class="ai-sec">
-        <h4>⏳ MO ค้างเร่งด่วน</h4>
-        <ul>${open.slice(0,5).map(d=>`<li class="${d.daysPending>14?'w':'y'}">${d.mcNo} — ${d.probType} — รอ ${d.daysPending} วัน</li>`).join('')||'<li class="g">ไม่มี MO ค้าง 🎉</li>'}</ul>
-      </div>
-    </div>`;
+ document.getElementById('ai-out').innerHTML = `
+ <div style="background:rgba(255,171,0,.08);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px">
+ <p style="color:var(--amber);font-size:13px;font-weight:700;margin-bottom:4px">⚠️ AI API ต้องการ Web Server</p>
+ <p style="color:#94a3b8;font-size:11px">อัปโหลดขึ้น GitHub Pages / Netlify เพื่อใช้ AI Analysis</p>
+ </div>
+ <div class="ai-grid">
+ <div class="ai-sec">
+ <h4>📋 KPI Summary</h4>
+ <ul>
+ <li class="${m.closeRate>=95?'g':m.closeRate>=80?'y':'w'}">Close Rate: <b>${m.closeRate.toFixed(1)}%</b> ${m.closeRate>=95?'✓':'✗ ต่ำกว่าเป้า 95%'}</li>
+ <li class="${m.mtbf>=150?'g':m.mtbf>=100?'y':'w'}">MTBF: <b>${m.mtbf.toFixed(1)} hr</b> ${m.mtbf>=150?'✓':'✗ ต่ำกว่าเป้า 150hr'}</li>
+ <li class="${m.mttr<=0.25?'g':m.mttr<=0.5?'y':'w'}">MTTR: <b>${m.mttr.toFixed(2)} hr</b> ${m.mttr<=0.25?'✓':'✗ สูงกว่าเป้า 0.25hr'}</li>
+ <li class="${m.open===0?'g':'w'}">MO ค้าง: <b>${m.open} งาน</b></li>
+ </ul>
+ </div>
+ <div class="ai-sec">
+ <h4>🔴 Top Problems</h4>
+ <ul>${topProbs.map(([k,v],i)=>`<li class="${i===0?'w':'y'}">${k}: ${v} ครั้ง</li>`).join('')}</ul>
+ </div>
+ <div class="ai-sec">
+ <h4>👨‍🔧 ช่าง Performance</h4>
+ <ul>${techs.slice(0,5).map(t=>`<li class="${t.closeRate>=95?'g':t.closeRate>=80?'y':'w'}">${t.name}: Close ${t.closeRate.toFixed(0)}% · MTTR ${t.avgTTR.toFixed(2)}hr</li>`).join('')}</ul>
+ </div>
+ <div class="ai-sec">
+ <h4>⏳ MO ค้างเร่งด่วน</h4>
+ <ul>${open.slice(0,5).map(d=>`<li class="${d.daysPending>14?'w':'y'}">${d.mcNo} — ${d.probType} — รอ ${d.daysPending} วัน</li>`).join('')||'<li class="g">ไม่มี MO ค้าง 🎉</li>'}</ul>
+ </div>
+ </div>`;
 }
 
 // Auto-load on page ready
