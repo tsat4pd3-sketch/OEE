@@ -298,9 +298,28 @@ main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 .fade-up { animation: fadeUp .4s ease both; }
 #noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px;}[data-theme="light"] #noise-overlay{opacity:.014}
+
+/* ── CUSTOM CURSOR ────────────────────────────────────────────── */
+@media(hover:hover){body{cursor:none}}
+#cursor{
+  position:fixed;top:0;left:0;width:10px;height:10px;
+  background:var(--accent);border-radius:50%;
+  pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
+  transition:width .22s,height .22s;mix-blend-mode:difference;
+}
+#cursor-ring{
+  position:fixed;top:0;left:0;width:34px;height:34px;
+  border:1px solid rgba(227,25,55,0.4);border-radius:50%;
+  pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
+  transition:width .3s,height .3s,opacity .25s;
+}
+body.cur-hover #cursor{width:44px;height:44px}
+body.cur-hover #cursor-ring{opacity:0}
 </style>
 </head>
 <body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
 <div id="noise-overlay"></div>
 
 <!-- HEADER -->
@@ -1264,6 +1283,29 @@ function fallbackAI(m, topProbs, topMc, open, techs) {
 
 // Auto-load on page ready
 window.addEventListener('load', () => setTimeout(loadMO, 1500));
+</script>
+<!-- ── Custom Cursor ─────────────────────────────────────────────── -->
+<script>
+(function(){
+  const dot=document.getElementById('cursor');
+  const ring=document.getElementById('cursor-ring');
+  if(!dot||!ring)return;
+  if(!window.matchMedia('(hover:hover)').matches)return;
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    dot.style.left=mx+'px';dot.style.top=my+'px';
+  });
+  (function animRing(){
+    rx+=(mx-rx)*.11;ry+=(my-ry)*.11;
+    ring.style.left=rx+'px';ring.style.top=ry+'px';
+    requestAnimationFrame(animRing);
+  })();
+  document.querySelectorAll('a,button,.card,.kpi,.src-pill,.tg-btn,.enter-btn').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('cur-hover'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('cur-hover'));
+  });
+})();
 </script>
 </body>
 </html>
