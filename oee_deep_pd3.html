@@ -168,11 +168,34 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 /*  LOADING  */
 #loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .5s}
 #loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.intro-letters{display:flex;gap:.03em;overflow:hidden;justify-content:center}
+.intro-letter{
+  font-family:var(--font-display);font-size:clamp(4rem,14vw,10rem);
+  font-weight:800;letter-spacing:-.03em;line-height:1;
+  transform:translateY(115%);opacity:0;
+  transition:transform .7s cubic-bezier(.16,1,.3,1),opacity .5s ease;
+  color:#ffffff;
+}
+.intro-letter.up{transform:translateY(0);opacity:1}
+.intro-letter.red{color:#e31937}
+.intro-letter.dim{color:rgba(255,255,255,0.22)}
+.intro-sub{
+  font-family:var(--font-display);font-size:clamp(.5rem,1.1vw,.75rem);
+  letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,0.25);
+  margin-top:1.4rem;opacity:0;transform:translateY(14px);
+  transition:opacity .6s 1.2s,transform .6s 1.2s;
+}
+.intro-sub.up{opacity:1;transform:translateY(0)}
+.intro-status{
+  font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:2px;
+  font-family:var(--font-display);text-transform:uppercase;margin-top:2.4rem;
+}
+.src-badges{display:flex;gap:8px;margin-top:.7rem}
+.ld-bar-wrap{width:160px;height:1px;background:rgba(255,255,255,0.08);margin-top:.7rem;border-radius:0}
+.ld-bar-fill{height:100%;width:0%;background:#e31937;transition:width .4s cubic-bezier(.4,0,.2,1)}
 .ld-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ld-title{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--accent);letter-spacing:2px}
-.ld-bar-wrap{width:200px;height:4px;background:var(--border2);border-radius:2px;margin-top:4px}
-.ld-bar-fill{height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .4s}
 
 /*  SCROLLBAR  */
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg3)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
@@ -288,9 +311,13 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 <button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu"></button>
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div id="loading">
-  <div class="ld-ring"></div>
-  <div style="font-family:var(--font-display);font-size:16px;color:var(--accent);letter-spacing:2px">PD3 DEEP ANALYSIS</div>
-  <p id="ldmsg" style="font-size:12px;color:var(--muted)">กำลังโหลดข้อมูล...</p>
+  <div class="intro-letters">
+    <span class="intro-letter" id="il0">P</span>
+    <span class="intro-letter" id="il1">D</span>
+    <span class="intro-letter red" id="il2">3</span>
+  </div>
+  <div class="intro-sub" id="intro-sub">Deep Analysis</div>
+  <p class="intro-status" id="ldmsg">กำลังดึงข้อมูล...</p>
   <div class="ld-bar-wrap"><div class="ld-bar-fill" id="ld-bar"></div></div>
 </div>
 
@@ -573,7 +600,7 @@ function boot(){PARTS=[...new Set(ALL.map(d=>d.part))].filter(Boolean).sort();in
   document.getElementById("date-from").addEventListener("change",applyFilter);
   document.getElementById("date-to").addEventListener("change",applyFilter);
   document.getElementById("shift-sel").addEventListener("change",applyFilter);
-  applyFilter();window.enterDashboard();startAutoRefresh();}
+  applyFilter();setTimeout(()=>window.enterDashboard(),800);startAutoRefresh();}
 let arTimer=null;
 function startAutoRefresh(){if(arTimer)clearInterval(arTimer);updateNextLabel();arTimer=setInterval(()=>refreshLive(),3600000);}
 function updateNextLabel(){const el=document.getElementById("next-refresh");if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})+" น.";}
@@ -2059,6 +2086,21 @@ function fallbackProductivityImpact(ranked, overallOEE, totalTTRHours, totalProd
 window.addEventListener("load",()=>setTimeout(loadMO, 2000));
 
 // Gemini module removed
+</script>
+
+<script>
+(function(){
+  [0,1,2].forEach((i)=>{
+    setTimeout(()=>{
+      const el=document.getElementById('il'+i);
+      if(el)el.classList.add('up');
+    }, 120 + i*100);
+  });
+  setTimeout(()=>{
+    const sub=document.getElementById('intro-sub');
+    if(sub)sub.classList.add('up');
+  },700);
+})();
 </script>
 
 <script>
