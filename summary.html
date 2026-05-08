@@ -259,7 +259,8 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 </style>
 </head>
 <body>
-<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu"></button>
+<div id="sidebar-edge"></div>
+<button id="sidebar-toggle" onclick="toggleSidebar()"></button>
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <div id="noise-overlay"></div>
@@ -1260,22 +1261,18 @@ function clearQA(){
  document.addEventListener('DOMContentLoaded',updateBtn);
 })();
 
- // Sidebar toggle
- window.toggleSidebar = function() {
- var isMobile = window.innerWidth <= 768;
- if (isMobile) {
- document.body.classList.toggle('sidebar-open');
- } else {
- document.body.classList.toggle('sidebar-collapsed');
- localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
- }
- };
- // Restore desktop state
  (function(){
- if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === '1') {
- document.body.classList.add('sidebar-collapsed');
- }
- })();
+  var closeTimer=null;var pinned=localStorage.getItem('sidebarPinned')==='1';
+  var sb=document.getElementById('sidebar');var toggle=document.getElementById('sidebar-toggle');
+  var edge=document.getElementById('sidebar-edge');var overlay=document.getElementById('sidebar-overlay');
+  function openSB(){clearTimeout(closeTimer);if(window.innerWidth>768){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-open');}}
+  function closeSB(now){if(pinned&&window.innerWidth>768)return;if(window.innerWidth<=768){document.body.classList.remove('sidebar-open');return;}if(now){document.body.classList.add('sidebar-collapsed');}else{closeTimer=setTimeout(()=>document.body.classList.add('sidebar-collapsed'),380);}}
+  if(edge)edge.addEventListener('mouseenter',openSB);
+  if(sb){sb.addEventListener('mouseenter',()=>clearTimeout(closeTimer));sb.addEventListener('mouseleave',()=>closeSB(false));}
+  if(overlay)overlay.addEventListener('click',()=>closeSB(true));
+  window.toggleSidebar=function(){if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');return;}pinned=!pinned;localStorage.setItem('sidebarPinned',pinned?'1':'0');if(toggle)toggle.title=pinned?'Unpin sidebar':'Pin sidebar';if(pinned)openSB();else closeSB(true);};
+  if(window.innerWidth>768){if(pinned){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-collapsed');}}
+})();
 </script>
 </body>
 </html>
