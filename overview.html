@@ -15,9 +15,9 @@
   --border:#e0e0e0;--border2:#cccccc;
   --accent:#e31937;--accent-dim:rgba(227,25,55,0.08);
   --cyan:#0066cc;--green:#1a7a1a;--red:#e31937;--purple:#6600cc;--amber:#cc7700;
-  --text:#171717;--text2:#404040;--muted:#888888;--muted2:#aaaaaa;
-  --pd3:#1a6dcc;--pd3-bg:#e8f0fb;--pd3-border:#c0d4f5;
-  --pd4:#cc8800;--pd4-bg:#fdf3e0;--pd4-border:#f0d090;
+  --text:#121212;--text2:#404040;--muted:#7a7a7a;--muted2:#a0a0a0;
+  --pd3:#1a6dcc;--pd3-bg:#f0f5ff;--pd3-border:#d0e2fc;
+  --pd4:#cc8800;--pd4-bg:#fdf6ee;--pd4-border:#f0ddb0;
   --sidebar:252px;--radius:4px;--radius-sm:3px;
   --font-body:'Sarabun',sans-serif;--font-display:'Inter',sans-serif;
 }
@@ -55,7 +55,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   width:32px;height:32px;border-radius:50%;
   background:var(--bg2);border:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:14px;
+  cursor:pointer;font-size:16px;
   transition:all .2s;
 }
 body.sidebar-collapsed #sidebar-toggle{left:10px}
@@ -81,22 +81,22 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 
 .logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
 .logo-tag{
-  font-family:var(--font-display);font-size:9px;letter-spacing:4px;
+  font-family:var(--font-display);font-size:10px;letter-spacing:4px;
   color:var(--accent);text-transform:uppercase;margin-bottom:8px;font-weight:700;
 }
 .logo h1{
-  font-family:var(--font-display);font-size:20px;font-weight:700;
+  font-family:var(--font-display);font-size:22px;font-weight:700;
   color:var(--text);line-height:1.15;letter-spacing:-0.5px;
 }
-.logo-sub{font-size:12px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.badge{padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.logo-sub{font-size:13px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{padding:2px 8px;border-radius:2px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
 .bl{background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.25)}
 .bx{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
 
 .nav-links{padding:8px 10px;display:flex;flex-direction:column;gap:2px;border-bottom:1px solid var(--border)}
 .nav-btn{
   display:flex;align-items:center;gap:10px;padding:9px 12px;
-  border-radius:var(--radius-sm);font-size:13px;color:var(--muted);
+  border-radius:var(--radius-sm);font-size:15px;color:var(--muted);
   text-decoration:none;border:1px solid transparent;
   transition:all .15s;background:none;width:100%;text-align:left;
   font-family:var(--font-body);font-weight:500;letter-spacing:.1px;
@@ -113,20 +113,20 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 
 .ss{padding:14px 16px 4px}
 .ss-label{
-  font-size:9px;font-weight:700;color:var(--muted);
+  font-size:10px;font-weight:700;color:var(--muted);
   text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;
 }
 .ss input,.ss select{
   width:100%;padding:8px 10px;background:var(--bg3);
   border:1px solid var(--border);border-radius:var(--radius-sm);
-  color:var(--text);font-family:var(--font-body);font-size:13px;
+  color:var(--text);font-family:var(--font-body);font-size:15px;
   margin-bottom:7px;outline:none;transition:border-color .2s;
 }
 .ss input:focus,.ss select:focus{border-color:var(--accent)}
 
 .src-pills{display:flex;gap:4px;padding:8px 16px 0;flex-wrap:wrap}
 .src-pill{
-  padding:4px 12px;border-radius:2px;font-size:11px;font-weight:700;
+  padding:4px 12px;border-radius:2px;font-size:12px;font-weight:700;
   cursor:pointer;border:1px solid var(--border);background:transparent;
   color:var(--muted);transition:all .15s;font-family:var(--font-display);
   letter-spacing:.5px;text-transform:uppercase;
@@ -139,28 +139,28 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   margin:12px 16px 4px;padding:10px;
   background:transparent;border:1px solid var(--accent);
   border-radius:var(--radius-sm);color:var(--accent);
-  font-family:var(--font-display);font-size:12px;font-weight:700;
+  font-family:var(--font-display);font-size:13px;font-weight:700;
   cursor:pointer;transition:all .2s;width:calc(100% - 32px);
   letter-spacing:1px;text-transform:uppercase;
 }
 .btn-refresh:hover{background:var(--accent);color:#fff}
-.auto-info{font-size:10px;color:var(--muted2);text-align:center;padding:4px 16px 12px;line-height:1.7;letter-spacing:.2px}
+.auto-info{font-size:11px;color:var(--muted2);text-align:center;padding:4px 16px 12px;line-height:1.7;letter-spacing:.2px}
 
 /* ── MAIN CONTENT ─────────────────────────────────────────────── */
 #main{flex:1;padding:32px 36px 56px;overflow-y:auto;position:relative;z-index:1;transition:padding .25s}
 .topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:12px;flex-wrap:wrap}
 .topbar h2{
-  font-family:var(--font-display);font-size:28px;font-weight:700;
+  font-family:var(--font-display);font-size:31px;font-weight:700;
   color:var(--text);letter-spacing:-0.8px;
 }
-.topbar p{font-size:13px;color:var(--muted);margin-top:5px;letter-spacing:.2px}
+.topbar p{font-size:15px;color:var(--muted);margin-top:5px;letter-spacing:.2px}
 
 .sec-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px;margin-top:4px}
 .sec-hdr h3{
-  font-family:var(--font-display);font-size:11px;font-weight:700;
+  font-family:var(--font-display);font-size:12px;font-weight:700;
   color:var(--muted);text-transform:uppercase;letter-spacing:2.5px;
 }
-.sec-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:2px;letter-spacing:.8px;text-transform:uppercase}
+.sec-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:2px;letter-spacing:.8px;text-transform:uppercase}
 .sec-line{flex:1;height:1px;background:var(--border)}
 
 /* ── KPI GRID ─────────────────────────────────────────────────── */
@@ -178,17 +178,17 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 .k3::after{background:var(--green)}
 .k4::after{background:var(--amber)}
 .kpi-lbl{
-  font-size:10px;color:var(--muted);font-weight:600;
+  font-size:11px;color:var(--muted);font-weight:600;
   letter-spacing:1.5px;margin-bottom:10px;text-transform:uppercase;
   font-family:var(--font-display);
 }
 .kpi-val{
-  font-family:var(--font-display);font-size:36px;font-weight:700;
+  font-family:var(--font-display);font-size:40px;font-weight:700;
   line-height:1;color:var(--text);letter-spacing:-1px;
 }
-.kpi-sub{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:.2px}
+.kpi-sub{font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:.2px}
 .kpi-split{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-.kpi-split span{padding:2px 7px;border-radius:2px;font-size:10px;font-weight:700;font-family:var(--font-display);letter-spacing:.3px}
+.kpi-split span{padding:2px 7px;border-radius:2px;font-size:11px;font-weight:700;font-family:var(--font-display);letter-spacing:.3px}
 .good{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
 
 /* ── CARDS ────────────────────────────────────────────────────── */
@@ -198,11 +198,11 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 }
 .card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
 .card-hdr h3{
-  font-family:var(--font-display);font-size:12px;font-weight:700;
+  font-family:var(--font-display);font-size:13px;font-weight:700;
   color:var(--text);display:flex;align-items:center;gap:8px;
   text-transform:uppercase;letter-spacing:1.5px;
 }
-.card-hdr em{font-style:normal;font-size:12px;color:var(--muted);letter-spacing:.2px;text-transform:none;font-weight:400;font-family:var(--font-body)}
+.card-hdr em{font-style:normal;font-size:13px;color:var(--muted);letter-spacing:.2px;text-transform:none;font-weight:400;font-family:var(--font-body)}
 .ch{position:relative}
 .row{display:grid;gap:1px;margin-bottom:1px;background:var(--border)}
 .r2{grid-template-columns:1fr 1fr}
@@ -210,7 +210,7 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 
 .toggle-group{display:flex;gap:2px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:2px}
 .tg-btn{
-  padding:5px 12px;border-radius:2px;font-size:11px;font-weight:700;
+  padding:5px 12px;border-radius:2px;font-size:12px;font-weight:700;
   cursor:pointer;border:none;background:transparent;color:var(--muted);
   font-family:var(--font-display);transition:all .15s;
   letter-spacing:.5px;text-transform:uppercase;
@@ -220,18 +220,18 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 /* ── PARETO ───────────────────────────────────────────────────── */
 .par-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
 .par-row:last-child{border-bottom:none}
-.par-label{flex:0 0 145px;font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.par-label{flex:0 0 145px;font-size:13px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .par-bar-bg{flex:1;background:var(--bg3);border-radius:0;height:4px;overflow:hidden}
 .par-bar-fill{height:100%;border-radius:0;background:var(--accent);transition:width .6s cubic-bezier(.4,0,.2,1)}
-.par-pct{flex:0 0 38px;text-align:right;font-size:12px;font-weight:700;color:var(--accent);font-family:var(--font-display)}
-.par-val{flex:0 0 56px;text-align:right;font-size:11px;color:var(--muted);font-family:var(--font-display)}
+.par-pct{flex:0 0 38px;text-align:right;font-size:13px;font-weight:700;color:var(--accent);font-family:var(--font-display)}
+.par-val{flex:0 0 56px;text-align:right;font-size:12px;color:var(--muted);font-family:var(--font-display)}
 
 /* ── TABLES ───────────────────────────────────────────────────── */
 .tbl-wrap{overflow-x:auto;max-height:300px;overflow-y:auto}
-.dt-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.dt-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .dt-tbl th{
   background:var(--bg3);color:var(--muted);font-weight:700;
-  padding:10px 12px;text-align:left;font-size:10px;
+  padding:10px 12px;text-align:left;font-size:11px;
   position:sticky;top:0;border-bottom:1px solid var(--border2);
   text-transform:uppercase;letter-spacing:1px;font-family:var(--font-display);
 }
@@ -256,11 +256,11 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 .src-badges{display:flex;gap:8px}
 #loading .src-badges span{font-family:var(--font-display)}
 #loading>div:nth-child(2){
-  font-family:var(--font-display) !important;font-size:11px !important;
+  font-family:var(--font-display) !important;font-size:12px !important;
   color:rgba(255,255,255,0.4) !important;letter-spacing:4px !important;
   text-transform:uppercase !important;
 }
-#ld-msg{font-size:10px !important;color:rgba(255,255,255,0.3) !important;letter-spacing:1px !important}
+#ld-msg{font-size:11px !important;color:rgba(255,255,255,0.3) !important;letter-spacing:1px !important}
 
 /* ── FLASH ALARM ──────────────────────────────────────────────── */
 @keyframes flashPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(227,25,55,0.3)}50%{opacity:.9;box-shadow:0 0 0 8px rgba(227,25,55,0)}}
@@ -274,12 +274,12 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 }
 .alarm-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .alarm-hdr h3{
-  font-family:var(--font-display);font-size:11px;font-weight:700;
+  font-family:var(--font-display);font-size:12px;font-weight:700;
   color:#e31937;display:flex;align-items:center;gap:7px;
   text-transform:uppercase;letter-spacing:2px;
 }
 .alarm-badge-flash{
-  padding:2px 8px;border-radius:2px;font-size:10px;font-weight:800;
+  padding:2px 8px;border-radius:2px;font-size:11px;font-weight:800;
   animation:flashBadge 1.4s ease-in-out infinite;
   font-family:var(--font-display);letter-spacing:.5px;
 }
@@ -289,29 +289,29 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   animation:flashPulse 2.5s ease-in-out infinite;
   display:flex;align-items:center;gap:12px;flex-wrap:wrap;
 }
-.alarm-src-badge{font-size:9px;font-weight:800;padding:2px 7px;border-radius:2px;flex-shrink:0;font-family:var(--font-display);letter-spacing:1px;text-transform:uppercase}
-.alarm-part{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text);flex:1;min-width:120px;letter-spacing:-.2px}
+.alarm-src-badge{font-size:10px;font-weight:800;padding:2px 7px;border-radius:2px;flex-shrink:0;font-family:var(--font-display);letter-spacing:1px;text-transform:uppercase}
+.alarm-part{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text);flex:1;min-width:120px;letter-spacing:-.2px}
 .alarm-stat{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:60px}
-.alarm-stat-val{font-family:var(--font-display);font-size:16px;font-weight:700;letter-spacing:-.5px}
-.alarm-stat-lbl{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.alarm-stat-val{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:-.5px}
+.alarm-stat-lbl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase}
 .alarm-gap{
   display:flex;align-items:center;gap:4px;
   background:rgba(227,25,55,0.08);border:1px solid rgba(227,25,55,0.2);
   border-radius:2px;padding:4px 10px;
 }
-.alarm-gap span{font-family:var(--font-display);font-size:14px;font-weight:800;color:#e31937}
-.alarm-gap small{font-size:9px;color:#e31937;font-weight:600;letter-spacing:.5px}
-.alarm-no-issue{display:flex;align-items:center;gap:8px;color:var(--green);font-size:12px;font-weight:600;padding:8px 0;font-family:var(--font-display);letter-spacing:.5px}
+.alarm-gap span{font-family:var(--font-display);font-size:16px;font-weight:800;color:#e31937}
+.alarm-gap small{font-size:10px;color:#e31937;font-weight:600;letter-spacing:.5px}
+.alarm-no-issue{display:flex;align-items:center;gap:8px;color:var(--green);font-size:13px;font-weight:600;padding:8px 0;font-family:var(--font-display);letter-spacing:.5px}
 .alarm-ok-badge{
   background:rgba(34,197,94,0.12);color:#22c55e;
   border:1px solid rgba(34,197,94,0.25);
-  padding:2px 8px;border-radius:2px;font-size:10px;font-weight:800;
+  padding:2px 8px;border-radius:2px;font-size:11px;font-weight:800;
   font-family:var(--font-display);letter-spacing:.5px;text-transform:uppercase;
 }
 .alarm-sidebar-btn{
   position:relative;display:flex;align-items:center;gap:9px;
   padding:9px 12px;border-radius:var(--radius-sm);
-  font-size:13px;color:var(--muted);border:1px solid transparent;
+  font-size:15px;color:var(--muted);border:1px solid transparent;
   transition:all .15s;background:none;width:100%;text-align:left;
   font-family:var(--font-body);font-weight:500;cursor:pointer;
 }
@@ -323,7 +323,7 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 }
 .alarm-dismiss{
   margin-left:auto;padding:4px 10px;border-radius:2px;
-  font-size:10px;font-weight:700;background:transparent;
+  font-size:11px;font-weight:700;background:transparent;
   border:1px solid var(--border);color:var(--muted);
   cursor:pointer;font-family:var(--font-display);
   letter-spacing:.5px;text-transform:uppercase;
@@ -335,9 +335,9 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   body{padding:0}
   #main{padding:16px 14px 64px}
   .card{padding:16px 14px}
-  .kpi-val{font-size:28px}
-  .kpi-sub{font-size:11px}
-  table{font-size:11px}
+  .kpi-val{font-size:31px}
+  .kpi-sub{font-size:12px}
+  table{font-size:12px}
   .tbl-wrap,.chart-wrap{overflow-x:auto}
   .r2,.r3,.r4{grid-template-columns:1fr!important}
   .ai-grid{grid-template-columns:1fr!important}
@@ -447,6 +447,13 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   .card,.kpi{transition:none}
 }
 
+/* ── SIDEBAR HOVER EDGE ZONE ─────────────────────────────────── */
+#sidebar-edge{
+  position:fixed;left:0;top:0;bottom:0;width:24px;
+  z-index:99;pointer-events:none;
+}
+body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
+
 /* ── CUSTOM CURSOR ────────────────────────────────────────────── */
 @media(hover:hover){body{cursor:none}}
 #cursor{
@@ -493,7 +500,7 @@ body.cur-hover #cursor-ring{opacity:0}
 .intro-sub.up{opacity:1;transform:translateY(0)}
 
 .intro-status{
-  font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:2px;
+  font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:2px;
   font-family:var(--font-display);text-transform:uppercase;margin-top:2.8rem;
 }
 .src-badges{display:flex;gap:8px;margin-top:.7rem}
@@ -525,12 +532,12 @@ body.cur-hover #cursor-ring{opacity:0}
 }
 .marquee-item{
   display:inline-flex;align-items:center;gap:1.2rem;padding:0 2rem;
-  font-family:var(--font-display);font-size:10px;letter-spacing:1.5px;
+  font-family:var(--font-display);font-size:11px;letter-spacing:1.5px;
   text-transform:uppercase;color:var(--muted);flex-shrink:0;
 }
 .m-line{color:var(--text2);font-weight:700}
 .m-val.good{color:#22c55e}.m-val.warn{color:#f59e0b}.m-val.bad{color:#e31937}
-.m-sep{color:var(--border2);font-size:8px}
+.m-sep{color:var(--border2);font-size:9px}
 @keyframes marqueeScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
 /* ── NOISE OVERLAY ────────────────────────────────────────────── */
@@ -547,7 +554,8 @@ body.cur-hover #cursor-ring{opacity:0}
 <div id="cursor-ring"></div>
 <div id="noise-overlay"></div>
 
-<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu">
+<div id="sidebar-edge"></div>
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Pin sidebar">
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="4" x2="13" y2="4"/><line x1="1" y1="10" x2="13" y2="10"/></svg>
 </button>
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -566,8 +574,8 @@ body.cur-hover #cursor-ring{opacity:0}
   <p class="intro-status" id="ld-msg">กำลังดึงข้อมูล...</p>
   <div class="ld-bar-wrap"><div class="ld-bar-fill" id="ld-bar"></div></div>
   <div class="src-badges">
-    <span id="ld-pd3" style="font-size:9px;font-weight:700;padding:2px 10px;border-radius:2px;background:rgba(77,159,255,0.1);color:#4d9fff;border:1px solid rgba(77,159,255,0.2);font-family:'Inter',sans-serif;letter-spacing:1px">PD3 ...</span>
-    <span id="ld-pd4" style="font-size:9px;font-weight:700;padding:2px 10px;border-radius:2px;background:rgba(255,170,64,0.1);color:#ffaa40;border:1px solid rgba(255,170,64,0.2);font-family:'Inter',sans-serif;letter-spacing:1px">PD4 ...</span>
+    <span id="ld-pd3" style="font-size:10px;font-weight:700;padding:2px 10px;border-radius:2px;background:rgba(77,159,255,0.1);color:#4d9fff;border:1px solid rgba(77,159,255,0.2);font-family:'Inter',sans-serif;letter-spacing:1px">PD3 ...</span>
+    <span id="ld-pd4" style="font-size:10px;font-weight:700;padding:2px 10px;border-radius:2px;background:rgba(255,170,64,0.1);color:#ffaa40;border:1px solid rgba(255,170,64,0.2);font-family:'Inter',sans-serif;letter-spacing:1px">PD4 ...</span>
   </div>
   <button class="enter-btn" id="enter-btn" onclick="enterDashboard()">Enter</button>
 </div>
@@ -578,7 +586,7 @@ body.cur-hover #cursor-ring{opacity:0}
     <h1>PD3 + PD4<br>Overview</h1>
     <div class="logo-sub">
       <span id="src-badge" class="badge bx">...</span>
-      <span id="last-update" style="font-size:9px;color:var(--muted)"></span>
+      <span id="last-update" style="font-size:10px;color:var(--muted)"></span>
     </div>
   </div>
 
@@ -627,17 +635,17 @@ body.cur-hover #cursor-ring{opacity:0}
     </select>
   </div>
 
-  <div style="padding:14px 16px 2px;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-family:var(--font-display)">สถานะข้อมูล</div>
+  <div style="padding:14px 16px 2px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-family:var(--font-display)">สถานะข้อมูล</div>
   <div style="padding:4px 16px 8px;display:flex;gap:6px;flex-wrap:wrap">
-    <span id="pill-pd3" style="font-size:9px;font-weight:700;padding:2px 9px;border-radius:2px;background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border);font-family:Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase">PD3 ...</span>
-    <span id="pill-pd4" style="font-size:9px;font-weight:700;padding:2px 9px;border-radius:2px;background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border);font-family:Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase">PD4 ...</span>
+    <span id="pill-pd3" style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:2px;background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border);font-family:Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase">PD3 ...</span>
+    <span id="pill-pd4" style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:2px;background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border);font-family:Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase">PD4 ...</span>
   </div>
 
   <button class="btn-refresh" onclick="reloadAll()">Refresh Data</button>
   <div class="auto-info">Auto-refresh ทุก 1 ชม.<br>ครั้งถัดไป: <span id="next-refresh">—</span></div>
 
   <div style="padding:0 16px 14px;margin-top:auto">
-    <button id="theme-toggle" onclick="toggleTheme()" style="width:100%;padding:9px 12px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-family:var(--font-display);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:1.5px;text-transform:uppercase">
+    <button id="theme-toggle" onclick="toggleTheme()" style="width:100%;padding:9px 12px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-family:var(--font-display);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:1.5px;text-transform:uppercase">
       <span id="theme-icon">◐</span><span id="theme-label">Dark Mode</span>
     </button>
   </div>
@@ -649,7 +657,7 @@ body.cur-hover #cursor-ring{opacity:0}
       <h2 id="main-title">Production Overview — ทั้งหมด</h2>
       <p id="range-lbl">—</p>
     </div>
-    <div style="font-size:11px;color:var(--muted);font-family:var(--font-display);letter-spacing:.5px" id="rec-count">—</div>
+    <div style="font-size:12px;color:var(--muted);font-family:var(--font-display);letter-spacing:.5px" id="rec-count">—</div>
   </div>
 
   <!-- Live KPI Marquee -->
@@ -730,8 +738,8 @@ body.cur-hover #cursor-ring{opacity:0}
     <div class="card-hdr">
       <h3>หมายเหตุล่าสุด<em>50 รายการ</em></h3>
       <div style="display:flex;gap:6px">
-        <span id="rem-pd3-badge" style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:2px;background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border);font-family:Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase">PD3</span>
-        <span id="rem-pd4-badge" style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:2px;background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border);font-family:Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase">PD4</span>
+        <span id="rem-pd3-badge" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:2px;background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border);font-family:Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase">PD3</span>
+        <span id="rem-pd4-badge" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:2px;background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border);font-family:Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase">PD4</span>
       </div>
     </div>
     <div class="tbl-wrap">
@@ -1012,7 +1020,7 @@ function rKPI(){
       <div class="kpi-val" data-end="${f(qAll)}" data-suffix="%" style="color:${oc(qAll)}">0%</div>
       <div class="kpi-sub">${qAll>=99?'เยี่ยม':qAll>=95?'ปกติ':'ต้องปรับปรุง'}</div>${split(q3,q4)}</div>
     <div class="kpi k4"><div class="kpi-lbl">Total Downtime</div>
-      <div class="kpi-val" data-end="${(dtAll/60).toFixed(1)}" data-suffix=" ชม." style="color:var(--red);font-size:22px">0 ชม.</div>
+      <div class="kpi-val" data-end="${(dtAll/60).toFixed(1)}" data-suffix=" ชม." style="color:var(--red);font-size:25px">0 ชม.</div>
       <div class="kpi-sub">${dtAll.toLocaleString()} นาที</div></div>`;
   if(typeof window.animateKPIs==='function') window.animateKPIs();
 }
@@ -1122,7 +1130,7 @@ function rDTChart(){
 
 // ── DT icon & OEE pill helpers ────────────────────────────────────────
 function dtIcon(t){const s=(t||'').toLowerCase();if(s.includes('plc')||s.includes('sensor')||s.includes('เซนเซอร์'))return'💡';if(s.includes('robot')||s.includes('โรบอท'))return'🤖';if(s.includes('หลัก'))return'⚙️';if(s.includes('รอง'))return'🔧';if(s.includes('พิมพ์')||s.includes('จิ๊ก')||s.includes('กริ๊ป'))return'🗜️';if(s.includes('คุณภาพ')||s.includes('quality'))return'🔍';if(s.includes('qa')||s.includes('คอนเฟิร์ม'))return'🔬';if(s.includes('ภาชนะ')||s.includes('วัสดุ'))return'📦';if(s.includes('setup')||s.includes('ตั้ง'))return'🔩';if(s.includes('ไฟ')||s.includes('power'))return'⚡';return'📋';}
-function oeeTag(v){if(!v&&v!==0)return'<span style="color:var(--muted)">—</span>';const p=(+v).toFixed(1);if(v>=85)return`<span style="padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700;background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3);font-family:Inter,sans-serif;letter-spacing:.5px">${p}%</span>`;if(v>=70)return`<span style="padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700;background:rgba(245,158,11,0.12);color:var(--amber);border:1px solid rgba(245,158,11,0.3);font-family:Inter,sans-serif;letter-spacing:.5px">${p}%</span>`;return`<span style="padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700;background:rgba(227,25,55,0.12);color:var(--red);border:1px solid rgba(227,25,55,0.3);font-family:Inter,sans-serif;letter-spacing:.5px">${p}%</span>`;}
+function oeeTag(v){if(!v&&v!==0)return'<span style="color:var(--muted)">—</span>';const p=(+v).toFixed(1);if(v>=85)return`<span style="padding:2px 8px;border-radius:2px;font-size:11px;font-weight:700;background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3);font-family:Inter,sans-serif;letter-spacing:.5px">${p}%</span>`;if(v>=70)return`<span style="padding:2px 8px;border-radius:2px;font-size:11px;font-weight:700;background:rgba(245,158,11,0.12);color:var(--amber);border:1px solid rgba(245,158,11,0.3);font-family:Inter,sans-serif;letter-spacing:.5px">${p}%</span>`;return`<span style="padding:2px 8px;border-radius:2px;font-size:11px;font-weight:700;background:rgba(227,25,55,0.12);color:var(--red);border:1px solid rgba(227,25,55,0.3);font-family:Inter,sans-serif;letter-spacing:.5px">${p}%</span>`;}
 
 // ── DT Pareto ─────────────────────────────────────────────────────────
 function rPareto(rows,containerId){
@@ -1131,7 +1139,7 @@ function rPareto(rows,containerId){
   const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const total=sorted.reduce((s,[,v])=>s+v,0)||1;
   const COLS=['#e31937','#4d9fff','#a855f7','#ffaa40','#22c55e','#f59e0b','#e879f9','#fb923c'];
-  if(!sorted.length){el.innerHTML='<p style="color:var(--muted);font-size:12px;padding:8px">ไม่มีข้อมูล DT</p>';return;}
+  if(!sorted.length){el.innerHTML='<p style="color:var(--muted);font-size:13px;padding:8px">ไม่มีข้อมูล DT</p>';return;}
   let cum=0;
   el.innerHTML=sorted.map(([l,v],i)=>{cum+=v;const pct=(v/total*100).toFixed(1);
     return`<div class="par-row">
@@ -1149,7 +1157,7 @@ function rRemarks(){
   const srcStyle=src=>src==='PD3'?'background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border)':'background:var(--pd4-bg);color:var(--pd4);border:1px solid var(--pd4-border)';
   document.getElementById('rem-tbody').innerHTML=rows.map(d=>`<tr>
     <td>${d.dateStr}</td>
-    <td><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:2px;letter-spacing:.5px;font-family:Inter,sans-serif;${srcStyle(d.src)}">${d.src}</span></td>
+    <td><span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:2px;letter-spacing:.5px;font-family:Inter,sans-serif;${srcStyle(d.src)}">${d.src}</span></td>
     <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.part}">${d.part}</td>
     <td>${d.shift}</td>
     <td class="r">${oeeTag(d.oee)}</td>
@@ -1247,8 +1255,8 @@ function rAlarm() {
 
   if (ALARM_DISMISSED && alarms.length > 0) {
     section.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm)">
-      <span style="color:var(--accent);font-size:12px;font-weight:700;font-family:var(--font-display);letter-spacing:.5px">มี ${alarms.length} product ที่ต้องโฟกัส</span>
-      <button onclick="ALARM_DISMISSED=false;rAlarm()" style="padding:3px 12px;border-radius:2px;font-size:10px;font-weight:700;background:transparent;border:1px solid var(--accent);color:var(--accent);cursor:pointer;font-family:var(--font-display);letter-spacing:1px;text-transform:uppercase">แสดง Alarm</button>
+      <span style="color:var(--accent);font-size:13px;font-weight:700;font-family:var(--font-display);letter-spacing:.5px">มี ${alarms.length} product ที่ต้องโฟกัส</span>
+      <button onclick="ALARM_DISMISSED=false;rAlarm()" style="padding:3px 12px;border-radius:2px;font-size:11px;font-weight:700;background:transparent;border:1px solid var(--accent);color:var(--accent);cursor:pointer;font-family:var(--font-display);letter-spacing:1px;text-transform:uppercase">แสดง Alarm</button>
     </div>`;
     return;
   }
@@ -1264,7 +1272,7 @@ function rAlarm() {
       <div class="alarm-hdr">
         <h3 style="color:var(--green)">✅ Flash Alarm — ทุก Product ปกติ</h3>
         <span class="alarm-ok-badge">OK</span>
-        <em style="font-size:10px;color:var(--muted);margin-left:auto">ตรวจ 3 วันล่าสุด: ${fmtD(threeDayAgo)}–${fmtD(latestDate)}</em>
+        <em style="font-size:11px;color:var(--muted);margin-left:auto">ตรวจ 3 วันล่าสุด: ${fmtD(threeDayAgo)}–${fmtD(latestDate)}</em>
       </div>
       <div class="alarm-no-issue">Output/Hour ทุก product อยู่ในระดับปกติ ≥ ค่ากลาง</div>
     </div>`;
@@ -1279,12 +1287,12 @@ function rAlarm() {
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span class="alarm-src-badge" style="${srcStyle(a.src)}">${a.src}</span>
         <div class="alarm-part">${a.part}</div>
-        <div style="font-size:11px;color:var(--muted);margin-left:auto">${a.recentCount} shifts · เฉลี่ย ${f1(a.recentHr)} ชม./กะ</div>
+        <div style="font-size:12px;color:var(--muted);margin-left:auto">${a.recentCount} shifts · เฉลี่ย ${f1(a.recentHr)} ชม./กะ</div>
       </div>
 
       <!-- PRIMARY: Out/Hour -->
       <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(227,25,55,0.05);border:1px solid rgba(227,25,55,0.2);border-radius:2px;flex-wrap:wrap">
-        <div style="font-size:9px;font-weight:800;color:var(--accent);letter-spacing:1.5px;min-width:80px;font-family:var(--font-display);text-transform:uppercase">OUT / HOUR</div>
+        <div style="font-size:10px;font-weight:800;color:var(--accent);letter-spacing:1.5px;min-width:80px;font-family:var(--font-display);text-transform:uppercase">OUT / HOUR</div>
         <div class="alarm-stat">
           <span class="alarm-stat-val" style="color:var(--red)">${f1(a.recentOph)}</span>
           <span class="alarm-stat-lbl">3 วันล่าสุด</span>
@@ -1302,17 +1310,17 @@ function rAlarm() {
 
       <!-- SUPPORTING: Raw Output -->
       <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;flex-wrap:wrap">
-        <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;min-width:80px">📦 RAW OUTPUT</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;min-width:80px">📦 RAW OUTPUT</div>
         <div class="alarm-stat">
-          <span class="alarm-stat-val" style="color:${gapGoodColor(a)};font-size:14px">${Math.round(a.recentGood).toLocaleString()}</span>
+          <span class="alarm-stat-val" style="color:${gapGoodColor(a)};font-size:16px">${Math.round(a.recentGood).toLocaleString()}</span>
           <span class="alarm-stat-lbl">ชิ้น/กะ เฉลี่ย</span>
         </div>
         <div style="color:var(--muted2);font-weight:300">vs</div>
         <div class="alarm-stat">
-          <span class="alarm-stat-val" style="color:var(--text2);font-size:14px">${Math.round(a.medGood).toLocaleString()}</span>
+          <span class="alarm-stat-val" style="color:var(--text2);font-size:16px">${Math.round(a.medGood).toLocaleString()}</span>
           <span class="alarm-stat-lbl">ค่ากลาง</span>
         </div>
-        <div style="font-size:11px;color:${gapGoodColor(a)};font-weight:700;padding:3px 8px;border-radius:2px;font-family:var(--font-display);background:${a.gapGoodPct<5?'rgba(34,197,94,0.1)':a.gapGoodPct<15?'rgba(245,158,11,0.1)':'rgba(227,25,55,0.1)'}">
+        <div style="font-size:12px;color:${gapGoodColor(a)};font-weight:700;padding:3px 8px;border-radius:2px;font-family:var(--font-display);background:${a.gapGoodPct<5?'rgba(34,197,94,0.1)':a.gapGoodPct<15?'rgba(245,158,11,0.1)':'rgba(227,25,55,0.1)'}">
           ${a.gapGoodPct < 5 ? '✅ ปกติ (กะสั้นกว่า)' : `▼${f1(a.gapGoodPct)}% ต่ำด้วย`}
         </div>
       </div>
@@ -1322,8 +1330,8 @@ function rAlarm() {
     <div class="alarm-hdr">
       <h3>🚨 Flash Alarm — Output/Hour ต่ำกว่าค่ากลาง</h3>
       <span class="alarm-badge-flash">${alarms.length} รายการ</span>
-      <em style="font-size:10px;color:var(--muted)">3 วันล่าสุด: ${fmtD(threeDayAgo)}–${fmtD(latestDate)}</em>
-      <em style="font-size:10px;color:var(--muted)">threshold ≥10% ต่ำกว่า median out/hr</em>
+      <em style="font-size:11px;color:var(--muted)">3 วันล่าสุด: ${fmtD(threeDayAgo)}–${fmtD(latestDate)}</em>
+      <em style="font-size:11px;color:var(--muted)">threshold ≥10% ต่ำกว่า median out/hr</em>
       <button class="alarm-dismiss" onclick="ALARM_DISMISSED=true;rAlarm()">ซ่อน</button>
     </div>
     ${cards}
@@ -1399,19 +1407,46 @@ async function init(){
   },500);
   if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadAll,3600000);updateNextLabel();
 }
-// ── Sidebar Toggle ────────────────────────────────────────────────────
-window.toggleSidebar = function() {
-  var isMobile = window.innerWidth <= 768;
-  if (isMobile) {
-    document.body.classList.toggle('sidebar-open');
-  } else {
-    document.body.classList.toggle('sidebar-collapsed');
-    localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
-  }
-};
+// ── Sidebar: Hover auto-open, click to pin ────────────────────────────
 (function(){
-  if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === '1') {
-    document.body.classList.add('sidebar-collapsed');
+  var closeTimer=null;
+  var pinned=localStorage.getItem('sidebarPinned')==='1';
+  var sb=document.getElementById('sidebar');
+  var toggle=document.getElementById('sidebar-toggle');
+  var edge=document.getElementById('sidebar-edge');
+  var overlay=document.getElementById('sidebar-overlay');
+
+  function openSB(){
+    clearTimeout(closeTimer);
+    if(window.innerWidth>768){document.body.classList.remove('sidebar-collapsed');}
+    else{document.body.classList.add('sidebar-open');}
+  }
+  function closeSB(now){
+    if(pinned&&window.innerWidth>768)return;
+    if(window.innerWidth<=768){document.body.classList.remove('sidebar-open');return;}
+    if(now){document.body.classList.add('sidebar-collapsed');}
+    else{closeTimer=setTimeout(()=>document.body.classList.add('sidebar-collapsed'),380);}
+  }
+
+  if(edge){edge.addEventListener('mouseenter',openSB);}
+  if(sb){
+    sb.addEventListener('mouseenter',()=>clearTimeout(closeTimer));
+    sb.addEventListener('mouseleave',()=>closeSB(false));
+  }
+  if(overlay){overlay.addEventListener('click',()=>closeSB(true));}
+
+  window.toggleSidebar=function(){
+    if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');return;}
+    pinned=!pinned;
+    localStorage.setItem('sidebarPinned',pinned?'1':'0');
+    if(toggle)toggle.title=pinned?'Unpin sidebar (pinned)':'Pin sidebar';
+    if(pinned)openSB();else closeSB(true);
+  };
+
+  // Default: collapsed on desktop (hover to reveal), unless pinned
+  if(window.innerWidth>768){
+    if(pinned){document.body.classList.remove('sidebar-collapsed');}
+    else{document.body.classList.add('sidebar-collapsed');}
   }
 })();
 
