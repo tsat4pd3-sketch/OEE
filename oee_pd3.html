@@ -651,21 +651,23 @@ function rKPI(){
   const q=avg(FD.map(d=>d.qual)), qP=avg(first.map(d=>d.qual)), qC=avg(second.map(d=>d.qual));
   const totDT=FD.reduce((s,d)=>s+(d.dtMin||0),0), dtP=first.reduce((s,d)=>s+(d.dtMin||0),0)/(first.length||1), dtC=second.reduce((s,d)=>s+(d.dtMin||0),0)/(second.length||1);
 
-  document.getElementById("kv0").textContent=oee.toFixed(1)+"%";
+  const el0=document.getElementById("kv0");el0.dataset.end=oee.toFixed(1);el0.dataset.suffix="%";el0.textContent="0%";
   document.getElementById("ks0").textContent=`A:${a.toFixed(1)} P:${p.toFixed(1)} Q:${q.toFixed(1)}`;
   document.getElementById("kt0").innerHTML=trend(oeeC,oeeP);
-  document.getElementById("kv1").textContent=a.toFixed(1)+"%";
+  const el1=document.getElementById("kv1");el1.dataset.end=a.toFixed(1);el1.dataset.suffix="%";el1.textContent="0%";
   document.getElementById("ks1").textContent=a>=85?"✅ World Class":a>=70?"⚠️ ต้องปรับปรุง":"🔴 วิกฤต";
   document.getElementById("kt1").innerHTML=trend(aC,aP);
-  document.getElementById("kv2").textContent=p.toFixed(1)+"%";
+  const el2=document.getElementById("kv2");el2.dataset.end=p.toFixed(1);el2.dataset.suffix="%";el2.textContent="0%";
   document.getElementById("ks2").textContent=p>=85?"✅ World Class":p>=70?"⚠️ ต้องปรับปรุง":"🔴 วิกฤต";
   document.getElementById("kt2").innerHTML=trend(pC,pP);
-  document.getElementById("kv3").textContent=q.toFixed(1)+"%";
+  const el3=document.getElementById("kv3");el3.dataset.end=q.toFixed(1);el3.dataset.suffix="%";el3.textContent="0%";
   document.getElementById("ks3").textContent=q>=99?"✅ เยี่ยม":q>=95?"ปกติ":"⚠️ ต้องปรับปรุง";
   document.getElementById("kt3").innerHTML=trend(qC,qP);
-  document.getElementById("kv4").textContent=totDT>60?(totDT/60).toFixed(1)+" ชม.":totDT.toFixed(0)+" min";
+  const dtVal=totDT>60?(totDT/60).toFixed(1):totDT.toFixed(0);const dtSuf=totDT>60?" ชม.":" min";
+  const el4=document.getElementById("kv4");el4.dataset.end=dtVal;el4.dataset.suffix=dtSuf;el4.textContent="0"+dtSuf;
   document.getElementById("ks4").textContent=`${totDT.toLocaleString()} นาที รวม`;
   document.getElementById("kt4").innerHTML=trend(dtC,dtP).replace("▲","▲ DT เพิ่ม").replace("▼","▼ DT ลด");
+  if(typeof window.animateKPIs==='function')window.animateKPIs();
 }
 
 // ─── STATS for BAND (low/median/high) ───
@@ -1187,6 +1189,9 @@ loadData();
   window.toggleSidebar=function(){if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');return;}pinned=!pinned;localStorage.setItem('sidebarPinned',pinned?'1':'0');if(toggle)toggle.title=pinned?'Unpin sidebar':'Pin sidebar';if(pinned)openSB();else closeSB(true);};
   if(window.innerWidth>768){if(pinned){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-collapsed');}}
 })();
+
+/* KPI Count-up animation */
+window.animateKPIs=function(){document.querySelectorAll('.kpi-val[data-end]').forEach(el=>{const end=parseFloat(el.dataset.end);const suffix=el.dataset.suffix||'';const decimals=(el.dataset.end.includes('.'))?el.dataset.end.split('.')[1].length:0;if(isNaN(end))return;el.classList.add('counting');const dur=900;const start=performance.now();function step(now){const t=Math.min((now-start)/dur,1);const ease=1-Math.pow(1-t,3);el.textContent=(end*ease).toFixed(decimals)+suffix;if(t<1)requestAnimationFrame(step);else{el.textContent=end.toFixed(decimals)+suffix;el.classList.remove('counting');}}requestAnimationFrame(step);});};
 </script>
 </body>
 </html>

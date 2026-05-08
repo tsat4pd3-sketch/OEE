@@ -697,12 +697,12 @@ function renderCard(prod,stats){
  <span class="src-badge ${srcCls}">${prod.src}</span>
  </div>
  <div class="pc-kpis">
- <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/SHIFT</div><div class="pc-kpi-val" style="color:${prod.color}">${vShift.toLocaleString()}</div><div class="pc-kpi-unit">${unitShift}</div></div>
- <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/HOUR</div><div class="pc-kpi-val" style="color:var(--cyan)">${vHr.toLocaleString()}</div><div class="pc-kpi-unit">${unitHr}</div></div>
- <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/DAY</div><div class="pc-kpi-val" style="color:var(--purple)">${vDay.toLocaleString()}</div><div class="pc-kpi-unit">${unitDay}</div></div>
- <div class="pc-kpi"><div class="pc-kpi-lbl">AVAILABILITY</div><div class="pc-kpi-val ${oeeClass(a)}">${fmt1(a)}%</div><div class="pc-kpi-unit">avg</div></div>
- <div class="pc-kpi"><div class="pc-kpi-lbl">PERFORMANCE</div><div class="pc-kpi-val ${oeeClass(p)}">${fmt1(p)}%</div><div class="pc-kpi-unit">avg</div></div>
- <div class="pc-kpi"><div class="pc-kpi-lbl">OEE</div><div class="pc-kpi-val ${oeeClass(o)}">${fmt1(o)}%</div><div class="pc-kpi-unit">avg</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/SHIFT</div><div class="pc-kpi-val" style="color:${prod.color}" data-end="${vShift}" data-suffix="">0</div><div class="pc-kpi-unit">${unitShift}</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/HOUR</div><div class="pc-kpi-val" style="color:var(--cyan)" data-end="${vHr}" data-suffix="">0</div><div class="pc-kpi-unit">${unitHr}</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">${modeLabel} OUT/DAY</div><div class="pc-kpi-val" style="color:var(--purple)" data-end="${vDay}" data-suffix="">0</div><div class="pc-kpi-unit">${unitDay}</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">AVAILABILITY</div><div class="pc-kpi-val ${oeeClass(a)}" data-end="${fmt1(a)}" data-suffix="%">0%</div><div class="pc-kpi-unit">avg</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">PERFORMANCE</div><div class="pc-kpi-val ${oeeClass(p)}" data-end="${fmt1(p)}" data-suffix="%">0%</div><div class="pc-kpi-unit">avg</div></div>
+ <div class="pc-kpi"><div class="pc-kpi-lbl">OEE</div><div class="pc-kpi-val ${oeeClass(o)}" data-end="${fmt1(o)}" data-suffix="%">0%</div><div class="pc-kpi-unit">avg</div></div>
  </div>
  <div class="oee-bar-wrap">
  <div class="oee-bar-lbl">
@@ -738,6 +738,7 @@ function renderCard(prod,stats){
  const momL=_mlM[STAT_MODE]||'MED OUT/SHIFT';
  renderMoM(document.getElementById('mom-out-'+prod.id),stats.monthTrend,momF,momL,stats.outArrow,prod.color,'ชิ้น/กะ');
  renderMoM(document.getElementById('mom-oee-'+prod.id),stats.monthTrend,'avgOEE','OEE %',stats.oeeArrow,oeeCol,'%');
+ if(typeof window.animateKPIs==='function')window.animateKPIs();
  });
 }
 
@@ -1276,6 +1277,9 @@ function clearQA(){
   window.toggleSidebar=function(){if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');return;}pinned=!pinned;localStorage.setItem('sidebarPinned',pinned?'1':'0');if(toggle)toggle.title=pinned?'Unpin sidebar':'Pin sidebar';if(pinned)openSB();else closeSB(true);};
   if(window.innerWidth>768){if(pinned){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-collapsed');}}
 })();
+
+/* KPI Count-up animation with toLocaleString support */
+window.animateKPIs=function(){document.querySelectorAll('.pc-kpi-val[data-end]').forEach(el=>{const end=parseFloat(el.dataset.end);const suffix=el.dataset.suffix||'';const decimals=(el.dataset.end.includes('.'))?el.dataset.end.split('.')[1].length:0;if(isNaN(end))return;el.classList.add('counting');const dur=900;const start=performance.now();function step(now){const t=Math.min((now-start)/dur,1);const ease=1-Math.pow(1-t,3);const val=(end*ease).toFixed(decimals);const formatted=parseInt(val)>999?parseInt(val).toLocaleString('en-US'):val;el.textContent=formatted+suffix;if(t<1)requestAnimationFrame(step);else{const finalVal=end.toFixed(decimals);const finalFormatted=parseInt(finalVal)>999?parseInt(finalVal).toLocaleString('en-US'):finalVal;el.textContent=finalFormatted+suffix;el.classList.remove('counting');}}requestAnimationFrame(step);});};
 </script>
 </body>
 </html>
