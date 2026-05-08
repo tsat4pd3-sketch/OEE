@@ -169,6 +169,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 
 /*  LOADING  */
 #loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .5s}
+#loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .ld-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ld-title{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--accent);letter-spacing:2px}
@@ -570,7 +571,7 @@ function boot(){
   document.getElementById("date-from").addEventListener("change",applyFilter);
   document.getElementById("date-to").addEventListener("change",applyFilter);
   document.getElementById("shift-sel").addEventListener("change",applyFilter);
-  applyFilter();hideLd();startAutoRefresh();
+  applyFilter();window.enterDashboard();startAutoRefresh();
 }
 let arTimer=null;
 function startAutoRefresh(){
@@ -585,7 +586,7 @@ function updateNextLabel(){
 function setMsg(t){const p=document.getElementById("ldmsg");if(p)p.textContent=t;}
 function setBadge(t,cls){const b=document.getElementById("src-badge");if(b){b.textContent=t;b.className="badge "+cls;}}
 function setUpdate(t){const el=document.getElementById("last-update");if(el)el.textContent=t;}
-function hideLd(){const el=document.getElementById("loading");el.style.opacity="0";setTimeout(()=>el.style.display="none",500);}
+window.enterDashboard=function(){const el=document.getElementById("loading");if(el)el.classList.add("hidden");setTimeout(()=>{if(el)el.style.display="none";},500);};
 function initParts(){
   const sel=document.getElementById("part-select");
   if(!sel)return;

@@ -166,6 +166,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 [data-theme="dark"] .tg-btn.active{background:var(--bg2);box-shadow:none}
 /*  LOADING  */
 #loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .5s}
+#loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .ld-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ld-title{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--accent);letter-spacing:2px}
@@ -208,7 +209,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 [data-theme="dark"] .sev-l{background:#22c55e22;color:#4ade80;border-color:#22c55e44}
 [data-theme="dark"] .bl{background:#22c55e;color:#000;border-color:#22c55e}
 [data-theme="dark"] .bc{background:#f59e0b;color:#000;border-color:#f59e0b}
-[data-theme="dark"] .bx{background:#526080;color:#fff;border-color:#526080}
+[data-theme="dark"] .bx{background:#526080;color:#fff;border-color:var(--text2)}
 [data-theme="dark"] .btn-refresh{background:var(--accent-dim);border-color:#3b82f630;color:var(--accent)}
 [data-theme="dark"] .btn-refresh:hover{background:var(--accent);color:#000}
 [data-theme="dark"] .ins-sev-h,.dark .sev-h{background:#f43f5e22;color:#f87171}
@@ -356,9 +357,9 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     </div>
     <div class="ch" style="height:240px"><canvas id="c-daily-output"></canvas></div>
     <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
-      <span style="font-size:11px;color:#38bdf8"> ยอดผลิตรวม</span>
-      <span style="font-size:11px;color:#22c55e"> งานดี</span>
-      <span style="font-size:11px;color:#f43f5e"> งานเสีย</span>
+      <span style="font-size:11px;color:var(--pd3)"> ยอดผลิตรวม</span>
+      <span style="font-size:11px;color:var(--green)"> งานดี</span>
+      <span style="font-size:11px;color:var(--red)"> งานเสีย</span>
     </div>
   </div>
 
@@ -369,7 +370,7 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     <div class="kpi k3"><div class="kpi-lbl">PPM สูงสุด</div><div class="kpi-val" id="kppm">—</div><div class="kpi-sub" id="kppm-s"></div></div>
     <div class="kpi k4"><div class="kpi-lbl">วัน DT สูงสุด</div><div class="kpi-val" id="kworst" style="font-size:18px">—</div><div class="kpi-sub" id="kworst-s"></div></div>
     <div class="kpi k5"><div class="kpi-lbl">Median Output / Hour</div><div class="kpi-val" id="kjobhr" style="color:var(--cyan)">—</div><div class="kpi-sub" id="kjobhr-s"></div></div>
-    <div class="kpi k6"><div class="kpi-lbl">Median Output / Shift</div><div class="kpi-val" id="koutday" style="color:#34d399">—</div><div class="kpi-sub" id="koutday-s"></div></div>
+    <div class="kpi k6"><div class="kpi-lbl">Median Output / Shift</div><div class="kpi-val" id="koutday" style="color:var(--green)">—</div><div class="kpi-sub" id="koutday-s"></div></div>
   </div>
 
   <div class="row r2">
@@ -402,7 +403,7 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     <div id="ai-out"><p class="pulse" style="color:var(--muted);font-size:13px">กำลังรอข้อมูล...</p></div>
   </div>
   <!--  MO REPAIR ANALYSIS SECTION  -->
-  <div class="card" style="border-color:#ddd6fe">
+  <div class="card" style="border-color:var(--border)">
     <div class="card-hdr">
       <h3 style="color:var(--purple)"> MO Repair Intelligence<em>จาก Maintenance Order Sheet</em></h3>
       <div style="display:flex;gap:6px;align-items:center">
@@ -464,7 +465,7 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   </div>
 
   <!--  MO AI ANALYSIS  -->
-  <div class="ai-wrap" style="border-color:#1a3a1a">
+  <div class="ai-wrap" style="border-color:var(--border)">
     <div class="ai-hdr">
       <div class="ai-orb" style="background:linear-gradient(135deg,#166534,#22c55e)"></div>
       <div>
@@ -477,7 +478,7 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   </div>
 
   <!--  PRODUCTIVITY IMPACT ANALYSIS  -->
-  <div class="ai-wrap" style="border-color:#1a2a4a;margin-top:16px">
+  <div class="ai-wrap" style="border-color:var(--border);margin-top:16px">
     <div class="ai-hdr">
       <div class="ai-orb" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6)"></div>
       <div>
@@ -557,14 +558,14 @@ function boot(){PARTS=[...new Set(ALL.map(d=>d.part))].filter(Boolean).sort();in
   document.getElementById("date-from").addEventListener("change",applyFilter);
   document.getElementById("date-to").addEventListener("change",applyFilter);
   document.getElementById("shift-sel").addEventListener("change",applyFilter);
-  applyFilter();hideLd();startAutoRefresh();}
+  applyFilter();window.enterDashboard();startAutoRefresh();}
 let arTimer=null;
 function startAutoRefresh(){if(arTimer)clearInterval(arTimer);updateNextLabel();arTimer=setInterval(()=>refreshLive(),3600000);}
 function updateNextLabel(){const el=document.getElementById("next-refresh");if(el)el.textContent=new Date(Date.now()+3600000).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})+" น.";}
 function setMsg(t){const p=document.getElementById("ldmsg");if(p)p.textContent=t;}
 function setBadge(t,cls){const b=document.getElementById("src-badge");if(b){b.textContent=t;b.className="badge "+cls;}}
 function setUpdate(t){document.getElementById("last-update").textContent=t;}
-function hideLd(){const el=document.getElementById("loading");el.style.opacity="0";setTimeout(()=>el.style.display="none",500);}
+window.enterDashboard=function(){const el=document.getElementById("loading");if(el)el.classList.add("hidden");setTimeout(()=>{if(el)el.style.display="none";},500);};
 function initParts(){
   const sel=document.getElementById("part-select");
   if(!sel)return;
@@ -1204,7 +1205,7 @@ function rMOKPI(mo) {
   ].map(k => `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:13px 15px;border-bottom:2px solid ${k.c}">
     <div style="font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.3px">${k.l}</div>
     <div style="font-family:var(--font-display);font-size:24px;font-weight:700;color:${k.c}">${k.v}</div>
-    <div style="font-size:11px;color:#7a8faa;margin-top:4px">${k.u}</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px">${k.u}</div>
   </div>`).join("");
 }
 
@@ -1428,7 +1429,7 @@ function rPMAlerts(mo) {
       const barColor = pct >= 100 ? "#f43f5e" : pct >= 75 ? "#f59e0b" : "#4ade80";
       timelineBar = `
         <div style="padding:8px 14px 4px;border-top:1px solid var(--border)">
-          <div style="display:flex;justify-content:space-between;font-size:9px;color:#526080;margin-bottom:3px">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text2);margin-bottom:3px">
             <span>ซ่อมล่าสุด</span>
             <span style="color:${barColor};font-weight:700">${pct}% ของรอบ</span>
             <span>คาดว่าจะเสียอีกครั้ง</span>
@@ -1437,7 +1438,7 @@ function rPMAlerts(mo) {
             <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#22c55e,${barColor});border-radius:2px;transition:width .3s"></div>
             ${pct>=100?'<div style="position:absolute;right:0;top:0;height:100%;width:4px;background:#f43f5e;animation:pulse 1s infinite"></div>':''}
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:9px;color:#526080;margin-top:2px">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text2);margin-top:2px">
             <span>${a.daysSince} วันที่แล้ว</span>
             ${pct<100?`<span style="color:${barColor}">อีก ~${a.daysUntilNext} วัน</span>`:`<span style="color:var(--red)">เกิน ${Math.abs(+a.daysUntilNext)} วัน</span>`}
           </div>
@@ -1449,7 +1450,7 @@ function rPMAlerts(mo) {
     if (isRes) {
       badge = `<div style="display:flex;align-items:center;gap:5px">
         <span style="background:#22c55e22;color:var(--green);font-size:10px;font-weight:700;padding:3px 10px;border-radius:2px;border:1px solid #22c55e40">✅ RESOLVED</span>
-        <span style="font-size:10px;color:#526080">ไม่เสียซ้ำ ${a.daysSince}d (${a.overdueRatio}×)</span>
+        <span style="font-size:10px;color:var(--text2)">ไม่เสียซ้ำ ${a.daysSince}d (${a.overdueRatio}×)</span>
       </div>`;
     } else if (isOver) {
       badge = `<span style="background:${bc}22;color:${bc};font-size:10px;font-weight:700;padding:3px 10px;border-radius:2px;border:1px solid ${bc}50;animation:pulse 1.5s infinite">⚠️ ${a.risk} — เกิน ${Math.abs(+a.daysUntilNext)}d</span>`;
@@ -1459,7 +1460,7 @@ function rPMAlerts(mo) {
 
     const prod = a.prodSince > 0
       ? `<span style="font-size:12px;font-weight:700;color:#ddd8fe">${a.prodSince.toLocaleString()}</span><span style="font-size:10px;color:var(--muted)"> ชิ้น</span>`
-      : `<span style="font-size:11px;color:#3d4f69">ไม่มีข้อมูล</span>`;
+      : `<span style="font-size:11px;color:var(--text2)">ไม่มีข้อมูล</span>`;
 
     return `
     <div style="background:var(--bg3);border:1px solid ${bc}30;border-left:3px solid ${bc};border-radius:11px;overflow:hidden;margin-bottom:8px">
@@ -1470,32 +1471,32 @@ function rPMAlerts(mo) {
             ${badge}
           </div>
           <div style="font-size:14px;font-weight:700;color:var(--text)">${a.mc}</div>
-          <div style="font-size:11px;color:#64748b;margin-top:1px">${a.mcType} · ${a.line}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:1px">${a.mcType} · ${a.line}</div>
         </div>
         <div style="text-align:right;min-width:110px">
-          <div style="font-size:10px;color:#526080;margin-bottom:2px">🏭 ผลิตหลังซ่อมล่าสุด</div>
+          <div style="font-size:10px;color:var(--text2);margin-bottom:2px">🏭 ผลิตหลังซ่อมล่าสุด</div>
           <div>${prod}</div>
         </div>
       </div>
       <!-- Row 2: 4 stats chips -->
       <div style="display:flex;gap:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
         <div style="flex:1;text-align:center;padding:7px 4px;border-right:1px solid var(--border)">
-          <div style="font-size:9px;color:#526080">ซ่อมมาแล้ว</div>
+          <div style="font-size:9px;color:var(--text2)">ซ่อมมาแล้ว</div>
           <div style="font-size:16px;font-weight:700;color:var(--text);line-height:1.2">${a.count}</div>
-          <div style="font-size:9px;color:#526080">ครั้ง</div>
+          <div style="font-size:9px;color:var(--text2)">ครั้ง</div>
         </div>
         <div style="flex:1;text-align:center;padding:7px 4px;border-right:1px solid var(--border)">
-          <div style="font-size:9px;color:#526080">MTTR avg</div>
+          <div style="font-size:9px;color:var(--text2)">MTTR avg</div>
           <div style="font-size:16px;font-weight:700;color:#f59e0b;line-height:1.2">${a.avgTTR}</div>
-          <div style="font-size:9px;color:#526080">นาที</div>
+          <div style="font-size:9px;color:var(--text2)">นาที</div>
         </div>
         <div style="flex:1;text-align:center;padding:7px 4px;border-right:1px solid var(--border)">
-          <div style="font-size:9px;color:#526080">ซ่อมล่าสุด</div>
+          <div style="font-size:9px;color:var(--text2)">ซ่อมล่าสุด</div>
           <div style="font-size:16px;font-weight:700;color:var(--muted);line-height:1.2">${a.daysSince}</div>
-          <div style="font-size:9px;color:#526080">วันที่แล้ว</div>
+          <div style="font-size:9px;color:var(--text2)">วันที่แล้ว</div>
         </div>
         <div style="flex:1;text-align:center;padding:7px 4px">
-          <div style="font-size:9px;color:#526080">interval</div>
+          <div style="font-size:9px;color:var(--text2)">interval</div>
           <div style="font-size:16px;font-weight:700;color:${intColor};line-height:1.2">${a.avgInterval}</div>
           <div style="font-size:9px;color:${intColor}">${intLabel}</div>
         </div>
@@ -1717,7 +1718,7 @@ function renderMOAI(a) {
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
         <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:#f43f5e;opacity:.5">${String(rc.rank||i+1).padStart(2,"0")}</span>
         <span style="font-size:13px;font-weight:700;color:var(--text)">${rc.problem}</span>
-        <span style="margin-left:auto;font-size:10px;color:#7a8faa;background:var(--bg);padding:2px 9px;border-radius:2px">${rc.frequency||""}</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--text2);background:var(--bg);padding:2px 9px;border-radius:2px">${rc.frequency||""}</span>
       </div>
       <div style="font-size:12px;color:var(--text2);line-height:1.7"><b style="color:var(--amber)">Root Cause:</b> ${rc.root_cause}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:5px;padding:5px 9px;background:var(--bg);border-radius:6px;border-left:2px solid #334155"><span style="color:var(--accent2)">📎 อาการ/หลักฐาน:</span> ${rc.evidence}</div>
@@ -2010,13 +2011,13 @@ function fallbackProductivityImpact(ranked, overallOEE, totalTTRHours, totalProd
     const level = pct>=80?"CRITICAL":pct>=50?"HIGH":pct>=25?"MEDIUM":"LOW";
     const lc = {CRITICAL:"#f43f5e",HIGH:"#f87171",MEDIUM:"#f59e0b",LOW:"#4ade80"};
     return `<div style="display:grid;grid-template-columns:28px 1fr 60px 50px 60px;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:11px;font-weight:700;color:#526080">${i+1}</span>
+      <span style="font-size:11px;font-weight:700;color:var(--text2)">${i+1}</span>
       <div>
         <div style="font-size:12px;font-weight:600;color:var(--text)">${r.prob}</div>
         <div style="background:var(--bg);border-radius:3px;height:4px;margin-top:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${lc[level]};border-radius:3px"></div></div>
       </div>
-      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#f59e0b">${r.avgTTR}m</div><div style="font-size:9px;color:#526080">avg TTR</div></div>
-      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:${lc[level]}">${r.count}</div><div style="font-size:9px;color:#526080">ครั้ง</div></div>
+      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#f59e0b">${r.avgTTR}m</div><div style="font-size:9px;color:var(--text2)">avg TTR</div></div>
+      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:${lc[level]}">${r.count}</div><div style="font-size:9px;color:var(--text2)">ครั้ง</div></div>
       <div style="text-align:center"><span style="font-size:9px;font-weight:700;padding:2px 7px;background:${lc[level]}20;color:${lc[level]};border-radius:2px">${level}</span></div>
     </div>`;
   }).join("");
@@ -2027,15 +2028,15 @@ function fallbackProductivityImpact(ranked, overallOEE, totalTTRHours, totalProd
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
       <div style="background:var(--bg3);border-radius:9px;padding:12px;border-bottom:2px solid #3b82f6;text-align:center">
-        <div style="font-size:10px;color:#526080">OEE เฉลี่ย</div>
+        <div style="font-size:10px;color:var(--text2)">OEE เฉลี่ย</div>
         <div style="font-size:22px;font-weight:700;color:var(--accent2)">${overallOEE}%</div>
       </div>
       <div style="background:var(--bg3);border-radius:9px;padding:12px;border-bottom:2px solid #f59e0b;text-align:center">
-        <div style="font-size:10px;color:#526080">เวลาซ่อมรวม</div>
+        <div style="font-size:10px;color:var(--text2)">เวลาซ่อมรวม</div>
         <div style="font-size:22px;font-weight:700;color:var(--amber)">${totalTTRHours}h</div>
       </div>
       <div style="background:var(--bg3);border-radius:9px;padding:12px;border-bottom:2px solid #f43f5e;text-align:center">
-        <div style="font-size:10px;color:#526080">ชิ้นที่เสียโอกาส</div>
+        <div style="font-size:10px;color:var(--text2)">ชิ้นที่เสียโอกาส</div>
         <div style="font-size:22px;font-weight:700;color:var(--red)">~${totalProdLost.toLocaleString()}</div>
       </div>
     </div>

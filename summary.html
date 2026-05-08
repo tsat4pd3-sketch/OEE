@@ -118,6 +118,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 
 /* LOADING */
 #loading{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;transition:opacity .5s}
+#loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .ld-ring{width:42px;height:42px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ld-bar-wrap{width:180px;height:4px;background:var(--border);border-radius:2px;margin-top:4px}
@@ -822,7 +823,7 @@ async function init(){
  // Safety timeout — ซ่อน loading ถ้าค้างนานเกิน 20 วินาที
  const safetyTimer=setTimeout(()=>{
  setMsg('หมดเวลา — แสดงข้อมูลที่มี');
- const el=document.getElementById('loading');if(el){el.style.opacity='0';setTimeout(()=>el.style.display='none',500);}
+ window.enterDashboard();
  },20000);
  try{
  setMsg('กำลังดึงข้อมูล...');setBar(15);
@@ -856,10 +857,12 @@ async function init(){
  setMsg('เกิดข้อผิดพลาด: '+e.message);
  }finally{
  clearTimeout(safetyTimer);
- const el=document.getElementById('loading');if(el){el.style.opacity='0';setTimeout(()=>el.style.display='none',500);}
+ window.enterDashboard();
  if(arTimer)clearInterval(arTimer);arTimer=setInterval(reloadData,3600000);updateNextLabel();
  }
 }
+
+window.enterDashboard=function(){const el=document.getElementById('loading');if(el)el.classList.add('hidden');setTimeout(()=>{if(el)el.style.display='none';},500);};
 
 if(typeof Chart==='undefined'){
  const _wc=setInterval(()=>{if(typeof Chart!=='undefined'){clearInterval(_wc);init();}},50);
