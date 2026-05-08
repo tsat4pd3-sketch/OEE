@@ -50,15 +50,15 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 /* ══ HEADER ══ */
 .hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
 .hdr-brand{display:flex;align-items:center;gap:10px;}
-.hdr-icon{width:36px;height:36px;background:var(--acc);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.hdr-icon{width:36px;height:36px;background:var(--accent);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
 .hdr-text h1{font-size:clamp(22px,3.5vw,30px);font-weight:700;letter-spacing:-.3px;}
 .hdr-text h1 em{color:var(--acc);font-style:normal;}
-.hdr-meta{font-size:15px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap;}
+.hdr-meta{font-size:17px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap;}
 .sync-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:2px;font-size:15px;font-family:var(--font-display);}
 .sync-pill.idle{background:rgba(94,122,150,.15);color:var(--muted);}
-.sync-pill.ok{background:rgba(62,207,114,.12);color:var(--grn);}
-.sync-pill.err{background:rgba(240,104,112,.12);color:var(--red);}
-.sync-pill.loading{background:rgba(245,166,35,.12);color:var(--acc);}
+.sync-pill.ok{background:rgba(34,197,94,.12);color:var(--green);}
+.sync-pill.err{background:var(--accent-dim);color:var(--red);}
+.sync-pill.loading{background:rgba(245,158,11,.12);color:var(--amber);}
 .sdot{width:6px;height:6px;border-radius:50%;background:currentColor;}
 .loading .sdot{animation:blink .7s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
@@ -986,11 +986,18 @@ init();
 </div><!-- /main-wrap -->
 </div><!-- /app -->
 <script>
-function toggleSidebar(){
-  const b=document.body;
-  if(window.innerWidth<=768){b.classList.toggle('sidebar-open')}
-  else{b.classList.toggle('sidebar-collapsed')}
-}
+(function(){
+  var closeTimer=null;var pinned=localStorage.getItem('sidebarPinned')==='1';
+  var sb=document.getElementById('sidebar');var toggle=document.getElementById('sidebar-toggle');
+  var edge=document.getElementById('sidebar-edge');var overlay=document.getElementById('sidebar-overlay');
+  function openSB(){clearTimeout(closeTimer);if(window.innerWidth>768){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-open');}}
+  function closeSB(now){if(pinned&&window.innerWidth>768)return;if(window.innerWidth<=768){document.body.classList.remove('sidebar-open');return;}if(now){document.body.classList.add('sidebar-collapsed');}else{closeTimer=setTimeout(()=>document.body.classList.add('sidebar-collapsed'),380);}}
+  if(edge)edge.addEventListener('mouseenter',openSB);
+  if(sb){sb.addEventListener('mouseenter',()=>clearTimeout(closeTimer));sb.addEventListener('mouseleave',()=>closeSB(false));}
+  if(overlay)overlay.addEventListener('click',()=>closeSB(true));
+  window.toggleSidebar=function(){if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');return;}pinned=!pinned;localStorage.setItem('sidebarPinned',pinned?'1':'0');if(toggle)toggle.title=pinned?'Unpin sidebar':'Pin sidebar';if(pinned)openSB();else closeSB(true);};
+  if(window.innerWidth>768){if(pinned){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-collapsed');}}
+})();
 </script>
 </body>
 </html>
