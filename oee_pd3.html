@@ -434,6 +434,26 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   .date-apply-btn { width: 100%; }
 }
 
+#marquee-bar{
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:12px 0;overflow:hidden;background:var(--bg2);
+  display:none;
+}
+#marquee-bar:hover .marquee-track{animation-play-state:paused}
+.marquee-track{
+  display:flex;white-space:nowrap;
+  animation:marqueeScroll 35s linear infinite;
+}
+.marquee-item{
+  display:inline-flex;align-items:center;gap:1.2rem;padding:0 2rem;
+  font-family:var(--font-display);font-size:11px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);flex-shrink:0;
+}
+.m-line{color:var(--text2);font-weight:700}
+.m-val.good{color:#22c55e}.m-val.warn{color:#f59e0b}.m-val.bad{color:#e31937}
+.m-sep{color:var(--border2);font-size:9px}
+@keyframes marqueeScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
 </style>
 </head>
 <body>
@@ -517,6 +537,11 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
       <p id="range-lbl">—</p>
     </div>
     <div class="topbar-right" id="rec-count">—</div>
+  </div>
+
+  <!-- OEE by Product Marquee -->
+  <div id="marquee-bar">
+    <div class="marquee-track" id="marquee-track"></div>
   </div>
 
   <!-- KPI -->
@@ -778,6 +803,30 @@ function applyFilter(){
     `${document.getElementById("date-from").value} — ${document.getElementById("date-to").value}`;
   document.getElementById("rec-count").textContent=`${FD.length.toLocaleString()} records`;
   render();
+  updateMarquee();
+}
+function updateMarquee(){
+  const partMap={};
+  FD.forEach(d=>{
+    if(!d.oee||d.oee<=0)return;
+    if(!partMap[d.part])partMap[d.part]={sum:0,cnt:0};
+    partMap[d.part].sum+=d.oee;
+    partMap[d.part].cnt++;
+  });
+  const items=Object.entries(partMap)
+    .map(([part,v])=>({part,oee:v.sum/v.cnt}))
+    .sort((a,b)=>b.oee-a.oee);
+  if(!items.length)return;
+  const oc=v=>v>=85?'good':v>=70?'warn':'bad';
+  const html=[...items,...items].map(it=>
+    `<div class="marquee-item"><span class="m-sep">▸</span><span class="m-line">${it.part}</span><span class="m-val ${oc(it.oee)}">${it.oee.toFixed(1)}%</span></div>`
+  ).join('');
+  const track=document.getElementById('marquee-track');
+  if(track)track.innerHTML=html;
+  const bar=document.getElementById('marquee-bar');
+  if(bar)bar.style.display='block';
+  const dur=Math.max(20,items.length*4);
+  if(track)track.style.animationDuration=dur+'s';
 }
 const dch=id=>{if(CH[id]){CH[id].destroy();delete CH[id];}};
 const avg=arr=>{const v=arr.filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;};
