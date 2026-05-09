@@ -269,7 +269,6 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 @keyframes flashBadge{0%,100%{background:#e31937;color:#fff}50%{background:rgba(227,25,55,0.15);color:#e31937}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 #alarm-section{display:none}
-#alarm-section.alarm-visible{display:block}
 #alarm-toggle-btn{
   padding:10px 14px;background:var(--accent-dim);border:1px solid rgba(227,25,55,0.2);
   border-radius:var(--radius);font-size:13px;font-weight:600;color:var(--accent);
@@ -1465,13 +1464,13 @@ function rAlarm() {
 function toggleAlarmVisibility(){
   const section=document.getElementById('alarm-section');
   const btn=document.getElementById('alarm-toggle-btn');
-  const isVisible=section.classList.contains('alarm-visible');
-  if(isVisible){
-    section.classList.remove('alarm-visible');
+  const isShown=section.style.display==='block';
+  if(isShown){
+    section.style.display='none';
     btn.textContent='📊 View Flash Alarm';
     localStorage.setItem('alarmVisible','false');
   }else{
-    section.classList.add('alarm-visible');
+    section.style.display='block';
     btn.textContent='📊 Hide Flash Alarm';
     localStorage.setItem('alarmVisible','true');
   }
@@ -1538,15 +1537,13 @@ async function init(){
   document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
   document.getElementById('f-from').addEventListener('change',render);
   document.getElementById('f-to').addEventListener('change',render);
-  // Initialize alarm visibility from localStorage (hidden by default)
-  const alarmShouldBeVisible=localStorage.getItem('alarmVisible')==='true';
+  // Always start hidden; show only if user explicitly opened it before
   const alarmSection=document.getElementById('alarm-section');
-  if(alarmShouldBeVisible){
-    alarmSection.classList.add('alarm-visible');
+  alarmSection.style.display='none';
+  document.getElementById('alarm-toggle-btn').textContent='📊 View Flash Alarm';
+  if(localStorage.getItem('alarmVisible')==='true'){
+    alarmSection.style.display='block';
     document.getElementById('alarm-toggle-btn').textContent='📊 Hide Flash Alarm';
-  }else{
-    alarmSection.classList.remove('alarm-visible');
-    document.getElementById('alarm-toggle-btn').textContent='📊 View Flash Alarm';
   }
   setBar(100);render();
   setMsg('พร้อมแล้ว');
