@@ -1540,9 +1540,13 @@ async function init(){
   document.getElementById('f-to').addEventListener('change',render);
   // Initialize alarm visibility from localStorage (hidden by default)
   const alarmShouldBeVisible=localStorage.getItem('alarmVisible')==='true';
+  const alarmSection=document.getElementById('alarm-section');
   if(alarmShouldBeVisible){
-    document.getElementById('alarm-section').classList.add('alarm-visible');
+    alarmSection.classList.add('alarm-visible');
     document.getElementById('alarm-toggle-btn').textContent='📊 Hide Flash Alarm';
+  }else{
+    alarmSection.classList.remove('alarm-visible');
+    document.getElementById('alarm-toggle-btn').textContent='📊 View Flash Alarm';
   }
   setBar(100);render();
   setMsg('พร้อมแล้ว');
