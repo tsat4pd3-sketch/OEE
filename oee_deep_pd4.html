@@ -1071,6 +1071,7 @@ function rDTTrend(){
   dch("c-dt-trend");CH["c-dt-trend"]=new Chart(document.getElementById("c-dt-trend"),{type:"line",
     data:{labels,datasets:[{data:vals,borderColor:"#f43f5e",backgroundColor:"#f43f5e12",fill:true,tension:.3,pointRadius:1.5,borderWidth:2}]},
     options:copts({y:{ticks:{callback:v=>v+"m"}}})});
+  setTimeout(()=>addTodayLineToChart(CH["c-dt-trend"],'x'),50);
 }
 
 
@@ -1102,6 +1103,7 @@ function rPPMTrend(){
       {data:raw,label:"PPM",borderColor:"#f59e0b44",backgroundColor:"transparent",tension:.2,pointRadius:0,fill:false},
       {data:ma,label:"MA",borderColor:"#f59e0b",backgroundColor:"transparent",tension:.4,pointRadius:0,borderWidth:2,fill:false}]},
     options:{...copts(),plugins:{legend:{display:true,position:"top",labels:{color:"#94a3b8",font:{size:9},boxWidth:10}},tooltip:{backgroundColor:"#ffffff",titleColor:"#0f172a",bodyColor:"#64748b",borderColor:"#e2e7f0",borderWidth:1}}}});
+  setTimeout(()=>addTodayLineToChart(CH["c-ppm-trend"],'x'),50);
 }
 
 

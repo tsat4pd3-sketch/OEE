@@ -1239,6 +1239,7 @@ function rOEEChart(){
   addForecastDataset(chartData,0,labels,PERIOD);
   if(datasets.length>1)addForecastDataset(chartData,1,labels,PERIOD);
   CHARTS['c-oee']=new Chart(document.getElementById('c-oee'),{type:'line',data:chartData,options:withNow(opts,labels,PERIOD,C)});
+  setTimeout(()=>addTodayLineToChart(CHARTS['c-oee'],'x'),50);
 }
 
 // ── Output Trend Chart ────────────────────────────────────────────────
@@ -1290,6 +1291,7 @@ function rOutputChart(){
   const chartData={labels,datasets};
   if(datasets.length>0)addForecastDataset(chartData,0,labels,PERIOD_OUT);
   CHARTS['c-output']=new Chart(document.getElementById('c-output'),{type:'line',data:chartData,options:withNow(opts,labels,PERIOD_OUT,C)});
+  setTimeout(()=>addTodayLineToChart(CHARTS['c-output'],'x'),50);
 }
 
 // ── A/P/Q Breakdown Bar Chart ─────────────────────────────────────────
@@ -1331,6 +1333,7 @@ function rDTChart(){
   if(datasets.length>0)addForecastDataset(chartData,0,labels,PERIOD);
   if(datasets.length>1)addForecastDataset(chartData,1,labels,PERIOD);
   CHARTS['c-dt']=new Chart(document.getElementById('c-dt'),{type:'line',data:chartData,options:withNow(opts,labels,PERIOD,C)});
+  setTimeout(()=>addTodayLineToChart(CHARTS['c-dt'],'x'),50);
 }
 
 // ── DT icon & OEE pill helpers ────────────────────────────────────────
