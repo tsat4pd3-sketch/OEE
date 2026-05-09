@@ -153,9 +153,18 @@ body.cur-hover #cursor-ring{opacity:0}
 [data-theme="dark"] #loading{background:#050505}
 [data-theme="dark"] ::-webkit-scrollbar-track{background:var(--bg2)}
 
-#sidebar-toggle{position:fixed;top:50vh;left:calc(var(--sidebar) - 18px);z-index:200;transform:translateY(-50%);width:36px;height:36px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;box-shadow:0 2px 8px #00000015;transition:all .2s}
-body.sidebar-collapsed #sidebar-toggle{left:12px}
-#sidebar-toggle:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+#sidebar-toggle{
+  position:fixed;top:16px;left:calc(var(--sidebar) - 1px);z-index:201;
+  width:28px;height:48px;border-radius:0 6px 6px 0;
+  background:var(--accent);
+  border:none;border-left:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#fff;font-size:14px;
+  transition:left .28s cubic-bezier(.4,0,.2,1),background .2s,box-shadow .2s;
+  box-shadow:2px 0 8px rgba(227,25,55,0.35);
+}
+body.sidebar-collapsed #sidebar-toggle{left:0px}
+#sidebar-toggle:hover{background:#c0132e;box-shadow:3px 0 12px rgba(227,25,55,0.5)}
 #sidebar-overlay{display:none;position:fixed;inset:0;background:#00000050;z-index:150;backdrop-filter:blur(1px)}
 body.sidebar-collapsed #sidebar{transform:translateX(calc(-1 * var(--sidebar)));position:fixed}
 body.sidebar-collapsed #main{margin-left:0}
@@ -167,6 +176,9 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   body.sidebar-open #sidebar{transform:translateX(0)}
   body.sidebar-open #sidebar-overlay{display:block}
   #main{margin-left:0 !important;padding-top:60px !important}
+  #sidebar-toggle{width:28px;height:44px}
+  body.sidebar-open #sidebar-toggle{left:calc(var(--sidebar) - 1px)}
+  body:not(.sidebar-open) #sidebar-toggle{left:0px}
 }
 @media(min-width:769px){
   #sidebar{transition:transform .28s cubic-bezier(.4,0,.2,1)}
@@ -198,7 +210,6 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   .topbar h2 { font-size: 26px; }
   .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
   .card { padding: 16px 18px; }
-  #sidebar-toggle { width: 44px; height: 44px; font-size: 20px; }
   .sec-hdr { flex-wrap: wrap; }
   .chart-toggle { flex-wrap: wrap; gap: 6px; }
   .chart-toggle button { font-size: 12px; padding: 6px 10px; }
@@ -215,7 +226,6 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   .kpi-val { font-size: 28px; }
   .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
   .card { padding: 14px 14px; }
-  #sidebar-toggle { width: 44px; height: 44px; font-size: 18px; left: 8px; }
   .sec-hdr h3 { font-size: 10px; letter-spacing: 1.5px; }
   .ch { height: 180px !important; }
   .marquee { font-size: 12px; }
@@ -306,7 +316,9 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 <div id="cursor-ring"></div>
 <div id="noise-overlay"></div>
 <div id="sidebar-edge"></div>
-<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu">☰</button>
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">
+  <span id="toggle-icon">◀</span>
+</button>
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <div id="loading">
@@ -1146,8 +1158,9 @@ function fallbackMOAI(topProbs,recurring,highTTR,avgTTR) {
   if(edge)edge.addEventListener('mouseenter',openSB);
   if(sb){sb.addEventListener('mouseenter',()=>clearTimeout(closeTimer));sb.addEventListener('mouseleave',()=>closeSB(false));}
   if(overlay)overlay.addEventListener('click',()=>closeSB(true));
-  window.toggleSidebar=function(){if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');return;}pinned=!pinned;localStorage.setItem('sidebarPinned',pinned?'1':'0');if(toggle)toggle.title=pinned?'Unpin sidebar':'Pin sidebar';if(pinned)openSB();else closeSB(true);};
+  window.toggleSidebar=function(){if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');const icon=document.getElementById('toggle-icon');if(icon)icon.textContent=document.body.classList.contains('sidebar-open')?'◀':'▶';return;}pinned=!pinned;localStorage.setItem('sidebarPinned',pinned?'1':'0');if(toggle)toggle.title=pinned?'Unpin sidebar':'Pin sidebar';if(pinned)openSB();else closeSB(true);const icon=document.getElementById('toggle-icon');if(icon)icon.textContent=document.body.classList.contains('sidebar-collapsed')?'▶':'◀';};
   if(window.innerWidth>768){if(pinned){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-collapsed');}}
+  const icon=document.getElementById('toggle-icon');if(icon)icon.textContent=document.body.classList.contains('sidebar-collapsed')?'▶':'◀';
 })();
 </script>
 
