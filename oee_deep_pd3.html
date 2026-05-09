@@ -262,17 +262,17 @@ body.cur-hover #cursor-ring{opacity:0}
 
 /* SIDEBAR TOGGLE */
 #sidebar-toggle{
-  position:fixed;top:50vh;left:calc(var(--sidebar) - 18px);z-index:200;
+  position:fixed;top:50vh;left:calc(var(--sidebar) - 20px);z-index:200;
   transform:translateY(-50%);
-  width:36px;height:36px;border-radius:10px;
-  background:var(--bg2);border:1px solid var(--border);
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg, var(--accent), rgba(227,25,55,0.8));
+  border:none;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:20px;
-  box-shadow:0 2px 8px #00000015;
-  transition:all .2s;
+  cursor:pointer;font-size:18px;color:#fff;font-weight:700;
+  transition:all .2s;box-shadow:0 4px 12px rgba(227,25,55,0.3);
 }
-body.sidebar-collapsed #sidebar-toggle{left:12px}
-#sidebar-toggle:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+body.sidebar-collapsed #sidebar-toggle{left:8px}
+#sidebar-toggle:hover{transform:translateY(-50%) scale(1.08);box-shadow:0 6px 16px rgba(227,25,55,0.4)}
 #sidebar-overlay{display:none;position:fixed;inset:0;background:#00000050;z-index:150;backdrop-filter:blur(1px)}
 /* collapsed state */
 body.sidebar-collapsed #sidebar{
@@ -293,7 +293,7 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   body.sidebar-open #sidebar{transform:translateX(0)}
   body.sidebar-open #sidebar-overlay{display:block}
   #main{margin-left:0 !important;padding-top:60px !important}
-  #sidebar-toggle{display:flex}
+  #sidebar-toggle{display:flex;top:16px;left:12px;transform:translateY(0)}
 }
 @media(min-width:769px){
   #sidebar{
@@ -327,7 +327,7 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 <div id="cursor-ring"></div>
 <div id="noise-overlay"></div>
 <div id="sidebar-edge"></div>
-<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu"></button>
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div id="loading">
   <div class="intro-letters">

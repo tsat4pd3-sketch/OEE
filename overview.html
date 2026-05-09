@@ -50,16 +50,18 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   height:100vh;overflow-y:auto;z-index:100;
 }
 #sidebar-toggle{
-  position:fixed;top:50vh;left:calc(var(--sidebar) - 16px);z-index:200;
+  position:fixed;top:50vh;left:calc(var(--sidebar) - 20px);z-index:200;
   transform:translateY(-50%);
-  width:32px;height:32px;border-radius:50%;
-  background:var(--bg2);border:1px solid var(--border);
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg, var(--accent), rgba(227,25,55,0.8));
+  border:none;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:16px;
-  transition:all .2s;
+  cursor:pointer;font-size:18px;color:#fff;font-weight:700;
+  transition:all .2s;box-shadow:0 4px 12px rgba(227,25,55,0.3);
+  title:'Toggle Sidebar';
 }
-body.sidebar-collapsed #sidebar-toggle{left:10px}
-#sidebar-toggle:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+body.sidebar-collapsed #sidebar-toggle{left:8px}
+#sidebar-toggle:hover{transform:translateY(-50%) scale(1.08);box-shadow:0 6px 16px rgba(227,25,55,0.4)}
 #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:150;backdrop-filter:blur(2px)}
 body.sidebar-collapsed #sidebar{transform:translateX(calc(-1 * var(--sidebar)));position:fixed}
 body.sidebar-collapsed #main{margin-left:0}
@@ -70,7 +72,7 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   body.sidebar-open #sidebar{transform:translateX(0)}
   body.sidebar-open #sidebar-overlay{display:block}
   #main{margin-left:0 !important;padding-top:60px !important}
-  #sidebar-toggle{display:flex}
+  #sidebar-toggle{display:flex;top:16px;left:12px;transform:translateY(0)}
 }
 @media(min-width:769px){
   #sidebar{transition:transform .28s cubic-bezier(.4,0,.2,1)}
@@ -266,6 +268,15 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 @keyframes flashPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(227,25,55,0.3)}50%{opacity:.9;box-shadow:0 0 0 8px rgba(227,25,55,0)}}
 @keyframes flashBadge{0%,100%{background:#e31937;color:#fff}50%{background:rgba(227,25,55,0.15);color:#e31937}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+#alarm-section{display:none}
+#alarm-section.alarm-visible{display:block}
+#alarm-toggle-btn{
+  padding:10px 14px;background:var(--accent-dim);border:1px solid rgba(227,25,55,0.2);
+  border-radius:var(--radius);font-size:13px;font-weight:600;color:var(--accent);
+  cursor:pointer;margin-bottom:16px;display:inline-flex;align-items:center;gap:8px;
+  transition:all .2s;font-family:var(--font-body);
+}
+#alarm-toggle-btn:hover{background:rgba(227,25,55,0.15);border-color:rgba(227,25,55,0.3)}
 .alarm-panel{
   background:var(--card);border:1px solid rgba(227,25,55,0.4);
   border-left:3px solid #e31937;
@@ -556,9 +567,7 @@ body.cur-hover #cursor-ring{opacity:0}
 <div id="noise-overlay"></div>
 
 <div id="sidebar-edge"></div>
-<button id="sidebar-toggle" onclick="toggleSidebar()" title="Pin sidebar">
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="4" x2="13" y2="4"/><line x1="1" y1="10" x2="13" y2="10"/></svg>
-</button>
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <div id="loading">
@@ -666,6 +675,9 @@ body.cur-hover #cursor-ring{opacity:0}
   <div id="marquee-bar">
     <div class="marquee-track" id="marquee-track"></div>
   </div>
+
+  <!-- Flash Alarm Panel Toggle -->
+  <button id="alarm-toggle-btn" onclick="toggleAlarmVisibility()">📊 View Flash Alarm</button>
 
   <!-- Flash Alarm Panel -->
   <div id="alarm-section" style="scroll-margin-top:20px"></div>
@@ -1340,6 +1352,22 @@ function rAlarm() {
   </div>`;
 }
 
+// ── Alarm Toggle ───────────────────────────────────────────────────────
+function toggleAlarmVisibility(){
+  const section=document.getElementById('alarm-section');
+  const btn=document.getElementById('alarm-toggle-btn');
+  const isVisible=section.classList.contains('alarm-visible');
+  if(isVisible){
+    section.classList.remove('alarm-visible');
+    btn.textContent='📊 View Flash Alarm';
+    localStorage.setItem('alarmVisible','false');
+  }else{
+    section.classList.add('alarm-visible');
+    btn.textContent='📊 Hide Flash Alarm';
+    localStorage.setItem('alarmVisible','true');
+  }
+}
+
 // ── Main Render ───────────────────────────────────────────────────────
 function render(){
   const {all}=getFiltered();
@@ -1401,6 +1429,12 @@ async function init(){
   document.getElementById('last-update').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
   document.getElementById('f-from').addEventListener('change',render);
   document.getElementById('f-to').addEventListener('change',render);
+  // Initialize alarm visibility from localStorage
+  const alarmShouldBeVisible=localStorage.getItem('alarmVisible')!=='false';
+  if(alarmShouldBeVisible){
+    document.getElementById('alarm-section').classList.add('alarm-visible');
+    document.getElementById('alarm-toggle-btn').textContent='📊 Hide Flash Alarm';
+  }
   setBar(100);render();
   setMsg('พร้อมแล้ว');
   setTimeout(()=>{
