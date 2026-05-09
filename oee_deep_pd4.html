@@ -1073,10 +1073,12 @@ function rDTTrend(){
     const keys=Object.keys(yk).sort();
     labels=keys; vals=keys.map(k=>yk[k]);
   }
+  const _dtOpts=copts({y:{ticks:{callback:v=>v+"m"}}});
+  if(!_dtOpts.plugins)_dtOpts.plugins={};
+  _dtOpts.plugins.annotation={annotations:{todayLine:{type:'line',scaleID:'x',value:labels.length-1,borderColor:'rgba(227,25,55,0.7)',borderWidth:1.5,borderDash:[4,4],label:{display:true,content:'▼ ปัจจุบัน',position:'start',backgroundColor:'rgba(227,25,55,0.12)',color:'#e31937',font:{size:10,weight:'700'},padding:{x:6,y:3},borderRadius:2,yAdjust:-2}}}};
   dch("c-dt-trend");CH["c-dt-trend"]=new Chart(document.getElementById("c-dt-trend"),{type:"line",
     data:{labels,datasets:[{data:vals,borderColor:"#f43f5e",backgroundColor:"#f43f5e12",fill:true,tension:.3,pointRadius:1.5,borderWidth:2}]},
-    options:copts({y:{ticks:{callback:v=>v+"m"}}})});
-  setTimeout(()=>addTodayLineToChart(CH["c-dt-trend"],'x'),50);
+    options:_dtOpts});
 }
 
 
@@ -1103,12 +1105,12 @@ function rPPMTrend(){
     raw=keys.map(k=>yk[k].t>0?Math.round((yk[k].d/yk[k].t)*1e6):0);
   }
   const ma=raw.map((v,i)=>{const sl=raw.slice(Math.max(0,i-6),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
+  const _ppmOpts={...copts(),plugins:{legend:{display:true,position:"top",labels:{color:"#94a3b8",font:{size:9},boxWidth:10}},tooltip:{backgroundColor:"#ffffff",titleColor:"#0f172a",bodyColor:"#64748b",borderColor:"#e2e7f0",borderWidth:1},annotation:{annotations:{todayLine:{type:'line',scaleID:'x',value:labels.length-1,borderColor:'rgba(227,25,55,0.7)',borderWidth:1.5,borderDash:[4,4],label:{display:true,content:'▼ ปัจจุบัน',position:'start',backgroundColor:'rgba(227,25,55,0.12)',color:'#e31937',font:{size:10,weight:'700'},padding:{x:6,y:3},borderRadius:2,yAdjust:-2}}}}}};
   dch("c-ppm-trend");CH["c-ppm-trend"]=new Chart(document.getElementById("c-ppm-trend"),{type:"line",
     data:{labels,datasets:[
       {data:raw,label:"PPM",borderColor:"#f59e0b44",backgroundColor:"transparent",tension:.2,pointRadius:0,fill:false},
       {data:ma,label:"MA",borderColor:"#f59e0b",backgroundColor:"transparent",tension:.4,pointRadius:0,borderWidth:2,fill:false}]},
-    options:{...copts(),plugins:{legend:{display:true,position:"top",labels:{color:"#94a3b8",font:{size:9},boxWidth:10}},tooltip:{backgroundColor:"#ffffff",titleColor:"#0f172a",bodyColor:"#64748b",borderColor:"#e2e7f0",borderWidth:1}}}});
-  setTimeout(()=>addTodayLineToChart(CH["c-ppm-trend"],'x'),50);
+    options:_ppmOpts});
 }
 
 
