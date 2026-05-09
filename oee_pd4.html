@@ -319,6 +319,115 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 }
 #noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px;}
 [data-theme="light"] #noise-overlay{opacity:.014}
+
+/* Mobile Responsiveness Improvements */
+@media (max-width: 768px) {
+  #main { padding: 24px 20px 48px !important; }
+  .topbar { flex-direction: column; gap: 8px; }
+  .topbar h2 { font-size: 26px; }
+  .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+  .card { padding: 16px 18px; }
+  #sidebar-toggle { width: 44px; height: 44px; font-size: 20px; }
+  .sec-hdr { flex-wrap: wrap; }
+  .chart-toggle { flex-wrap: wrap; gap: 6px; }
+  .chart-toggle button { font-size: 12px; padding: 6px 10px; }
+  table { font-size: 13px; }
+  input[type="date"], input[type="text"], select { font-size: 16px; padding: 10px; }
+  .ch { height: 220px !important; }
+  .marquee { font-size: 13px; }
+}
+
+@media (max-width: 480px) {
+  #main { padding: 18px 14px 36px !important; }
+  .topbar { flex-direction: column; gap: 8px; }
+  .topbar h2 { font-size: 22px; }
+  .kpi-val { font-size: 28px; }
+  .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+  .card { padding: 14px 14px; }
+  #sidebar-toggle { width: 44px; height: 44px; font-size: 18px; left: 8px; }
+  .sec-hdr h3 { font-size: 10px; letter-spacing: 1.5px; }
+  .ch { height: 180px !important; }
+  .marquee { font-size: 12px; }
+  table { font-size: 12px; }
+}
+
+@media (max-width: 375px) {
+  #main { padding: 14px 10px 32px !important; }
+  .topbar h2 { font-size: 18px; }
+  .kpi-val { font-size: 24px; }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .ch { height: 160px !important; }
+  .marquee { font-size: 11px; }
+}
+
+
+/* Date Picker Styling */
+.date-picker-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.date-picker-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-picker-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: var(--font-display);
+}
+
+.date-picker-group input[type="date"] {
+  padding: 8px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-body);
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.date-picker-group input[type="date"]:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(227, 25, 55, 0.1);
+}
+
+.date-apply-btn {
+  padding: 8px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+  letter-spacing: 0.5px;
+}
+
+.date-apply-btn:hover {
+  background: rgba(227, 25, 55, 0.9);
+  box-shadow: 0 4px 12px rgba(227, 25, 55, 0.3);
+}
+
+@media (max-width: 480px) {
+  .date-picker-container { flex-direction: column; align-items: stretch; gap: 8px; }
+  .date-picker-group input[type="date"] { width: 100%; font-size: 16px; }
+  .date-apply-btn { width: 100%; }
+}
+
 </style>
 </head>
 <body>
@@ -1218,6 +1327,23 @@ function fallbackInsights(oee,totDT,ppm,topDT,topDef,partStats,oeeRecent,oeePrev
 }
 
 loadData();
+
+// Initialize UI state from localStorage
+(function(){
+  const alarmSection = document.getElementById('alarm-section');
+  const alarmBtn = document.getElementById('alarm-toggle-btn');
+  if (alarmSection && alarmBtn) {
+    const savedState = localStorage.getItem('alarmVisible');
+    if (savedState === 'true') {
+      alarmSection.classList.add('alarm-visible');
+      if (alarmBtn.textContent.includes('View')) alarmBtn.textContent = '📊 Hide Flash Alarm';
+    } else {
+      alarmSection.classList.remove('alarm-visible');
+      if (alarmBtn.textContent.includes('Hide')) alarmBtn.textContent = '📊 View Flash Alarm';
+    }
+  }
+})();
+
 </script>
 
 <script>
@@ -1314,6 +1440,64 @@ window.animateKPIs=function(){document.querySelectorAll('.kpi-val[data-end]').fo
     el.addEventListener('mouseleave',()=>document.body.classList.remove('cur-hover'));
   });
 })();
+
+// Helper function to add today line to charts
+function addTodayLineToChart(chartInstance, xAxisKey) {
+  if (!chartInstance || !chartInstance.ctx || !chartInstance.chartArea) return;
+  
+  const ctx = chartInstance.ctx;
+  const xScale = chartInstance.scales[xAxisKey || 'x'];
+  if (!xScale) return;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Find today position in the x-axis
+  let todayIndex = -1;
+  const labels = chartInstance.data.labels || [];
+  for (let i = 0; i < labels.length; i++) {
+    const label = labels[i];
+    let labelDate;
+    
+    if (typeof label === 'string') {
+      labelDate = new Date(label);
+    } else if (label instanceof Date) {
+      labelDate = label;
+    } else {
+      continue;
+    }
+    
+    labelDate.setHours(0, 0, 0, 0);
+    if (labelDate.getTime() === today.getTime()) {
+      todayIndex = i;
+      break;
+    }
+  }
+  
+  if (todayIndex === -1) return;
+  
+  // Calculate the x pixel position
+  const xPixel = xScale.getPixelForValue(todayIndex);
+  if (isNaN(xPixel)) return;
+  
+  // Draw the line
+  ctx.save();
+  ctx.strokeStyle = 'rgba(227, 25, 55, 0.4)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(xPixel, chartInstance.chartArea.top);
+  ctx.lineTo(xPixel, chartInstance.chartArea.bottom);
+  ctx.stroke();
+  
+  // Draw label badge
+  const badgeY = chartInstance.chartArea.top - 20;
+  ctx.font = '11px Inter, sans-serif';
+  ctx.fillStyle = 'rgba(227, 25, 55, 0.8)';
+  ctx.fillText('Today', xPixel - 15, badgeY);
+  ctx.restore();
+}
+
 </script>
 </body>
 </html>
