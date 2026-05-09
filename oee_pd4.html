@@ -190,7 +190,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:2px;
   font-family:var(--font-display);text-transform:uppercase;margin-top:2.4rem;
 }
-.ld-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+.ld-ring{width:35px;height:35px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ld-title{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--accent);letter-spacing:2px}
 .ld-bar-wrap{width:160px;height:1px;background:rgba(255,255,255,0.08);margin-top:.7rem;border-radius:0}
@@ -208,12 +208,12 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   transition:width .22s,height .22s;mix-blend-mode:difference;
 }
 #cursor-ring{
-  position:fixed;top:0;left:0;width:34px;height:34px;
+  position:fixed;top:0;left:0;width:27px;height:27px;
   border:1px solid rgba(227,25,55,0.4);border-radius:50%;
   pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
   transition:width .3s,height .3s,opacity .25s;
 }
-body.cur-hover #cursor{width:44px;height:44px}
+body.cur-hover #cursor{width:35px;height:35px}
 body.cur-hover #cursor-ring{opacity:0}
 
 /*  PULSE  */
@@ -463,14 +463,14 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 
   <div class="nav-links">
     <a class="nav-btn" href="index.html">🏠 Home</a>
-    <a class="nav-btn" href="overview.html"> Combined Overview</a>
-    <a class="nav-btn" href="summary.html"> Summary Dashboard</a>
-    <a class="nav-btn" href="oee_pd3.html"> PD3 Overview</a>
-    <a class="nav-btn" href="oee_deep_pd3.html"> Deep Analysis PD3</a>
-    <a class="nav-btn active"> PD4 Overview</a>
-    <a class="nav-btn" href="oee_deep_pd4.html"> Deep Analysis PD4</a>
-    <a class="nav-btn" href="jig_mtn.html"> JIG MTN</a>
-    <a class="nav-btn" href="masterplan .html"> Masterplan</a>
+    <a class="nav-btn" href="overview.html">📊 Combined Overview</a>
+    <a class="nav-btn" href="summary.html">📈 Summary Dashboard</a>
+    <a class="nav-btn" href="oee_pd3.html">⚙️ PD3 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd3.html">🔬 Deep Analysis PD3</a>
+    <a class="nav-btn active">⚙️ PD4 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd4.html">🔬 Deep Analysis PD4</a>
+    <a class="nav-btn" href="jig_mtn.html">🔧 JIG MTN</a>
+    <a class="nav-btn" href="masterplan .html">📋 Masterplan</a>
   </div>
 
   <div class="ss">

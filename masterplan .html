@@ -241,12 +241,12 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   transition:width .22s,height .22s;mix-blend-mode:difference;
 }
 #cursor-ring{
-  position:fixed;top:0;left:0;width:34px;height:34px;
+  position:fixed;top:0;left:0;width:27px;height:27px;
   border:1px solid rgba(227,25,55,0.4);border-radius:50%;
   pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
   transition:width .3s,height .3s,opacity .25s;
 }
-body.cur-hover #cursor{width:44px;height:44px}
+body.cur-hover #cursor{width:35px;height:35px}
 body.cur-hover #cursor-ring{opacity:0}
 @media(max-width:768px){
   #sidebar{position:fixed;top:0;left:0;height:100vh;transform:translateX(calc(-1 * var(--sidebar)));transition:transform .28s cubic-bezier(.4,0,.2,1)}
@@ -390,18 +390,19 @@ body.cur-hover #cursor-ring{opacity:0}
     <div class="nav-logo-icon"></div>
     <div><div class="nav-logo-text">OEE Dashboard</div><div class="nav-logo-sub">Production Monitor</div></div>
   </div>
+  <a class="nav-btn" href="index.html">🏠 Home</a>
   <div class="nav-section">Overview</div>
-  <a class="nav-btn" href="overview.html">Combined Overview</a>
-  <a class="nav-btn" href="summary.html">Summary Dashboard</a>
+  <a class="nav-btn" href="overview.html">📊 Combined Overview</a>
+  <a class="nav-btn" href="summary.html">📈 Summary Dashboard</a>
   <div class="nav-section">PD3</div>
-  <a class="nav-btn" href="oee_pd3.html">PD3 Overview</a>
-  <a class="nav-btn" href="oee_deep_pd3.html">Deep Analysis PD3</a>
+  <a class="nav-btn" href="oee_pd3.html">⚙️ PD3 Overview</a>
+  <a class="nav-btn" href="oee_deep_pd3.html">🔬 Deep Analysis PD3</a>
   <div class="nav-section">PD4</div>
-  <a class="nav-btn" href="oee_pd4.html">PD4 Overview</a>
-  <a class="nav-btn" href="oee_deep_pd4.html">Deep Analysis PD4</a>
-  <a class="nav-btn" href="jig_mtn.html">JIG MTN</a>
+  <a class="nav-btn" href="oee_pd4.html">⚙️ PD4 Overview</a>
+  <a class="nav-btn" href="oee_deep_pd4.html">🔬 Deep Analysis PD4</a>
+  <a class="nav-btn" href="jig_mtn.html">🔧 JIG MTN</a>
   <div class="nav-section">Planning</div>
-  <a class="nav-btn active" href="masterplan .html">Masterplan</a>
+  <a class="nav-btn active" href="masterplan .html">📋 Masterplan</a>
 </aside>
 <div id="main-wrap">
 
