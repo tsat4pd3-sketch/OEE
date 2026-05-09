@@ -262,17 +262,17 @@ body.cur-hover #cursor-ring{opacity:0}
 
 /* SIDEBAR TOGGLE */
 #sidebar-toggle{
-  position:fixed;top:50vh;left:calc(var(--sidebar) - 18px);z-index:200;
-  transform:translateY(-50%);
-  width:36px;height:36px;border-radius:10px;
-  background:var(--bg2);border:1px solid var(--border);
+  position:fixed;top:16px;left:calc(var(--sidebar) - 1px);z-index:201;
+  width:28px;height:48px;border-radius:0 6px 6px 0;
+  background:var(--accent);
+  border:none;border-left:none;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:20px;
-  box-shadow:0 2px 8px #00000015;
-  transition:all .2s;
+  cursor:pointer;color:#fff;font-size:14px;
+  transition:left .28s cubic-bezier(.4,0,.2,1),background .2s,box-shadow .2s;
+  box-shadow:2px 0 8px rgba(227,25,55,0.35);
 }
-body.sidebar-collapsed #sidebar-toggle{left:12px}
-#sidebar-toggle:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+body.sidebar-collapsed #sidebar-toggle{left:0px}
+#sidebar-toggle:hover{background:#c0132e;box-shadow:3px 0 12px rgba(227,25,55,0.5)}
 #sidebar-overlay{display:none;position:fixed;inset:0;background:#00000050;z-index:150;backdrop-filter:blur(1px)}
 /* collapsed state */
 body.sidebar-collapsed #sidebar{
@@ -293,7 +293,9 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   body.sidebar-open #sidebar{transform:translateX(0)}
   body.sidebar-open #sidebar-overlay{display:block}
   #main{margin-left:0 !important;padding-top:60px !important}
-  #sidebar-toggle{display:flex}
+  #sidebar-toggle{width:28px;height:44px}
+  body.sidebar-open #sidebar-toggle{left:calc(var(--sidebar) - 1px)}
+  body:not(.sidebar-open) #sidebar-toggle{left:0px}
 }
 @media(min-width:769px){
   #sidebar{
@@ -320,6 +322,113 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 #noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px;}
 [data-theme="light"] #noise-overlay{opacity:.014}
+
+/* Mobile Responsiveness Improvements */
+@media (max-width: 768px) {
+  #main { padding: 24px 20px 48px !important; }
+  .topbar { flex-direction: column; gap: 8px; }
+  .topbar h2 { font-size: 26px; }
+  .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+  .card { padding: 16px 18px; }
+  .sec-hdr { flex-wrap: wrap; }
+  .chart-toggle { flex-wrap: wrap; gap: 6px; }
+  .chart-toggle button { font-size: 12px; padding: 6px 10px; }
+  table { font-size: 13px; }
+  input[type="date"], input[type="text"], select { font-size: 16px; padding: 10px; }
+  .ch { height: 220px !important; }
+  .marquee { font-size: 13px; }
+}
+
+@media (max-width: 480px) {
+  #main { padding: 18px 14px 36px !important; }
+  .topbar { flex-direction: column; gap: 8px; }
+  .topbar h2 { font-size: 22px; }
+  .kpi-val { font-size: 28px; }
+  .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+  .card { padding: 14px 14px; }
+  .sec-hdr h3 { font-size: 10px; letter-spacing: 1.5px; }
+  .ch { height: 180px !important; }
+  .marquee { font-size: 12px; }
+  table { font-size: 12px; }
+}
+
+@media (max-width: 375px) {
+  #main { padding: 14px 10px 32px !important; }
+  .topbar h2 { font-size: 18px; }
+  .kpi-val { font-size: 24px; }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .ch { height: 160px !important; }
+  .marquee { font-size: 11px; }
+}
+
+
+/* Date Picker Styling */
+.date-picker-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.date-picker-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-picker-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: var(--font-display);
+}
+
+.date-picker-group input[type="date"] {
+  padding: 8px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-body);
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.date-picker-group input[type="date"]:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(227, 25, 55, 0.1);
+}
+
+.date-apply-btn {
+  padding: 8px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+  letter-spacing: 0.5px;
+}
+
+.date-apply-btn:hover {
+  background: rgba(227, 25, 55, 0.9);
+  box-shadow: 0 4px 12px rgba(227, 25, 55, 0.3);
+}
+
+@media (max-width: 480px) {
+  .date-picker-container { flex-direction: column; align-items: stretch; gap: 8px; }
+  .date-picker-group input[type="date"] { width: 100%; font-size: 16px; }
+  .date-apply-btn { width: 100%; }
+}
+
 </style>
 </head>
 <body>
@@ -327,7 +436,9 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 <div id="cursor-ring"></div>
 <div id="noise-overlay"></div>
 <div id="sidebar-edge"></div>
-<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu"></button>
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">
+  <span id="toggle-icon">◀</span>
+</button>
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div id="loading">
   <div class="intro-letters">
@@ -350,6 +461,7 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     </div>
   </div>
   <div class="nav-links">
+    <a class="nav-btn" href="index.html">🏠 Home</a>
     <a class="nav-btn" href="overview.html"> Combined Overview</a>
     <a class="nav-btn" href="summary.html"> Summary Dashboard</a>
     <a class="nav-btn" href="oee_pd3.html"> PD3 Overview</a>
@@ -1097,6 +1209,23 @@ function fallbackAI(oee,totDT,ppm,topDT,partStats){
 }
 
 loadData();
+
+// Initialize UI state from localStorage
+(function(){
+  const alarmSection = document.getElementById('alarm-section');
+  const alarmBtn = document.getElementById('alarm-toggle-btn');
+  if (alarmSection && alarmBtn) {
+    const savedState = localStorage.getItem('alarmVisible');
+    if (savedState === 'true') {
+      alarmSection.classList.add('alarm-visible');
+      if (alarmBtn.textContent.includes('View')) alarmBtn.textContent = '📊 Hide Flash Alarm';
+    } else {
+      alarmSection.classList.remove('alarm-visible');
+      if (alarmBtn.textContent.includes('Hide')) alarmBtn.textContent = '📊 View Flash Alarm';
+    }
+  }
+})();
+
 
 
 // ══════════════════════════════════════════════════════
@@ -2173,8 +2302,9 @@ window.addEventListener("load",()=>setTimeout(loadMO, 2000));
   if(edge)edge.addEventListener('mouseenter',openSB);
   if(sb){sb.addEventListener('mouseenter',()=>clearTimeout(closeTimer));sb.addEventListener('mouseleave',()=>closeSB(false));}
   if(overlay)overlay.addEventListener('click',()=>closeSB(true));
-  window.toggleSidebar=function(){if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');return;}pinned=!pinned;localStorage.setItem('sidebarPinned',pinned?'1':'0');if(toggle)toggle.title=pinned?'Unpin sidebar':'Pin sidebar';if(pinned)openSB();else closeSB(true);};
+  window.toggleSidebar=function(){if(window.innerWidth<=768){document.body.classList.toggle('sidebar-open');const icon=document.getElementById('toggle-icon');if(icon)icon.textContent=document.body.classList.contains('sidebar-open')?'◀':'▶';return;}pinned=!pinned;localStorage.setItem('sidebarPinned',pinned?'1':'0');if(toggle)toggle.title=pinned?'Unpin sidebar':'Pin sidebar';if(pinned)openSB();else closeSB(true);const icon=document.getElementById('toggle-icon');if(icon)icon.textContent=document.body.classList.contains('sidebar-collapsed')?'▶':'◀';};
   if(window.innerWidth>768){if(pinned){document.body.classList.remove('sidebar-collapsed');}else{document.body.classList.add('sidebar-collapsed');}}
+  const icon=document.getElementById('toggle-icon');if(icon)icon.textContent=document.body.classList.contains('sidebar-collapsed')?'▶':'◀';
 })();
 
 /* KPI Count-up animation with toLocaleString support */
@@ -2202,6 +2332,64 @@ window.animateKPIs=function(){document.querySelectorAll('.kpi-val[data-end]').fo
     el.addEventListener('mouseleave',()=>document.body.classList.remove('cur-hover'));
   });
 })();
+
+// Helper function to add today line to charts
+function addTodayLineToChart(chartInstance, xAxisKey) {
+  if (!chartInstance || !chartInstance.ctx || !chartInstance.chartArea) return;
+  
+  const ctx = chartInstance.ctx;
+  const xScale = chartInstance.scales[xAxisKey || 'x'];
+  if (!xScale) return;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Find today position in the x-axis
+  let todayIndex = -1;
+  const labels = chartInstance.data.labels || [];
+  for (let i = 0; i < labels.length; i++) {
+    const label = labels[i];
+    let labelDate;
+    
+    if (typeof label === 'string') {
+      labelDate = new Date(label);
+    } else if (label instanceof Date) {
+      labelDate = label;
+    } else {
+      continue;
+    }
+    
+    labelDate.setHours(0, 0, 0, 0);
+    if (labelDate.getTime() === today.getTime()) {
+      todayIndex = i;
+      break;
+    }
+  }
+  
+  if (todayIndex === -1) return;
+  
+  // Calculate the x pixel position
+  const xPixel = xScale.getPixelForValue(todayIndex);
+  if (isNaN(xPixel)) return;
+  
+  // Draw the line
+  ctx.save();
+  ctx.strokeStyle = 'rgba(227, 25, 55, 0.4)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(xPixel, chartInstance.chartArea.top);
+  ctx.lineTo(xPixel, chartInstance.chartArea.bottom);
+  ctx.stroke();
+  
+  // Draw label badge
+  const badgeY = chartInstance.chartArea.top - 20;
+  ctx.font = '11px Inter, sans-serif';
+  ctx.fillStyle = 'rgba(227, 25, 55, 0.8)';
+  ctx.fillText('Today', xPixel - 15, badgeY);
+  ctx.restore();
+}
+
 </script>
 </body>
 </html>

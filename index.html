@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OEE · Production Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050505;--bg2:#0a0a0a;--bg3:#111111;--card:#0d0d0d;
+  --border:#1e1e1e;--border2:#2a2a2a;
+  --accent:#e31937;--accent-dim:rgba(227,25,55,0.10);
+  --text:#ffffff;--text2:#a8a8a8;--muted:#555555;--muted2:#333333;
+  --green:#22c55e;--amber:#f59e0b;
+  --font-body:'Sarabun',sans-serif;--font-display:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow-x:hidden}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--font-body);
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* ── NOISE ── */
+#noise{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px}
+
+/* ── BG GRID ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
+  background-image:
+    linear-gradient(rgba(227,25,55,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(227,25,55,0.03) 1px, transparent 1px);
+  background-size:60px 60px;
+}
+
+/* ── CURSOR ── */
+@media(hover:hover){body{cursor:none}}
+#cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .22s,height .22s;mix-blend-mode:difference}
+#cursor-ring{position:fixed;top:0;left:0;width:34px;height:34px;border:1px solid rgba(227,25,55,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .25s}
+body.cur-hover #cursor{width:44px;height:44px}
+body.cur-hover #cursor-ring{opacity:0}
+
+/* ── LAYOUT ── */
+.page{
+  position:relative;z-index:2;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 24px 60px;
+}
+
+/* ── TOP NAV ── */
+.top-nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  height:56px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;border-bottom:1px solid var(--border);
+  background:rgba(5,5,5,0.85);backdrop-filter:blur(12px);
+}
+.nav-logo{
+  font-family:var(--font-display);font-size:13px;font-weight:800;
+  letter-spacing:3px;color:var(--text);text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;
+}
+.nav-logo-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.nav-time{font-family:var(--font-display);font-size:11px;color:var(--muted);letter-spacing:2px}
+
+/* ── HERO ── */
+.hero{text-align:center;margin-bottom:64px;margin-top:56px}
+.hero-eyebrow{
+  font-family:var(--font-display);font-size:10px;font-weight:600;
+  letter-spacing:5px;text-transform:uppercase;color:var(--accent);
+  margin-bottom:20px;opacity:0;animation:fadeUp .6s .1s ease forwards;
+}
+.hero-title{
+  font-family:var(--font-display);font-size:clamp(3rem,8vw,7rem);
+  font-weight:900;line-height:.95;letter-spacing:-.04em;
+  color:var(--text);margin-bottom:16px;
+  opacity:0;animation:fadeUp .7s .25s ease forwards;
+}
+.hero-title span{color:var(--accent)}
+.hero-sub{
+  font-family:var(--font-display);font-size:clamp(.75rem,1.5vw,1rem);
+  color:var(--muted);letter-spacing:.05em;max-width:500px;margin:0 auto;
+  opacity:0;animation:fadeUp .7s .4s ease forwards;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTOR CARDS ── */
+.sectors{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+  width:100%;max-width:900px;margin:0 auto 48px;
+  opacity:0;animation:fadeUp .8s .5s ease forwards;
+}
+.sector-card{
+  position:relative;overflow:hidden;
+  border:1px solid var(--border);background:var(--card);
+  border-radius:2px;padding:40px 36px 36px;
+  cursor:pointer;text-decoration:none;color:var(--text);
+  display:flex;flex-direction:column;
+  transition:border-color .25s,transform .25s,box-shadow .25s;
+}
+.sector-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--card-accent,var(--accent));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sector-card:hover::before{transform:scaleX(1)}
+.sector-card:hover{
+  border-color:var(--border2);
+  transform:translateY(-3px);
+  box-shadow:0 16px 48px rgba(0,0,0,0.6);
+}
+.sector-card.oee{--card-accent:#e31937}
+.sector-card.mtn{--card-accent:#22c55e}
+
+.sector-icon{
+  width:52px;height:52px;margin-bottom:24px;border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex-shrink:0;
+}
+.sector-card.oee .sector-icon{background:rgba(227,25,55,0.1);border:1px solid rgba(227,25,55,0.2)}
+.sector-card.mtn .sector-icon{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15)}
+
+.sector-label{
+  font-family:var(--font-display);font-size:10px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;
+}
+.sector-card.oee .sector-label{color:var(--accent)}
+.sector-card.mtn .sector-label{color:var(--green)}
+
+.sector-title{
+  font-family:var(--font-display);font-size:clamp(1.4rem,2.5vw,2rem);
+  font-weight:800;letter-spacing:-.03em;line-height:1.1;
+  color:var(--text);margin-bottom:12px;
+}
+.sector-desc{
+  font-size:14px;color:var(--text2);line-height:1.7;
+  margin-bottom:24px;flex:1;
+}
+
+.sector-links{display:flex;flex-direction:column;gap:6px}
+.sector-link{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;border-radius:2px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  font-family:var(--font-display);font-size:11px;font-weight:600;
+  letter-spacing:.8px;text-transform:uppercase;color:var(--text2);
+  text-decoration:none;transition:all .15s;
+}
+.sector-link:hover{background:rgba(255,255,255,0.06);border-color:var(--border2);color:var(--text)}
+.sector-link .arrow{opacity:.4;transition:opacity .15s,transform .15s}
+.sector-link:hover .arrow{opacity:1;transform:translateX(3px)}
+
+.sector-card.oee .sector-link:hover{border-color:rgba(227,25,55,0.3);color:var(--accent)}
+.sector-card.mtn .sector-link:hover{border-color:rgba(34,197,94,0.25);color:var(--green)}
+
+/* ── STATUS ROW ── */
+.status-row{
+  display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap;
+  opacity:0;animation:fadeUp .8s .65s ease forwards;
+  margin-bottom:16px;
+}
+.status-pill{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--font-display);font-size:10px;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);
+}
+.s-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse-dot 2s infinite}
+.s-dot.red{background:var(--accent)}
+.s-dot.amber{background:var(--amber)}
+
+/* ── FOOTER ── */
+.footer{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  height:36px;display:flex;align-items:center;justify-content:center;
+  border-top:1px solid var(--border);background:rgba(5,5,5,0.8);
+  font-family:var(--font-display);font-size:10px;color:var(--muted);
+  letter-spacing:2px;text-transform:uppercase;gap:20px;
+}
+.footer-sep{width:1px;height:12px;background:var(--border2)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sectors{grid-template-columns:1fr;max-width:480px}
+  .sector-card{padding:30px 24px 26px}
+  .top-nav{padding:0 16px}
+  .hero-title{letter-spacing:-.03em}
+}
+@media(max-width:480px){
+  .sector-card{padding:24px 20px}
+  .hero{margin-bottom:36px}
+  .sectors{gap:12px}
+}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="noise"></div>
+
+<!-- Top Nav -->
+<nav class="top-nav">
+  <div class="nav-logo">
+    <div class="nav-logo-dot"></div>
+    PRODUCTION INTELLIGENCE
+  </div>
+  <div class="nav-time" id="nav-time"></div>
+</nav>
+
+<!-- Main Page -->
+<div class="page">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Dashboard Hub · PD3 + PD4</div>
+    <h1 class="hero-title">OEE<br><span>Intelligence</span></h1>
+    <p class="hero-sub">Production & Maintenance performance intelligence platform</p>
+  </div>
+
+  <!-- Sector Cards -->
+  <div class="sectors">
+    <!-- OEE / Production -->
+    <a class="sector-card oee" href="overview.html">
+      <div class="sector-icon">⚙️</div>
+      <div class="sector-label">Production Performance</div>
+      <h2 class="sector-title">OEE Dashboard</h2>
+      <p class="sector-desc">ติดตาม Overall Equipment Effectiveness (OEE) แบบ Real-time — Availability, Performance, Quality รายวัน/เดือน/ปี</p>
+      <div class="sector-links">
+        <a class="sector-link" href="overview.html" onclick="event.stopPropagation()">
+          Combined Overview <span class="arrow">→</span>
+        </a>
+        <a class="sector-link" href="summary.html" onclick="event.stopPropagation()">
+          Summary Dashboard <span class="arrow">→</span>
+        </a>
+        <a class="sector-link" href="oee_pd3.html" onclick="event.stopPropagation()">
+          PD3 Overview <span class="arrow">→</span>
+        </a>
+        <a class="sector-link" href="oee_pd4.html" onclick="event.stopPropagation()">
+          PD4 Overview <span class="arrow">→</span>
+        </a>
+        <a class="sector-link" href="oee_deep_pd3.html" onclick="event.stopPropagation()">
+          Deep Analysis PD3 <span class="arrow">→</span>
+        </a>
+        <a class="sector-link" href="oee_deep_pd4.html" onclick="event.stopPropagation()">
+          Deep Analysis PD4 <span class="arrow">→</span>
+        </a>
+      </div>
+    </a>
+
+    <!-- Maintenance -->
+    <a class="sector-card mtn" href="jig_mtn.html">
+      <div class="sector-icon">🔧</div>
+      <div class="sector-label">Maintenance Performance</div>
+      <h2 class="sector-title">JIG MTN Dashboard</h2>
+      <p class="sector-desc">วิเคราะห์ Maintenance Order, MTTR, MTBF, ปัญหาซ้ำ และ Predictive Maintenance สำหรับงาน JIG Maintenance</p>
+      <div class="sector-links">
+        <a class="sector-link" href="jig_mtn.html" onclick="event.stopPropagation()">
+          JIG MTN Intelligence <span class="arrow">→</span>
+        </a>
+        <a class="sector-link" href="masterplan .html" onclick="event.stopPropagation()">
+          Masterplan <span class="arrow">→</span>
+        </a>
+      </div>
+    </a>
+  </div>
+
+  <!-- Status Row -->
+  <div class="status-row">
+    <div class="status-pill"><div class="s-dot"></div>LIVE DATA</div>
+    <div class="footer-sep"></div>
+    <div class="status-pill"><div class="s-dot red"></div>PD3 + PD4</div>
+    <div class="footer-sep"></div>
+    <div class="status-pill"><div class="s-dot amber"></div>JIG MTN</div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <span>OEE INTELLIGENCE PLATFORM</span>
+  <div class="footer-sep"></div>
+  <span id="footer-date"></span>
+</footer>
+
+<script>
+// Clock
+function updateTime(){
+  const now=new Date();
+  document.getElementById('nav-time').textContent=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' น.';
+  document.getElementById('footer-date').textContent=now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+}
+updateTime();setInterval(updateTime,1000);
+
+// Custom cursor
+(function(){
+  const dot=document.getElementById('cursor');
+  const ring=document.getElementById('cursor-ring');
+  if(!dot||!ring)return;
+  if(!window.matchMedia('(hover:hover)').matches)return;
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    dot.style.left=mx+'px';dot.style.top=my+'px';
+  });
+  (function animRing(){
+    rx+=(mx-rx)*.11;ry+=(my-ry)*.11;
+    ring.style.left=rx+'px';ring.style.top=ry+'px';
+    requestAnimationFrame(animRing);
+  })();
+  document.querySelectorAll('a,.sector-card,.sector-link').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('cur-hover'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('cur-hover'));
+  });
+})();
+</script>
+</body>
+</html>
