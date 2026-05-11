@@ -1203,25 +1203,25 @@ function buildForecast(vals, color, labelPrefix, nFuture=3){
     midPts.forEach((v,i)=>arr.push(+Math.max(0,adjFn(v,i)).toFixed(2)));
     return arr;
   };
-  const grow=1+nFuture*0.12; // band widens slightly over time
+  const improving=slope>=0;
   const baseStyle={borderWidth:1.5,tension:.35,spanGaps:true,pointHoverRadius:6,borderDash:[6,3]};
-  return[
-    {...baseStyle,label:`${labelPrefix} Best`,
-      data:mkData((v,i)=>v+band*(1+i*0.15)),
-      borderColor:alpha(color,0.5),backgroundColor:alpha(color,0.07),
-      pointRadius:mkData((v,i)=>v).map((_,i)=>i>=vals.length?5:0),
-      pointStyle:'triangle',fill:'+1'},
-    {...baseStyle,label:`${labelPrefix} Forecast`,
-      data:mkData(v=>v),
-      borderColor:color,borderWidth:2,borderDash:[9,4],
-      pointRadius:mkData(v=>v).map((_,i)=>i===vals.length-1?0:i>=vals.length?5:0),
-      pointBackgroundColor:color,pointStyle:'circle',fill:false},
-    {...baseStyle,label:`${labelPrefix} Worst`,
-      data:mkData((v,i)=>v-band*(1+i*0.15)),
-      borderColor:alpha(color,0.5),backgroundColor:alpha(color,0.07),
-      pointRadius:mkData((v,i)=>v).map((_,i)=>i>=vals.length?5:0),
-      pointStyle:'rectRot',fill:'-1'},
-  ];
+  const midData=mkData(v=>v);
+  const ptRadii=midData.map((_,i)=>i===vals.length-1?0:i>=vals.length?5:0);
+  const bandPtRadii=midData.map((_,i)=>i>=vals.length?5:0);
+  const midDs={...baseStyle,label:`${labelPrefix} Forecast`,
+    data:midData,borderColor:color,borderWidth:2,borderDash:[9,4],
+    pointRadius:ptRadii,pointBackgroundColor:color,pointStyle:'circle',
+    fill:improving?'+1':false};
+  const bandDs=improving
+    ?{...baseStyle,label:`${labelPrefix} Best`,
+        data:mkData((v,i)=>v+band*(1+i*0.15)),
+        borderColor:alpha(color,0.5),backgroundColor:alpha(color,0.09),
+        pointRadius:bandPtRadii,pointStyle:'triangle',fill:false}
+    :{...baseStyle,label:`${labelPrefix} Worst`,
+        data:mkData((v,i)=>v-band*(1+i*0.15)),
+        borderColor:alpha(color,0.5),backgroundColor:alpha(color,0.09),
+        pointRadius:bandPtRadii,pointStyle:'rectRot',fill:false};
+  return improving?[midDs,bandDs]:[midDs,bandDs];
 }
 
 function rOEEChart(){
