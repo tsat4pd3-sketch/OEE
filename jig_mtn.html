@@ -642,11 +642,18 @@ function rMOKPI(mo) {
   const mttr = closedWithTTR.length > 0 ? (closedWithTTR.reduce((s,d) => s + d.ttr, 0) / closedWithTTR.length).toFixed(1) : "—";
 
   const mcMap = {};
-  mo.forEach(d => { if (!mcMap[d.mcNo]) mcMap[d.mcNo] = []; mcMap[d.mcNo].push(d.date); });
+  mo.forEach(d => {
+    if (!mcMap[d.mcNo]) mcMap[d.mcNo] = [];
+    mcMap[d.mcNo].push({ open: d.date, close: d.dateClose });
+  });
   const intervals = [];
   Object.values(mcMap).forEach(evts => {
-    const sorted = [...evts].sort((a,b) => a - b);
-    for (let i = 1; i < sorted.length; i++) intervals.push((sorted[i] - sorted[i-1]) / 3600000);
+    const sorted = [...evts].sort((a,b) => a.open - b.open);
+    for (let i = 1; i < sorted.length; i++) {
+      const prevEnd = sorted[i-1].close || sorted[i-1].open; // fallback: no close date
+      const gap = (sorted[i].open - prevEnd) / 3600000; // hours
+      if (gap > 0) intervals.push(gap);
+    }
   });
   const mtbf = intervals.length ? (intervals.reduce((a,b) => a + b, 0) / intervals.length).toFixed(1) : "—";
   const uniqMc = new Set(mo.map(d => d.mcNo)).size;
