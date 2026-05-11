@@ -1121,6 +1121,9 @@ function rKPI(){
   const oeeAll=avg(all.map(d=>d.oee)),aAll=avg(all.map(d=>d.avail));
   const pAll=avg(all.map(d=>d.perf)),qAll=avg(all.map(d=>d.qual));
   const dtAll=all.reduce((s,d)=>s+(d.dtMin||0),0);
+  const loadingAllMin = all.reduce((s,d) => s+((d.loadingHr||0)*60), 0);
+  const uptimeMin = loadingAllMin - dtAll;
+  const dtPctUptime = uptimeMin > 0 ? ((dtAll / uptimeMin) * 100).toFixed(1) : null;
   const oee3=avg(pd3.map(d=>d.oee)),oee4=avg(pd4.map(d=>d.oee));
   const a3=avg(pd3.map(d=>d.avail)),a4=avg(pd4.map(d=>d.avail));
   const p3=avg(pd3.map(d=>d.perf)),p4=avg(pd4.map(d=>d.perf));
@@ -1145,7 +1148,7 @@ function rKPI(){
       <div class="kpi-sub">${qAll>=99?'เยี่ยม':qAll>=95?'ปกติ':'ต้องปรับปรุง'}</div>${split(q3,q4)}</div>
     <div class="kpi k4"><div class="kpi-lbl">Total Downtime</div>
       <div class="kpi-val" data-end="${(dtAll/60).toFixed(1)}" data-suffix=" ชม." style="color:var(--red);font-size:25px">0 ชม.</div>
-      <div class="kpi-sub">${dtAll.toLocaleString()} นาที</div></div>`;
+      <div class="kpi-sub">${dtPctUptime !== null ? dtPctUptime+'% of Uptime' : '—'}</div>`;
   if(typeof window.animateKPIs==='function') window.animateKPIs();
 }
 
