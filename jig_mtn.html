@@ -434,6 +434,14 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     </div>
   </div>
 
+  <!-- Monthly Trend -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>📈 Monthly Trend<em>MTTR · Downtime · MO Issued vs Closed</em></h3>
+    </div>
+    <div class="ch" style="height:280px"><canvas id="c-monthly-trend"></canvas></div>
+  </div>
+
   <!-- PM Alerts -->
   <div class="card">
     <div class="card-hdr">
@@ -544,7 +552,14 @@ function parseMOCSV(text) {
       probType: g(row, "Problem Type"),
       symptom: g(row, "อาการ/สาเหตุ"),
       solution: g(row, "แนวทางการแก้ไข"),
-      ttr: n(g(row, "TTR")),
+      ttr: (() => {
+        const direct = n(g(row, "TTR"));
+        if (direct > 0) return direct;
+        const repair = n(g(row, "ระยะเวลาในการซ่อมงาน"));
+        if (repair > 0) return repair;
+        if (dateClose && dateOpen && dateClose > dateOpen) return Math.round((dateClose - dateOpen) / 60000);
+        return 0;
+      })(),
       moWait: n(g(row, "MO รอการแก้ไข")),
       tech: g(row, "ช่างที่รับการแก้ไข"),
       onOff: g(row, "Online/Offline"),
@@ -610,6 +625,7 @@ function renderMO() {
   rMOMcPareto(mo);
   rTTRDist(mo);
   rMOFreq(mo);
+  rMonthlyTrend(mo);
   rPMAlerts(mo);
   renderTechTable(mo);
   rMOTable(mo);
@@ -622,7 +638,8 @@ function rMOKPI(mo) {
   const closedCount = closedMO.length;
   const openCount = totalMO - closedCount;
   const closedPct = totalMO > 0 ? Math.round(closedCount / totalMO * 100) : 0;
-  const mttr = closedCount > 0 ? (closedMO.reduce((s,d) => s + d.ttr, 0) / closedCount).toFixed(1) : "—";
+  const closedWithTTR = closedMO.filter(d => d.ttr > 0);
+  const mttr = closedWithTTR.length > 0 ? (closedWithTTR.reduce((s,d) => s + d.ttr, 0) / closedWithTTR.length).toFixed(1) : "—";
 
   const mcMap = {};
   mo.forEach(d => { if (!mcMap[d.mcNo]) mcMap[d.mcNo] = []; mcMap[d.mcNo].push(d.date); });
@@ -767,6 +784,48 @@ function rMOFreq(mo) {
     type:"bar",
     data:{ labels:labels, datasets:[{ data:months.map(m=>wk[m]), backgroundColor:"#38bdf844", borderColor:"#38bdf8", borderWidth:1, borderRadius:3 }] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:"#0d1117", titleColor:"#dce4f0", bodyColor:"#526080", borderColor:"#1c2640", borderWidth:1 } }, scales:{ x:{ grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#526080", font:{ size:9 }, maxRotation:45 } }, y:{ grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#526080", font:{ size:9 } } } } }
+  });
+}
+
+function rMonthlyTrend(mo) {
+  const MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mm = {};
+  mo.forEach(d => {
+    const ym = `${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;
+    if (!mm[ym]) mm[ym] = { issued:0, closed:0, ttrSum:0, ttrN:0, dtSum:0 };
+    mm[ym].issued++;
+    if (d.isClosed) mm[ym].closed++;
+    if (d.ttr > 0) { mm[ym].ttrSum += d.ttr; mm[ym].ttrN++; mm[ym].dtSum += d.ttr; }
+  });
+  const months = Object.keys(mm).sort().slice(-12);
+  if (months.length < 2) return;
+  const labels = months.map(m => { const [yr,mn]=m.split('-'); return `${MN[+mn-1]} ${yr.slice(2)}`; });
+  const issued  = months.map(m => mm[m].issued);
+  const closed  = months.map(m => mm[m].closed);
+  const mttrL   = months.map(m => mm[m].ttrN > 0 ? +(mm[m].ttrSum/mm[m].ttrN).toFixed(1) : null);
+  const dtL     = months.map(m => mm[m].dtSum || null);
+
+  dch("c-monthly-trend");
+  CH["c-monthly-trend"] = new Chart(document.getElementById("c-monthly-trend"), {
+    type:"bar",
+    data:{ labels, datasets:[
+      { label:"MO Issued",       data:issued,  backgroundColor:"#38bdf830", borderColor:"#38bdf8", borderWidth:1, borderRadius:3, yAxisID:"yMO",   order:2 },
+      { label:"MO Closed",       data:closed,  backgroundColor:"#22c55e30", borderColor:"#22c55e", borderWidth:1, borderRadius:3, yAxisID:"yMO",   order:2 },
+      { label:"Avg MTTR (min)",  data:mttrL,   type:"line", borderColor:"#f59e0b", backgroundColor:"#f59e0b18", borderWidth:2, pointRadius:3, pointHoverRadius:5, tension:.3, fill:false, yAxisID:"yMin", order:1, spanGaps:true },
+      { label:"Total DT (min)",  data:dtL,     type:"line", borderColor:"#f43f5e", backgroundColor:"transparent", borderWidth:1.5, pointRadius:2, tension:.3, fill:false, yAxisID:"yMin", order:1, borderDash:[4,3], spanGaps:true },
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ display:true, position:"top", labels:{ color:"#94a3b8", font:{size:10}, boxWidth:12, padding:12, usePointStyle:true }},
+        tooltip:{ backgroundColor:"#0d1117", titleColor:"#dce4f0", bodyColor:"#94a3b8", borderColor:"#1c2640", borderWidth:1, mode:"index", intersect:false }
+      },
+      scales:{
+        x:{ grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#526080", font:{size:9}, maxRotation:45 }},
+        yMO:{ type:"linear", position:"left", grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#38bdf8", font:{size:9} }, title:{ display:true, text:"MO Count", color:"#526080", font:{size:9} }, beginAtZero:true },
+        yMin:{ type:"linear", position:"right", grid:{ drawOnChartArea:false }, ticks:{ color:"#f59e0b", font:{size:9}, callback:v=>v+"m" }, title:{ display:true, text:"Minutes", color:"#94a3b8", font:{size:9} }, beginAtZero:true }
+      }
+    }
   });
 }
 
