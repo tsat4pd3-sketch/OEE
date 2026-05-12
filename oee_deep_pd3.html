@@ -38,6 +38,11 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:15px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;cursor:pointer;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
 .nav-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border)}
 .nav-btn.active{background:var(--accent-dim);border-color:#e3193730;color:var(--accent);font-weight:600}
+.nav-btn .ni{
+  flex-shrink:0;width:20px;text-align:center;line-height:1;
+  font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
+  font-style:normal;display:inline-block;font-size:14px;
+}
 .ss{padding:14px 16px 6px}
 .ss-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
 .ss input,.ss select{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:15px;margin-bottom:8px;outline:none;transition:border-color .2s}
@@ -193,7 +198,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .src-badges{display:flex;gap:8px;margin-top:.7rem}
 .ld-bar-wrap{width:160px;height:1px;background:rgba(255,255,255,0.08);margin-top:.7rem;border-radius:0}
 .ld-bar-fill{height:100%;width:0%;background:#e31937;transition:width .4s cubic-bezier(.4,0,.2,1)}
-.ld-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+.ld-ring{width:35px;height:35px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ld-title{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--accent);letter-spacing:2px}
 
@@ -209,12 +214,12 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   transition:width .22s,height .22s;mix-blend-mode:difference;
 }
 #cursor-ring{
-  position:fixed;top:0;left:0;width:34px;height:34px;
+  position:fixed;top:0;left:0;width:27px;height:27px;
   border:1px solid rgba(227,25,55,0.4);border-radius:50%;
   pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
   transition:width .3s,height .3s,opacity .25s;
 }
-body.cur-hover #cursor{width:44px;height:44px}
+body.cur-hover #cursor{width:35px;height:35px}
 body.cur-hover #cursor-ring{opacity:0}
 
 /*  PULSE  */
@@ -461,15 +466,15 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     </div>
   </div>
   <div class="nav-links">
-    <a class="nav-btn" href="index.html">🏠 Home</a>
-    <a class="nav-btn" href="overview.html"> Combined Overview</a>
-    <a class="nav-btn" href="summary.html"> Summary Dashboard</a>
-    <a class="nav-btn" href="oee_pd3.html"> PD3 Overview</a>
-    <a class="nav-btn active"> Deep Analysis PD3</a>
-    <a class="nav-btn" href="oee_pd4.html"> PD4 Overview</a>
-    <a class="nav-btn" href="oee_deep_pd4.html"> Deep Analysis PD4</a>
-    <a class="nav-btn" href="jig_mtn.html"> JIG MTN</a>
-    <a class="nav-btn" href="masterplan .html"> Masterplan</a>
+    <a class="nav-btn" href="index.html"><span class="ni">🏠</span>Home</a>
+    <a class="nav-btn" href="overview.html"><span class="ni">📊</span>Combined Overview</a>
+    <a class="nav-btn" href="summary.html"><span class="ni">📈</span>Summary Dashboard</a>
+    <a class="nav-btn" href="oee_pd3.html"><span class="ni">⚙️</span>PD3 Overview</a>
+    <a class="nav-btn active"><span class="ni">🔬</span>Deep Analysis PD3</a>
+    <a class="nav-btn" href="oee_pd4.html"><span class="ni">⚙️</span>PD4 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd4.html"><span class="ni">🔬</span>Deep Analysis PD4</a>
+    <a class="nav-btn" href="jig_mtn.html"><span class="ni">🔧</span>JIG MTN</a>
+    <a class="nav-btn" href="masterplan .html"><span class="ni">📋</span>Masterplan</a>
   </div>
   <div class="ss">
     <div class="ss-label"> ช่วงวันที่</div>
@@ -1073,9 +1078,12 @@ function rDTTrend(){
     const keys=Object.keys(yk).sort();
     labels=keys; vals=keys.map(k=>yk[k]);
   }
+  const _dtOpts=copts({y:{ticks:{callback:v=>v+"m"}}});
+  if(!_dtOpts.plugins)_dtOpts.plugins={};
+  _dtOpts.plugins.annotation={annotations:{todayLine:{type:'line',scaleID:'x',value:labels.length-1,borderColor:'rgba(227,25,55,0.7)',borderWidth:1.5,borderDash:[4,4],label:{display:true,content:'▼ ปัจจุบัน',position:'start',backgroundColor:'rgba(227,25,55,0.12)',color:'#e31937',font:{size:10,weight:'700'},padding:{x:6,y:3},borderRadius:2,yAdjust:-2}}}};
   dch("c-dt-trend");CH["c-dt-trend"]=new Chart(document.getElementById("c-dt-trend"),{type:"line",
     data:{labels,datasets:[{data:vals,borderColor:"#f43f5e",backgroundColor:"#f43f5e12",fill:true,tension:.3,pointRadius:1.5,borderWidth:2}]},
-    options:copts({y:{ticks:{callback:v=>v+"m"}}})});
+    options:_dtOpts});
 }
 
 
@@ -1102,11 +1110,12 @@ function rPPMTrend(){
     raw=keys.map(k=>yk[k].t>0?Math.round((yk[k].d/yk[k].t)*1e6):0);
   }
   const ma=raw.map((v,i)=>{const sl=raw.slice(Math.max(0,i-6),i+1);return sl.reduce((a,b)=>a+b,0)/sl.length;});
+  const _ppmOpts={...copts(),plugins:{legend:{display:true,position:"top",labels:{color:"#94a3b8",font:{size:9},boxWidth:10}},tooltip:{backgroundColor:"#ffffff",titleColor:"#0f172a",bodyColor:"#64748b",borderColor:"#e2e7f0",borderWidth:1},annotation:{annotations:{todayLine:{type:'line',scaleID:'x',value:labels.length-1,borderColor:'rgba(227,25,55,0.7)',borderWidth:1.5,borderDash:[4,4],label:{display:true,content:'▼ ปัจจุบัน',position:'start',backgroundColor:'rgba(227,25,55,0.12)',color:'#e31937',font:{size:10,weight:'700'},padding:{x:6,y:3},borderRadius:2,yAdjust:-2}}}}}};
   dch("c-ppm-trend");CH["c-ppm-trend"]=new Chart(document.getElementById("c-ppm-trend"),{type:"line",
     data:{labels,datasets:[
       {data:raw,label:"PPM",borderColor:"#f59e0b44",backgroundColor:"transparent",tension:.2,pointRadius:0,fill:false},
       {data:ma,label:"MA",borderColor:"#f59e0b",backgroundColor:"transparent",tension:.4,pointRadius:0,borderWidth:2,fill:false}]},
-    options:{...copts(),plugins:{legend:{display:true,position:"top",labels:{color:"#94a3b8",font:{size:9},boxWidth:10}},tooltip:{backgroundColor:"#ffffff",titleColor:"#0f172a",bodyColor:"#64748b",borderColor:"#e2e7f0",borderWidth:1}}}});
+    options:_ppmOpts});
 }
 
 

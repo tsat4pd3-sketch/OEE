@@ -37,6 +37,11 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:15px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;cursor:pointer;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
 .nav-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border)}
 .nav-btn.active{background:var(--accent-dim);border-color:#e3193730;color:var(--accent);font-weight:600}
+.nav-btn .ni{
+  flex-shrink:0;width:20px;text-align:center;line-height:1;
+  font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
+  font-style:normal;display:inline-block;font-size:14px;
+}
 .ss{padding:14px 16px 6px}
 .ss-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
 .ss input,.ss select{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:15px;margin-bottom:8px;outline:none;transition:border-color .2s}
@@ -190,7 +195,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:2px;
   font-family:var(--font-display);text-transform:uppercase;margin-top:2.4rem;
 }
-.ld-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+.ld-ring{width:35px;height:35px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ld-title{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--accent);letter-spacing:2px}
 .ld-bar-wrap{width:160px;height:1px;background:rgba(255,255,255,0.08);margin-top:.7rem;border-radius:0}
@@ -208,12 +213,12 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   transition:width .22s,height .22s;mix-blend-mode:difference;
 }
 #cursor-ring{
-  position:fixed;top:0;left:0;width:34px;height:34px;
+  position:fixed;top:0;left:0;width:27px;height:27px;
   border:1px solid rgba(227,25,55,0.4);border-radius:50%;
   pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
   transition:width .3s,height .3s,opacity .25s;
 }
-body.cur-hover #cursor{width:44px;height:44px}
+body.cur-hover #cursor{width:35px;height:35px}
 body.cur-hover #cursor-ring{opacity:0}
 
 /*  PULSE  */
@@ -428,6 +433,26 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   .date-apply-btn { width: 100%; }
 }
 
+#marquee-bar{
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:12px 0;overflow:hidden;background:var(--bg2);
+  display:none;
+}
+#marquee-bar:hover .marquee-track{animation-play-state:paused}
+.marquee-track{
+  display:flex;white-space:nowrap;
+  animation:marqueeScroll 35s linear infinite;
+}
+.marquee-item{
+  display:inline-flex;align-items:center;gap:1.2rem;padding:0 2rem;
+  font-family:var(--font-display);font-size:11px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);flex-shrink:0;
+}
+.m-line{color:var(--text2);font-weight:700}
+.m-val.good{color:#22c55e}.m-val.warn{color:#f59e0b}.m-val.bad{color:#e31937}
+.m-sep{color:var(--border2);font-size:9px}
+@keyframes marqueeScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
 </style>
 </head>
 <body>
@@ -462,15 +487,15 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
   </div>
 
   <div class="nav-links">
-    <a class="nav-btn" href="index.html">🏠 Home</a>
-    <a class="nav-btn" href="overview.html"> Combined Overview</a>
-    <a class="nav-btn" href="summary.html"> Summary Dashboard</a>
-    <a class="nav-btn" href="oee_pd3.html"> PD3 Overview</a>
-    <a class="nav-btn" href="oee_deep_pd3.html"> Deep Analysis PD3</a>
-    <a class="nav-btn active"> PD4 Overview</a>
-    <a class="nav-btn" href="oee_deep_pd4.html"> Deep Analysis PD4</a>
-    <a class="nav-btn" href="jig_mtn.html"> JIG MTN</a>
-    <a class="nav-btn" href="masterplan .html"> Masterplan</a>
+    <a class="nav-btn" href="index.html"><span class="ni">🏠</span>Home</a>
+    <a class="nav-btn" href="overview.html"><span class="ni">📊</span>Combined Overview</a>
+    <a class="nav-btn" href="summary.html"><span class="ni">📈</span>Summary Dashboard</a>
+    <a class="nav-btn" href="oee_pd3.html"><span class="ni">⚙️</span>PD3 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd3.html"><span class="ni">🔬</span>Deep Analysis PD3</a>
+    <a class="nav-btn active"><span class="ni">⚙️</span>PD4 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd4.html"><span class="ni">🔬</span>Deep Analysis PD4</a>
+    <a class="nav-btn" href="jig_mtn.html"><span class="ni">🔧</span>JIG MTN</a>
+    <a class="nav-btn" href="masterplan .html"><span class="ni">📋</span>Masterplan</a>
   </div>
 
   <div class="ss">
@@ -511,6 +536,11 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
       <p id="range-lbl">—</p>
     </div>
     <div class="topbar-right" id="rec-count">—</div>
+  </div>
+
+  <!-- OEE by Product Marquee -->
+  <div id="marquee-bar">
+    <div class="marquee-track" id="marquee-track"></div>
   </div>
 
   <!-- KPI -->
@@ -813,6 +843,30 @@ function applyFilter(){
     `${document.getElementById("date-from").value} — ${document.getElementById("date-to").value}`;
   document.getElementById("rec-count").textContent=`${FD.length.toLocaleString()} records`;
   render();
+  updateMarquee();
+}
+function updateMarquee(){
+  const partMap={};
+  FD.forEach(d=>{
+    if(!d.oee||d.oee<=0)return;
+    if(!partMap[d.part])partMap[d.part]={sum:0,cnt:0};
+    partMap[d.part].sum+=d.oee;
+    partMap[d.part].cnt++;
+  });
+  const items=Object.entries(partMap)
+    .map(([part,v])=>({part,oee:v.sum/v.cnt}))
+    .sort((a,b)=>b.oee-a.oee);
+  if(!items.length)return;
+  const oc=v=>v>=85?'good':v>=70?'warn':'bad';
+  const html=[...items,...items].map(it=>
+    `<div class="marquee-item"><span class="m-sep">▸</span><span class="m-line">${it.part}</span><span class="m-val ${oc(it.oee)}">${it.oee.toFixed(1)}%</span></div>`
+  ).join('');
+  const track=document.getElementById('marquee-track');
+  if(track)track.innerHTML=html;
+  const bar=document.getElementById('marquee-bar');
+  if(bar)bar.style.display='block';
+  const dur=Math.max(20,items.length*4);
+  if(track)track.style.animationDuration=dur+'s';
 }
 const dch=id=>{if(CH[id]){CH[id].destroy();delete CH[id];}};
 const avg=arr=>{const v=arr.filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;};

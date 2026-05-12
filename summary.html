@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Production Summary Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -35,6 +36,11 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:15px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
 .nav-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border)}
 .nav-btn.active{background:var(--accent-dim);border-color:#e3193730;color:var(--accent);font-weight:600}
+.nav-btn .ni{
+  flex-shrink:0;width:20px;text-align:center;line-height:1;
+  font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
+  font-style:normal;display:inline-block;font-size:14px;
+}
 .ss{padding:12px 16px 4px}
 .ss-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
 .ss input,.ss select{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:15px;margin-bottom:7px;outline:none;transition:border-color .2s}
@@ -178,12 +184,12 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
   transition:width .22s,height .22s;mix-blend-mode:difference;
 }
 #cursor-ring{
-  position:fixed;top:0;left:0;width:34px;height:34px;
+  position:fixed;top:0;left:0;width:27px;height:27px;
   border:1px solid rgba(227,25,55,0.4);border-radius:50%;
   pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
   transition:width .3s,height .3s,opacity .25s;
 }
-body.cur-hover #cursor{width:44px;height:44px}
+body.cur-hover #cursor{width:35px;height:35px}
 body.cur-hover #cursor-ring{opacity:0}
 
 /* TREND CHART SECTION */
@@ -451,15 +457,15 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
  </div>
 
  <div class="nav-links">
-    <a class="nav-btn" href="index.html">🏠 Home</a>
- <a class="nav-btn" href="overview.html"> Combined Overview</a>
- <a class="nav-btn active"> Summary Dashboard</a>
- <a class="nav-btn" href="oee_pd3.html"> PD3 Overview</a>
- <a class="nav-btn" href="oee_deep_pd3.html"> Deep Analysis PD3</a>
- <a class="nav-btn" href="oee_pd4.html"> PD4 Overview</a>
- <a class="nav-btn" href="oee_deep_pd4.html"> Deep Analysis PD4</a>
- <a class="nav-btn" href="jig_mtn.html"> JIG MTN</a>
- <a class="nav-btn" href="masterplan .html"> Masterplan</a>
+    <a class="nav-btn" href="index.html"><span class="ni">🏠</span>Home</a>
+ <a class="nav-btn" href="overview.html"><span class="ni">📊</span>Combined Overview</a>
+ <a class="nav-btn active"><span class="ni">📈</span>Summary Dashboard</a>
+ <a class="nav-btn" href="oee_pd3.html"><span class="ni">⚙️</span>PD3 Overview</a>
+ <a class="nav-btn" href="oee_deep_pd3.html"><span class="ni">🔬</span>Deep Analysis PD3</a>
+ <a class="nav-btn" href="oee_pd4.html"><span class="ni">⚙️</span>PD4 Overview</a>
+ <a class="nav-btn" href="oee_deep_pd4.html"><span class="ni">🔬</span>Deep Analysis PD4</a>
+ <a class="nav-btn" href="jig_mtn.html"><span class="ni">🔧</span>JIG MTN</a>
+ <a class="nav-btn" href="masterplan .html"><span class="ni">📋</span>Masterplan</a>
  </div>
 
  <div class="ss">
@@ -1313,6 +1319,15 @@ function renderTrendChart(){
  if(TREND_CHART){TREND_CHART.destroy();TREND_CHART=null;}
  const ctx=document.getElementById('c-trend');
  if(!ctx)return;
+ const todayIdx=(()=>{
+  const ld=new Date();
+  const dd=String(ld.getDate()).padStart(2,'0');
+  const mm=String(ld.getMonth()+1).padStart(2,'0');
+  const yy=String(ld.getFullYear()).slice(2);
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const tk=labels.findIndex(l=>l===`${dd}/${mm}`||l.startsWith(`${String(ld.getDate())} ${MN[ld.getMonth()]}`));
+  return tk>=0?tk:labels.length-1;
+ })();
  TREND_CHART=new Chart(ctx,{
  type:'line',
  data:{labels,datasets:[...datasets,...oeeAnnotationDatasets]},
@@ -1328,7 +1343,8 @@ function renderTrendChart(){
  if(c.raw==null)return null;
  return isOEE?` ${c.dataset.label}: ${c.raw.toFixed(1)}%`:` ${c.dataset.label}: ${c.raw.toLocaleString()} ${yLabel}`;
  }}
- }
+ },
+ annotation:{annotations:{todayLine:{type:'line',scaleID:'x',value:todayIdx,borderColor:'rgba(227,25,55,0.7)',borderWidth:1.5,borderDash:[4,4],label:{display:true,content:'▼ ปัจจุบัน',position:'start',backgroundColor:'rgba(227,25,55,0.12)',color:'#e31937',font:{size:10,weight:'700',family:'Inter,sans-serif'},padding:{x:6,y:3},borderRadius:2,yAdjust:-2}}}}
  },
  scales:{
  x:{grid:{color:gridC},ticks:{color:tickC,font:{size:10},maxRotation:45,maxTicksLimit:20}},

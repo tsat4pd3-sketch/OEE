@@ -33,6 +33,11 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:15px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;cursor:pointer;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
 .nav-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border)}
 .nav-btn.active{background:var(--accent-dim);border-color:#e3193730;color:var(--accent);font-weight:600}
+.nav-btn .ni{
+  flex-shrink:0;width:20px;text-align:center;line-height:1;
+  font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
+  font-style:normal;display:inline-block;font-size:14px;
+}
 .ss{padding:14px 16px 6px}
 .ss-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
 .ss input{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:15px;margin-bottom:8px;outline:none;transition:border-color .2s}
@@ -121,8 +126,8 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 
 @media(hover:hover){body{cursor:none}}
 #cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .22s,height .22s;mix-blend-mode:difference}
-#cursor-ring{position:fixed;top:0;left:0;width:34px;height:34px;border:1px solid rgba(227,25,55,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .25s}
-body.cur-hover #cursor{width:44px;height:44px}
+#cursor-ring{position:fixed;top:0;left:0;width:27px;height:27px;border:1px solid rgba(227,25,55,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .25s}
+body.cur-hover #cursor{width:35px;height:35px}
 body.cur-hover #cursor-ring{opacity:0}
 
 .pulse{animation:pulse 1.5s ease-in-out infinite}
@@ -241,6 +246,20 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   .marquee { font-size: 11px; }
 }
 
+/* Uptime/Downtime Timeline */
+#timeline-wrap{overflow-x:auto}
+.tl-axis{display:flex;justify-content:space-between;margin:0 0 8px;padding:0 0 0 128px;font-size:10px;color:var(--muted);font-family:var(--font-display);letter-spacing:.3px}
+.tl-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;min-width:0}
+.tl-lbl{flex:0 0 118px;font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;font-family:var(--font-display)}
+.tl-bar{flex:1;height:16px;background:var(--bg3);border-radius:2px;position:relative;overflow:hidden;min-width:0}
+.tl-seg{position:absolute;top:0;height:100%;cursor:pointer;transition:filter .12s}
+.tl-seg:hover{filter:brightness(1.3)}
+.tl-up{background:#22c55e}
+.tl-dn{background:#ef4444}
+.tl-pct{flex:0 0 34px;text-align:right;font-size:10px;font-weight:700;font-family:var(--font-display)}
+.tl-tip{position:fixed;background:#0d1117;border:1px solid #1c2640;border-radius:6px;padding:9px 13px;font-size:11px;color:#dce4f0;pointer-events:none;z-index:5000;max-width:230px;line-height:1.75;box-shadow:0 6px 24px #00000070;display:none}
+.tl-legend{display:flex;gap:18px;margin-bottom:12px;font-size:11px;color:var(--muted);align-items:center}
+.tl-legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}
 
 /* Date Picker Styling */
 .date-picker-container {
@@ -346,15 +365,15 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     </div>
   </div>
   <div class="nav-links">
-    <a class="nav-btn" href="index.html">🏠 Home</a>
-    <a class="nav-btn" href="overview.html"> Combined Overview</a>
-    <a class="nav-btn" href="summary.html"> Summary Dashboard</a>
-    <a class="nav-btn" href="oee_pd3.html"> PD3 Overview</a>
-    <a class="nav-btn" href="oee_pd4.html"> PD4 Overview</a>
-    <a class="nav-btn" href="oee_deep_pd3.html"> Deep Analysis PD3</a>
-    <a class="nav-btn" href="oee_deep_pd4.html"> Deep Analysis PD4</a>
-    <a class="nav-btn active" href="jig_mtn.html"> JIG MTN</a>
-    <a class="nav-btn" href="masterplan .html"> Masterplan</a>
+    <a class="nav-btn" href="index.html"><span class="ni">🏠</span>Home</a>
+    <a class="nav-btn" href="overview.html"><span class="ni">📊</span>Combined Overview</a>
+    <a class="nav-btn" href="summary.html"><span class="ni">📈</span>Summary Dashboard</a>
+    <a class="nav-btn" href="oee_pd3.html"><span class="ni">⚙️</span>PD3 Overview</a>
+    <a class="nav-btn" href="oee_pd4.html"><span class="ni">⚙️</span>PD4 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd3.html"><span class="ni">🔬</span>Deep Analysis PD3</a>
+    <a class="nav-btn" href="oee_deep_pd4.html"><span class="ni">🔬</span>Deep Analysis PD4</a>
+    <a class="nav-btn active" href="jig_mtn.html"><span class="ni">🔧</span>JIG MTN</a>
+    <a class="nav-btn" href="masterplan .html"><span class="ni">📋</span>Masterplan</a>
   </div>
   <div class="ss">
     <div class="ss-label">ช่วงวันที่</div>
@@ -426,6 +445,29 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     <div class="card">
       <div class="card-hdr"><h3>📅 MO Frequency รายเดือน</h3></div>
       <div class="ch" style="height:160px"><canvas id="c-mo-freq"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Monthly Trend -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>📈 Monthly Trend<em>MTTR · Downtime · MO Issued vs Closed</em></h3>
+    </div>
+    <div class="ch" style="height:280px"><canvas id="c-monthly-trend"></canvas></div>
+  </div>
+
+  <!-- Uptime/Downtime Timeline -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>📊 Uptime / Downtime Timeline<em>รายเครื่อง JIG</em></h3>
+    </div>
+    <div class="tl-legend">
+      <span><span class="tl-legend-dot" style="background:#22c55e"></span>Uptime (ทำงานปกติ)</span>
+      <span><span class="tl-legend-dot" style="background:#ef4444"></span>Downtime (ระหว่างซ่อม)</span>
+      <span style="margin-left:auto;font-size:10px">%คือ Uptime ตลอดช่วง</span>
+    </div>
+    <div id="timeline-wrap">
+      <div id="uptime-timeline"><p style="color:var(--muted);font-size:13px">รอข้อมูล...</p></div>
     </div>
   </div>
 
@@ -539,7 +581,14 @@ function parseMOCSV(text) {
       probType: g(row, "Problem Type"),
       symptom: g(row, "อาการ/สาเหตุ"),
       solution: g(row, "แนวทางการแก้ไข"),
-      ttr: n(g(row, "TTR")),
+      ttr: (() => {
+        const direct = n(g(row, "TTR"));
+        if (direct > 0) return direct;
+        const repair = n(g(row, "ระยะเวลาในการซ่อมงาน"));
+        if (repair > 0) return repair;
+        if (dateClose && dateOpen && dateClose > dateOpen) return Math.round((dateClose - dateOpen) / 60000);
+        return 0;
+      })(),
       moWait: n(g(row, "MO รอการแก้ไข")),
       tech: g(row, "ช่างที่รับการแก้ไข"),
       onOff: g(row, "Online/Offline"),
@@ -605,6 +654,8 @@ function renderMO() {
   rMOMcPareto(mo);
   rTTRDist(mo);
   rMOFreq(mo);
+  rMonthlyTrend(mo);
+  rUptimeTimeline(mo);
   rPMAlerts(mo);
   renderTechTable(mo);
   rMOTable(mo);
@@ -617,14 +668,22 @@ function rMOKPI(mo) {
   const closedCount = closedMO.length;
   const openCount = totalMO - closedCount;
   const closedPct = totalMO > 0 ? Math.round(closedCount / totalMO * 100) : 0;
-  const mttr = closedCount > 0 ? (closedMO.reduce((s,d) => s + d.ttr, 0) / closedCount).toFixed(1) : "—";
+  const closedWithTTR = closedMO.filter(d => d.ttr > 0);
+  const mttr = closedWithTTR.length > 0 ? (closedWithTTR.reduce((s,d) => s + d.ttr, 0) / closedWithTTR.length).toFixed(1) : "—";
 
   const mcMap = {};
-  mo.forEach(d => { if (!mcMap[d.mcNo]) mcMap[d.mcNo] = []; mcMap[d.mcNo].push(d.date); });
+  mo.forEach(d => {
+    if (!mcMap[d.mcNo]) mcMap[d.mcNo] = [];
+    mcMap[d.mcNo].push({ open: d.date, close: d.dateClose });
+  });
   const intervals = [];
   Object.values(mcMap).forEach(evts => {
-    const sorted = [...evts].sort((a,b) => a - b);
-    for (let i = 1; i < sorted.length; i++) intervals.push((sorted[i] - sorted[i-1]) / 3600000);
+    const sorted = [...evts].sort((a,b) => a.open - b.open);
+    for (let i = 1; i < sorted.length; i++) {
+      const prevEnd = sorted[i-1].close || sorted[i-1].open; // fallback: no close date
+      const gap = (sorted[i].open - prevEnd) / 3600000; // hours
+      if (gap > 0) intervals.push(gap);
+    }
   });
   const mtbf = intervals.length ? (intervals.reduce((a,b) => a + b, 0) / intervals.length).toFixed(1) : "—";
   const uniqMc = new Set(mo.map(d => d.mcNo)).size;
@@ -762,6 +821,163 @@ function rMOFreq(mo) {
     type:"bar",
     data:{ labels:labels, datasets:[{ data:months.map(m=>wk[m]), backgroundColor:"#38bdf844", borderColor:"#38bdf8", borderWidth:1, borderRadius:3 }] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:"#0d1117", titleColor:"#dce4f0", bodyColor:"#526080", borderColor:"#1c2640", borderWidth:1 } }, scales:{ x:{ grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#526080", font:{ size:9 }, maxRotation:45 } }, y:{ grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#526080", font:{ size:9 } } } } }
+  });
+}
+
+function rMonthlyTrend(mo) {
+  const MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mm = {};
+  mo.forEach(d => {
+    const ym = `${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}`;
+    if (!mm[ym]) mm[ym] = { issued:0, closed:0, ttrSum:0, ttrN:0, dtSum:0 };
+    mm[ym].issued++;
+    if (d.isClosed) mm[ym].closed++;
+    if (d.ttr > 0) { mm[ym].ttrSum += d.ttr; mm[ym].ttrN++; mm[ym].dtSum += d.ttr; }
+  });
+  const months = Object.keys(mm).sort().slice(-12);
+  if (months.length < 2) return;
+  const labels = months.map(m => { const [yr,mn]=m.split('-'); return `${MN[+mn-1]} ${yr.slice(2)}`; });
+  const issued  = months.map(m => mm[m].issued);
+  const closed  = months.map(m => mm[m].closed);
+  const mttrL   = months.map(m => mm[m].ttrN > 0 ? +(mm[m].ttrSum/mm[m].ttrN).toFixed(1) : null);
+  const dtL     = months.map(m => mm[m].dtSum || null);
+
+  dch("c-monthly-trend");
+  CH["c-monthly-trend"] = new Chart(document.getElementById("c-monthly-trend"), {
+    type:"bar",
+    data:{ labels, datasets:[
+      { label:"MO Issued",       data:issued,  backgroundColor:"#38bdf830", borderColor:"#38bdf8", borderWidth:1, borderRadius:3, yAxisID:"yMO",   order:2 },
+      { label:"MO Closed",       data:closed,  backgroundColor:"#22c55e30", borderColor:"#22c55e", borderWidth:1, borderRadius:3, yAxisID:"yMO",   order:2 },
+      { label:"Avg MTTR (min)",  data:mttrL,   type:"line", borderColor:"#f59e0b", backgroundColor:"#f59e0b18", borderWidth:2, pointRadius:3, pointHoverRadius:5, tension:.3, fill:false, yAxisID:"yMin", order:1, spanGaps:true },
+      { label:"Total DT (min)",  data:dtL,     type:"line", borderColor:"#f43f5e", backgroundColor:"transparent", borderWidth:1.5, pointRadius:2, tension:.3, fill:false, yAxisID:"yMin", order:1, borderDash:[4,3], spanGaps:true },
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ display:true, position:"top", labels:{ color:"#94a3b8", font:{size:10}, boxWidth:12, padding:12, usePointStyle:true }},
+        tooltip:{ backgroundColor:"#0d1117", titleColor:"#dce4f0", bodyColor:"#94a3b8", borderColor:"#1c2640", borderWidth:1, mode:"index", intersect:false }
+      },
+      scales:{
+        x:{ grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#526080", font:{size:9}, maxRotation:45 }},
+        yMO:{ type:"linear", position:"left", grid:{ color:"rgba(28,38,64,.4)" }, ticks:{ color:"#38bdf8", font:{size:9} }, title:{ display:true, text:"MO Count", color:"#526080", font:{size:9} }, beginAtZero:true },
+        yMin:{ type:"linear", position:"right", grid:{ drawOnChartArea:false }, ticks:{ color:"#f59e0b", font:{size:9}, callback:v=>v+"m" }, title:{ display:true, text:"Minutes", color:"#94a3b8", font:{size:9} }, beginAtZero:true }
+      }
+    }
+  });
+}
+
+function rUptimeTimeline(mo) {
+  const container = document.getElementById("uptime-timeline");
+  if (!mo.length) { container.innerHTML = '<p style="color:var(--muted);font-size:12px">ไม่มีข้อมูล</p>'; return; }
+
+  // Use local-date parsing (same as getMOFiltered) to avoid UTC offset issues
+  const _fvp = document.getElementById("date-from").value.split("-");
+  const _tvp = document.getElementById("date-to").value.split("-");
+  const allDates = mo.map(d => d.date.getTime());
+  const allClose = mo.filter(d => d.dateClose).map(d => d.dateClose.getTime());
+  const rangeStart = _fvp.length === 3 && _fvp[0]
+    ? new Date(+_fvp[0], +_fvp[1]-1, +_fvp[2])
+    : new Date(Math.min(...allDates));
+  const rawEnd = _tvp.length === 3 && _tvp[0]
+    ? new Date(+_tvp[0], +_tvp[1]-1, +_tvp[2], 23, 59, 59)
+    : new Date(allClose.length ? Math.max(...allClose) : Math.max(...allDates));
+  // Guarantee at least 1 day range so segments are visible
+  const rangeEnd = rawEnd - rangeStart < 86400000
+    ? new Date(rangeStart.getTime() + 86400000)
+    : rawEnd;
+  const totalMs = rangeEnd - rangeStart;
+  if (totalMs <= 0) { container.innerHTML = '<p style="color:var(--muted);font-size:12px">ช่วงวันที่ไม่ถูกต้อง</p>'; return; }
+
+  const mcMap = {};
+  mo.forEach(d => { if (!mcMap[d.mcNo]) mcMap[d.mcNo] = []; mcMap[d.mcNo].push(d); });
+
+  const machines = Object.entries(mcMap)
+    .sort((a, b) => Math.max(...b[1].map(d => d.date)) - Math.max(...a[1].map(d => d.date)));
+
+  const fmtD = d => `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
+  const midDate = new Date(rangeStart.getTime() + totalMs / 2);
+
+  let html = `<div class="tl-axis"><span>${fmtD(rangeStart)}</span><span>${fmtD(midDate)}</span><span>${fmtD(rangeEnd)}</span></div>`;
+
+  machines.forEach(([mcNo, events]) => {
+    const sorted = [...events].sort((a, b) => a.date - b.date);
+    const segs = [];
+    let cursor = rangeStart.getTime();
+
+    sorted.forEach(ev => {
+      const evOpen  = Math.max(ev.date.getTime(), rangeStart.getTime());
+      const evClose = ev.dateClose ? Math.min(ev.dateClose.getTime(), rangeEnd.getTime()) : evOpen;
+
+      if (evOpen > cursor) {
+        segs.push({ type:'up', s: cursor, e: evOpen });
+      }
+      const dnEnd = Math.max(evClose, evOpen + 60000);
+      segs.push({ type:'dn', s: evOpen, e: Math.min(dnEnd, rangeEnd.getTime()), ev });
+      cursor = Math.max(cursor, dnEnd);
+    });
+
+    if (cursor < rangeEnd.getTime()) {
+      segs.push({ type:'up', s: cursor, e: rangeEnd.getTime() });
+    }
+
+    const totalDn = sorted.reduce((s, ev) => {
+      if (ev.dateClose && ev.dateClose > ev.date) {
+        const dn = Math.min(ev.dateClose.getTime(), rangeEnd.getTime()) - Math.max(ev.date.getTime(), rangeStart.getTime());
+        return s + Math.max(0, dn);
+      }
+      return s;
+    }, 0);
+    const uptimePct = Math.max(0, Math.round((1 - totalDn / totalMs) * 100));
+    const uptimeColor = uptimePct >= 90 ? '#22c55e' : uptimePct >= 70 ? '#f59e0b' : '#ef4444';
+
+    const segHtml = segs.map(seg => {
+      const left  = Math.max(0, (seg.s - rangeStart.getTime()) / totalMs * 100);
+      const rawW  = (seg.e - seg.s) / totalMs * 100;
+      if (seg.type === 'up' && rawW < 0.05) return '';
+      const cls   = seg.type === 'up' ? 'tl-up' : 'tl-dn';
+      // Downtime segments always at least 0.4% wide so they remain clickable
+      const width = seg.type === 'dn' ? Math.min(100 - left, Math.max(rawW, 0.4)) : Math.min(100 - left, rawW);
+      if (seg.type === 'dn' && seg.ev) {
+        const ev = seg.ev;
+        const tip = encodeURIComponent(JSON.stringify({
+          mc: ev.mcNo, prob: ev.probType || '—',
+          ttr: ev.ttr, tech: ev.tech || '—',
+          date: ev.dateStr, closed: ev.isClosed
+        }));
+        return `<div class="tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%" data-tip="${tip}"></div>`;
+      }
+      return `<div class="tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%"></div>`;
+    }).join('');
+
+    html += `<div class="tl-row">
+      <div class="tl-lbl" title="${mcNo}">${mcNo}</div>
+      <div class="tl-bar">${segHtml}</div>
+      <div class="tl-pct" style="color:${uptimeColor}">${uptimePct}%</div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Floating tooltip
+  let tip = document.getElementById("tl-tip");
+  if (!tip) { tip = document.createElement("div"); tip.id="tl-tip"; tip.className="tl-tip"; document.body.appendChild(tip); }
+
+  container.querySelectorAll(".tl-seg[data-tip]").forEach(el => {
+    el.addEventListener("mouseenter", () => {
+      const d = JSON.parse(decodeURIComponent(el.dataset.tip));
+      tip.innerHTML = `<div style="font-weight:700;color:#ef4444;margin-bottom:5px">⚡ ${d.prob}</div>
+        <div><span style="color:#526080">Mc No.:</span> <b>${d.mc}</b></div>
+        <div><span style="color:#526080">วันที่:</span> ${d.date}</div>
+        <div><span style="color:#526080">TTR:</span> <b style="color:#f59e0b">${d.ttr > 0 ? d.ttr + ' นาที' : '—'}</b></div>
+        <div><span style="color:#526080">ช่าง:</span> ${d.tech}</div>
+        <div style="margin-top:5px">${d.closed ? '<span style="color:#22c55e;font-weight:700">✅ ปิดแล้ว</span>' : '<span style="color:#f59e0b;font-weight:700">⏳ ค้างซ่อม</span>'}</div>`;
+      tip.style.display = "block";
+    });
+    el.addEventListener("mousemove", e => {
+      tip.style.left = (e.clientX + 14) + "px";
+      tip.style.top  = (e.clientY - 36) + "px";
+    });
+    el.addEventListener("mouseleave", () => { tip.style.display = "none"; });
   });
 }
 
