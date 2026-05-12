@@ -611,11 +611,12 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
       </div>
     </div>
 
-    <!-- Predictive Maintenance Alerts -->
+  <!-- PM ALERTS (disabled)
     <div style="margin-bottom:16px">
       <h4 style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px"> Predictive Maintenance Alerts</h4>
       <div id="pm-alerts"></div>
     </div>
+  -->
 
     <!-- MO Detail Table -->
     <div>
@@ -1361,7 +1362,7 @@ function renderMO() {
   rMOMcPareto(mo);
   rTTRDist(mo);
   rMOFreq(mo);
-  rPMAlerts(mo);
+  // rPMAlerts(mo);
   rMOTable(mo);
 }
 
@@ -1509,6 +1510,7 @@ function rMOFreq(mo) {
   });
 }
 
+/* PM ALERTS (disabled)
 function rPMAlerts(mo) {
   const mcMap = {};
   mo.forEach(d => {
@@ -1720,6 +1722,7 @@ function rPMAlerts(mo) {
   document.getElementById("pm-alerts").innerHTML = html2;
 }
 
+*/
 function rMOTable(mo) {
   const rows = [...mo].sort((a, b) => b.date - a.date).slice(0, 80);
   document.getElementById("mo-tb").innerHTML = rows.map(d => {
