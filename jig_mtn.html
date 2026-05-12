@@ -301,8 +301,11 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 .tl-line-lbl{flex:0 0 118px;font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;font-family:var(--font-display);display:flex;align-items:center;gap:5px}
 .tl-chevron{display:inline-block;font-size:9px;transition:transform .2s;color:var(--muted)}
 .tl-chevron.open{transform:rotate(90deg)}
-.tl-mc-group{display:none;padding-left:14px;border-left:2px solid var(--border2);margin-left:6px;margin-bottom:4px}
+.tl-mc-group{display:none;margin-bottom:4px}
 .tl-mc-group.open{display:block}
+.tl-mc-group .tl-lbl{padding-left:20px;font-size:9px;color:var(--muted)}
+.tl-mc-group .tl-bar{height:10px}
+.tl-mc-group .tl-row{margin-bottom:3px}
 
 /* Recurrence table */
 .rec-hdr,.rec-row{display:grid;grid-template-columns:160px 1fr 90px 70px 70px 80px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
