@@ -269,6 +269,13 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 .tl-tip{position:fixed;background:#0d1117;border:1px solid #1c2640;border-radius:6px;padding:9px 13px;font-size:11px;color:#dce4f0;pointer-events:none;z-index:5000;max-width:230px;line-height:1.75;box-shadow:0 6px 24px #00000070;display:none}
 .tl-legend{display:flex;gap:18px;margin-bottom:12px;font-size:11px;color:var(--muted);align-items:center}
 .tl-legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}
+.tl-line-row{display:flex;align-items:center;gap:10px;margin-bottom:3px;min-width:0;cursor:pointer;border-radius:4px;padding:2px 0}
+.tl-line-row:hover .tl-bar{filter:brightness(1.08)}
+.tl-line-lbl{flex:0 0 118px;font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;font-family:var(--font-display);display:flex;align-items:center;gap:5px}
+.tl-chevron{display:inline-block;font-size:9px;transition:transform .2s;color:var(--muted)}
+.tl-chevron.open{transform:rotate(90deg)}
+.tl-mc-group{display:none;padding-left:14px;border-left:2px solid var(--border2);margin-left:6px;margin-bottom:4px}
+.tl-mc-group.open{display:block}
 
 /* Date Picker Styling */
 .date-picker-container {
@@ -1065,104 +1072,57 @@ function rMonthlyTrend(mo) {
   });
 }
 
-function rUptimeTimeline(mo) {
-  const container = document.getElementById("uptime-timeline");
-  if (!mo.length) { container.innerHTML = '<p style="color:var(--muted);font-size:12px">ไม่มีข้อมูล</p>'; return; }
+function _tlSegHtml(events, rangeStart, rangeEnd, totalMs) {
+  const sorted = [...events].sort((a, b) => a.date - b.date);
+  const segs = [];
+  let cursor = rangeStart.getTime();
 
-  // Use local-date parsing (same as getMOFiltered) to avoid UTC offset issues
-  const _fvp = document.getElementById("date-from").value.split("-");
-  const _tvp = document.getElementById("date-to").value.split("-");
-  const allDates = mo.map(d => d.date.getTime());
-  const allClose = mo.filter(d => d.dateClose).map(d => d.dateClose.getTime());
-  const rangeStart = _fvp.length === 3 && _fvp[0]
-    ? new Date(+_fvp[0], +_fvp[1]-1, +_fvp[2])
-    : new Date(Math.min(...allDates));
-  const rawEnd = _tvp.length === 3 && _tvp[0]
-    ? new Date(+_tvp[0], +_tvp[1]-1, +_tvp[2], 23, 59, 59)
-    : new Date(allClose.length ? Math.max(...allClose) : Math.max(...allDates));
-  // Guarantee at least 1 day range so segments are visible
-  const rangeEnd = rawEnd - rangeStart < 86400000
-    ? new Date(rangeStart.getTime() + 86400000)
-    : rawEnd;
-  const totalMs = rangeEnd - rangeStart;
-  if (totalMs <= 0) { container.innerHTML = '<p style="color:var(--muted);font-size:12px">ช่วงวันที่ไม่ถูกต้อง</p>'; return; }
-
-  const mcMap = {};
-  mo.forEach(d => { if (!mcMap[d.mcNo]) mcMap[d.mcNo] = []; mcMap[d.mcNo].push(d); });
-
-  const machines = Object.entries(mcMap)
-    .sort((a, b) => Math.max(...b[1].map(d => d.date)) - Math.max(...a[1].map(d => d.date)));
-
-  const fmtD = d => `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
-  const midDate = new Date(rangeStart.getTime() + totalMs / 2);
-
-  let html = `<div class="tl-axis"><span>${fmtD(rangeStart)}</span><span>${fmtD(midDate)}</span><span>${fmtD(rangeEnd)}</span></div>`;
-
-  machines.forEach(([mcNo, events]) => {
-    const sorted = [...events].sort((a, b) => a.date - b.date);
-    const segs = [];
-    let cursor = rangeStart.getTime();
-
-    sorted.forEach(ev => {
-      const evOpen  = Math.max(ev.date.getTime(), rangeStart.getTime());
-      const evClose = ev.dateClose ? Math.min(ev.dateClose.getTime(), rangeEnd.getTime()) : evOpen;
-
-      if (evOpen > cursor) {
-        segs.push({ type:'up', s: cursor, e: evOpen });
-      }
-      const dnEnd = Math.max(evClose, evOpen + 60000);
-      segs.push({ type:'dn', s: evOpen, e: Math.min(dnEnd, rangeEnd.getTime()), ev });
-      cursor = Math.max(cursor, dnEnd);
-    });
-
-    if (cursor < rangeEnd.getTime()) {
-      segs.push({ type:'up', s: cursor, e: rangeEnd.getTime() });
-    }
-
-    const totalDn = sorted.reduce((s, ev) => {
-      if (ev.dateClose && ev.dateClose > ev.date) {
-        const dn = Math.min(ev.dateClose.getTime(), rangeEnd.getTime()) - Math.max(ev.date.getTime(), rangeStart.getTime());
-        return s + Math.max(0, dn);
-      }
-      return s;
-    }, 0);
-    const uptimePct = Math.max(0, Math.round((1 - totalDn / totalMs) * 100));
-    const uptimeColor = uptimePct >= 90 ? '#22c55e' : uptimePct >= 70 ? '#f59e0b' : '#ef4444';
-
-    const segHtml = segs.map(seg => {
-      const left  = Math.max(0, (seg.s - rangeStart.getTime()) / totalMs * 100);
-      const rawW  = (seg.e - seg.s) / totalMs * 100;
-      if (seg.type === 'up' && rawW < 0.05) return '';
-      const cls   = seg.type === 'up' ? 'tl-up' : 'tl-dn';
-      // Downtime segments always at least 0.4% wide so they remain clickable
-      const width = seg.type === 'dn' ? Math.min(100 - left, Math.max(rawW, 0.4)) : Math.min(100 - left, rawW);
-      if (seg.type === 'dn' && seg.ev) {
-        const ev = seg.ev;
-        const tip = encodeURIComponent(JSON.stringify({
-          mc: ev.mcNo, prob: ev.probType || '—',
-          ttr: ev.ttr, lineDt: ev.lineDt || 0,
-          resp: ev.responseTime || 0,
-          tech: ev.tech || '—',
-          date: ev.dateStr, closed: ev.isClosed
-        }));
-        return `<div class="tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%" data-tip="${tip}"></div>`;
-      }
-      return `<div class="tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%"></div>`;
-    }).join('');
-
-    html += `<div class="tl-row">
-      <div class="tl-lbl" title="${mcNo}">${mcNo}</div>
-      <div class="tl-bar">${segHtml}</div>
-      <div class="tl-pct" style="color:${uptimeColor}">${uptimePct}%</div>
-    </div>`;
+  sorted.forEach(ev => {
+    const evOpen  = Math.max(ev.date.getTime(), rangeStart.getTime());
+    const evClose = ev.dateClose ? Math.min(ev.dateClose.getTime(), rangeEnd.getTime()) : evOpen;
+    if (evOpen > cursor) segs.push({ type:'up', s: cursor, e: evOpen });
+    const dnEnd = Math.max(evClose, evOpen + 60000);
+    segs.push({ type:'dn', s: evOpen, e: Math.min(dnEnd, rangeEnd.getTime()), ev });
+    cursor = Math.max(cursor, dnEnd);
   });
+  if (cursor < rangeEnd.getTime()) segs.push({ type:'up', s: cursor, e: rangeEnd.getTime() });
 
-  container.innerHTML = html;
+  const totalDn = sorted.reduce((s, ev) => {
+    if (ev.dateClose && ev.dateClose > ev.date) {
+      const dn = Math.min(ev.dateClose.getTime(), rangeEnd.getTime()) - Math.max(ev.date.getTime(), rangeStart.getTime());
+      return s + Math.max(0, dn);
+    }
+    return s;
+  }, 0);
+  const uptimePct = Math.max(0, Math.round((1 - totalDn / totalMs) * 100));
+  const uptimeColor = uptimePct >= 90 ? '#22c55e' : uptimePct >= 70 ? '#f59e0b' : '#ef4444';
 
-  // Floating tooltip
+  const segHtml = segs.map(seg => {
+    const left = Math.max(0, (seg.s - rangeStart.getTime()) / totalMs * 100);
+    const rawW = (seg.e - seg.s) / totalMs * 100;
+    if (seg.type === 'up' && rawW < 0.05) return '';
+    const cls   = seg.type === 'up' ? 'tl-up' : 'tl-dn';
+    const width = seg.type === 'dn' ? Math.min(100 - left, Math.max(rawW, 0.4)) : Math.min(100 - left, rawW);
+    if (seg.type === 'dn' && seg.ev) {
+      const ev = seg.ev;
+      const tip = encodeURIComponent(JSON.stringify({
+        mc: ev.mcNo, prob: ev.probType || '—',
+        ttr: ev.ttr, lineDt: ev.lineDt || 0,
+        resp: ev.responseTime || 0,
+        tech: ev.tech || '—',
+        date: ev.dateStr, closed: ev.isClosed
+      }));
+      return `<div class="tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%" data-tip="${tip}"></div>`;
+    }
+    return `<div class="tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%"></div>`;
+  }).join('');
+
+  return { segHtml, uptimePct, uptimeColor };
+}
+
+function _tlBindTooltips(container) {
   let tip = document.getElementById("tl-tip");
   if (!tip) { tip = document.createElement("div"); tip.id="tl-tip"; tip.className="tl-tip"; document.body.appendChild(tip); }
-
   container.querySelectorAll(".tl-seg[data-tip]").forEach(el => {
     el.addEventListener("mouseenter", () => {
       const d = JSON.parse(decodeURIComponent(el.dataset.tip));
@@ -1184,6 +1144,88 @@ function rUptimeTimeline(mo) {
     });
     el.addEventListener("mouseleave", () => { tip.style.display = "none"; });
   });
+}
+
+function rUptimeTimeline(mo) {
+  const container = document.getElementById("uptime-timeline");
+  if (!mo.length) { container.innerHTML = '<p style="color:var(--muted);font-size:12px">ไม่มีข้อมูล</p>'; return; }
+
+  const _fvp = document.getElementById("date-from").value.split("-");
+  const _tvp = document.getElementById("date-to").value.split("-");
+  const allDates = mo.map(d => d.date.getTime());
+  const allClose = mo.filter(d => d.dateClose).map(d => d.dateClose.getTime());
+  const rangeStart = _fvp.length === 3 && _fvp[0]
+    ? new Date(+_fvp[0], +_fvp[1]-1, +_fvp[2])
+    : new Date(Math.min(...allDates));
+  const rawEnd = _tvp.length === 3 && _tvp[0]
+    ? new Date(+_tvp[0], +_tvp[1]-1, +_tvp[2], 23, 59, 59)
+    : new Date(allClose.length ? Math.max(...allClose) : Math.max(...allDates));
+  const rangeEnd = rawEnd - rangeStart < 86400000
+    ? new Date(rangeStart.getTime() + 86400000) : rawEnd;
+  const totalMs = rangeEnd - rangeStart;
+  if (totalMs <= 0) { container.innerHTML = '<p style="color:var(--muted);font-size:12px">ช่วงวันที่ไม่ถูกต้อง</p>'; return; }
+
+  // Group by line → machine
+  const lineMap = {};
+  mo.forEach(d => {
+    const ln = d.line || 'ไม่ระบุไลน์';
+    if (!lineMap[ln]) lineMap[ln] = {};
+    if (!lineMap[ln][d.mcNo]) lineMap[ln][d.mcNo] = [];
+    lineMap[ln][d.mcNo].push(d);
+  });
+
+  const fmtD = d => `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
+  const midDate = new Date(rangeStart.getTime() + totalMs / 2);
+
+  let html = `<div class="tl-axis"><span>${fmtD(rangeStart)}</span><span>${fmtD(midDate)}</span><span>${fmtD(rangeEnd)}</span></div>`;
+
+  const lineNames = Object.keys(lineMap).sort();
+  lineNames.forEach((lineName, li) => {
+    const mcMap = lineMap[lineName];
+    const allLineEvents = Object.values(mcMap).flat();
+
+    // Line-level aggregate bar
+    const { segHtml: lSegHtml, uptimePct: lPct, uptimeColor: lColor } = _tlSegHtml(allLineEvents, rangeStart, rangeEnd, totalMs);
+    const groupId = `tl-grp-${li}`;
+
+    html += `<div class="tl-line-row" onclick="tlToggle('${groupId}',this)">
+      <div class="tl-line-lbl" title="${lineName}">
+        <span class="tl-chevron">▶</span>${lineName}
+        <span style="font-size:9px;font-weight:400;color:var(--muted)">(${allLineEvents.length} MO)</span>
+      </div>
+      <div class="tl-bar">${lSegHtml}</div>
+      <div class="tl-pct" style="color:${lColor}">${lPct}%</div>
+    </div>`;
+
+    // Machine rows (hidden by default, inside collapsible group)
+    const mcNames = Object.keys(mcMap).sort((a, b) => {
+      const lastA = Math.max(...mcMap[a].map(d => d.date.getTime()));
+      const lastB = Math.max(...mcMap[b].map(d => d.date.getTime()));
+      return lastB - lastA;
+    });
+
+    let mcHtml = '';
+    mcNames.forEach(mcNo => {
+      const { segHtml, uptimePct, uptimeColor } = _tlSegHtml(mcMap[mcNo], rangeStart, rangeEnd, totalMs);
+      mcHtml += `<div class="tl-row">
+        <div class="tl-lbl" title="${mcNo}">${mcNo}</div>
+        <div class="tl-bar">${segHtml}</div>
+        <div class="tl-pct" style="color:${uptimeColor}">${uptimePct}%</div>
+      </div>`;
+    });
+
+    html += `<div class="tl-mc-group" id="${groupId}">${mcHtml}</div>`;
+  });
+
+  container.innerHTML = html;
+  _tlBindTooltips(container);
+}
+
+function tlToggle(groupId, rowEl) {
+  const grp = document.getElementById(groupId);
+  const chev = rowEl.querySelector('.tl-chevron');
+  const isOpen = grp.classList.toggle('open');
+  if (chev) chev.classList.toggle('open', isOpen);
 }
 
 /* PM ALERTS (disabled)
@@ -1299,6 +1341,7 @@ function rPMAlerts(mo) {
   if (!html2) html2 = '<p style="color:var(--muted);font-size:12px">ต้องมีข้อมูล MO อย่างน้อย 2 รายการต่อเครื่อง</p>';
   document.getElementById("pm-alerts").innerHTML = html2;
 }
+*/
 
 function renderTechTable(mo) {
   const techMap = {};
