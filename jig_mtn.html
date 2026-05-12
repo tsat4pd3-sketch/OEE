@@ -567,7 +567,7 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     </div>
   </div>
 
-  <!-- AI Analysis -->
+  <!-- AI MAINTENANCE INTELLIGENCE (disabled)
   <div class="ai-wrap" style="border-color:#1a3a1a">
     <div class="ai-hdr">
       <div class="ai-orb"></div>
@@ -579,6 +579,7 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     </div>
     <div id="mo-ai-out"><p class="pulse" style="color:var(--muted);font-size:13px">กำลังรอข้อมูล MO...</p></div>
   </div>
+  -->
 </main>
 
 <script>
@@ -689,7 +690,7 @@ async function loadMO() {
     document.getElementById("mo-badge").className = "badge bl";
     document.getElementById("mo-status").textContent = "โหลดสำเร็จ — " + MO_ALL.length + " MO (JIG)";
     renderMO();
-    runMOAI();
+    // runMOAI(); // AI MAINTENANCE INTELLIGENCE (disabled)
   } catch (e) {
     document.getElementById("mo-badge").textContent = "● ERR";
     document.getElementById("mo-badge").className = "badge bx";
@@ -1413,7 +1414,7 @@ function updateMarquee(mo) {
   bar.style.display = "block";
 }
 
-// ── AI MAINTENANCE ANALYSIS ──
+/* AI MAINTENANCE INTELLIGENCE (disabled)
 async function runMOAI() {
   if (!MO_LOADED || !MO_ALL.length) {
     document.getElementById("mo-ai-out").innerHTML = '<p style="color:var(--muted);font-size:12px">กรุณาโหลด MO data ก่อน</p>';
@@ -1588,6 +1589,7 @@ function fallbackMOAI(topProbs,recurring,highTTR,avgTTR) {
       </div>
     </div>`;
 }
+*/
 </script>
 
 <!-- Theme + Sidebar Scripts -->
