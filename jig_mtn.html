@@ -70,7 +70,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .kpi-mode-btn:hover{border-color:var(--accent);color:var(--accent)}
 .kpi-mode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px;box-shadow:0 1px 3px #00000008}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px;box-shadow:0 1px 3px #00000008;min-width:0;overflow:hidden}
 .card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
 .card-hdr h3{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
 .card-hdr em{font-style:normal;font-size:12px;color:var(--muted)}
@@ -255,6 +255,33 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   .marquee { font-size: 11px; }
 }
 
+@media (max-width: 768px) {
+  /* Card header + tabs: stack vertically */
+  .card-hdr  { flex-wrap: wrap; gap: 8px; }
+  .par-tabs  { width: 100%; justify-content: flex-start; }
+  /* KPI mode bar wraps */
+  .kpi-mode-bar { flex-wrap: wrap; gap: 6px; }
+  /* Timeline legend: allow wrap */
+  .tl-legend { flex-wrap: wrap; gap: 8px; }
+  .tl-legend span:last-child { margin-left: 0 !important; }
+}
+
+@media (max-width: 600px) {
+  /* Pareto rows: shrink label, hide cumulative % column */
+  .par-label { flex: 0 0 110px !important; font-size: 11px !important; }
+  .par-val   { flex: 0 0 48px !important; font-size: 11px !important; }
+  .par-cum   { display: none !important; }
+  .par-pct   { flex: 0 0 34px !important; }
+
+  /* Timeline label narrower on small screens */
+  .tl-lbl      { flex: 0 0 90px !important; font-size: 9px !important; }
+  .tl-line-lbl { flex: 0 0 90px !important; font-size: 10px !important; }
+  .tl-axis     { padding-left: 100px !important; }
+
+  /* MO table: shrink padding */
+  .dt-tbl th, .dt-tbl td { padding: 8px 8px !important; font-size: 11px !important; }
+}
+
 /* Uptime/Downtime Timeline */
 #timeline-wrap{overflow-x:auto}
 .tl-axis{display:flex;justify-content:space-between;margin:0 0 8px;padding:0 0 0 128px;font-size:10px;color:var(--muted);font-family:var(--font-display);letter-spacing:.3px}
@@ -276,6 +303,18 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 .tl-chevron.open{transform:rotate(90deg)}
 .tl-mc-group{display:none;padding-left:14px;border-left:2px solid var(--border2);margin-left:6px;margin-bottom:4px}
 .tl-mc-group.open{display:block}
+
+/* Recurrence table */
+.rec-hdr,.rec-row{display:grid;grid-template-columns:160px 1fr 90px 70px 70px 80px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.rec-mc{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-bar-bg{background:var(--bg3);border-radius:3px;height:6px;overflow:hidden}
+.rec-cnt{font-size:11px;font-weight:700;text-align:center}
+.rec-ttr{font-size:10px;color:var(--muted)}
+.rec-ago{font-size:10px;color:var(--muted)}
+@media(max-width:600px){
+  .rec-hdr,.rec-row{grid-template-columns:1fr 60px 72px;gap:6px}
+  .rec-bar-bg,.rec-ttr,.rec-ago{display:none}
+}
 
 /* Date Picker Styling */
 .date-picker-container {
@@ -881,18 +920,19 @@ function rMORecurrence(mo) {
       ? `<span style="background:#f43f5e22;color:#f43f5e;padding:2px 8px;border-radius:2px;font-size:9px;font-weight:700">🔄 RECURRING</span>`
       : `<span style="background:#22c55e22;color:#22c55e;padding:2px 8px;border-radius:2px;font-size:9px;font-weight:700">✅ RESOLVED</span>`;
     const w = Math.round(mc.events.length / maxC * 100);
-    return `<div style="display:grid;grid-template-columns:160px 1fr 90px 70px 70px 80px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
-      <div style="font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${mc.mc}">${mc.mc}</div>
-      <div style="background:var(--bg3);border-radius:3px;height:6px;overflow:hidden"><div style="width:${w}%;height:100%;background:${isRecurring?"#f43f5e":"#22c55e"};border-radius:3px"></div></div>
-      <div style="font-size:11px;color:${isRecurring?"#f43f5e":"#22c55e"};font-weight:700;text-align:center">${mc.events.length} ครั้ง</div>
-      <div style="font-size:10px;color:var(--muted)">${avgTTR}m avg</div>
-      <div style="font-size:10px;color:var(--muted)">${daysSince}d ago</div>
+    return `<div class="rec-row">
+      <div class="rec-mc" title="${mc.mc}">${mc.mc}</div>
+      <div class="rec-bar-bg"><div style="width:${w}%;height:100%;background:${isRecurring?"#f43f5e":"#22c55e"};border-radius:3px"></div></div>
+      <div class="rec-cnt" style="color:${isRecurring?"#f43f5e":"#22c55e"}">${mc.events.length} ครั้ง</div>
+      <div class="rec-ttr">${avgTTR}m avg</div>
+      <div class="rec-ago">${daysSince}d ago</div>
       <div>${tag}</div>
     </div>`;
   });
   document.getElementById("mo-recurrence").innerHTML = `
-    <div style="display:grid;grid-template-columns:160px 1fr 90px 70px 70px 80px;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
-      <div style="font-size:9px;color:var(--muted)">Mc No.</div><div style="font-size:9px;color:var(--muted)">ความถี่</div>
+    <div class="rec-hdr">
+      <div style="font-size:9px;color:var(--muted)">Mc No.</div>
+      <div style="font-size:9px;color:var(--muted)">ความถี่</div>
       <div style="font-size:9px;color:var(--muted);text-align:center">จำนวน</div>
       <div style="font-size:9px;color:var(--muted)">TTR avg</div>
       <div style="font-size:9px;color:var(--muted)">ซ่อมล่าสุด</div>

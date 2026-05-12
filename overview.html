@@ -1323,6 +1323,8 @@ function rOEEChart(){
   const agg=(rows)=>{const m={};rows.forEach(d=>{if(!d.oee||d.oee<=0)return;const k=getPKey(d.date,PERIOD);if(!m[k])m[k]=[];m[k].push(d.oee);});return m;};
   const m3=agg(pd3),m4=agg(pd4);
   const histKeys=[...new Set([...Object.keys(m3),...Object.keys(m4)])].sort();
+  const keys=histKeys;
+  const labels=histKeys.map(k=>fmtPKey(k,PERIOD));
   const avgArr=(m,k)=>m[k]?+(m[k].reduce((a,b)=>a+b)/m[k].length).toFixed(1):null;
 
   // Combined band across PD3+PD4
