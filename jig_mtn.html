@@ -322,6 +322,20 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   box-shadow: 0 4px 12px rgba(227, 25, 55, 0.3);
 }
 
+/* Data Toggles */
+.tog-section{padding:12px 16px 4px;border-top:1px solid var(--border)}
+.tog-section .ss-label{margin-bottom:10px}
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)}
+.tog-row:last-child{border-bottom:none}
+.tog-lbl{font-size:13px;color:var(--text2);font-weight:500;line-height:1.3}
+.tog-sub{font-size:10px;color:var(--muted);display:block;margin-top:1px}
+.tog-sw{position:relative;width:34px;height:18px;flex-shrink:0;margin-left:8px}
+.tog-sw input{opacity:0;width:0;height:0;position:absolute}
+.tog-track{position:absolute;inset:0;border-radius:18px;background:var(--border2);cursor:pointer;transition:background .2s}
+.tog-sw input:checked + .tog-track{background:var(--accent)}
+.tog-track::before{content:'';position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px #00000030}
+.tog-sw input:checked + .tog-track::before{transform:translateX(16px)}
+
 @media (max-width: 480px) {
   .date-picker-container { flex-direction: column; align-items: stretch; gap: 8px; }
   .date-picker-group input[type="date"] { width: 100%; font-size: 16px; }
@@ -379,6 +393,29 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     <div class="ss-label">ช่วงวันที่</div>
     <input type="date" id="date-from" onchange="renderMO()">
     <input type="date" id="date-to" onchange="renderMO()">
+  </div>
+  <div class="tog-section">
+    <div class="ss-label">ตัวกรองข้อมูล</div>
+    <div class="tog-row">
+      <div>
+        <span class="tog-lbl">รวมซ่อมนอกไลน์</span>
+        <span class="tog-sub">Online/Offline</span>
+      </div>
+      <label class="tog-sw">
+        <input type="checkbox" id="tog-offline" onchange="renderMO()">
+        <span class="tog-track"></span>
+      </label>
+    </div>
+    <div class="tog-row">
+      <div>
+        <span class="tog-lbl">รวมปรับจิ๊ก</span>
+        <span class="tog-sub">Problem Type: ปรับจิ๊ก</span>
+      </div>
+      <label class="tog-sw">
+        <input type="checkbox" id="tog-adjust" onchange="renderMO()">
+        <span class="tog-track"></span>
+      </label>
+    </div>
   </div>
   <button class="btn-refresh" onclick="loadMO()">🔄 โหลดข้อมูลใหม่</button>
   <div class="auto-info">JIG MTN — PD3 + PD4<br>Maintenance Intelligence</div>
@@ -568,7 +605,7 @@ function parseMOCSV(text) {
     const mcType = g(row, "Mc Type");
     // Filter: only JIG rows
     if (dept && !dept.toUpperCase().includes("JIG") && !mcType.toUpperCase().includes("JIG")) continue;
-    const dateClose = parseMODate(g(row, "เวลาซ่อมเสร็จ"));
+    const dateClose = parseMODate(g(row, "วันเวลาที่ซ่อมเสร็จ-")) || parseMODate(g(row, "เวลาซ่อมเสร็จ"));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
     rows.push({
@@ -624,19 +661,40 @@ async function loadMO() {
   }
 }
 
+function isOfflineMO(v) {
+  const s = (v || '').toLowerCase().trim();
+  return s.includes('นอก') || s === 'offline' || s === 'off';
+}
+function isAdjustMO(v) {
+  return (v || '').includes('ปรับจิ๊ก');
+}
+
 function getMOFiltered() {
   const _fv = document.getElementById("date-from").value.split("-");
   const from = _fv.length === 3 ? new Date(+_fv[0], +_fv[1]-1, +_fv[2]) : new Date(0);
   const _tv = document.getElementById("date-to").value.split("-");
   const to = _tv.length === 3 ? new Date(+_tv[0], +_tv[1]-1, +_tv[2], 23, 59, 59) : new Date(9999, 0, 1);
-  const filtered = MO_ALL.filter(d => d.date >= from && d.date <= to);
+  const inclOffline = document.getElementById("tog-offline")?.checked ?? false;
+  const inclAdjust  = document.getElementById("tog-adjust")?.checked ?? false;
+
+  const filtered = MO_ALL.filter(d => {
+    if (d.date < from || d.date > to) return false;
+    if (!inclOffline && isOfflineMO(d.onOff)) return false;
+    if (!inclAdjust  && isAdjustMO(d.probType)) return false;
+    return true;
+  });
+
   if (!filtered.length && MO_ALL.length > 0) {
     const moMin = new Date(Math.min(...MO_ALL.map(d => d.date)));
     const moMax = new Date(Math.max(...MO_ALL.map(d => d.date)));
     document.getElementById("mo-status").textContent =
       `ไม่มี MO ในช่วงนี้ (data: ${moMin.toLocaleDateString("th-TH")} ถึง ${moMax.toLocaleDateString("th-TH")})`;
   } else if (MO_LOADED) {
-    document.getElementById("mo-status").textContent = `แสดง ${filtered.length} MO`;
+    const tags = [];
+    if (!inclOffline) tags.push('ในไลน์');
+    if (!inclAdjust)  tags.push('ไม่รวมปรับจิ๊ก');
+    const tagStr = tags.length ? ` · ${tags.join(' · ')}` : '';
+    document.getElementById("mo-status").textContent = `แสดง ${filtered.length} MO${tagStr}`;
   }
   return filtered;
 }
