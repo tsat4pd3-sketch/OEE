@@ -84,6 +84,11 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .par-val{flex:0 0 60px;text-align:right;font-size:12px;color:var(--muted)}
 .par-cum{flex:0 0 45px;text-align:right;font-size:11px;color:var(--muted2)}
 
+.par-tabs{display:flex;gap:4px;margin-bottom:12px}
+.par-tab{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;font-family:var(--font-display)}
+.par-tab:hover{border-color:var(--accent);color:var(--accent)}
+.par-tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
 .tbl-wrap{overflow-x:auto;max-height:360px;overflow-y:auto}
 .dt-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .dt-tbl th{background:var(--bg3);color:var(--muted);font-weight:700;padding:10px 13px;text-align:left;font-size:12px;position:sticky;top:0;letter-spacing:.3px;border-bottom:2px solid var(--border2)}
@@ -464,7 +469,14 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   <!-- Pareto row -->
   <div class="row r2">
     <div class="card">
-      <div class="card-hdr"><h3>📊 Top Problem Types</h3></div>
+      <div class="card-hdr">
+        <h3>📊 Top Problem Types</h3>
+        <div class="par-tabs">
+          <button class="par-tab active" onclick="setProbParetoTab('count',this)">MO Count</button>
+          <button class="par-tab" onclick="setProbParetoTab('dt',this)">Total DT</button>
+          <button class="par-tab" onclick="setProbParetoTab('mttr',this)">Avg MTTR</button>
+        </div>
+      </div>
       <div id="mo-prob-pareto"><p style="color:var(--muted);font-size:13px">รอข้อมูล...</p></div>
     </div>
     <div class="card">
@@ -827,15 +839,68 @@ function dtIcon(t) {
   return '🔧';
 }
 
+let _probParetoTab = 'count';
+let _probParetoMO  = [];
+
+function setProbParetoTab(tab, btn) {
+  _probParetoTab = tab;
+  document.querySelectorAll('.par-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rMOProbPareto(_probParetoMO);
+}
+
 function rMOProbPareto(mo) {
-  const sums = {}; mo.forEach(d => { sums[d.probType] = (sums[d.probType] || 0) + 1; });
-  const sorted = Object.entries(sums).sort((a,b) => b[1] - a[1]).slice(0, 8);
-  const total = sorted.reduce((s,[,v]) => s + v, 0) || 1; let cum = 0;
-  document.getElementById("mo-prob-pareto").innerHTML = sorted.map(([l,v],i) => {
-    cum += v; const pct = (v/total*100).toFixed(1); const cumPct = (cum/total*100).toFixed(1);
-    return `<div class="par-row"><div class="par-label" title="${l}" style="flex:0 0 145px">${dtIcon(l)} ${l}</div>
-      <div class="par-bar-bg"><div class="par-bar-fill" style="width:${(v/total*100).toFixed(0)}%;background:${MO_COLORS[i]}"></div></div>
-      <div class="par-pct">${pct}%</div><div class="par-val">${v} MO</div><div class="par-cum">∑${cumPct}%</div></div>`;
+  _probParetoMO = mo;
+  const tab = _probParetoTab;
+
+  // Aggregate per problem type
+  const agg = {};
+  mo.forEach(d => {
+    if (!agg[d.probType]) agg[d.probType] = { count: 0, dtSum: 0, ttrSum: 0, ttrN: 0 };
+    agg[d.probType].count++;
+    if (d.lineDt > 0) agg[d.probType].dtSum += d.lineDt;
+    if (d.ttr > 0) { agg[d.probType].ttrSum += d.ttr; agg[d.probType].ttrN++; }
+  });
+
+  let rows;
+  if (tab === 'dt') {
+    rows = Object.entries(agg)
+      .map(([l, v]) => [l, v.dtSum])
+      .filter(([, v]) => v > 0)
+      .sort((a, b) => b[1] - a[1]).slice(0, 8);
+  } else if (tab === 'mttr') {
+    rows = Object.entries(agg)
+      .map(([l, v]) => [l, v.ttrN > 0 ? +(v.ttrSum / v.ttrN).toFixed(1) : 0])
+      .filter(([, v]) => v > 0)
+      .sort((a, b) => b[1] - a[1]).slice(0, 8);
+  } else {
+    rows = Object.entries(agg)
+      .map(([l, v]) => [l, v.count])
+      .sort((a, b) => b[1] - a[1]).slice(0, 8);
+  }
+
+  const total = rows.reduce((s, [, v]) => s + v, 0) || 1;
+  const maxVal = rows[0]?.[1] || 1;
+  let cum = 0;
+
+  const unitLabel = tab === 'dt' ? 'นาที DT' : tab === 'mttr' ? 'นาที avg' : 'MO';
+  const accentFor = (i) => tab === 'dt' ? '#ef4444' : tab === 'mttr' ? '#f59e0b' : MO_COLORS[i];
+
+  document.getElementById("mo-prob-pareto").innerHTML = rows.map(([l, v], i) => {
+    cum += v;
+    const barPct = (v / maxVal * 100).toFixed(0);
+    const cumPct = (cum / total * 100).toFixed(1);
+    const valDisplay = tab === 'dt'
+      ? (v >= 60 ? (v / 60).toFixed(1) + ' ชม.' : v + ' นาที')
+      : tab === 'mttr' ? v + ' นาที'
+      : v + ' MO';
+    return `<div class="par-row">
+      <div class="par-label" title="${l}" style="flex:0 0 145px">${dtIcon(l)} ${l}</div>
+      <div class="par-bar-bg"><div class="par-bar-fill" style="width:${barPct}%;background:${accentFor(i)}"></div></div>
+      <div class="par-pct" style="color:${accentFor(i)}">${(v / total * 100).toFixed(1)}%</div>
+      <div class="par-val">${valDisplay}</div>
+      <div class="par-cum">∑${cumPct}%</div>
+    </div>`;
   }).join("") || '<p style="color:var(--muted);font-size:12px">ไม่มีข้อมูล</p>';
 }
 
