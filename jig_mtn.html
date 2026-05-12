@@ -529,13 +529,14 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     </div>
   </div>
 
-  <!-- PM Alerts -->
+  <!-- PM ALERTS (disabled)
   <div class="card">
     <div class="card-hdr">
       <h3>🔮 Predictive Maintenance Alerts</h3>
     </div>
     <div id="pm-alerts"><p style="color:var(--muted);font-size:13px">รอข้อมูล...</p></div>
   </div>
+  -->
 
   <!-- Technician Performance -->
   <div class="card">
@@ -742,7 +743,7 @@ function renderMO() {
   rMOFreq(mo);
   rMonthlyTrend(mo);
   rUptimeTimeline(mo);
-  rPMAlerts(mo);
+  // rPMAlerts(mo);
   renderTechTable(mo);
   rMOTable(mo);
   updateMarquee(mo);
@@ -1185,6 +1186,7 @@ function rUptimeTimeline(mo) {
   });
 }
 
+/* PM ALERTS (disabled)
 function rPMAlerts(mo) {
   const mcMap = {};
   mo.forEach(d => {
@@ -1323,6 +1325,7 @@ function renderTechTable(mo) {
   }).join("") || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted)">ไม่มีข้อมูล</td></tr>';
 }
 
+*/
 function rMOTable(mo) {
   const rows = [...mo].sort((a,b) => b.date - a.date).slice(0, 30);
   document.getElementById("mo-tb").innerHTML = rows.map(d => {
