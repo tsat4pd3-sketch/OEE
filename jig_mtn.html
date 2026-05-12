@@ -608,6 +608,11 @@ function parseMOCSV(text) {
     const dateClose = parseMODate(g(row, "วันเวลาที่ซ่อมเสร็จ-")) || parseMODate(g(row, "เวลาซ่อมเสร็จ"));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
+    const responseTime = n(g(row, "ระยะเวลาเข้าดำเนินการ"));
+    const repairTime   = n(g(row, "ระยะเวลาในการซ่อมงาน"));
+    // lineDt = full line downtime (report → repair done), used for Uptime/Downtime Timeline
+    const lineDt = (dateClose && dateOpen && dateClose > dateOpen)
+      ? Math.round((dateClose - dateOpen) / 60000) : 0;
     rows.push({
       date: dateOpen,
       dateClose: dateClose,
@@ -618,19 +623,21 @@ function parseMOCSV(text) {
       probType: g(row, "Problem Type"),
       symptom: g(row, "อาการ/สาเหตุ"),
       solution: g(row, "แนวทางการแก้ไข"),
+      // ttr = actual repair time (รับงาน → ซ่อมเสร็จ), not including waiting
       ttr: (() => {
         const direct = n(g(row, "TTR"));
         if (direct > 0) return direct;
-        const repair = n(g(row, "ระยะเวลาในการซ่อมงาน"));
-        if (repair > 0) return repair;
-        if (dateClose && dateOpen && dateClose > dateOpen) return Math.round((dateClose - dateOpen) / 60000);
+        if (repairTime > 0) return repairTime;
+        // fallback: total downtime minus response/waiting time
+        if (lineDt > 0) return Math.max(1, Math.round(lineDt - responseTime));
         return 0;
       })(),
+      lineDt,          // line downtime in minutes (report → repair done)
       moWait: n(g(row, "MO รอการแก้ไข")),
       tech: g(row, "ช่างที่รับการแก้ไข"),
       onOff: g(row, "Online/Offline"),
-      repairTime: n(g(row, "ระยะเวลาในการซ่อมงาน")),
-      responseTime: n(g(row, "ระยะเวลาเข้าดำเนินการ")),
+      repairTime,
+      responseTime,
       dept: dept,
       statusMO: statusMO,
       isClosed: isClosed,
@@ -999,7 +1006,9 @@ function rUptimeTimeline(mo) {
         const ev = seg.ev;
         const tip = encodeURIComponent(JSON.stringify({
           mc: ev.mcNo, prob: ev.probType || '—',
-          ttr: ev.ttr, tech: ev.tech || '—',
+          ttr: ev.ttr, lineDt: ev.lineDt || 0,
+          resp: ev.responseTime || 0,
+          tech: ev.tech || '—',
           date: ev.dateStr, closed: ev.isClosed
         }));
         return `<div class="tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%" data-tip="${tip}"></div>`;
@@ -1026,9 +1035,13 @@ function rUptimeTimeline(mo) {
       tip.innerHTML = `<div style="font-weight:700;color:#ef4444;margin-bottom:5px">⚡ ${d.prob}</div>
         <div><span style="color:#526080">Mc No.:</span> <b>${d.mc}</b></div>
         <div><span style="color:#526080">วันที่:</span> ${d.date}</div>
-        <div><span style="color:#526080">TTR:</span> <b style="color:#f59e0b">${d.ttr > 0 ? d.ttr + ' นาที' : '—'}</b></div>
-        <div><span style="color:#526080">ช่าง:</span> ${d.tech}</div>
-        <div style="margin-top:5px">${d.closed ? '<span style="color:#22c55e;font-weight:700">✅ ปิดแล้ว</span>' : '<span style="color:#f59e0b;font-weight:700">⏳ ค้างซ่อม</span>'}</div>`;
+        <div style="margin-top:4px;padding-top:4px;border-top:1px solid #1c2640">
+          <div><span style="color:#526080">Line DT:</span> <b style="color:#ef4444">${d.lineDt > 0 ? d.lineDt + ' นาที' : '—'}</b><span style="color:#526080;font-size:10px"> (แจ้ง→เสร็จ)</span></div>
+          <div><span style="color:#526080">รอช่าง:</span> <span style="color:#94a3b8">${d.resp > 0 ? d.resp + ' นาที' : '—'}</span></div>
+          <div><span style="color:#526080">MTTR:</span> <b style="color:#f59e0b">${d.ttr > 0 ? d.ttr + ' นาที' : '—'}</b><span style="color:#526080;font-size:10px"> (รับงาน→เสร็จ)</span></div>
+        </div>
+        <div style="margin-top:4px"><span style="color:#526080">ช่าง:</span> ${d.tech}</div>
+        <div style="margin-top:4px">${d.closed ? '<span style="color:#22c55e;font-weight:700">✅ ปิดแล้ว</span>' : '<span style="color:#f59e0b;font-weight:700">⏳ ค้างซ่อม</span>'}</div>`;
       tip.style.display = "block";
     });
     el.addEventListener("mousemove", e => {
