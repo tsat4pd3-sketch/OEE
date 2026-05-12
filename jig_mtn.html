@@ -1369,7 +1369,6 @@ function renderTechTable(mo) {
   }).join("") || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted)">ไม่มีข้อมูล</td></tr>';
 }
 
-*/
 function rMOTable(mo) {
   const rows = [...mo].sort((a,b) => b.date - a.date).slice(0, 30);
   document.getElementById("mo-tb").innerHTML = rows.map(d => {
