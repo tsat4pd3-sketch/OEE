@@ -65,6 +65,10 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .kpi-lbl{font-size:12px;color:var(--muted);letter-spacing:.3px;margin-bottom:8px;font-weight:500}
 .kpi-val{font-family:var(--font-display);font-size:32px;font-weight:700;line-height:1;margin-bottom:5px;color:var(--text)}
 .kpi-sub{font-size:12px;color:var(--muted)}
+.kpi-mode-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:11px;color:var(--muted)}
+.kpi-mode-btn{padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--font-display);transition:all .15s}
+.kpi-mode-btn:hover{border-color:var(--accent);color:var(--accent)}
+.kpi-mode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px;box-shadow:0 1px 3px #00000008}
 .card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
@@ -449,6 +453,11 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   </div>
 
   <!-- KPI Cards -->
+  <div class="kpi-mode-bar">
+    <span>MTTR / MTBF:</span>
+    <button class="kpi-mode-btn active" id="kpi-mode-overall" onclick="setKpiMode('overall')">Overall</button>
+    <button class="kpi-mode-btn" id="kpi-mode-monthly" onclick="setKpiMode('monthly')">Monthly Avg</button>
+  </div>
   <div class="kpi-grid" id="mo-kpi">
     <div class="kpi k0"><div class="kpi-lbl">Total MO</div><div class="kpi-val" id="kv-total">—</div><div class="kpi-sub" id="ks-total"></div></div>
     <div class="kpi k1"><div class="kpi-lbl">Close Rate</div><div class="kpi-val" id="kv-close">—</div><div class="kpi-sub" id="ks-close"></div></div>
@@ -739,15 +748,22 @@ function renderMO() {
   updateMarquee(mo);
 }
 
-function rMOKPI(mo) {
-  const totalMO = mo.length;
-  const closedMO = mo.filter(d => d.isClosed);
-  const closedCount = closedMO.length;
-  const openCount = totalMO - closedCount;
-  const closedPct = totalMO > 0 ? Math.round(closedCount / totalMO * 100) : 0;
-  const closedWithTTR = closedMO.filter(d => d.ttr > 0);
-  const mttr = closedWithTTR.length > 0 ? (closedWithTTR.reduce((s,d) => s + d.ttr, 0) / closedWithTTR.length).toFixed(1) : "—";
+let _kpiMode = 'overall';
+let _kpiMO   = [];
 
+function setKpiMode(mode) {
+  _kpiMode = mode;
+  document.getElementById('kpi-mode-overall').classList.toggle('active', mode === 'overall');
+  document.getElementById('kpi-mode-monthly').classList.toggle('active', mode === 'monthly');
+  rMOKPI(_kpiMO);
+}
+
+function _calcMTTR_overall(mo) {
+  const closed = mo.filter(d => d.isClosed && d.ttr > 0);
+  return closed.length ? (closed.reduce((s,d) => s + d.ttr, 0) / closed.length).toFixed(1) : "—";
+}
+
+function _calcMTBF_overall(mo) {
   const mcMap = {};
   mo.forEach(d => {
     if (!mcMap[d.mcNo]) mcMap[d.mcNo] = [];
@@ -757,18 +773,70 @@ function rMOKPI(mo) {
   Object.values(mcMap).forEach(evts => {
     const sorted = [...evts].sort((a,b) => a.open - b.open);
     for (let i = 1; i < sorted.length; i++) {
-      const prevEnd = sorted[i-1].close || sorted[i-1].open; // fallback: no close date
-      const gap = (sorted[i].open - prevEnd) / 3600000; // hours
+      const prevEnd = sorted[i-1].close || sorted[i-1].open;
+      const gap = (sorted[i].open - prevEnd) / 3600000;
       if (gap > 0) intervals.push(gap);
     }
   });
-  const mtbf = intervals.length ? (intervals.reduce((a,b) => a + b, 0) / intervals.length).toFixed(1) : "—";
+  return intervals.length ? (intervals.reduce((a,b) => a + b, 0) / intervals.length).toFixed(1) : "—";
+}
+
+function _calcMTTR_monthly(mo) {
+  // average of per-month MTTR averages
+  const mm = {};
+  mo.forEach(d => {
+    if (!d.isClosed || d.ttr <= 0) return;
+    const key = d.date.toISOString().slice(0,7); // YYYY-MM
+    if (!mm[key]) mm[key] = { sum: 0, n: 0 };
+    mm[key].sum += d.ttr; mm[key].n++;
+  });
+  const monthlyAvgs = Object.values(mm).map(v => v.sum / v.n);
+  return monthlyAvgs.length ? (monthlyAvgs.reduce((a,b) => a+b,0) / monthlyAvgs.length).toFixed(1) : "—";
+}
+
+function _calcMTBF_monthly(mo) {
+  // average of per-month MTBF values
+  // per month: build machine intervals within that month only
+  const byMonth = {};
+  mo.forEach(d => {
+    const key = d.date.toISOString().slice(0,7);
+    if (!byMonth[key]) byMonth[key] = {};
+    if (!byMonth[key][d.mcNo]) byMonth[key][d.mcNo] = [];
+    byMonth[key][d.mcNo].push({ open: d.date, close: d.dateClose });
+  });
+  const monthlyMTBF = [];
+  Object.values(byMonth).forEach(mcMap => {
+    const intervals = [];
+    Object.values(mcMap).forEach(evts => {
+      const sorted = [...evts].sort((a,b) => a.open - b.open);
+      for (let i = 1; i < sorted.length; i++) {
+        const prevEnd = sorted[i-1].close || sorted[i-1].open;
+        const gap = (sorted[i].open - prevEnd) / 3600000;
+        if (gap > 0) intervals.push(gap);
+      }
+    });
+    if (intervals.length) monthlyMTBF.push(intervals.reduce((a,b)=>a+b,0)/intervals.length);
+  });
+  return monthlyMTBF.length ? (monthlyMTBF.reduce((a,b)=>a+b,0)/monthlyMTBF.length).toFixed(1) : "—";
+}
+
+function rMOKPI(mo) {
+  _kpiMO = mo;
+  const totalMO = mo.length;
+  const closedMO = mo.filter(d => d.isClosed);
+  const closedCount = closedMO.length;
+  const openCount = totalMO - closedCount;
+  const closedPct = totalMO > 0 ? Math.round(closedCount / totalMO * 100) : 0;
   const uniqMc = new Set(mo.map(d => d.mcNo)).size;
   const mcProb = {};
   mo.forEach(d => { const k = d.mcNo + "|" + d.probType; if (!mcProb[k]) mcProb[k] = 0; mcProb[k]++; });
   const recurring = Object.values(mcProb).filter(v => v > 1).length;
 
-  // Update KPI cards
+  const monthly = _kpiMode === 'monthly';
+  const mttr = monthly ? _calcMTTR_monthly(mo) : _calcMTTR_overall(mo);
+  const mtbf = monthly ? _calcMTBF_monthly(mo) : _calcMTBF_overall(mo);
+  const modeLabel = monthly ? 'Monthly Avg' : 'Overall Avg';
+
   const set = (id, v, s) => {
     const el = document.getElementById(id);
     if (el) el.textContent = v;
@@ -777,8 +845,8 @@ function rMOKPI(mo) {
   };
   set("kv-total", totalMO.toLocaleString(), `ปิดแล้ว ${closedCount} | ค้าง ${openCount}`);
   set("kv-close", closedPct + "%", `${closedCount} / ${totalMO} MO`);
-  set("kv-mttr", mttr, "นาที (Mean Time To Repair)");
-  set("kv-mtbf", mtbf, "ชั่วโมง (Mean Time Between Failures)");
+  set("kv-mttr", mttr, `นาที · ${modeLabel}`);
+  set("kv-mtbf", mtbf, `ชั่วโมง · ${modeLabel}`);
   set("kv-mc", uniqMc, "เครื่องที่ซ่อม");
   set("kv-rec", recurring, "กรณีปัญหาซ้ำ");
 }
