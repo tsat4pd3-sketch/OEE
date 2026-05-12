@@ -786,9 +786,13 @@ function selectAllParts(){
   applyFilter();
 }
 function setDefaultDates(){
-  const today=new Date(), minD=new Date(today);minD.setDate(minD.getDate()-180);
-  document.getElementById("date-from").value=fmtIso(minD);
-  document.getElementById("date-to").value=fmtIso(today);
+  const _ats=ALL.map(d=>d.date&&d.date.getTime?d.date.getTime():0).filter(t=>t>0);
+  const _latest=_ats.length?new Date(Math.max(..._ats)):new Date();
+  const _yr=_latest.getFullYear(),_jan1=new Date(_yr,0,1).getTime();
+  const _cnt=_ats.filter(t=>t>=_jan1).length;
+  const _from=_cnt>=60?new Date(_yr,0,1):(()=>{const d=new Date(_latest);d.setMonth(d.getMonth()-6);return d;})();
+  document.getElementById("date-from").value=fmtIso(_from);
+  document.getElementById("date-to").value=fmtIso(_latest);
 }
 function selectAll(v){selectAllParts();}
 function applyFilter(){

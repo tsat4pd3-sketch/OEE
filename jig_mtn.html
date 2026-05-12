@@ -301,8 +301,11 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 .tl-line-lbl{flex:0 0 118px;font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;font-family:var(--font-display);display:flex;align-items:center;gap:5px}
 .tl-chevron{display:inline-block;font-size:9px;transition:transform .2s;color:var(--muted)}
 .tl-chevron.open{transform:rotate(90deg)}
-.tl-mc-group{display:none;padding-left:14px;border-left:2px solid var(--border2);margin-left:6px;margin-bottom:4px}
+.tl-mc-group{display:none;margin-bottom:4px}
 .tl-mc-group.open{display:block}
+.tl-mc-group .tl-lbl{padding-left:20px;font-size:9px;color:var(--muted)}
+.tl-mc-group .tl-bar{height:10px}
+.tl-mc-group .tl-row{margin-bottom:3px}
 
 /* Recurrence table */
 .rec-hdr,.rec-row{display:grid;grid-template-columns:160px 1fr 90px 70px 70px 80px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
@@ -564,6 +567,12 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   <div class="card">
     <div class="card-hdr">
       <h3>📊 Uptime / Downtime Timeline<em>รายเครื่อง JIG</em></h3>
+      <div class="par-tabs">
+        <button class="par-tab active" id="tl-r-3d" onclick="setTlRange(3,this)">3D</button>
+        <button class="par-tab" id="tl-r-7d" onclick="setTlRange(7,this)">7D</button>
+        <button class="par-tab" id="tl-r-30d" onclick="setTlRange(30,this)">30D</button>
+        <button class="par-tab" id="tl-r-all" onclick="setTlRange(0,this)">All</button>
+      </div>
     </div>
     <div class="tl-legend">
       <span><span class="tl-legend-dot" style="background:#22c55e"></span>Uptime (ทำงานปกติ)</span>
@@ -728,6 +737,23 @@ async function loadMO() {
     document.getElementById("mo-badge").textContent = "● LIVE " + MO_ALL.length + " MO";
     document.getElementById("mo-badge").className = "badge bl";
     document.getElementById("mo-status").textContent = "โหลดสำเร็จ — " + MO_ALL.length + " MO (JIG)";
+    // Smart default date range (same logic as overview)
+    const _allTs = MO_ALL.map(d => d.date && d.date.getTime ? d.date.getTime() : 0).filter(t => t > 0);
+    if (_allTs.length) {
+      const _latestDate = new Date(Math.max(..._allTs));
+      const _thisYear = _latestDate.getFullYear();
+      const _jan1Ts = new Date(_thisYear, 0, 1).getTime();
+      const _thisYearCount = _allTs.filter(t => t >= _jan1Ts).length;
+      let _fromD;
+      if (_thisYearCount >= 60) { _fromD = new Date(_thisYear, 0, 1); }
+      else { _fromD = new Date(_latestDate); _fromD.setMonth(_fromD.getMonth() - 6); }
+      const _pad = n => String(n).padStart(2, '0');
+      const _fmtISO = d => `${d.getFullYear()}-${_pad(d.getMonth()+1)}-${_pad(d.getDate())}`;
+      const _dfrom = document.getElementById('date-from');
+      const _dto = document.getElementById('date-to');
+      if (_dfrom && !_dfrom.value) _dfrom.value = _fmtISO(_fromD);
+      if (_dto && !_dto.value) _dto.value = _fmtISO(_latestDate);
+    }
     renderMO();
     // runMOAI(); // AI MAINTENANCE INTELLIGENCE (disabled)
   } catch (e) {
@@ -954,6 +980,15 @@ function dtIcon(t) {
   if (s.includes('setup')||s.includes('ตั้ง')) return '🔩';
   if (s.includes('ไฟ')||s.includes('power')) return '⚡';
   return '🔧';
+}
+
+let _tlRangeDays = 3; // default: last 3 days
+
+function setTlRange(days, btn) {
+  _tlRangeDays = days;
+  document.querySelectorAll('[id^="tl-r-"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (MO_LOADED) rUptimeTimeline(getMOFiltered());
 }
 
 let _probParetoTab = 'count';
@@ -1206,6 +1241,13 @@ function rUptimeTimeline(mo) {
   const totalMs = rangeEnd - rangeStart;
   if (totalMs <= 0) { container.innerHTML = '<p style="color:var(--muted);font-size:12px">ช่วงวันที่ไม่ถูกต้อง</p>'; return; }
 
+  // Apply local timeline range (_tlRangeDays)
+  const tlStart = _tlRangeDays > 0
+    ? new Date(Math.max(rangeEnd.getTime() - _tlRangeDays * 86400000, rangeStart.getTime()))
+    : rangeStart;
+  const tlEnd   = rangeEnd;
+  const tlMs    = tlEnd - tlStart;
+
   // Group by line → machine
   const lineMap = {};
   mo.forEach(d => {
@@ -1216,9 +1258,9 @@ function rUptimeTimeline(mo) {
   });
 
   const fmtD = d => `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
-  const midDate = new Date(rangeStart.getTime() + totalMs / 2);
+  const midDate = new Date(tlStart.getTime() + tlMs / 2);
 
-  let html = `<div class="tl-axis"><span>${fmtD(rangeStart)}</span><span>${fmtD(midDate)}</span><span>${fmtD(rangeEnd)}</span></div>`;
+  let html = `<div class="tl-axis"><span>${fmtD(tlStart)}</span><span>${fmtD(midDate)}</span><span>${fmtD(tlEnd)}</span></div>`;
 
   const lineNames = Object.keys(lineMap).sort();
   lineNames.forEach((lineName, li) => {
@@ -1226,7 +1268,7 @@ function rUptimeTimeline(mo) {
     const allLineEvents = Object.values(mcMap).flat();
 
     // Line-level aggregate bar
-    const { segHtml: lSegHtml, uptimePct: lPct, uptimeColor: lColor } = _tlSegHtml(allLineEvents, rangeStart, rangeEnd, totalMs);
+    const { segHtml: lSegHtml, uptimePct: lPct, uptimeColor: lColor } = _tlSegHtml(allLineEvents, tlStart, tlEnd, tlMs);
     const groupId = `tl-grp-${li}`;
 
     html += `<div class="tl-line-row" onclick="tlToggle('${groupId}',this)">
@@ -1247,7 +1289,7 @@ function rUptimeTimeline(mo) {
 
     let mcHtml = '';
     mcNames.forEach(mcNo => {
-      const { segHtml, uptimePct, uptimeColor } = _tlSegHtml(mcMap[mcNo], rangeStart, rangeEnd, totalMs);
+      const { segHtml, uptimePct, uptimeColor } = _tlSegHtml(mcMap[mcNo], tlStart, tlEnd, tlMs);
       mcHtml += `<div class="tl-row">
         <div class="tl-lbl" title="${mcNo}">${mcNo}</div>
         <div class="tl-bar">${segHtml}</div>
@@ -1700,16 +1742,6 @@ function fallbackMOAI(topProbs,recurring,highTTR,avgTTR) {
   // Auto-close splash after 800ms then load data
   setTimeout(()=>{
     enterDashboard();
-    // Set default date range (last 90 days)
-    const now = new Date();
-    const from = new Date(now);
-    from.setDate(from.getDate() - 90);
-    const pad = n => String(n).padStart(2,'0');
-    const fmtISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-    const dfrom = document.getElementById('date-from');
-    const dto = document.getElementById('date-to');
-    if(dfrom && !dfrom.value) dfrom.value = fmtISO(from);
-    if(dto && !dto.value) dto.value = fmtISO(now);
     loadMO();
 
 // Initialize UI state from localStorage
