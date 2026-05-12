@@ -246,6 +246,20 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
   .marquee { font-size: 11px; }
 }
 
+/* Uptime/Downtime Timeline */
+#timeline-wrap{overflow-x:auto}
+.tl-axis{display:flex;justify-content:space-between;margin:0 0 8px;padding:0 0 0 128px;font-size:10px;color:var(--muted);font-family:var(--font-display);letter-spacing:.3px}
+.tl-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;min-width:0}
+.tl-lbl{flex:0 0 118px;font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;font-family:var(--font-display)}
+.tl-bar{flex:1;height:16px;background:var(--bg3);border-radius:2px;position:relative;overflow:hidden;min-width:0}
+.tl-seg{position:absolute;top:0;height:100%;cursor:pointer;transition:filter .12s}
+.tl-seg:hover{filter:brightness(1.3)}
+.tl-up{background:#22c55e}
+.tl-dn{background:#ef4444}
+.tl-pct{flex:0 0 34px;text-align:right;font-size:10px;font-weight:700;font-family:var(--font-display)}
+.tl-tip{position:fixed;background:#0d1117;border:1px solid #1c2640;border-radius:6px;padding:9px 13px;font-size:11px;color:#dce4f0;pointer-events:none;z-index:5000;max-width:230px;line-height:1.75;box-shadow:0 6px 24px #00000070;display:none}
+.tl-legend{display:flex;gap:18px;margin-bottom:12px;font-size:11px;color:var(--muted);align-items:center}
+.tl-legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}
 
 /* Date Picker Styling */
 .date-picker-container {
@@ -442,6 +456,21 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     <div class="ch" style="height:280px"><canvas id="c-monthly-trend"></canvas></div>
   </div>
 
+  <!-- Uptime/Downtime Timeline -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>📊 Uptime / Downtime Timeline<em>รายเครื่อง JIG</em></h3>
+    </div>
+    <div class="tl-legend">
+      <span><span class="tl-legend-dot" style="background:#22c55e"></span>Uptime (ทำงานปกติ)</span>
+      <span><span class="tl-legend-dot" style="background:#ef4444"></span>Downtime (ระหว่างซ่อม)</span>
+      <span style="margin-left:auto;font-size:10px">%คือ Uptime ตลอดช่วง</span>
+    </div>
+    <div id="timeline-wrap">
+      <div id="uptime-timeline"><p style="color:var(--muted);font-size:13px">รอข้อมูล...</p></div>
+    </div>
+  </div>
+
   <!-- PM Alerts -->
   <div class="card">
     <div class="card-hdr">
@@ -626,6 +655,7 @@ function renderMO() {
   rTTRDist(mo);
   rMOFreq(mo);
   rMonthlyTrend(mo);
+  rUptimeTimeline(mo);
   rPMAlerts(mo);
   renderTechTable(mo);
   rMOTable(mo);
@@ -833,6 +863,110 @@ function rMonthlyTrend(mo) {
         yMin:{ type:"linear", position:"right", grid:{ drawOnChartArea:false }, ticks:{ color:"#f59e0b", font:{size:9}, callback:v=>v+"m" }, title:{ display:true, text:"Minutes", color:"#94a3b8", font:{size:9} }, beginAtZero:true }
       }
     }
+  });
+}
+
+function rUptimeTimeline(mo) {
+  const container = document.getElementById("uptime-timeline");
+  if (!mo.length) { container.innerHTML = '<p style="color:var(--muted);font-size:12px">ไม่มีข้อมูล</p>'; return; }
+
+  const _fv = document.getElementById("date-from").value;
+  const _tv = document.getElementById("date-to").value;
+  const allDates = mo.map(d => d.date.getTime());
+  const allClose = mo.filter(d => d.dateClose).map(d => d.dateClose.getTime());
+  const rangeStart = _fv ? new Date(_fv) : new Date(Math.min(...allDates));
+  const rangeEnd   = _tv ? new Date(_tv + "T23:59:59") : new Date(allClose.length ? Math.max(...allClose) : Math.max(...allDates));
+  const totalMs = rangeEnd - rangeStart;
+  if (totalMs <= 0) { container.innerHTML = '<p style="color:var(--muted);font-size:12px">ช่วงวันที่ไม่ถูกต้อง</p>'; return; }
+
+  const mcMap = {};
+  mo.forEach(d => { if (!mcMap[d.mcNo]) mcMap[d.mcNo] = []; mcMap[d.mcNo].push(d); });
+
+  const machines = Object.entries(mcMap)
+    .sort((a, b) => Math.max(...b[1].map(d => d.date)) - Math.max(...a[1].map(d => d.date)));
+
+  const fmtD = d => `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
+  const midDate = new Date(rangeStart.getTime() + totalMs / 2);
+
+  let html = `<div class="tl-axis"><span>${fmtD(rangeStart)}</span><span>${fmtD(midDate)}</span><span>${fmtD(rangeEnd)}</span></div>`;
+
+  machines.forEach(([mcNo, events]) => {
+    const sorted = [...events].sort((a, b) => a.date - b.date);
+    const segs = [];
+    let cursor = rangeStart.getTime();
+
+    sorted.forEach(ev => {
+      const evOpen  = Math.max(ev.date.getTime(), rangeStart.getTime());
+      const evClose = ev.dateClose ? Math.min(ev.dateClose.getTime(), rangeEnd.getTime()) : evOpen;
+
+      if (evOpen > cursor) {
+        segs.push({ type:'up', s: cursor, e: evOpen });
+      }
+      const dnEnd = Math.max(evClose, evOpen + 60000);
+      segs.push({ type:'dn', s: evOpen, e: Math.min(dnEnd, rangeEnd.getTime()), ev });
+      cursor = Math.max(cursor, dnEnd);
+    });
+
+    if (cursor < rangeEnd.getTime()) {
+      segs.push({ type:'up', s: cursor, e: rangeEnd.getTime() });
+    }
+
+    const totalDn = sorted.reduce((s, ev) => {
+      if (ev.dateClose && ev.dateClose > ev.date) {
+        const dn = Math.min(ev.dateClose.getTime(), rangeEnd.getTime()) - Math.max(ev.date.getTime(), rangeStart.getTime());
+        return s + Math.max(0, dn);
+      }
+      return s;
+    }, 0);
+    const uptimePct = Math.max(0, Math.round((1 - totalDn / totalMs) * 100));
+    const uptimeColor = uptimePct >= 90 ? '#22c55e' : uptimePct >= 70 ? '#f59e0b' : '#ef4444';
+
+    const segHtml = segs.map(seg => {
+      const left  = Math.max(0, (seg.s - rangeStart.getTime()) / totalMs * 100);
+      const width = Math.min(100 - left, (seg.e - seg.s) / totalMs * 100);
+      if (width < 0.05) return '';
+      const cls = seg.type === 'up' ? 'tl-up' : 'tl-dn';
+      if (seg.type === 'dn' && seg.ev) {
+        const ev = seg.ev;
+        const tip = encodeURIComponent(JSON.stringify({
+          mc: ev.mcNo, prob: ev.probType || '—',
+          ttr: ev.ttr, tech: ev.tech || '—',
+          date: ev.dateStr, closed: ev.isClosed
+        }));
+        return `<div class="tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${Math.max(width,0.3).toFixed(2)}%" data-tip="${tip}"></div>`;
+      }
+      return `<div class="tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%"></div>`;
+    }).join('');
+
+    html += `<div class="tl-row">
+      <div class="tl-lbl" title="${mcNo}">${mcNo}</div>
+      <div class="tl-bar">${segHtml}</div>
+      <div class="tl-pct" style="color:${uptimeColor}">${uptimePct}%</div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Floating tooltip
+  let tip = document.getElementById("tl-tip");
+  if (!tip) { tip = document.createElement("div"); tip.id="tl-tip"; tip.className="tl-tip"; document.body.appendChild(tip); }
+
+  container.querySelectorAll(".tl-seg[data-tip]").forEach(el => {
+    el.addEventListener("mouseenter", () => {
+      const d = JSON.parse(decodeURIComponent(el.dataset.tip));
+      tip.innerHTML = `<div style="font-weight:700;color:#ef4444;margin-bottom:5px">⚡ ${d.prob}</div>
+        <div><span style="color:#526080">Mc No.:</span> <b>${d.mc}</b></div>
+        <div><span style="color:#526080">วันที่:</span> ${d.date}</div>
+        <div><span style="color:#526080">TTR:</span> <b style="color:#f59e0b">${d.ttr > 0 ? d.ttr + ' นาที' : '—'}</b></div>
+        <div><span style="color:#526080">ช่าง:</span> ${d.tech}</div>
+        <div style="margin-top:5px">${d.closed ? '<span style="color:#22c55e;font-weight:700">✅ ปิดแล้ว</span>' : '<span style="color:#f59e0b;font-weight:700">⏳ ค้างซ่อม</span>'}</div>`;
+      tip.style.display = "block";
+    });
+    el.addEventListener("mousemove", e => {
+      tip.style.left = (e.clientX + 14) + "px";
+      tip.style.top  = (e.clientY - 36) + "px";
+    });
+    el.addEventListener("mouseleave", () => { tip.style.display = "none"; });
   });
 }
 
