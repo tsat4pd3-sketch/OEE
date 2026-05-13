@@ -568,7 +568,8 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     <div class="card-hdr">
       <h3>📊 Uptime / Downtime Timeline<em>รายเครื่อง JIG</em></h3>
       <div class="par-tabs">
-        <button class="par-tab active" id="tl-r-3d" onclick="setTlRange(3,this)">3D</button>
+        <button class="par-tab active" id="tl-r-1d" onclick="setTlRange(1,this)">1D</button>
+        <button class="par-tab" id="tl-r-3d" onclick="setTlRange(3,this)">3D</button>
         <button class="par-tab" id="tl-r-7d" onclick="setTlRange(7,this)">7D</button>
         <button class="par-tab" id="tl-r-30d" onclick="setTlRange(30,this)">30D</button>
         <button class="par-tab" id="tl-r-all" onclick="setTlRange(0,this)">All</button>
@@ -982,7 +983,7 @@ function dtIcon(t) {
   return '🔧';
 }
 
-let _tlRangeDays = 3; // default: last 3 days
+let _tlRangeDays = 1; // default: today's shift window (08:00→08:00)
 
 function setTlRange(days, btn) {
   _tlRangeDays = days;
@@ -1148,29 +1149,33 @@ function rMonthlyTrend(mo) {
   });
 }
 
-function _tlSegHtml(events, rangeStart, rangeEnd, totalMs) {
+// effectiveEnd: optional — segments stop here (future zone stays gray); uptime% uses elapsed time
+function _tlSegHtml(events, rangeStart, rangeEnd, totalMs, effectiveEnd) {
+  const capEnd = effectiveEnd || rangeEnd;
+  const elapsedMs = capEnd - rangeStart;
   const sorted = [...events].sort((a, b) => a.date - b.date);
   const segs = [];
   let cursor = rangeStart.getTime();
 
   sorted.forEach(ev => {
     const evOpen  = Math.max(ev.date.getTime(), rangeStart.getTime());
-    const evClose = ev.dateClose ? Math.min(ev.dateClose.getTime(), rangeEnd.getTime()) : evOpen;
+    const evClose = ev.dateClose ? Math.min(ev.dateClose.getTime(), capEnd.getTime()) : evOpen;
     if (evOpen > cursor) segs.push({ type:'up', s: cursor, e: evOpen });
     const dnEnd = Math.max(evClose, evOpen + 60000);
-    segs.push({ type:'dn', s: evOpen, e: Math.min(dnEnd, rangeEnd.getTime()), ev });
+    segs.push({ type:'dn', s: evOpen, e: Math.min(dnEnd, capEnd.getTime()), ev });
     cursor = Math.max(cursor, dnEnd);
   });
-  if (cursor < rangeEnd.getTime()) segs.push({ type:'up', s: cursor, e: rangeEnd.getTime() });
+  // Only fill up to capEnd — beyond is gray (future)
+  if (cursor < capEnd.getTime()) segs.push({ type:'up', s: cursor, e: capEnd.getTime() });
 
   const totalDn = sorted.reduce((s, ev) => {
     if (ev.dateClose && ev.dateClose > ev.date) {
-      const dn = Math.min(ev.dateClose.getTime(), rangeEnd.getTime()) - Math.max(ev.date.getTime(), rangeStart.getTime());
+      const dn = Math.min(ev.dateClose.getTime(), capEnd.getTime()) - Math.max(ev.date.getTime(), rangeStart.getTime());
       return s + Math.max(0, dn);
     }
     return s;
   }, 0);
-  const uptimePct = Math.max(0, Math.round((1 - totalDn / totalMs) * 100));
+  const uptimePct = Math.max(0, Math.round((1 - totalDn / elapsedMs) * 100));
   const uptimeColor = uptimePct >= 90 ? '#22c55e' : uptimePct >= 70 ? '#f59e0b' : '#ef4444';
 
   const segHtml = segs.map(seg => {
@@ -1242,11 +1247,23 @@ function rUptimeTimeline(mo) {
   if (totalMs <= 0) { container.innerHTML = '<p style="color:var(--muted);font-size:12px">ช่วงวันที่ไม่ถูกต้อง</p>'; return; }
 
   // Apply local timeline range (_tlRangeDays)
-  const tlStart = _tlRangeDays > 0
-    ? new Date(Math.max(rangeEnd.getTime() - _tlRangeDays * 86400000, rangeStart.getTime()))
-    : rangeStart;
-  const tlEnd   = rangeEnd;
-  const tlMs    = tlEnd - tlStart;
+  const now = new Date();
+  let tlStart, tlEnd, tlEffective;
+  if (_tlRangeDays === 1) {
+    // Shift window: 08:00 shift day → 08:00+24h (same logic as Summary Dashboard)
+    const isAfter8 = now.getHours() >= 8;
+    const shiftDate = isAfter8 ? now : new Date(now.getTime() - 86400000);
+    tlStart = new Date(shiftDate.getFullYear(), shiftDate.getMonth(), shiftDate.getDate(), 8, 0, 0);
+    tlEnd   = new Date(tlStart.getTime() + 24 * 3600000);
+    tlEffective = new Date(Math.min(now.getTime(), tlEnd.getTime()));
+  } else {
+    tlStart = _tlRangeDays > 0
+      ? new Date(Math.max(rangeEnd.getTime() - _tlRangeDays * 86400000, rangeStart.getTime()))
+      : rangeStart;
+    tlEnd   = rangeEnd;
+    tlEffective = null; // no future zone for non-1D
+  }
+  const tlMs = tlEnd - tlStart;
 
   // Group by line → machine
   const lineMap = {};
@@ -1257,10 +1274,23 @@ function rUptimeTimeline(mo) {
     lineMap[ln][d.mcNo].push(d);
   });
 
-  const fmtD = d => `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
+  const pad = n => String(n).padStart(2,'0');
+  const fmtD  = d => `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
+  const fmtHM = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const fmtAxis = d => _tlRangeDays === 1 ? fmtHM(d) : fmtD(d);
   const midDate = new Date(tlStart.getTime() + tlMs / 2);
 
-  let html = `<div class="tl-axis"><span>${fmtD(tlStart)}</span><span>${fmtD(midDate)}</span><span>${fmtD(tlEnd)}</span></div>`;
+  // Tick marks for 1D (hourly) — rendered inside each bar
+  let tickHtml = '';
+  if (_tlRangeDays === 1) {
+    for (let h = 1; h < 24; h++) {
+      const left = (h * 3600000 / tlMs * 100).toFixed(2);
+      const bright = h % 4 === 0;
+      tickHtml += `<div style="position:absolute;top:0;left:${left}%;width:1px;height:100%;background:${bright?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.1)'};pointer-events:none;z-index:2"></div>`;
+    }
+  }
+
+  let html = `<div class="tl-axis"><span>${fmtAxis(tlStart)}</span><span>${fmtAxis(midDate)}</span><span>${fmtAxis(tlEnd)}</span></div>`;
 
   const lineNames = Object.keys(lineMap).sort();
   lineNames.forEach((lineName, li) => {
@@ -1268,7 +1298,7 @@ function rUptimeTimeline(mo) {
     const allLineEvents = Object.values(mcMap).flat();
 
     // Line-level aggregate bar
-    const { segHtml: lSegHtml, uptimePct: lPct, uptimeColor: lColor } = _tlSegHtml(allLineEvents, tlStart, tlEnd, tlMs);
+    const { segHtml: lSegHtml, uptimePct: lPct, uptimeColor: lColor } = _tlSegHtml(allLineEvents, tlStart, tlEnd, tlMs, tlEffective);
     const groupId = `tl-grp-${li}`;
 
     html += `<div class="tl-line-row" onclick="tlToggle('${groupId}',this)">
@@ -1276,7 +1306,7 @@ function rUptimeTimeline(mo) {
         <span class="tl-chevron">▶</span>${lineName}
         <span style="font-size:9px;font-weight:400;color:var(--muted)">(${allLineEvents.length} MO)</span>
       </div>
-      <div class="tl-bar">${lSegHtml}</div>
+      <div class="tl-bar">${lSegHtml}${tickHtml}</div>
       <div class="tl-pct" style="color:${lColor}">${lPct}%</div>
     </div>`;
 
@@ -1289,10 +1319,10 @@ function rUptimeTimeline(mo) {
 
     let mcHtml = '';
     mcNames.forEach(mcNo => {
-      const { segHtml, uptimePct, uptimeColor } = _tlSegHtml(mcMap[mcNo], tlStart, tlEnd, tlMs);
+      const { segHtml, uptimePct, uptimeColor } = _tlSegHtml(mcMap[mcNo], tlStart, tlEnd, tlMs, tlEffective);
       mcHtml += `<div class="tl-row">
         <div class="tl-lbl" title="${mcNo}">${mcNo}</div>
-        <div class="tl-bar">${segHtml}</div>
+        <div class="tl-bar">${segHtml}${tickHtml}</div>
         <div class="tl-pct" style="color:${uptimeColor}">${uptimePct}%</div>
       </div>`;
     });
