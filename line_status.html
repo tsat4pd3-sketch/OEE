@@ -494,7 +494,10 @@ function render(){
   // Current status
   const lineStatus={};
   lines.forEach(ln=>{
-    const active=lineMap[ln].filter(d=>d.date<=now&&(!d.dateClose||d.dateClose>=now)&&!d.isClosed);
+    // Only treat as DOWN if the MO overlaps the current window AND is still open now
+    const active=lineMap[ln].filter(d=>
+      !d.isClosed&&d.date<=now&&(!d.dateClose||d.dateClose>=now)&&
+      d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
     lineStatus[ln]={down:active.length>0,events:active};
   });
 
