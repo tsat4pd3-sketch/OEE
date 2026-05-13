@@ -646,14 +646,18 @@ function parseMOSummary(text){
   const rows=[];
   for(let i=1;i<lines.length;i++){
     const row=lines[i].split(',');
-    // Same column as jig_mtn.html: "เวลาเปิด MO"
     const dateOpen=parseMODate(g(row,'เวลาเปิด MO')||g(row,'วันที่แจ้ง')||g(row,'วันเวลาที่แจ้ง'));
     if(!dateOpen)continue;
+    const onOff=g(row,'Online/Offline');
+    const probType=g(row,'ประเภทงานซ่อม')||g(row,'ประเภท')||g(row,'Problem Type');
+    // Same default filters as jig_mtn: exclude offline + ปรับจิ๊ก
+    const s=(onOff||'').toLowerCase().trim();
+    if(s.includes('นอก')||s==='offline'||s==='off')continue;
+    if(probType.includes('ปรับจิ๊ก'))continue;
     const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
     const line=(g(row,'Line การผลิต')||'').trim().toUpperCase();
     rows.push({date:dateOpen,dateClose,line,mcNo:g(row,'Mc No.')||g(row,'Machine No.'),
-      probType:g(row,'ประเภทงานซ่อม')||g(row,'ประเภท'),
-      lineDt:dateClose&&dateClose>dateOpen?Math.round((dateClose-dateOpen)/60000):0});
+      probType,lineDt:dateClose&&dateClose>dateOpen?Math.round((dateClose-dateOpen)/60000):0});
   }
   return rows;
 }
