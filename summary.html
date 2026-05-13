@@ -632,9 +632,9 @@ const PROD_LINE_KW={
 function parseMODate(s){
   if(!s)return null;
   const dmy=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
-  if(dmy)return new Date(+dmy[3],+dmy[2]-1,+dmy[1],+(dmy[4]||0),+(dmy[5]||0));
+  if(dmy){const y=+dmy[3],ce=y>2400?y-543:y;return new Date(ce,+dmy[2]-1,+dmy[1],+(dmy[4]||0),+(dmy[5]||0));}
   const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
+  if(iso){const y=+iso[1],ce=y>2400?y-543:y;return new Date(ce,+iso[2]-1,+iso[3]);}
   return null;
 }
 
