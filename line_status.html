@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Line Status — OEE Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0d1117;--bg2:#0a0e16;--bg3:#111827;--card:#111827;
+      --border:#1c2640;--border2:#2d3a52;
+      --text:#e2e8f0;--text2:#94a3b8;--muted:#526080;--muted2:#3a4a66;
+      --accent:#e31937;--accent-dim:#e3193715;
+      --green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+      --radius:12px;--radius-sm:7px;--sidebar:220px;
+      --font-body:'Inter',sans-serif;--font-display:'Barlow',sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh}
+
+    /* ── Sidebar ── */
+    #sidebar{width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .25s}
+    body.sidebar-collapsed #sidebar{transform:translateX(calc(-1 * var(--sidebar)))}
+    body.sidebar-collapsed #main{margin-left:0}
+    .sb-logo{padding:0 18px 20px;border-bottom:1px solid var(--border);margin-bottom:12px}
+    .sb-tag{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--accent);font-family:var(--font-display)}
+    .sb-title{font-size:18px;font-weight:700;font-family:var(--font-display);color:var(--text)}
+    .sb-live{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:3px 8px;background:var(--accent-dim);border:1px solid var(--accent);border-radius:4px;font-size:10px;font-weight:700;color:var(--accent)}
+    .sb-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .nav-btn{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:13px;font-weight:500;color:var(--text2);text-decoration:none;transition:all .15s;border-left:3px solid transparent}
+    .nav-btn:hover{background:var(--border);color:var(--text)}
+    .nav-btn.active{background:var(--accent-dim);color:var(--accent);border-left-color:var(--accent)}
+    .ni{font-size:14px;width:18px;text-align:center}
+    #sidebar-toggle{position:fixed;top:16px;left:calc(var(--sidebar) - 18px);z-index:200;width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:left .25s}
+    body.sidebar-collapsed #sidebar-toggle{left:8px}
+
+    /* ── Main ── */
+    #main{margin-left:var(--sidebar);flex:1;padding:32px 28px 60px;transition:margin-left .25s;min-width:0}
+    .page-hdr{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+    .page-hdr-left h1{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--text)}
+    .page-hdr-left p{font-size:12px;color:var(--muted);margin-top:3px}
+    .hdr-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:700}
+    .bl{background:#22c55e18;border:1px solid #22c55e40;color:#22c55e}
+    .bx{background:var(--bg3);border:1px solid var(--border);color:var(--muted)}
+    .btn-reload{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:6px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-display);transition:all .15s}
+    .btn-reload:hover{border-color:var(--accent);color:var(--accent)}
+
+    /* ── Summary bar ── */
+    .status-summary{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+    .ss-chip{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-family:var(--font-display)}
+    .ss-dot{width:10px;height:10px;border-radius:50%}
+    .ss-num{font-size:24px;font-weight:800;line-height:1}
+    .ss-lbl{font-size:11px;color:var(--muted);font-weight:500}
+
+    /* ── Range toggle ── */
+    .range-bar{display:flex;align-items:center;gap:6px;margin-bottom:20px}
+    .range-bar span{font-size:11px;color:var(--muted);font-weight:600;margin-right:4px}
+    .r-btn{padding:4px 12px;border-radius:5px;font-size:11px;font-weight:700;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--font-display);transition:all .15s}
+    .r-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+    /* ── Status grid ── */
+    #status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+
+    /* ── Status card ── */
+    .ls-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
+    .ls-card.is-down{border-color:#ef444460}
+    .ls-card.is-up{border-color:#22c55e30}
+    .ls-accent{height:4px}
+    .ls-card.is-down .ls-accent{background:linear-gradient(90deg,#ef4444,#f87171)}
+    .ls-card.is-up   .ls-accent{background:linear-gradient(90deg,#22c55e,#4ade80)}
+
+    .ls-body{padding:16px 18px 12px}
+    .ls-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+    .ls-name{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text);line-height:1.2}
+    .ls-mo-count{font-size:10px;color:var(--muted);margin-top:2px}
+    .ls-status-badge{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:800;font-family:var(--font-display)}
+    .ls-status-badge.up{background:#22c55e18;border:1px solid #22c55e40;color:#22c55e}
+    .ls-status-badge.down{background:#ef444418;border:1px solid #ef444440;color:#ef4444}
+    .ls-status-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+    .ls-status-badge.down::before{animation:pulse 1s infinite}
+
+    .ls-down-info{background:#ef444410;border:1px solid #ef444430;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px}
+    .ls-down-row{display:flex;align-items:center;gap:6px;font-size:11px;margin-bottom:3px;color:var(--text2)}
+    .ls-down-row:last-child{margin-bottom:0}
+    .ls-down-lbl{color:var(--muted);min-width:48px}
+    .ls-down-val{color:var(--text);font-weight:600}
+    .ls-elapsed{font-size:18px;font-weight:800;font-family:var(--font-display);color:#ef4444}
+
+    /* ── Timeline in card ── */
+    .ls-tl-wrap{padding:0 18px 14px}
+    .ls-tl-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+    .ls-tl-bar{position:relative;height:10px;background:var(--bg3);border-radius:2px;overflow:hidden}
+    .ls-tl-seg{position:absolute;top:0;height:100%}
+    .ls-tl-up{background:#22c55e}
+    .ls-tl-dn{background:#ef4444}
+    .ls-tl-axis{display:flex;justify-content:space-between;margin-top:3px;font-size:9px;color:var(--muted2);font-family:var(--font-display)}
+    .ls-tl-axis-1d{position:relative;height:12px;margin-top:3px;font-size:9px;color:var(--muted2);font-family:var(--font-display)}
+    .ls-tl-axis-1d span{position:absolute;white-space:nowrap}
+    @media(max-width:480px){.ls-ax-2h{display:none!important}}
+
+    /* ── Tooltip ── */
+    #ls-tip{position:fixed;background:#0d1117;border:1px solid #1c2640;border-radius:6px;padding:8px 12px;font-size:11px;color:#dce4f0;pointer-events:none;z-index:5000;max-width:220px;line-height:1.7;box-shadow:0 6px 24px #00000070;display:none}
+
+    /* ── Responsive ── */
+    @media(max-width:768px){
+      #main{padding:20px 16px 48px}
+      #status-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:600px){
+      body.sidebar-open #sidebar{transform:translateX(0)}
+      #sidebar{transform:translateX(calc(-1 * var(--sidebar)))}
+      #main{margin-left:0}
+      #sidebar-toggle{left:8px}
+    }
+  </style>
+</head>
+<body>
+  <button id="sidebar-toggle" onclick="toggleSB()" title="Toggle sidebar">☰</button>
+
+  <div id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-tag">MAINTENANCE</div>
+      <div class="sb-title">LINE STATUS</div>
+      <div class="sb-live" id="src-badge">● LIVE</div>
+    </div>
+    <a class="nav-btn" href="index.html"><span class="ni">🏠</span>Home</a>
+    <a class="nav-btn" href="overview.html"><span class="ni">📊</span>Combined Overview</a>
+    <a class="nav-btn" href="summary.html"><span class="ni">📈</span>Summary Dashboard</a>
+    <a class="nav-btn" href="oee_pd3.html"><span class="ni">⚙️</span>PD3 Overview</a>
+    <a class="nav-btn" href="oee_pd4.html"><span class="ni">⚙️</span>PD4 Overview</a>
+    <a class="nav-btn" href="oee_deep_pd3.html"><span class="ni">🔬</span>Deep Analysis PD3</a>
+    <a class="nav-btn" href="oee_deep_pd4.html"><span class="ni">🔬</span>Deep Analysis PD4</a>
+    <a class="nav-btn" href="jig_mtn.html"><span class="ni">🔧</span>JIG MTN</a>
+    <a class="nav-btn active" href="line_status.html"><span class="ni">🟢</span>Line Status</a>
+    <a class="nav-btn" href="masterplan .html"><span class="ni">📋</span>Masterplan</a>
+  </div>
+
+  <main id="main">
+    <div class="page-hdr">
+      <div class="page-hdr-left">
+        <h1>🟢 Line Status</h1>
+        <p id="last-update">กำลังโหลด...</p>
+      </div>
+      <div class="hdr-meta">
+        <button class="btn-reload" onclick="loadData()">⟳ Reload</button>
+      </div>
+    </div>
+
+    <div class="status-summary">
+      <div class="ss-chip">
+        <div class="ss-dot" style="background:#22c55e"></div>
+        <div><div class="ss-num" id="cnt-up" style="color:#22c55e">—</div><div class="ss-lbl">UP</div></div>
+      </div>
+      <div class="ss-chip">
+        <div class="ss-dot" style="background:#ef4444"></div>
+        <div><div class="ss-num" id="cnt-dn" style="color:#ef4444">—</div><div class="ss-lbl">DOWN</div></div>
+      </div>
+      <div class="ss-chip">
+        <div class="ss-dot" style="background:var(--muted)"></div>
+        <div><div class="ss-num" id="cnt-all" style="color:var(--text2)">—</div><div class="ss-lbl">ไลน์ทั้งหมด</div></div>
+      </div>
+    </div>
+
+    <div class="range-bar">
+      <span>ช่วงเวลา:</span>
+      <button class="r-btn active" id="rb-1d" onclick="setRange(1,this)">1D</button>
+      <button class="r-btn" id="rb-3d" onclick="setRange(3,this)">3D</button>
+      <button class="r-btn" id="rb-7d" onclick="setRange(7,this)">7D</button>
+    </div>
+
+    <div id="status-grid"><p style="color:var(--muted);font-size:13px">กำลังโหลดข้อมูล...</p></div>
+  </main>
+
+  <div id="ls-tip"></div>
+
+  <script>
+  const MO_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSVDNHyOb2LrXosMZG09quorOkfI9aLs8Hg_6ek8glxEQRQYL6F1rWl_cZ12A_f7SC2yDkyWroXHtM1/pub?gid=785568377&single=true&output=csv";
+  let MO_ALL = [];
+  let _range = 1; // 1=1D shift, 3=3days, 7=7days
+  let _reloadTimer = null;
+
+  // ── Sidebar ──────────────────────────────────────────────────────────
+  (function(){
+    const pinned = localStorage.getItem('sidebarPinned') === '1';
+    if (!pinned) document.body.classList.add('sidebar-collapsed');
+  })();
+  function toggleSB(){
+    const collapsed = document.body.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('sidebarPinned', collapsed ? '0' : '1');
+  }
+
+  // ── Range toggle ─────────────────────────────────────────────────────
+  function setRange(days, btn){
+    _range = days;
+    document.querySelectorAll('.r-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  // ── CSV parsing ──────────────────────────────────────────────────────
+  function csvLine(l){
+    const r=[];let c='',q=false;
+    for(let i=0;i<l.length;i++){
+      const ch=l[i];
+      if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}
+      else if(ch===','&&!q){r.push(c);c='';}
+      else c+=ch;
+    }
+    r.push(c);return r;
+  }
+
+  function parseMODate(s){
+    if(!s)return null;
+    const dmy=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+    if(dmy)return new Date(+dmy[3],+dmy[2]-1,+dmy[1],+(dmy[4]||0),+(dmy[5]||0));
+    const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
+    return null;
+  }
+
+  function parseCSV(text){
+    const lines = text.split('\n').filter(l=>l.trim());
+    if(lines.length<2)return[];
+    const hdr = csvLine(lines[0]);
+    const idx = {}; hdr.forEach((h,i)=>idx[h.trim().replace(/\r/g,'')]=i);
+    const g=(row,name)=>{const i=idx[name];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim().replace(/\r/g,''):''};
+    const n=v=>{if(!v)return 0;const x=parseFloat(v.replace(/,/g,''));return isNaN(x)?0:x};
+    const rows=[];
+    for(let r=1;r<lines.length;r++){
+      const row=csvLine(lines[r]);
+      if(row.length<8)continue;
+      const dateOpen=parseMODate(g(row,'เวลาเปิด MO'));
+      if(!dateOpen)continue;
+      const dept=g(row,'แผนก'), mcType=g(row,'Mc Type');
+      if(dept&&!dept.toUpperCase().includes('JIG')&&!mcType.toUpperCase().includes('JIG'))continue;
+      const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
+      const statusMO=g(row,'Status MO').toLowerCase();
+      const isClosed=!!dateClose||statusMO.includes('เสร็จ')||statusMO.includes('close')||statusMO.includes('done');
+      const lineDt=(dateClose&&dateClose>dateOpen)?Math.round((dateClose-dateOpen)/60000):0;
+      rows.push({
+        date:dateOpen,dateClose,isClosed,
+        line:g(row,'Line การผลิต').trim().toUpperCase(),
+        mcNo:g(row,'Mc No.'),probType:g(row,'Problem Type'),
+        symptom:g(row,'อาการ/สาเหตุ'),lineDt,
+        statusMO:g(row,'Status MO'),
+      });
+    }
+    return rows;
+  }
+
+  async function loadData(){
+    document.getElementById('src-badge').className='badge bx';
+    document.getElementById('src-badge').textContent='...';
+    try{
+      const res = await fetch(MO_URL+'&t='+Date.now(),{cache:'no-store'});
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      MO_ALL = parseCSV(await res.text());
+      document.getElementById('src-badge').className='badge bl';
+      document.getElementById('src-badge').textContent='● LIVE';
+      const now=new Date();
+      document.getElementById('last-update').textContent=
+        'อัปเดต '+now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น. · '+
+        MO_ALL.length+' MO';
+      render();
+      if(_reloadTimer)clearInterval(_reloadTimer);
+      _reloadTimer=setInterval(loadData,5*60*1000); // auto-refresh 5 min
+    }catch(e){
+      document.getElementById('src-badge').className='badge bx';
+      document.getElementById('src-badge').textContent='⚠ Error';
+      console.error(e);
+    }
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────
+  function render(){
+    if(!MO_ALL.length)return;
+    const now = new Date();
+
+    // Compute window
+    let winStart, winEnd, effectiveEnd;
+    if(_range===1){
+      const isAfter8 = now.getHours()>=8;
+      const sd = isAfter8?now:new Date(now-86400000);
+      winStart = new Date(sd.getFullYear(),sd.getMonth(),sd.getDate(),8,0,0);
+      winEnd   = new Date(winStart.getTime()+24*3600000);
+      effectiveEnd = new Date(Math.min(now.getTime(),winEnd.getTime()));
+    } else {
+      winStart = new Date(now.getTime()-_range*86400000);
+      winEnd   = now;
+      effectiveEnd = now;
+    }
+    const winMs = winEnd-winStart;
+    const elapsedMs = effectiveEnd-winStart;
+
+    // Group by line — use all MO data that starts within the window
+    const lineMap = {};
+    MO_ALL.forEach(d=>{
+      if(!d.line)return;
+      if(!lineMap[d.line])lineMap[d.line]=[];
+      lineMap[d.line].push(d);
+    });
+
+    const lines = Object.keys(lineMap).sort();
+
+    // Determine current status: any MO with dateOpen<=now and (no dateClose OR dateClose>=now)
+    const lineStatus = {};
+    lines.forEach(ln=>{
+      const active = lineMap[ln].filter(d=>d.date<=now&&(!d.dateClose||d.dateClose>=now)&&!d.isClosed);
+      lineStatus[ln] = active.length>0 ? {down:true, events:active} : {down:false};
+    });
+
+    const downCount = lines.filter(ln=>lineStatus[ln].down).length;
+    const upCount   = lines.length - downCount;
+    document.getElementById('cnt-up').textContent  = upCount;
+    document.getElementById('cnt-dn').textContent  = downCount;
+    document.getElementById('cnt-all').textContent = lines.length;
+
+    // Sort: DOWN lines first, then alphabetical
+    lines.sort((a,b)=>{
+      const da=lineStatus[a].down?0:1, db=lineStatus[b].down?0:1;
+      return da-db || a.localeCompare(b);
+    });
+
+    const pad=n=>String(n).padStart(2,'0');
+    const fmtElapsed=ms=>{
+      const m=Math.floor(ms/60000);
+      if(m<60)return m+'m';
+      return Math.floor(m/60)+'h '+pad(m%60)+'m';
+    };
+    const fmtHM=d=>`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const fmtDM=d=>`${d.getDate()}/${d.getMonth()+1}`;
+
+    const grid = document.getElementById('status-grid');
+    grid.innerHTML = lines.map(ln=>{
+      const st = lineStatus[ln];
+      const events = (lineMap[ln]||[]).filter(d=>d.date>=winStart&&d.date<=effectiveEnd);
+      const sorted = [...events].sort((a,b)=>a.date-b.date);
+
+      // Build timeline segments
+      const segs=[];let cursor=winStart.getTime();
+      sorted.forEach(ev=>{
+        const evOpen=Math.max(ev.date.getTime(),winStart.getTime());
+        const evClose=ev.dateClose?Math.min(ev.dateClose.getTime(),effectiveEnd.getTime()):evOpen;
+        if(evOpen>cursor)segs.push({type:'up',s:cursor,e:evOpen});
+        const dnEnd=Math.max(evClose,evOpen+60000);
+        segs.push({type:'dn',s:evOpen,e:Math.min(dnEnd,effectiveEnd.getTime()),ev});
+        cursor=Math.max(cursor,dnEnd);
+      });
+      if(cursor<effectiveEnd.getTime())segs.push({type:'up',s:cursor,e:effectiveEnd.getTime()});
+
+      const totalDn=sorted.reduce((s,ev)=>{
+        if(ev.dateClose&&ev.dateClose>ev.date){
+          const dn=Math.min(ev.dateClose.getTime(),effectiveEnd.getTime())-Math.max(ev.date.getTime(),winStart.getTime());
+          return s+Math.max(0,dn);
+        }return s;
+      },0);
+      const uptimePct=elapsedMs>0?Math.max(0,Math.round((1-totalDn/elapsedMs)*100)):100;
+      const uptimeColor=uptimePct>=95?'#22c55e':uptimePct>=80?'#f59e0b':'#ef4444';
+
+      // Tick marks
+      let tickHtml='';
+      if(_range===1){
+        for(let h=1;h<24;h++){
+          const left=(h*3600000/winMs*100).toFixed(2);
+          const bright=h%4===0;
+          tickHtml+=`<div style="position:absolute;top:0;left:${left}%;width:1px;height:100%;background:${bright?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.1)'};pointer-events:none;z-index:2"></div>`;
+        }
+      }
+
+      // Segment HTML
+      const segHtml=segs.map(seg=>{
+        const left=Math.max(0,(seg.s-winStart.getTime())/winMs*100);
+        const rawW=(seg.e-seg.s)/winMs*100;
+        if(seg.type==='up'&&rawW<0.05)return'';
+        const width=seg.type==='dn'?Math.min(100-left,Math.max(rawW,0.3)):Math.min(100-left,rawW);
+        const cls='ls-tl-seg ls-tl-'+(seg.type==='up'?'up':'dn');
+        if(seg.type==='dn'&&seg.ev){
+          const tip=encodeURIComponent(JSON.stringify({mc:seg.ev.mcNo,prob:seg.ev.probType||'—',date:seg.ev.date.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),lineDt:seg.ev.lineDt,closed:seg.ev.isClosed}));
+          return`<div class="${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%" data-tip="${tip}"></div>`;
+        }
+        return`<div class="${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%"></div>`;
+      }).join('');
+
+      // Axis
+      let axisHtml;
+      if(_range===1){
+        const axItems=[];
+        for(let h=0;h<=24;h+=2){
+          const d=new Date(winStart.getTime()+h*3600000);
+          const pct=(h/24*100).toFixed(2);
+          const minor=h%4!==0;
+          const xf=h===0?'':h===24?'transform:translateX(-100%)':'transform:translateX(-50%)';
+          axItems.push(`<span class="${minor?'ls-ax-2h':''}" style="left:${pct}%;${xf}">${fmtHM(d)}</span>`);
+        }
+        axisHtml=`<div class="ls-tl-axis-1d">${axItems.join('')}</div>`;
+      } else {
+        const mid=new Date(winStart.getTime()+winMs/2);
+        axisHtml=`<div class="ls-tl-axis"><span>${fmtDM(winStart)}</span><span>${fmtDM(mid)}</span><span>${fmtDM(winEnd)}</span></div>`;
+      }
+
+      // DOWN info block
+      let downBlock='';
+      if(st.down){
+        const ev=st.events[0]; // most recent active event
+        const elapsed=fmtElapsed(now-ev.date);
+        downBlock=`<div class="ls-down-info">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div class="ls-down-lbl" style="font-size:10px">เวลา DOWN</div>
+            <div class="ls-elapsed">${elapsed}</div>
+          </div>
+          <div class="ls-down-row"><span class="ls-down-lbl">Mc:</span><span class="ls-down-val">${ev.mcNo||'—'}</span></div>
+          <div class="ls-down-row"><span class="ls-down-lbl">ปัญหา:</span><span class="ls-down-val">${ev.probType||'—'}</span></div>
+          ${ev.symptom?`<div class="ls-down-row"><span class="ls-down-lbl">อาการ:</span><span style="color:var(--text2);font-size:10px">${ev.symptom}</span></div>`:''}
+          ${st.events.length>1?`<div style="font-size:10px;color:var(--amber);margin-top:4px">⚠ ${st.events.length} เครื่อง DOWN พร้อมกัน</div>`:''}
+        </div>`;
+      }
+
+      return`<div class="ls-card ${st.down?'is-down':'is-up'}">
+        <div class="ls-accent"></div>
+        <div class="ls-body">
+          <div class="ls-head">
+            <div>
+              <div class="ls-name">${ln}</div>
+              <div class="ls-mo-count">${events.length} MO ในช่วงนี้</div>
+            </div>
+            <div class="ls-status-badge ${st.down?'down':'up'}">${st.down?'DOWN':'UP'}</div>
+          </div>
+          ${downBlock}
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted);margin-bottom:6px">
+            <span>JIG Uptime</span>
+            <span style="color:${uptimeColor};font-weight:700">${uptimePct}%</span>
+          </div>
+        </div>
+        <div class="ls-tl-wrap">
+          <div class="ls-tl-bar">${segHtml}${tickHtml}</div>
+          ${axisHtml}
+        </div>
+      </div>`;
+    }).join('');
+
+    // Bind tooltips
+    const tip=document.getElementById('ls-tip');
+    document.querySelectorAll('.ls-tl-seg[data-tip]').forEach(el=>{
+      el.addEventListener('mouseenter',()=>{
+        const d=JSON.parse(decodeURIComponent(el.dataset.tip));
+        tip.innerHTML=`<div style="font-weight:700;color:#ef4444;margin-bottom:4px">⚡ ${d.prob}</div>
+          <div><span style="color:#526080">Mc:</span> <b>${d.mc}</b></div>
+          <div><span style="color:#526080">วันที่:</span> ${d.date}</div>
+          <div><span style="color:#526080">Line DT:</span> <b style="color:#ef4444">${d.lineDt>0?d.lineDt+' นาที':'—'}</b></div>
+          <div style="margin-top:4px">${d.closed?'<span style="color:#22c55e">✅ ซ่อมเสร็จ</span>':'<span style="color:#f59e0b">⏳ ค้างซ่อม</span>'}</div>`;
+        tip.style.display='block';
+      });
+      el.addEventListener('mousemove',e=>{tip.style.left=(e.clientX+12)+'px';tip.style.top=(e.clientY-40)+'px';});
+      el.addEventListener('mouseleave',()=>{tip.style.display='none';});
+    });
+  }
+
+  loadData();
+  </script>
+</body>
+</html>
