@@ -711,7 +711,7 @@ function renderProdTimelines(){
   </div>`;
 
   PRODUCTS.forEach(prod=>{
-    const mo=MO_SUM.filter(d=>PROD_LINE_KW[prod.id]&&PROD_LINE_KW[prod.id](d.line)&&d.date>=rangeStart&&d.date<=effectiveEnd);
+    const mo=MO_SUM.filter(d=>PROD_LINE_KW[prod.id]&&PROD_LINE_KW[prod.id](d.line)&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=rangeStart));
     const el=document.getElementById('pc-tl-'+prod.id);
     if(!el){return;}
 
