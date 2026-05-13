@@ -749,6 +749,25 @@ function renderProdTimelines(){
       return`<div class="pc-tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%"></div>`;
     }).join('');
 
+    // Hourly tick marks for 1D view (every 1h), day ticks for 3D
+    let tickHtml='';
+    if(_pcTlRange===1){
+      // 24 ticks, one per hour — skip first and last (edges)
+      for(let h=1;h<24;h++){
+        const left=(h*3600000/totalMs*100).toFixed(2);
+        // Every 4h = brighter tick (08:00,12:00,16:00,20:00,00:00,04:00)
+        const isMain=h%4===0;
+        tickHtml+=`<div style="position:absolute;top:0;left:${left}%;width:1px;height:100%;background:${isMain?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.1)'};pointer-events:none;z-index:2"></div>`;
+      }
+    } else {
+      // 3D: one tick per 12h
+      for(let h=12;h<3*24;h+=12){
+        const left=(h*3600000/totalMs*100).toFixed(2);
+        const isDay=h%24===0;
+        tickHtml+=`<div style="position:absolute;top:0;left:${left}%;width:1px;height:100%;background:${isDay?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.1)'};pointer-events:none;z-index:2"></div>`;
+      }
+    }
+
     // Axis always spans the full window (rangeStart → rangeEnd) so future gray is labeled
     const midDate=new Date(rangeStart.getTime()+totalMs/2);
     el.style.display='';
@@ -757,7 +776,7 @@ function renderProdTimelines(){
         <span>JIG Uptime · <span style="color:${uptimeColor};font-weight:700">${uptimePct}%</span>${mo.length?` · <span style="color:var(--muted)">${mo.length} MO</span>`:''}</span>
         ${tabHtml}
       </div>
-      <div class="pc-tl-bar">${segHtml}</div>
+      <div class="pc-tl-bar">${segHtml}${tickHtml}</div>
       <div class="pc-tl-axis"><span>${fmtAxis(rangeStart)}</span><span>${fmtAxis(midDate)}</span><span>${fmtAxis(rangeEnd)}</span></div>`;
 
     // Tooltips
