@@ -645,13 +645,23 @@ function parseMOSummary(text){
   const rows=[];
   for(let i=1;i<lines.length;i++){
     const row=lines[i].split(',');
-    const dateOpen=parseMODate(g(row,'วันที่แจ้ง')||g(row,'วันเวลาที่แจ้ง'));
+    // Same column as jig_mtn.html: "เวลาเปิด MO"
+    const dateOpen=parseMODate(g(row,'เวลาเปิด MO')||g(row,'วันที่แจ้ง')||g(row,'วันเวลาที่แจ้ง'));
     if(!dateOpen)continue;
     const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
     const line=(g(row,'Line การผลิต')||'').trim().toUpperCase();
-    rows.push({dateOpen,dateClose,line,mcNo:g(row,'Mc No.')||g(row,'Machine No.')});
+    rows.push({date:dateOpen,dateClose,line,mcNo:g(row,'Mc No.')||g(row,'Machine No.'),
+      probType:g(row,'ประเภทงานซ่อม')||g(row,'ประเภท'),
+      lineDt:dateClose&&dateClose>dateOpen?Math.round((dateClose-dateOpen)/60000):0});
   }
   return rows;
+}
+
+let _pcTlRange=1; // 1=today 08:00→now, 3=3days→now
+
+function setPcTlRange(days){
+  _pcTlRange=days;
+  renderProdTimelines();
 }
 
 async function loadMOSummary(){
@@ -665,27 +675,39 @@ async function loadMOSummary(){
 
 function renderProdTimelines(){
   if(!MO_SUM.length)return;
-  // Use same date range as main filter
-  const fromStr=document.getElementById('f-from').value;
-  const toStr=document.getElementById('f-to').value;
-  const fv=fromStr.split('-'),tv=toStr.split('-');
-  const rangeStart=fv.length===3&&fv[0]?new Date(+fv[0],+fv[1]-1,+fv[2]):new Date(Math.min(...MO_SUM.map(d=>d.dateOpen.getTime())));
-  const rawEnd=tv.length===3&&tv[0]?new Date(+tv[0],+tv[1]-1,+tv[2],23,59,59):new Date(Math.max(...MO_SUM.filter(d=>d.dateClose).map(d=>d.dateClose.getTime())));
-  const rangeEnd=rawEnd-rangeStart<86400000?new Date(rangeStart.getTime()+86400000):rawEnd;
+  const now=new Date();
+  let rangeStart,rangeEnd=now;
+  if(_pcTlRange===1){
+    // Today 08:00 → now
+    rangeStart=new Date(now.getFullYear(),now.getMonth(),now.getDate(),8,0,0);
+    if(rangeStart>=now) rangeStart=new Date(now.getTime()-3600000); // fallback 1h if before 08:00
+  } else {
+    // 3 days back → now
+    rangeStart=new Date(now.getTime()-3*86400000);
+  }
   const totalMs=rangeEnd-rangeStart;
   if(totalMs<=0)return;
-  const fmtD=d=>`${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
+
+  const pad=n=>String(n).padStart(2,'0');
+  const fmtTime=d=>`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const fmtDate=d=>`${d.getDate()}/${d.getMonth()+1}`;
+  const fmtAxis=d=>_pcTlRange===1?fmtTime(d):fmtDate(d);
+
+  const tabHtml=`<div style="display:flex;gap:3px">
+    <button onclick="setPcTlRange(1)" style="padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;border:1px solid var(--border2);cursor:pointer;font-family:var(--font-display);background:${_pcTlRange===1?'var(--accent)':'transparent'};color:${_pcTlRange===1?'#fff':'var(--muted)'}">1D</button>
+    <button onclick="setPcTlRange(3)" style="padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;border:1px solid var(--border2);cursor:pointer;font-family:var(--font-display);background:${_pcTlRange===3?'var(--accent)':'transparent'};color:${_pcTlRange===3?'#fff':'var(--muted)'}">3D</button>
+  </div>`;
 
   PRODUCTS.forEach(prod=>{
-    const mo=MO_SUM.filter(d=>PROD_LINE_KW[prod.id]&&PROD_LINE_KW[prod.id](d.line));
+    const mo=MO_SUM.filter(d=>PROD_LINE_KW[prod.id]&&PROD_LINE_KW[prod.id](d.line)&&d.date>=rangeStart&&d.date<=rangeEnd);
     const el=document.getElementById('pc-tl-'+prod.id);
-    if(!el||!mo.length){if(el)el.style.display='none';return;}
+    if(!el){return;}
 
-    // Build segments
-    const sorted=[...mo].sort((a,b)=>a.dateOpen-b.dateOpen);
+    // Build segments (same logic as jig_mtn _tlSegHtml)
+    const sorted=[...mo].sort((a,b)=>a.date-b.date);
     const segs=[];let cursor=rangeStart.getTime();
     sorted.forEach(ev=>{
-      const evOpen=Math.max(ev.dateOpen.getTime(),rangeStart.getTime());
+      const evOpen=Math.max(ev.date.getTime(),rangeStart.getTime());
       const evClose=ev.dateClose?Math.min(ev.dateClose.getTime(),rangeEnd.getTime()):evOpen;
       if(evOpen>cursor)segs.push({type:'up',s:cursor,e:evOpen});
       const dnEnd=Math.max(evClose,evOpen+60000);
@@ -695,8 +717,8 @@ function renderProdTimelines(){
     if(cursor<rangeEnd.getTime())segs.push({type:'up',s:cursor,e:rangeEnd.getTime()});
 
     const totalDn=sorted.reduce((s,ev)=>{
-      if(ev.dateClose&&ev.dateClose>ev.dateOpen){
-        const dn=Math.min(ev.dateClose.getTime(),rangeEnd.getTime())-Math.max(ev.dateOpen.getTime(),rangeStart.getTime());
+      if(ev.dateClose&&ev.dateClose>ev.date){
+        const dn=Math.min(ev.dateClose.getTime(),rangeEnd.getTime())-Math.max(ev.date.getTime(),rangeStart.getTime());
         return s+Math.max(0,dn);
       }return s;
     },0);
@@ -712,8 +734,8 @@ function renderProdTimelines(){
       if(seg.type==='dn'&&seg.ev){
         const tip=encodeURIComponent(JSON.stringify({
           line:seg.ev.line,mc:seg.ev.mcNo,
-          date:seg.ev.dateOpen.toLocaleDateString('th-TH'),
-          closed:!!seg.ev.dateClose
+          date:seg.ev.date.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),
+          lineDt:seg.ev.lineDt,closed:!!seg.ev.dateClose
         }));
         return`<div class="pc-tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%" data-tip="${tip}"></div>`;
       }
@@ -724,11 +746,11 @@ function renderProdTimelines(){
     el.style.display='';
     el.innerHTML=`
       <div class="pc-tl-hdr">
-        <span>JIG Uptime</span>
-        <span style="color:${uptimeColor};font-weight:700">${uptimePct}% · ${mo.length} MO</span>
+        <span>JIG Uptime · <span style="color:${uptimeColor};font-weight:700">${uptimePct}%</span>${mo.length?` · <span style="color:var(--muted)">${mo.length} MO</span>`:''}</span>
+        ${tabHtml}
       </div>
-      <div class="pc-tl-bar">${segHtml}</div>
-      <div class="pc-tl-axis"><span>${fmtD(rangeStart)}</span><span>${fmtD(midDate)}</span><span>${fmtD(rangeEnd)}</span></div>`;
+      <div class="pc-tl-bar">${segHtml||'<div class="pc-tl-seg pc-tl-up" style="left:0;width:100%"></div>'}</div>
+      <div class="pc-tl-axis"><span>${fmtAxis(rangeStart)}</span><span>${fmtAxis(midDate)}</span><span>${fmtAxis(rangeEnd)}</span></div>`;
 
     // Tooltips
     let tip=document.getElementById('pc-tl-tip');
@@ -740,6 +762,7 @@ function renderProdTimelines(){
           <div><span style="color:#526080">ไลน์:</span> ${d.line}</div>
           <div><span style="color:#526080">Mc:</span> ${d.mc}</div>
           <div><span style="color:#526080">วันที่:</span> ${d.date}</div>
+          <div><span style="color:#526080">Line DT:</span> <b style="color:#ef4444">${d.lineDt>0?d.lineDt+' นาที':'—'}</b></div>
           <div style="margin-top:4px">${d.closed?'<span style="color:#22c55e">✅ ซ่อมเสร็จ</span>':'<span style="color:#f59e0b">⏳ ค้างซ่อม</span>'}</div>`;
         tip.style.display='block';
       });
