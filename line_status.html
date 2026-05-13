@@ -521,7 +521,7 @@ function render(){
   const grid=document.getElementById('status-grid');
   grid.innerHTML=lines.map(ln=>{
     const st=lineStatus[ln];
-    const events=(lineMap[ln]||[]).filter(d=>d.date>=winStart&&d.date<=effectiveEnd);
+    const events=(lineMap[ln]||[]).filter(d=>d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
     const sorted=[...events].sort((a,b)=>a.date-b.date);
 
     // Segments
@@ -625,7 +625,7 @@ function render(){
   // Update avg uptime
   if(lines.length){
     const allPcts=lines.map(ln=>{
-      const ev=(lineMap[ln]||[]).filter(d=>d.date>=winStart&&d.date<=effectiveEnd);
+      const ev=(lineMap[ln]||[]).filter(d=>d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
       const dn=ev.reduce((s,e)=>{if(e.dateClose&&e.dateClose>e.date){const d=Math.min(e.dateClose,effectiveEnd)-Math.max(e.date,winStart);return s+Math.max(0,d);}return s;},0);
       return elapsedMs>0?Math.max(0,Math.round((1-dn/elapsedMs)*100)):100;
     });
