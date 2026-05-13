@@ -640,12 +640,13 @@ function parseMODate(s){
 
 function parseMOSummary(text){
   const lines=text.trim().split('\n');
-  const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  const headers=csvLine(lines[0]).map(h=>h.trim().replace(/^"|"$/g,''));
   const idx={};headers.forEach((h,i)=>{idx[h]=i;});
   const g=(row,col)=>{const i=idx[col];return i!==undefined?(row[i]||'').trim().replace(/^"|"$/g,''):''};
   const rows=[];
   for(let i=1;i<lines.length;i++){
-    const row=lines[i].split(',');
+    const row=csvLine(lines[i]); // proper CSV parse — handles quoted commas
+    if(row.length<4)continue;
     const dateOpen=parseMODate(g(row,'เวลาเปิด MO')||g(row,'วันที่แจ้ง')||g(row,'วันเวลาที่แจ้ง'));
     if(!dateOpen)continue;
     const onOff=g(row,'Online/Offline');
