@@ -285,6 +285,9 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 /* Uptime/Downtime Timeline */
 #timeline-wrap{overflow-x:auto}
 .tl-axis{display:flex;justify-content:space-between;margin:0 0 8px;padding:0 0 0 128px;font-size:10px;color:var(--muted);font-family:var(--font-display);letter-spacing:.3px}
+.tl-axis-1d{position:relative;margin-left:128px;height:14px;font-size:10px;color:var(--muted);font-family:var(--font-display);letter-spacing:.3px;margin-bottom:8px}
+.tl-axis-1d span{position:absolute;white-space:nowrap}
+@media(max-width:600px){.tl-axis-1d{margin-left:100px!important}.tl-ax-2h{display:none!important}}
 .tl-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;min-width:0}
 .tl-lbl{flex:0 0 118px;font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;font-family:var(--font-display)}
 .tl-bar{flex:1;height:16px;background:var(--bg3);border-radius:2px;position:relative;overflow:hidden;min-width:0}
@@ -1290,7 +1293,22 @@ function rUptimeTimeline(mo) {
     }
   }
 
-  let html = `<div class="tl-axis"><span>${fmtAxis(tlStart)}</span><span>${fmtAxis(midDate)}</span><span>${fmtAxis(tlEnd)}</span></div>`;
+  let axisHtml;
+  if (_tlRangeDays === 1) {
+    // Every 2h labels; odd multiples (10:00,14:00,18:00,22:00,02:00,06:00) hidden on mobile
+    const axItems = [];
+    for (let h = 0; h <= 24; h += 2) {
+      const d = new Date(tlStart.getTime() + h * 3600000);
+      const pct = (h / 24 * 100).toFixed(2);
+      const minor = h % 4 !== 0;
+      const xf = h === 0 ? '' : h === 24 ? 'transform:translateX(-100%)' : 'transform:translateX(-50%)';
+      axItems.push(`<span class="${minor ? 'tl-ax-2h' : ''}" style="left:${pct}%;${xf}">${pad(d.getHours())}:${pad(d.getMinutes())}</span>`);
+    }
+    axisHtml = `<div class="tl-axis-1d">${axItems.join('')}</div>`;
+  } else {
+    axisHtml = `<div class="tl-axis"><span>${fmtAxis(tlStart)}</span><span>${fmtAxis(midDate)}</span><span>${fmtAxis(tlEnd)}</span></div>`;
+  }
+  let html = axisHtml;
 
   const lineNames = Object.keys(lineMap).sort();
   lineNames.forEach((lineName, li) => {
