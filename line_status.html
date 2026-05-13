@@ -192,6 +192,10 @@
     localStorage.setItem('sidebarPinned', collapsed ? '0' : '1');
   }
 
+  // ── Same filters as jig_mtn.html (default OFF) ──────────────────────
+  function isOfflineMO(v){ const s=(v||'').toLowerCase().trim(); return s.includes('นอก')||s==='offline'||s==='off'; }
+  function isAdjustMO(v){ return (v||'').includes('ปรับจิ๊ก'); }
+
   // ── Range toggle ─────────────────────────────────────────────────────
   function setRange(days, btn){
     _range = days;
@@ -246,6 +250,7 @@
         mcNo:g(row,'Mc No.'),probType:g(row,'Problem Type'),
         symptom:g(row,'อาการ/สาเหตุ'),lineDt,
         statusMO:g(row,'Status MO'),
+        onOff:g(row,'Online/Offline'),
       });
     }
     return rows;
@@ -295,9 +300,12 @@
     const winMs = winEnd-winStart;
     const elapsedMs = effectiveEnd-winStart;
 
-    // Group by line — use all MO data that starts within the window
+    // Apply same default filters as jig_mtn: exclude offline + ปรับจิ๊ก
+    const moFiltered = MO_ALL.filter(d=>!isOfflineMO(d.onOff)&&!isAdjustMO(d.probType));
+
+    // Group by line
     const lineMap = {};
-    MO_ALL.forEach(d=>{
+    moFiltered.forEach(d=>{
       if(!d.line)return;
       if(!lineMap[d.line])lineMap[d.line]=[];
       lineMap[d.line].push(d);
