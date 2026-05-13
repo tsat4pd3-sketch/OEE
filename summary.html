@@ -96,6 +96,16 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .oee-bar-wrap{padding:12px 16px;border-top:1px solid var(--border)}
 .oee-bar-lbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .oee-bar-lbl span{font-size:11px;color:var(--muted)}
+.pc-tl-wrap{padding:10px 16px 12px;border-top:1px solid var(--border)}
+.pc-tl-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pc-tl-hdr span{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.pc-tl-bar{position:relative;height:12px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.pc-tl-seg{position:absolute;top:0;height:100%;cursor:pointer;transition:filter .12s}
+.pc-tl-seg:hover{filter:brightness(1.3)}
+.pc-tl-up{background:#22c55e}
+.pc-tl-dn{background:#ef4444}
+.pc-tl-axis{display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:var(--muted2);font-family:var(--font-display)}
+.pc-tl-tip{position:fixed;background:#0d1117;border:1px solid #1c2640;border-radius:6px;padding:8px 12px;font-size:11px;color:#dce4f0;pointer-events:none;z-index:5000;max-width:220px;line-height:1.7;box-shadow:0 6px 24px #00000070;display:none}
 .oee-segments{display:flex;gap:2px;height:7px;border-radius:3px;overflow:hidden;background:var(--bg3)}
 .pc-trends{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-top:1px solid var(--border)}
 .pc-trend{background:var(--card);padding:10px 14px}
@@ -606,6 +616,138 @@ function matchProduct(part,kws){
 }
 
 let PD3_ALL=[],PD4_ALL=[],arTimer=null;
+let MO_SUM=[];
+
+const MO_URL_SUM="https://docs.google.com/spreadsheets/d/e/2PACX-1vSVDNHyOb2LrXosMZG09quorOkfI9aLs8Hg_6ek8glxEQRQYL6F1rWl_cZ12A_f7SC2yDkyWroXHtM1/pub?gid=785568377&single=true&output=csv";
+
+// Map product id → line name keywords in MO data
+const PROD_LINE_KW={
+  gor: l=>l.includes('GOR'),
+  lwr: l=>l.includes('LWR')&&!l.includes('LASER'),
+  p60: l=>l.includes('APRON 60')||l.includes('APRON60')||(l.includes('60')&&!l.includes('61')&&!l.includes('LASER')),
+  p61: l=>l.includes('APRON 61')||l.includes('APRON61')||(l.includes('61')&&!l.includes('60')&&!l.includes('LASER')),
+};
+
+function parseMODate(s){
+  if(!s)return null;
+  const dmy=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if(dmy)return new Date(+dmy[3],+dmy[2]-1,+dmy[1],+(dmy[4]||0),+(dmy[5]||0));
+  const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
+  return null;
+}
+
+function parseMOSummary(text){
+  const lines=text.trim().split('\n');
+  const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  const idx={};headers.forEach((h,i)=>{idx[h]=i;});
+  const g=(row,col)=>{const i=idx[col];return i!==undefined?(row[i]||'').trim().replace(/^"|"$/g,''):''};
+  const rows=[];
+  for(let i=1;i<lines.length;i++){
+    const row=lines[i].split(',');
+    const dateOpen=parseMODate(g(row,'วันที่แจ้ง')||g(row,'วันเวลาที่แจ้ง'));
+    if(!dateOpen)continue;
+    const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
+    const line=(g(row,'Line การผลิต')||'').trim().toUpperCase();
+    rows.push({dateOpen,dateClose,line,mcNo:g(row,'Mc No.')||g(row,'Machine No.')});
+  }
+  return rows;
+}
+
+async function loadMOSummary(){
+  try{
+    const res=await fetch(MO_URL_SUM+'&t='+Date.now(),{cache:'no-store'});
+    if(!res.ok)return;
+    MO_SUM=parseMOSummary(await res.text());
+    renderProdTimelines();
+  }catch(e){console.warn('MO summary load failed',e);}
+}
+
+function renderProdTimelines(){
+  if(!MO_SUM.length)return;
+  // Use same date range as main filter
+  const fromStr=document.getElementById('f-from').value;
+  const toStr=document.getElementById('f-to').value;
+  const fv=fromStr.split('-'),tv=toStr.split('-');
+  const rangeStart=fv.length===3&&fv[0]?new Date(+fv[0],+fv[1]-1,+fv[2]):new Date(Math.min(...MO_SUM.map(d=>d.dateOpen.getTime())));
+  const rawEnd=tv.length===3&&tv[0]?new Date(+tv[0],+tv[1]-1,+tv[2],23,59,59):new Date(Math.max(...MO_SUM.filter(d=>d.dateClose).map(d=>d.dateClose.getTime())));
+  const rangeEnd=rawEnd-rangeStart<86400000?new Date(rangeStart.getTime()+86400000):rawEnd;
+  const totalMs=rangeEnd-rangeStart;
+  if(totalMs<=0)return;
+  const fmtD=d=>`${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
+
+  PRODUCTS.forEach(prod=>{
+    const mo=MO_SUM.filter(d=>PROD_LINE_KW[prod.id]&&PROD_LINE_KW[prod.id](d.line));
+    const el=document.getElementById('pc-tl-'+prod.id);
+    if(!el||!mo.length){if(el)el.style.display='none';return;}
+
+    // Build segments
+    const sorted=[...mo].sort((a,b)=>a.dateOpen-b.dateOpen);
+    const segs=[];let cursor=rangeStart.getTime();
+    sorted.forEach(ev=>{
+      const evOpen=Math.max(ev.dateOpen.getTime(),rangeStart.getTime());
+      const evClose=ev.dateClose?Math.min(ev.dateClose.getTime(),rangeEnd.getTime()):evOpen;
+      if(evOpen>cursor)segs.push({type:'up',s:cursor,e:evOpen});
+      const dnEnd=Math.max(evClose,evOpen+60000);
+      segs.push({type:'dn',s:evOpen,e:Math.min(dnEnd,rangeEnd.getTime()),ev});
+      cursor=Math.max(cursor,dnEnd);
+    });
+    if(cursor<rangeEnd.getTime())segs.push({type:'up',s:cursor,e:rangeEnd.getTime()});
+
+    const totalDn=sorted.reduce((s,ev)=>{
+      if(ev.dateClose&&ev.dateClose>ev.dateOpen){
+        const dn=Math.min(ev.dateClose.getTime(),rangeEnd.getTime())-Math.max(ev.dateOpen.getTime(),rangeStart.getTime());
+        return s+Math.max(0,dn);
+      }return s;
+    },0);
+    const uptimePct=Math.max(0,Math.round((1-totalDn/totalMs)*100));
+    const uptimeColor=uptimePct>=95?'#22c55e':uptimePct>=80?'#f59e0b':'#ef4444';
+
+    const segHtml=segs.map(seg=>{
+      const left=Math.max(0,(seg.s-rangeStart.getTime())/totalMs*100);
+      const rawW=(seg.e-seg.s)/totalMs*100;
+      if(seg.type==='up'&&rawW<0.05)return'';
+      const width=seg.type==='dn'?Math.min(100-left,Math.max(rawW,0.5)):Math.min(100-left,rawW);
+      const cls=seg.type==='up'?'pc-tl-up':'pc-tl-dn';
+      if(seg.type==='dn'&&seg.ev){
+        const tip=encodeURIComponent(JSON.stringify({
+          line:seg.ev.line,mc:seg.ev.mcNo,
+          date:seg.ev.dateOpen.toLocaleDateString('th-TH'),
+          closed:!!seg.ev.dateClose
+        }));
+        return`<div class="pc-tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%" data-tip="${tip}"></div>`;
+      }
+      return`<div class="pc-tl-seg ${cls}" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%"></div>`;
+    }).join('');
+
+    const midDate=new Date(rangeStart.getTime()+totalMs/2);
+    el.style.display='';
+    el.innerHTML=`
+      <div class="pc-tl-hdr">
+        <span>JIG Uptime</span>
+        <span style="color:${uptimeColor};font-weight:700">${uptimePct}% · ${mo.length} MO</span>
+      </div>
+      <div class="pc-tl-bar">${segHtml}</div>
+      <div class="pc-tl-axis"><span>${fmtD(rangeStart)}</span><span>${fmtD(midDate)}</span><span>${fmtD(rangeEnd)}</span></div>`;
+
+    // Tooltips
+    let tip=document.getElementById('pc-tl-tip');
+    if(!tip){tip=document.createElement('div');tip.id='pc-tl-tip';tip.className='pc-tl-tip';document.body.appendChild(tip);}
+    el.querySelectorAll('.pc-tl-seg[data-tip]').forEach(s=>{
+      s.addEventListener('mouseenter',()=>{
+        const d=JSON.parse(decodeURIComponent(s.dataset.tip));
+        tip.innerHTML=`<div style="font-weight:700;color:#ef4444;margin-bottom:4px">⚡ JIG Downtime</div>
+          <div><span style="color:#526080">ไลน์:</span> ${d.line}</div>
+          <div><span style="color:#526080">Mc:</span> ${d.mc}</div>
+          <div><span style="color:#526080">วันที่:</span> ${d.date}</div>
+          <div style="margin-top:4px">${d.closed?'<span style="color:#22c55e">✅ ซ่อมเสร็จ</span>':'<span style="color:#f59e0b">⏳ ค้างซ่อม</span>'}</div>`;
+        tip.style.display='block';
+      });
+      s.addEventListener('mousemove',e=>{tip.style.left=(e.clientX+12)+'px';tip.style.top=(e.clientY-40)+'px';});
+      s.addEventListener('mouseleave',()=>{tip.style.display='none';});
+    });
+  });
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────
 function csvLine(l){const r=[];let c='',q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(c);c='';}else c+=ch;}r.push(c);return r;}
@@ -900,7 +1042,8 @@ function renderCard(prod,stats){
  <span>🕐 Loading Time: avg <b style="color:var(--text2)">${stats.lhDebug.avg}h</b> (${stats.lhDebug.min}–${stats.lhDebug.max}h)</span>
  <span style="color:${stats.lhDebug.otCount>0?'var(--amber)':'var(--muted)'}">⏱ OT: ${stats.lhDebug.otCount} กะ (≥10h)</span>
  ${stats.lhDebug.missing>0?`<span style="color:var(--red)">⚠️ fallback 8h: ${stats.lhDebug.missing}/${stats.lhDebug.total} กะ</span>`:`<span style="color:var(--green)">✓ มีค่าครบ ${stats.lhDebug.total} กะ</span>`}
- </div>`;
+ </div>
+ <div class="pc-tl-wrap" id="pc-tl-${prod.id}" style="display:none"></div>`;
  requestAnimationFrame(()=>{
  const oeeCol=oeeColor(o).replace('var(--green)','#22c55e').replace('var(--amber)','#f59e0b').replace('var(--red)','#e31937');
  const _mfM={median:'medShift',avg:'avgShift',max:'maxShift',min:'minShift'};
@@ -971,6 +1114,7 @@ function applyFilter(){
  allStats.forEach(({prod,stats})=>renderCard(prod,stats));
  renderWorkTypeStrip(allStats);
  renderTrendChart();
+ if(MO_SUM.length) renderProdTimelines();
 }
 
 async function reloadData(){
@@ -1024,6 +1168,7 @@ async function init(){
  document.getElementById('f-to').addEventListener('change',applyFilter);
  setBar(100);
  try{applyFilter();}catch(e){console.warn('applyFilter error',e);}
+ loadMOSummary();
  }catch(e){
  console.error('init error',e);
  setMsg('เกิดข้อผิดพลาด: '+e.message);
