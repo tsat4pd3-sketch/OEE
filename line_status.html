@@ -496,14 +496,15 @@ function render(){
   const lines=Object.keys(lineMap).sort();
 
   // 3-state status:
-  // DOWN  = unclosed MO opened within current shift window (fresh breakdown, line stopped)
-  // WATCH = unclosed MO from before winStart still unresolved (running at reduced capacity)
+  // DOWN  = unclosed MO opened within last 2 shifts (48h from prevWinStart) — includes carryover
+  // WATCH = unclosed MO older than 2 shifts but within 7 days — chronic/managed situation
   // UP    = no unresolved MOs
-  const WATCH_LOOKBACK=7*86400000; // look back up to 7 days for cross-window MOs
+  const prevWinStart=new Date(winStart.getTime()-24*3600000); // start of previous shift
+  const WATCH_LOOKBACK=7*86400000;
   const lineStatus={};
   lines.forEach(ln=>{
-    const freshDown=lineMap[ln].filter(d=>!d.isClosed&&!d.dateClose&&d.date>=winStart&&d.date<=effectiveEnd);
-    const crossWatch=lineMap[ln].filter(d=>!d.isClosed&&!d.dateClose&&d.date<winStart&&d.date>=new Date(winStart.getTime()-WATCH_LOOKBACK));
+    const freshDown=lineMap[ln].filter(d=>!d.isClosed&&!d.dateClose&&d.date>=prevWinStart&&d.date<=effectiveEnd);
+    const crossWatch=lineMap[ln].filter(d=>!d.isClosed&&!d.dateClose&&d.date<prevWinStart&&d.date>=new Date(winStart.getTime()-WATCH_LOOKBACK));
     const status=freshDown.length>0?'down':crossWatch.length>0?'watch':'up';
     lineStatus[ln]={status,down:status==='down',watch:status==='watch',events:freshDown.length>0?freshDown:crossWatch};
   });
