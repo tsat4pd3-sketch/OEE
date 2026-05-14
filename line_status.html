@@ -71,9 +71,11 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .ls-card:hover{box-shadow:0 4px 16px #00000014}
 .ls-card.is-down{border-color:#ef444450}
 .ls-card.is-up{border-color:#22c55e30}
+.ls-card.is-watch{border-color:#f59e0b50}
 .ls-accent-bar{height:3px}
-.ls-card.is-down .ls-accent-bar{background:linear-gradient(90deg,#ef4444,#f87171)}
-.ls-card.is-up   .ls-accent-bar{background:linear-gradient(90deg,#22c55e,#4ade80)}
+.ls-card.is-down  .ls-accent-bar{background:linear-gradient(90deg,#ef4444,#f87171)}
+.ls-card.is-up    .ls-accent-bar{background:linear-gradient(90deg,#22c55e,#4ade80)}
+.ls-card.is-watch .ls-accent-bar{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
 .ls-body{padding:16px 18px 12px}
 .ls-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .ls-name{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text);line-height:1.2}
@@ -81,6 +83,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg);pointer-even
 .ls-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:3px;font-size:11px;font-weight:700;font-family:var(--font-display);letter-spacing:.5px}
 .ls-badge.up{background:rgba(34,197,94,.1);color:#15803d;border:1px solid rgba(34,197,94,.25)}
 .ls-badge.down{background:rgba(239,68,68,.1);color:#dc2626;border:1px solid rgba(239,68,68,.25)}
+.ls-badge.watch{background:rgba(245,158,11,.1);color:#b45309;border:1px solid rgba(245,158,11,.25)}
 .ls-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
 .ls-badge.down::before{animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
@@ -146,6 +149,7 @@ body.cur-hover #cursor-ring{opacity:0}
 [data-theme="dark"] .bx{background:#526080;color:#fff;border-color:#526080}
 [data-theme="dark"] .ls-badge.up{background:rgba(34,197,94,.12);color:#4ade80;border-color:rgba(34,197,94,.3)}
 [data-theme="dark"] .ls-badge.down{background:rgba(239,68,68,.12);color:#f87171;border-color:rgba(239,68,68,.3)}
+[data-theme="dark"] .ls-badge.watch{background:rgba(245,158,11,.12);color:#fbbf24;border-color:rgba(245,158,11,.3)}
 [data-theme="dark"] .ls-down-info{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)}
 [data-theme="dark"] .ls-elapsed{color:#f87171}
 [data-theme="dark"] .btn-refresh{background:var(--accent-dim);border-color:#3b82f630;color:var(--accent)}
@@ -491,20 +495,22 @@ function render(){
   });
   const lines=Object.keys(lineMap).sort();
 
-  // Current status — DOWN only if MO opened within this window and still open now
+  // 3-state status:
+  // DOWN  = unclosed MO opened within current shift window (fresh breakdown, line stopped)
+  // WATCH = unclosed MO from before winStart still unresolved (running at reduced capacity)
+  // UP    = no unresolved MOs
+  const WATCH_LOOKBACK=7*86400000; // look back up to 7 days for cross-window MOs
   const lineStatus={};
   lines.forEach(ln=>{
-    const active=lineMap[ln].filter(d=>
-      !d.isClosed &&
-      !d.dateClose &&          // still being repaired (no close time recorded)
-      d.date>=winStart &&      // opened during current shift window (not stale old MO)
-      d.date<=effectiveEnd     // not in the future
-    );
-    lineStatus[ln]={down:active.length>0,events:active};
+    const freshDown=lineMap[ln].filter(d=>!d.isClosed&&!d.dateClose&&d.date>=winStart&&d.date<=effectiveEnd);
+    const crossWatch=lineMap[ln].filter(d=>!d.isClosed&&!d.dateClose&&d.date<winStart&&d.date>=new Date(winStart.getTime()-WATCH_LOOKBACK));
+    const status=freshDown.length>0?'down':crossWatch.length>0?'watch':'up';
+    lineStatus[ln]={status,down:status==='down',watch:status==='watch',events:freshDown.length>0?freshDown:crossWatch};
   });
 
   const downCount=lines.filter(ln=>lineStatus[ln].down).length;
-  const upCount=lines.length-downCount;
+  const watchCount=lines.filter(ln=>lineStatus[ln].watch).length;
+  const upCount=lines.length-downCount-watchCount;
   document.getElementById('kv-up').textContent=upCount;
   document.getElementById('kv-dn').textContent=downCount;
   document.getElementById('kv-all').textContent=lines.length;
@@ -517,9 +523,10 @@ function render(){
   document.getElementById('last-update').textContent=
     `· อัปเดต ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น.`;
 
-  // Sort: DOWN first, then alpha
+  // Sort: DOWN first, then WATCH, then UP, then alpha
   lines.sort((a,b)=>{
-    const da=lineStatus[a].down?0:1,db=lineStatus[b].down?0:1;
+    const rank=s=>s.down?0:s.watch?1:2;
+    const da=rank(lineStatus[a]),db=rank(lineStatus[b]);
     return da-db||a.localeCompare(b);
   });
 
@@ -605,7 +612,10 @@ function render(){
       </div>`;
     }
 
-    return`<div class="ls-card ${st.down?'is-down':'is-up'}">
+    const cardCls=st.down?'is-down':st.watch?'is-watch':'is-up';
+    const badgeCls=st.down?'down':st.watch?'watch':'up';
+    const badgeTxt=st.down?'DOWN':st.watch?'WATCH':'UP';
+    return`<div class="ls-card ${cardCls}">
       <div class="ls-accent-bar"></div>
       <div class="ls-body">
         <div class="ls-head">
@@ -613,7 +623,7 @@ function render(){
             <div class="ls-name">${ln}</div>
             <div class="ls-mo-count">${events.length} MO ในช่วงนี้</div>
           </div>
-          <div class="ls-badge ${st.down?'down':'up'}">${st.down?'DOWN':'UP'}</div>
+          <div class="ls-badge ${badgeCls}">${badgeTxt}</div>
         </div>
         ${downBlock}
         <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:5px;font-family:var(--font-display);font-weight:600;letter-spacing:.3px;text-transform:uppercase">
