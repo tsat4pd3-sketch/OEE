@@ -604,15 +604,19 @@ function render(){
 
     // DOWN block
     let downBlock='';
-    if(st.down&&st.events.length){
+    if((st.down||st.watch)&&st.events.length){
       const ev=st.events[0];
       const elapsed=fmtElapsed(now-ev.date);
-      downBlock=`<div class="ls-down-info">
-        <div class="ls-elapsed">${elapsed}</div>
+      const blockColor=st.watch?'var(--amber)':'#ef4444';
+      const multiLabel=st.down
+        ?`⚠ ${st.events.length} เครื่อง DOWN พร้อมกัน`
+        :`⚠ ${st.events.length} รายการ ปรับจิ๊ก ค้าง`;
+      downBlock=`<div class="ls-down-info" style="${st.watch?'border-color:#f59e0b30;background:rgba(245,158,11,0.06)':''}">
+        <div class="ls-elapsed" style="color:${blockColor}">${elapsed}</div>
         <div class="ls-detail-row"><span class="ls-detail-lbl">Mc:</span><span style="font-weight:600">${ev.mcNo||'—'}</span></div>
         <div class="ls-detail-row"><span class="ls-detail-lbl">ปัญหา:</span><span>${ev.probType||'—'}</span></div>
         ${ev.symptom?`<div class="ls-detail-row"><span class="ls-detail-lbl">อาการ:</span><span style="color:var(--muted)">${ev.symptom}</span></div>`:''}
-        ${st.events.length>1?`<div style="font-size:10px;color:var(--amber);margin-top:5px;font-weight:600">⚠ ${st.events.length} เครื่อง DOWN พร้อมกัน</div>`:''}
+        ${st.events.length>1?`<div style="font-size:10px;color:${blockColor};margin-top:5px;font-weight:600">${multiLabel}</div>`:''}
       </div>`;
     }
 
