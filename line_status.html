@@ -491,13 +491,15 @@ function render(){
   });
   const lines=Object.keys(lineMap).sort();
 
-  // Current status
+  // Current status — DOWN only if MO opened within this window and still open now
   const lineStatus={};
   lines.forEach(ln=>{
-    // Only treat as DOWN if the MO overlaps the current window AND is still open now
     const active=lineMap[ln].filter(d=>
-      !d.isClosed&&d.date<=now&&(!d.dateClose||d.dateClose>=now)&&
-      d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
+      !d.isClosed &&
+      !d.dateClose &&          // still being repaired (no close time recorded)
+      d.date>=winStart &&      // opened during current shift window (not stale old MO)
+      d.date<=effectiveEnd     // not in the future
+    );
     lineStatus[ln]={down:active.length>0,events:active};
   });
 
