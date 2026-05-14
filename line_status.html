@@ -531,7 +531,8 @@ function render(){
     const segs=[];let cursor=winStart.getTime();
     sorted.forEach(ev=>{
       const evOpen=Math.max(ev.date.getTime(),winStart.getTime());
-      const evClose=ev.dateClose?Math.min(ev.dateClose.getTime(),effectiveEnd.getTime()):evOpen;
+      // Open MO (no dateClose) = still being repaired → extend to now
+      const evClose=Math.min((ev.dateClose||effectiveEnd).getTime(),effectiveEnd.getTime());
       if(evOpen>cursor)segs.push({type:'up',s:cursor,e:evOpen});
       const dnEnd=Math.max(evClose,evOpen+60000);
       segs.push({type:'dn',s:evOpen,e:Math.min(dnEnd,effectiveEnd.getTime()),ev});
@@ -540,10 +541,9 @@ function render(){
     if(cursor<effectiveEnd.getTime())segs.push({type:'up',s:cursor,e:effectiveEnd.getTime()});
 
     const totalDn=sorted.reduce((s,ev)=>{
-      if(ev.dateClose&&ev.dateClose>ev.date){
-        const dn=Math.min(ev.dateClose.getTime(),effectiveEnd.getTime())-Math.max(ev.date.getTime(),winStart.getTime());
-        return s+Math.max(0,dn);
-      }return s;
+      const closeT=(ev.dateClose||effectiveEnd).getTime();
+      const dn=Math.min(closeT,effectiveEnd.getTime())-Math.max(ev.date.getTime(),winStart.getTime());
+      return s+Math.max(0,dn);
     },0);
     const uptimePct=elapsedMs>0?Math.max(0,Math.round((1-totalDn/elapsedMs)*100)):100;
     const uptimeColor=uptimePct>=95?'var(--green)':uptimePct>=80?'var(--amber)':'#ef4444';
