@@ -720,22 +720,22 @@ function renderProdTimelines(){
     const segs=[];let cursor=rangeStart.getTime();
     sorted.forEach(ev=>{
       const evOpen=Math.max(ev.date.getTime(),rangeStart.getTime());
-      const evClose=Math.min((ev.dateClose||effectiveEnd).getTime(),effectiveEnd.getTime());
+      const evClose=ev.dateClose?Math.min(ev.dateClose.getTime(),effectiveEnd.getTime()):evOpen;
       if(evOpen>cursor)segs.push({type:'up',s:cursor,e:evOpen});
       const dnEnd=Math.max(evClose,evOpen+60000);
       segs.push({type:'dn',s:evOpen,e:Math.min(dnEnd,effectiveEnd.getTime()),ev});
       cursor=Math.max(cursor,dnEnd);
     });
-    // Close out up to effectiveEnd (not rangeEnd) — beyond is gray future
     if(cursor<effectiveEnd.getTime())segs.push({type:'up',s:cursor,e:effectiveEnd.getTime()});
 
     const totalDn=sorted.reduce((s,ev)=>{
-      const closeT=(ev.dateClose||effectiveEnd).getTime();
-      const dn=Math.min(closeT,effectiveEnd.getTime())-Math.max(ev.date.getTime(),rangeStart.getTime());
-      return s+Math.max(0,dn);
+      if(ev.dateClose&&ev.dateClose>ev.date){
+        const dn=Math.min(ev.dateClose.getTime(),effectiveEnd.getTime())-Math.max(ev.date.getTime(),rangeStart.getTime());
+        return s+Math.max(0,dn);
+      }return s;
     },0);
     const uptimePct=elapsedMs>0?Math.max(0,Math.round((1-totalDn/elapsedMs)*100)):100;
-    const uptimeColor=uptimePct>=95?'#22c55e':uptimePct>=80?'#f59e0b':'#ef4444';
+    const uptimeColor=uptimePct>=90?'#22c55e':uptimePct>=70?'#f59e0b':'#ef4444';
 
     const segHtml=segs.map(seg=>{
       const left=Math.max(0,(seg.s-rangeStart.getTime())/totalMs*100);
