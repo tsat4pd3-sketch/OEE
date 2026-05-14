@@ -451,7 +451,7 @@ async function loadData(){
     setTimeout(()=>enterDashboard(),400);
     render();
     if(_reloadTimer)clearInterval(_reloadTimer);
-    _reloadTimer=setInterval(loadData,5*60*1000);
+    _reloadTimer=setInterval(loadData,60*1000);
   }catch(e){
     badge.className='badge bx';badge.textContent='⚠ Error';
     if(ldmsg)ldmsg.textContent='โหลดข้อมูลไม่สำเร็จ';
