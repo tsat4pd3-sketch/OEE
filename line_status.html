@@ -540,13 +540,14 @@ function render(){
     const events=(lineMap[ln]||[]).filter(d=>!d.isAdjust&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
     const sorted=[...events].sort((a,b)=>a.date-b.date);
 
-    // Segments — open MO (no dateClose) extends to effectiveEnd (currently ongoing)
+    // Segments — recent open MO extends to now; old open MO gets 1-min marker only
     const segs=[];let cursor=winStart.getTime();
     sorted.forEach(ev=>{
       const evOpen=Math.max(ev.date.getTime(),winStart.getTime());
+      const isRecentOpen=!ev.dateClose&&ev.date>=prevWinStart;
       const evClose=ev.dateClose
         ?Math.min(ev.dateClose.getTime(),effectiveEnd.getTime())
-        :effectiveEnd.getTime(); // still open → extend to now
+        :isRecentOpen?effectiveEnd.getTime():evOpen;
       if(evOpen>cursor)segs.push({type:'up',s:cursor,e:evOpen});
       const dnEnd=Math.max(evClose,evOpen+60000);
       segs.push({type:'dn',s:evOpen,e:Math.min(dnEnd,effectiveEnd.getTime()),ev});
@@ -555,7 +556,8 @@ function render(){
     if(cursor<effectiveEnd.getTime())segs.push({type:'up',s:cursor,e:effectiveEnd.getTime()});
 
     const totalDn=sorted.reduce((s,ev)=>{
-      const closeT=(ev.dateClose||effectiveEnd).getTime();
+      const isRecentOpen=!ev.dateClose&&ev.date>=prevWinStart;
+      const closeT=ev.dateClose?ev.dateClose.getTime():isRecentOpen?effectiveEnd.getTime():ev.date.getTime();
       const dn=Math.min(closeT,effectiveEnd.getTime())-Math.max(ev.date.getTime(),winStart.getTime());
       return s+Math.max(0,dn);
     },0);
