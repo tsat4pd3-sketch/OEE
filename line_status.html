@@ -411,14 +411,15 @@ function parseCSV(text){
     if(dept&&!dept.toUpperCase().includes('JIG')&&!mcType.toUpperCase().includes('JIG'))continue;
     const onOff=g(row,'Online/Offline');
     const probType=g(row,'Problem Type')||g(row,'ประเภทงานซ่อม');
-    // Same default filters as jig_mtn
-    if(isOfflineMO(onOff)||isAdjustMO(probType))continue;
+    // Exclude offline MOs; keep ปรับจิ๊ก but tag separately (used for WATCH status only)
+    if(isOfflineMO(onOff))continue;
+    const isAdjust=isAdjustMO(probType);
     const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
     const statusMO=g(row,'Status MO').toLowerCase();
     const isClosed=!!dateClose||statusMO.includes('เสร็จ')||statusMO.includes('close')||statusMO.includes('done');
     const lineDt=(dateClose&&dateClose>dateOpen)?Math.round((dateClose-dateOpen)/60000):0;
     rows.push({
-      date:dateOpen,dateClose,isClosed,
+      date:dateOpen,dateClose,isClosed,isAdjust,
       line:(g(row,'Line การผลิต')||'').trim().toUpperCase(),
       mcNo:g(row,'Mc No.'),
       probType,
@@ -500,11 +501,12 @@ function render(){
   // WATCH = unclosed MO older than 2 shifts but within 7 days — chronic/managed situation
   // UP    = no unresolved MOs
   const prevWinStart=new Date(winStart.getTime()-24*3600000); // start of previous shift
-  const WATCH_LOOKBACK=7*86400000;
   const lineStatus={};
   lines.forEach(ln=>{
-    const freshDown=lineMap[ln].filter(d=>!d.isClosed&&!d.dateClose&&d.date>=prevWinStart&&d.date<=effectiveEnd);
-    const crossWatch=lineMap[ln].filter(d=>!d.isClosed&&!d.dateClose&&d.date<prevWinStart&&d.date>=new Date(winStart.getTime()-WATCH_LOOKBACK));
+    // DOWN: normal (non-ปรับจิ๊ก) unclosed MO from last 2 shifts
+    const freshDown=lineMap[ln].filter(d=>!d.isAdjust&&!d.isClosed&&!d.dateClose&&d.date>=prevWinStart&&d.date<=effectiveEnd);
+    // WATCH: unclosed ปรับจิ๊ก MO only (line running, not at full efficiency)
+    const crossWatch=lineMap[ln].filter(d=>d.isAdjust&&!d.isClosed&&!d.dateClose&&d.date<=effectiveEnd);
     const status=freshDown.length>0?'down':crossWatch.length>0?'watch':'up';
     lineStatus[ln]={status,down:status==='down',watch:status==='watch',events:freshDown.length>0?freshDown:crossWatch};
   });
@@ -534,7 +536,8 @@ function render(){
   const grid=document.getElementById('status-grid');
   grid.innerHTML=lines.map(ln=>{
     const st=lineStatus[ln];
-    const events=(lineMap[ln]||[]).filter(d=>d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
+    // Timeline shows only normal MOs (exclude ปรับจิ๊ก — doesn't stop the line)
+    const events=(lineMap[ln]||[]).filter(d=>!d.isAdjust&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
     const sorted=[...events].sort((a,b)=>a.date-b.date);
 
     // Segments
@@ -641,7 +644,7 @@ function render(){
   // Update avg uptime
   if(lines.length){
     const allPcts=lines.map(ln=>{
-      const ev=(lineMap[ln]||[]).filter(d=>d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
+      const ev=(lineMap[ln]||[]).filter(d=>!d.isAdjust&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
       const dn=ev.reduce((s,e)=>{if(e.dateClose&&e.dateClose>e.date){const d=Math.min(e.dateClose,effectiveEnd)-Math.max(e.date,winStart);return s+Math.max(0,d);}return s;},0);
       return elapsedMs>0?Math.max(0,Math.round((1-dn/elapsedMs)*100)):100;
     });
