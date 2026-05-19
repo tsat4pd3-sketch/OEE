@@ -145,8 +145,12 @@
   // ── Public API ─────────────────────────────────────────────────
   async function require(onReady) {
     _onReady = onReady;
-    const ok = await restoreSession();
-    if (ok) { onReady(); return; }
+    try {
+      const ok = await restoreSession();
+      if (ok) { onReady(); return; }
+    } catch(e) {
+      clearSession(); // bad saved session — clear and show login
+    }
     buildModal();
   }
 
