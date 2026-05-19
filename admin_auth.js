@@ -165,7 +165,8 @@
 
   function signOut() {
     clearSession();
-    window.location.reload();
+    if (typeof window.updateAuthBadge === "function") window.updateAuthBadge();
+    else window.location.reload();
   }
 
   global.AdminAuth = { require, isAuthed, getHeaders, signOut };
