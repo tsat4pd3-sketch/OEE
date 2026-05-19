@@ -127,7 +127,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 </style>
 <script src="admin_auth.js"></script>
 </head>
-<body style="visibility:hidden">
+<body>
+
+<!-- Auth overlay — shown until login completes; removed by AdminAuth.require() callback -->
+<div id="auth-overlay" style="
+  position:fixed;inset:0;z-index:9000;
+  background:var(--bg,#f2f2f2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Inter','Sarabun',sans-serif;font-size:14px;color:#aaa;
+">กำลังตรวจสอบสิทธิ์...</div>
 
 <nav id="sidebar">
   <div class="logo">
@@ -576,12 +584,23 @@ function showToast(msg, type = "success") {
   setTimeout(() => t.classList.remove("show"), 3000);
 }
 
-// Bootstrap: require admin auth before showing the page
-AdminAuth.require(function() {
-  document.body.style.visibility = "";
-  loadRegistry();
-  loadImages();
-});
+// Bootstrap: require admin auth, then remove overlay and load data
+function removeOverlay() {
+  const ov = document.getElementById("auth-overlay");
+  if (ov) ov.remove();
+}
+
+if (typeof AdminAuth === "undefined") {
+  // admin_auth.js failed to load — show page anyway so user isn't stranded
+  removeOverlay();
+  showToast("ไม่สามารถโหลดระบบ Auth — กรุณารีเฟรชหน้า", "error");
+} else {
+  AdminAuth.require(function() {
+    removeOverlay();
+    loadRegistry();
+    loadImages();
+  });
+}
 </script>
 </body>
 </html>
