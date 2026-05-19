@@ -157,6 +157,35 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
     </div>
   </div>
 
+  <!-- Registry card -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>🗝️ Part Registry — จัดการ Canonical Key &amp; Aliases</h3>
+      <button class="btn btn-ghost btn-sm" onclick="loadRegistry()">รีเฟรช</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
+      <b>Canonical Key</b> = ชื่อกลางที่ใช้ผูกรูป · <b>Aliases</b> = ชื่ออื่นๆ จากทุกแหล่งที่ map มาหา key นี้ได้ (คั่นด้วยจุลภาค)
+    </p>
+    <div class="form-row" style="align-items:flex-end">
+      <div class="form-group">
+        <label>Canonical Key *</label>
+        <input type="text" id="regKey" placeholder="เช่น GOR, LWRBAR, JIG-PRESS-01" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Aliases (คั่นด้วย ,)</label>
+        <input type="text" id="regAliases" placeholder="เช่น GOR BUMPER, 073, gor, กอร์">
+      </div>
+      <div class="form-group">
+        <label>คำอธิบาย</label>
+        <input type="text" id="regDesc" placeholder="เช่น ชิ้นงาน GOR Bumper ไลน์ PD4">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-primary btn-sm" onclick="saveRegistry()">บันทึก / อัพเดต</button>
+    </div>
+    <div id="registry-list" style="margin-top:16px"></div>
+  </div>
+
   <!-- Upload card -->
   <div class="card">
     <div class="card-hdr"><h3>📤 อัพโหลดรูปชิ้นงาน</h3></div>
@@ -171,8 +200,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 
     <div class="form-row">
       <div class="form-group">
-        <label>Part No. *</label>
-        <input type="text" id="partNoInput" placeholder="เช่น PA-001, SUB-A12" autocomplete="off">
+        <label>Canonical Key * <span style="font-weight:400;color:var(--muted)">(เลือกจาก Registry หรือพิมพ์ใหม่)</span></label>
+        <input type="text" id="partNoInput" list="partNoList" placeholder="เลือก Canonical Key..." autocomplete="off">
+        <datalist id="partNoList"></datalist>
       </div>
       <div class="form-group">
         <label>หมายเหตุ (ไม่บังคับ)</label>
@@ -233,6 +263,80 @@ const headers = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_
 
 let selectedFiles = [];
 let allImages = [];
+let allRegistry = [];
+
+// ─── Registry ─────────────────────────────────────────────────
+async function loadRegistry() {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/part_registry?select=*&order=canonical_key.asc`, { headers });
+  allRegistry = await res.json();
+  renderRegistryList();
+  // Populate datalist for upload
+  const dl = document.getElementById("partNoList");
+  dl.innerHTML = allRegistry.map(r => `<option value="${escHtml(r.canonical_key)}">${escHtml(r.canonical_key)}${r.description ? " — " + r.description : ""}</option>`).join("");
+}
+
+function renderRegistryList() {
+  const el = document.getElementById("registry-list");
+  if (!allRegistry.length) {
+    el.innerHTML = `<div style="font-size:13px;color:var(--muted);padding:8px 0">ยังไม่มี Registry — กรอกด้านบนแล้วกด "บันทึก"</div>`;
+    return;
+  }
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="background:var(--bg3)">
+      <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--muted);font-weight:700;border-bottom:2px solid var(--border2)">Canonical Key</th>
+      <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--muted);font-weight:700;border-bottom:2px solid var(--border2)">Aliases</th>
+      <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--muted);font-weight:700;border-bottom:2px solid var(--border2)">คำอธิบาย</th>
+      <th style="padding:8px 12px;border-bottom:2px solid var(--border2)"></th>
+    </tr></thead>
+    <tbody>${allRegistry.map(r => `
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 12px;font-weight:700;color:var(--text);font-family:var(--font-display)">${escHtml(r.canonical_key)}</td>
+      <td style="padding:9px 12px;color:var(--text2)">${(r.aliases||[]).map(a=>`<span style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 7px;font-size:11px;margin:2px;display:inline-block">${escHtml(a)}</span>`).join("")||"<span style='color:var(--muted2)'>—</span>"}</td>
+      <td style="padding:9px 12px;color:var(--muted)">${escHtml(r.description||"")}</td>
+      <td style="padding:9px 12px;text-align:right;white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editRegistry('${escHtml(r.canonical_key)}')">แก้ไข</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRegistry('${escHtml(r.canonical_key)}')">ลบ</button>
+      </td>
+    </tr>`).join("")}</tbody>
+  </table>`;
+}
+
+async function saveRegistry() {
+  const key = document.getElementById("regKey").value.trim().toUpperCase();
+  const aliasRaw = document.getElementById("regAliases").value.trim();
+  const desc = document.getElementById("regDesc").value.trim();
+  if (!key) { showToast("กรุณาระบุ Canonical Key", "error"); return; }
+  const aliases = aliasRaw ? aliasRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const body = JSON.stringify({ canonical_key: key, aliases, description: desc || null });
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/part_registry`, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates,return=minimal" },
+    body
+  });
+  if (!res.ok) { showToast("บันทึกไม่สำเร็จ: " + await res.text(), "error"); return; }
+  showToast("บันทึก " + key + " แล้ว", "success");
+  document.getElementById("regKey").value = "";
+  document.getElementById("regAliases").value = "";
+  document.getElementById("regDesc").value = "";
+  loadRegistry();
+}
+
+function editRegistry(key) {
+  const r = allRegistry.find(x => x.canonical_key === key);
+  if (!r) return;
+  document.getElementById("regKey").value = r.canonical_key;
+  document.getElementById("regAliases").value = (r.aliases || []).join(", ");
+  document.getElementById("regDesc").value = r.description || "";
+  document.getElementById("regKey").focus();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function deleteRegistry(key) {
+  if (!confirm(`ลบ "${key}" ออกจาก Registry? (รูปที่ผูกไว้จะยังอยู่)`)) return;
+  await fetch(`${SUPABASE_URL}/rest/v1/part_registry?canonical_key=eq.${encodeURIComponent(key)}`, { method: "DELETE", headers });
+  showToast("ลบ " + key + " แล้ว", "success");
+  loadRegistry();
+}
 
 // ─── File selection ───────────────────────────────────────────
 const dropZone = document.getElementById("dropZone");
@@ -463,6 +567,7 @@ function showToast(msg, type = "success") {
   setTimeout(() => t.classList.remove("show"), 3000);
 }
 
+loadRegistry();
 loadImages();
 </script>
 </body>
