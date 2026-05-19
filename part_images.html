@@ -129,14 +129,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 </head>
 <body>
 
-<!-- Auth overlay — shown until login completes; removed by AdminAuth.require() callback -->
-<div id="auth-overlay" style="
-  position:fixed;inset:0;z-index:9000;
-  background:var(--bg,#f2f2f2);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Inter','Sarabun',sans-serif;font-size:14px;color:#aaa;
-">กำลังตรวจสอบสิทธิ์...</div>
-
 <nav id="sidebar">
   <div class="logo">
     <div class="logo-tag">OEE Platform</div>
@@ -164,14 +156,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
       <h2>Part Images</h2>
       <p>คลังรูปชิ้นงาน — ผูกกับ Part No. แชร์ได้ทุกคน</p>
     </div>
-    <button onclick="AdminAuth.signOut()" style="
-      background:none;border:1px solid var(--border2);border-radius:4px;
-      color:var(--muted);font-size:12px;padding:6px 12px;cursor:pointer;
-      transition:all .2s;display:flex;align-items:center;gap:6px;
-    " onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
-       onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">
-      🔒 ออกจากระบบ
-    </button>
+    <div id="auth-status" style="display:flex;align-items:center;gap:8px;font-size:12px"></div>
   </div>
 
   <!-- Registry card -->
@@ -584,22 +569,57 @@ function showToast(msg, type = "success") {
   setTimeout(() => t.classList.remove("show"), 3000);
 }
 
-// Bootstrap: require admin auth, then remove overlay and load data
-function removeOverlay() {
-  const ov = document.getElementById("auth-overlay");
-  if (ov) ov.remove();
+// ─── Auth status badge ────────────────────────────────────────
+function updateAuthBadge() {
+  const el = document.getElementById("auth-status");
+  if (!el) return;
+  const authed = typeof AdminAuth !== "undefined" && AdminAuth.isAuthed();
+  if (authed) {
+    el.innerHTML = `
+      <span style="color:var(--green);font-weight:600">✓ Admin</span>
+      <button onclick="AdminAuth.signOut()" style="
+        background:none;border:1px solid var(--border2);border-radius:4px;
+        color:var(--muted);font-size:12px;padding:4px 10px;cursor:pointer;">
+        ออกจากระบบ
+      </button>`;
+  } else {
+    el.innerHTML = `
+      <span style="color:var(--muted)">อ่านอย่างเดียว</span>
+      <button onclick="requireAuth(loadRegistry)" style="
+        background:var(--accent);border:none;border-radius:4px;
+        color:#fff;font-size:12px;padding:4px 10px;cursor:pointer;font-weight:600;">
+        🔐 Login Admin
+      </button>`;
+  }
 }
 
-if (typeof AdminAuth === "undefined") {
-  // admin_auth.js failed to load — show page anyway so user isn't stranded
-  removeOverlay();
-  showToast("ไม่สามารถโหลดระบบ Auth — กรุณารีเฟรชหน้า", "error");
-} else {
+// requireAuth — show login if not authed, then run callback
+function requireAuth(onAuthed) {
+  if (typeof AdminAuth === "undefined") { showToast("Auth ไม่พร้อม กรุณารีเฟรช", "error"); return; }
+  if (AdminAuth.isAuthed()) { if (onAuthed) onAuthed(); return; }
+  AdminAuth.require(function() { updateAuthBadge(); if (onAuthed) onAuthed(); });
+}
+
+// Wrap write operations to require auth first
+const _origUpload    = uploadFiles;
+const _origSaveReg   = saveRegistry;
+const _origDeleteReg = deleteRegistry;
+const _origDeleteImg = deleteImage;
+
+window.uploadFiles   = () => requireAuth(_origUpload);
+window.saveRegistry  = () => requireAuth(_origSaveReg);
+window.deleteRegistry = (key) => requireAuth(() => _origDeleteReg(key));
+window.deleteImage    = (id, path) => requireAuth(() => _origDeleteImg(id, path));
+
+// Page init — load gallery immediately, no auth required for reading
+loadImages();
+if (typeof AdminAuth !== "undefined") {
   AdminAuth.require(function() {
-    removeOverlay();
+    updateAuthBadge();
     loadRegistry();
-    loadImages();
   });
+} else {
+  updateAuthBadge();
 }
 </script>
 </body>
