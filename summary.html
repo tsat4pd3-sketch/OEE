@@ -624,7 +624,7 @@ const MO_URL_SUM="https://docs.google.com/spreadsheets/d/e/2PACX-1vSVDNHyOb2LrXo
 
 // Map product id → line name keywords in MO data
 const PROD_LINE_KW={
-  gor: l=>l.includes('GOR'),
+  gor: l=>l.includes('GOR')&&!l.includes('LASER'),
   lwr: l=>l.includes('LWR')&&!l.includes('LASER'),
   p60: l=>l.includes('APRON 60')||l.includes('APRON60')||(l.includes('60')&&!l.includes('61')&&!l.includes('LASER')),
   p61: l=>l.includes('APRON 61')||l.includes('APRON61')||(l.includes('61')&&!l.includes('60')&&!l.includes('LASER')),
@@ -652,7 +652,9 @@ function parseMOSummary(text){
     if(!dateOpen)continue;
     const onOff=g(row,'Online/Offline');
     const probType=g(row,'ประเภทงานซ่อม')||g(row,'ประเภท')||g(row,'Problem Type');
-    // Same default filters as jig_mtn: exclude offline + ปรับจิ๊ก
+    // Filter: JIG dept/mc only (same as line_status) + exclude offline + ปรับจิ๊ก
+    const dept=g(row,'แผนก');const mcType=g(row,'Mc Type');
+    if(dept&&!dept.toUpperCase().includes('JIG')&&!mcType.toUpperCase().includes('JIG'))continue;
     const s=(onOff||'').toLowerCase().trim();
     if(s.includes('นอก')||s==='offline'||s==='off')continue;
     if(probType.includes('ปรับจิ๊ก'))continue;
