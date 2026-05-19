@@ -6,7 +6,6 @@
 <title>Production Summary Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
-<script src="part_img_widget.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -700,6 +699,7 @@ function renderProdTimelines(){
   }
   const totalMs=rangeEnd-rangeStart;       // full window — for pixel positioning
   const elapsedMs=effectiveEnd-rangeStart; // elapsed — for uptime %
+  const prevWinStart=new Date(rangeStart.getTime()-24*3600000); // start of previous shift (for open-MO extension)
   if(totalMs<=0)return;
 
   const pad=n=>String(n).padStart(2,'0');
@@ -722,7 +722,10 @@ function renderProdTimelines(){
     const segs=[];let cursor=rangeStart.getTime();
     sorted.forEach(ev=>{
       const evOpen=Math.max(ev.date.getTime(),rangeStart.getTime());
-      const evClose=ev.dateClose?Math.min(ev.dateClose.getTime(),effectiveEnd.getTime()):evOpen;
+      const isRecentOpen=!ev.dateClose&&ev.date>=prevWinStart;
+      const evClose=ev.dateClose
+        ?Math.min(ev.dateClose.getTime(),effectiveEnd.getTime())
+        :isRecentOpen?effectiveEnd.getTime():evOpen;
       if(evOpen>cursor)segs.push({type:'up',s:cursor,e:evOpen});
       const dnEnd=Math.max(evClose,evOpen+60000);
       segs.push({type:'dn',s:evOpen,e:Math.min(dnEnd,effectiveEnd.getTime()),ev});
@@ -1110,13 +1113,6 @@ function renderCard(prod,stats){
  renderMoM(document.getElementById('mom-out-'+prod.id),stats.monthTrend,momF,momL,stats.outArrow,prod.color,'ชิ้น/กะ');
  renderMoM(document.getElementById('mom-oee-'+prod.id),stats.monthTrend,'avgOEE','OEE %',stats.oeeArrow,oeeCol,'%');
  if(typeof window.animateKPIs==='function')window.animateKPIs();
- // Part images thumbnail
- if(typeof PartImgWidget!=='undefined'){
-   const thumbTarget=document.createElement('div');
-   thumbTarget.style.cssText='padding:8px 16px 10px;border-top:1px solid var(--border)';
-   el.appendChild(thumbTarget);
-   PartImgWidget.attachThumb(thumbTarget, prod.keywords.concat([prod.label, prod.id]), prod.label);
- }
  });
 }
 
@@ -1244,8 +1240,6 @@ async function init(){
 }
 
 window.enterDashboard=function(){const el=document.getElementById('loading');if(el)el.classList.add('hidden');setTimeout(()=>{if(el)el.style.display='none';},500);};
-
-if(typeof PartImgWidget!=='undefined') PartImgWidget.init();
 
 if(typeof Chart==='undefined'){
  const _wc=setInterval(()=>{if(typeof Chart!=='undefined'){clearInterval(_wc);init();

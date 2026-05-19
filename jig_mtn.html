@@ -1155,7 +1155,8 @@ function rMonthlyTrend(mo) {
 }
 
 // effectiveEnd: optional — segments stop here (future zone stays gray); uptime% uses elapsed time
-function _tlSegHtml(events, rangeStart, rangeEnd, totalMs, effectiveEnd) {
+// prevWinStart: optional — open MOs from this point onward extend to capEnd (shows line is still down)
+function _tlSegHtml(events, rangeStart, rangeEnd, totalMs, effectiveEnd, prevWinStart) {
   const capEnd = effectiveEnd || rangeEnd;
   const elapsedMs = capEnd - rangeStart;
   const sorted = [...events].sort((a, b) => a.date - b.date);
@@ -1164,7 +1165,10 @@ function _tlSegHtml(events, rangeStart, rangeEnd, totalMs, effectiveEnd) {
 
   sorted.forEach(ev => {
     const evOpen  = Math.max(ev.date.getTime(), rangeStart.getTime());
-    const evClose = ev.dateClose ? Math.min(ev.dateClose.getTime(), capEnd.getTime()) : evOpen;
+    const isRecentOpen = !ev.dateClose && prevWinStart && ev.date >= prevWinStart;
+    const evClose = ev.dateClose
+      ? Math.min(ev.dateClose.getTime(), capEnd.getTime())
+      : isRecentOpen ? capEnd.getTime() : evOpen;
     if (evOpen > cursor) segs.push({ type:'up', s: cursor, e: evOpen });
     const dnEnd = Math.max(evClose, evOpen + 60000);
     segs.push({ type:'dn', s: evOpen, e: Math.min(dnEnd, capEnd.getTime()), ev });
@@ -1174,8 +1178,10 @@ function _tlSegHtml(events, rangeStart, rangeEnd, totalMs, effectiveEnd) {
   if (cursor < capEnd.getTime()) segs.push({ type:'up', s: cursor, e: capEnd.getTime() });
 
   const totalDn = sorted.reduce((s, ev) => {
-    if (ev.dateClose && ev.dateClose > ev.date) {
-      const dn = Math.min(ev.dateClose.getTime(), capEnd.getTime()) - Math.max(ev.date.getTime(), rangeStart.getTime());
+    const isRecentOpen = !ev.dateClose && prevWinStart && ev.date >= prevWinStart;
+    const closeT = ev.dateClose ? ev.dateClose.getTime() : isRecentOpen ? capEnd.getTime() : null;
+    if (closeT && closeT > ev.date.getTime()) {
+      const dn = Math.min(closeT, capEnd.getTime()) - Math.max(ev.date.getTime(), rangeStart.getTime());
       return s + Math.max(0, dn);
     }
     return s;
@@ -1269,6 +1275,7 @@ function rUptimeTimeline(mo) {
     tlEffective = null; // no future zone for non-1D
   }
   const tlMs = tlEnd - tlStart;
+  const tlPrevWin = new Date(tlStart.getTime() - 24 * 3600000); // for open-MO extension
 
   // Group by line → machine
   const lineMap = {};
@@ -1318,7 +1325,7 @@ function rUptimeTimeline(mo) {
     const allLineEvents = Object.values(mcMap).flat();
 
     // Line-level aggregate bar
-    const { segHtml: lSegHtml, uptimePct: lPct, uptimeColor: lColor } = _tlSegHtml(allLineEvents, tlStart, tlEnd, tlMs, tlEffective);
+    const { segHtml: lSegHtml, uptimePct: lPct, uptimeColor: lColor } = _tlSegHtml(allLineEvents, tlStart, tlEnd, tlMs, tlEffective, tlPrevWin);
     const groupId = `tl-grp-${li}`;
 
     html += `<div class="tl-line-row" onclick="tlToggle('${groupId}',this)">
@@ -1339,7 +1346,7 @@ function rUptimeTimeline(mo) {
 
     let mcHtml = '';
     mcNames.forEach(mcNo => {
-      const { segHtml, uptimePct, uptimeColor } = _tlSegHtml(mcMap[mcNo], tlStart, tlEnd, tlMs, tlEffective);
+      const { segHtml, uptimePct, uptimeColor } = _tlSegHtml(mcMap[mcNo], tlStart, tlEnd, tlMs, tlEffective, tlPrevWin);
       mcHtml += `<div class="tl-row">
         <div class="tl-lbl" title="${mcNo}">${mcNo}</div>
         <div class="tl-bar">${segHtml}${tickHtml}</div>
