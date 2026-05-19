@@ -125,8 +125,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
   .img-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
 }
 </style>
+<script src="admin_auth.js"></script>
 </head>
-<body>
+<body style="visibility:hidden">
 
 <nav id="sidebar">
   <div class="logo">
@@ -155,6 +156,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
       <h2>Part Images</h2>
       <p>คลังรูปชิ้นงาน — ผูกกับ Part No. แชร์ได้ทุกคน</p>
     </div>
+    <button onclick="AdminAuth.signOut()" style="
+      background:none;border:1px solid var(--border2);border-radius:4px;
+      color:var(--muted);font-size:12px;padding:6px 12px;cursor:pointer;
+      transition:all .2s;display:flex;align-items:center;gap:6px;
+    " onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+       onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">
+      🔒 ออกจากระบบ
+    </button>
   </div>
 
   <!-- Registry card -->
@@ -256,10 +265,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 
 <script>
 const SUPABASE_URL = "https://ewhdfqwfwofivojtsizn.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3aGRmcXdmd29maXZvanRzaXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5NjYsImV4cCI6MjA5MjQ1Njk2Nn0.mGrLjRFmtNtpyAu3aBduKqixyb3AjQDCid06qpBzrxw";
 const BUCKET = "part-images";
 
-const headers = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY };
+// Always use auth headers (AdminAuth ensures we're logged in before this runs)
+function headers() { return AdminAuth.getHeaders(); }
 
 let selectedFiles = [];
 let allImages = [];
@@ -267,7 +276,7 @@ let allRegistry = [];
 
 // ─── Registry ─────────────────────────────────────────────────
 async function loadRegistry() {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/part_registry?select=*&order=canonical_key.asc`, { headers });
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/part_registry?select=*&order=canonical_key.asc`, { headers: headers() });
   allRegistry = await res.json();
   renderRegistryList();
   // Populate datalist for upload
@@ -310,7 +319,7 @@ async function saveRegistry() {
   const body = JSON.stringify({ canonical_key: key, aliases, description: desc || null });
   const res = await fetch(`${SUPABASE_URL}/rest/v1/part_registry`, {
     method: "POST",
-    headers: { ...headers, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates,return=minimal" },
+    headers: { ...headers(), "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates,return=minimal" },
     body
   });
   if (!res.ok) { showToast("บันทึกไม่สำเร็จ: " + await res.text(), "error"); return; }
@@ -333,7 +342,7 @@ function editRegistry(key) {
 
 async function deleteRegistry(key) {
   if (!confirm(`ลบ "${key}" ออกจาก Registry? (รูปที่ผูกไว้จะยังอยู่)`)) return;
-  await fetch(`${SUPABASE_URL}/rest/v1/part_registry?canonical_key=eq.${encodeURIComponent(key)}`, { method: "DELETE", headers });
+  await fetch(`${SUPABASE_URL}/rest/v1/part_registry?canonical_key=eq.${encodeURIComponent(key)}`, { method: "DELETE", headers: headers() });
   showToast("ลบ " + key + " แล้ว", "success");
   loadRegistry();
 }
@@ -406,7 +415,7 @@ async function uploadFiles() {
       // Upload to Storage
       const storRes = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, {
         method: "POST",
-        headers: { ...headers, "Content-Type": file.type },
+        headers: { ...headers(), "Content-Type": file.type },
         body: file
       });
       if (!storRes.ok) throw new Error(await storRes.text());
@@ -414,7 +423,7 @@ async function uploadFiles() {
       // Insert record
       const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/part_images`, {
         method: "POST",
-        headers: { ...headers, "Content-Type": "application/json", "Prefer": "return=minimal" },
+        headers: { ...headers(), "Content-Type": "application/json", "Prefer": "return=minimal" },
         body: JSON.stringify({ part_no: partNo, image_path: path, file_name: file.name, note: note || null })
       });
       if (!dbRes.ok) throw new Error(await dbRes.text());
@@ -449,7 +458,7 @@ async function uploadFiles() {
 async function loadImages() {
   document.getElementById("gallery").innerHTML = '<div class="loading">กำลังโหลด...</div>';
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/part_images?select=*&order=uploaded_at.desc`, { headers });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/part_images?select=*&order=uploaded_at.desc`, { headers: headers() });
     allImages = await res.json();
     buildFilterChips();
     renderGallery();
@@ -530,8 +539,8 @@ function escHtml(s) {
 async function deleteImage(id, path) {
   if (!confirm("ลบรูปนี้?")) return;
   try {
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${encodeURIComponent(path)}`, { method: "DELETE", headers });
-    await fetch(`${SUPABASE_URL}/rest/v1/part_images?id=eq.${id}`, { method: "DELETE", headers });
+    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${encodeURIComponent(path)}`, { method: "DELETE", headers: headers() });
+    await fetch(`${SUPABASE_URL}/rest/v1/part_images?id=eq.${id}`, { method: "DELETE", headers: headers() });
     showToast("ลบแล้ว", "success");
     loadImages();
   } catch {
@@ -567,8 +576,12 @@ function showToast(msg, type = "success") {
   setTimeout(() => t.classList.remove("show"), 3000);
 }
 
-loadRegistry();
-loadImages();
+// Bootstrap: require admin auth before showing the page
+AdminAuth.require(function() {
+  document.body.style.visibility = "";
+  loadRegistry();
+  loadImages();
+});
 </script>
 </body>
 </html>
