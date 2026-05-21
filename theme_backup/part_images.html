@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Part Images · Photo Library</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f5f7f5;--bg2:#ffffff;--bg3:#eef3ee;--card:#ffffff;
-  --border:#d0ddd0;--border2:#b8ccb8;
-  --accent:#0d3d14;--accent-dim:rgba(13,61,20,0.07);
-  --cyan:#0066cc;--green:#22c55e;--red:#3dd65c;--amber:#f59e0b;
-  --text:#0a1f0c;--text2:#2d4a30;--muted:#6a8a6d;--muted2:#9ab09c;
+  --bg:#f2f2f2;--bg2:#ffffff;--bg3:#f7f7f7;--card:#ffffff;
+  --border:#e0e0e0;--border2:#cccccc;
+  --accent:#e31937;--accent-dim:rgba(227,25,55,0.08);
+  --cyan:#0066cc;--green:#22c55e;--red:#e31937;--amber:#f59e0b;
+  --text:#121212;--text2:#404040;--muted:#7a7a7a;--muted2:#a0a0a0;
   --sidebar:252px;--radius:4px;--radius-sm:3px;
-  --font-body:'Sarabun','Tahoma',sans-serif;--font-display:'Tahoma','Sarabun',sans-serif;
+  --font-body:'Sarabun',sans-serif;--font-display:'Inter',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--font-body);display:flex;min-height:100vh;overflow-x:hidden}
@@ -27,7 +27,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 .nav-links{padding:12px 14px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--border)}
 .nav-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:15px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;cursor:pointer;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
 .nav-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border)}
-.nav-btn.active{background:var(--accent-dim);border-color:#3dd65c30;color:var(--accent);font-weight:600}
+.nav-btn.active{background:var(--accent-dim);border-color:#e3193730;color:var(--accent);font-weight:600}
 .nav-btn .ni{flex-shrink:0;width:20px;text-align:center;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;font-style:normal;display:inline-block;font-size:14px}
 
 /* Main */
@@ -52,7 +52,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 .form-group{display:flex;flex-direction:column;gap:6px}
 .form-group label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .form-group input,.form-group textarea{padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color .2s}
-.form-group input:focus,.form-group textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px #3dd65c15}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px #e3193715}
 .form-group textarea{resize:vertical;min-height:60px}
 
 .preview-strip{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
@@ -131,7 +131,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);display
 
 <nav id="sidebar">
   <div class="logo">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="width:30px;height:30px;background:var(--accent);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="15" viewBox="0 0 16 15" fill="none"><path d="M8 1L15 14H1L8 1Z" fill="rgba(255,255,255,0.9)"/><path d="M8 5.5L12 14H4L8 5.5Z" fill="var(--accent)"/></svg></div><div><div style="font-size:8px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;font-weight:700;font-family:var(--font-display)">Thai Summit</div><div style="font-size:7px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;font-family:var(--font-display)">VX System</div></div></div>
     <div class="logo-tag">OEE Platform</div>
     <h1>Tesla<br>PD3·PD4</h1>
     <div class="logo-sub">Production Intelligence</div>
