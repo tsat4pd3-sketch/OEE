@@ -3,316 +3,690 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OEE · Production Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Thai Summit · Production Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#060f07;--bg2:#091209;--bg3:#0f1a10;--card:#0c1a0d;
-  --border:#1a2e1c;--border2:#243626;
-  --accent:#3dd65c;--accent-dim:rgba(61,214,92,0.09);
-  --text:#e8f5e9;--text2:#a5c9a8;--muted:#4a6e4d;--muted2:#2d4430;
-  --green:#3dd65c;--amber:#f59a3f;--red:#e05c4a;
-  --font-body:'Sarabun','Tahoma',sans-serif;--font-display:'Tahoma','Sarabun',sans-serif;
-}
+/* ─────────────────────────────────────────────────────────────────
+   THAI SUMMIT VX — PRODUCTION INTELLIGENCE
+   Premium landing — dark forest edition
+───────────────────────────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow-x:hidden}
+:root{
+  --g0:#060f07;--g1:#091209;--g2:#0c1a0d;--g3:#0f1e10;
+  --accent:#3dd65c;--accent2:#e87c1e;
+  --border:rgba(61,214,92,0.12);--border2:rgba(61,214,92,0.06);
+  --text:#e8f5e9;--text2:#a5c9a8;--muted:#4a6e4d;
+  --ff:'Tahoma','Sarabun',sans-serif;
+  --fs:'Sarabun',sans-serif;
+}
+html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
+html,body{height:100%}
 body{
-  background:var(--bg);color:var(--text);font-family:var(--font-body);
-  min-height:100vh;overflow-x:hidden;
+  background:var(--g0);color:var(--text);
+  font-family:var(--ff);overflow-x:hidden;
+  cursor:none;
 }
 
-/* ── NOISE ── */
-#noise{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.025;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:200px}
+/* ── AMBIENT BACKGROUND ──────────────────────────────────────── */
+#ambient{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  overflow:hidden;
+}
+#ambient::before{
+  content:'';position:absolute;
+  width:900px;height:900px;border-radius:50%;
+  background:radial-gradient(circle,rgba(61,214,92,0.06) 0%,transparent 70%);
+  top:-20%;left:-10%;animation:drift1 18s ease-in-out infinite alternate;
+}
+#ambient::after{
+  content:'';position:absolute;
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(232,124,30,0.04) 0%,transparent 70%);
+  bottom:-10%;right:-5%;animation:drift2 22s ease-in-out infinite alternate;
+}
+@keyframes drift1{to{transform:translate(80px,60px)}}
+@keyframes drift2{to{transform:translate(-60px,-40px)}}
 
-/* ── BG GRID ── */
-body::before{
-  content:'';position:fixed;inset:0;z-index:0;
+/* Grid overlay */
+#grid{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:
-    linear-gradient(rgba(13,61,20,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(13,61,20,0.03) 1px, transparent 1px);
-  background-size:60px 60px;
+    linear-gradient(rgba(61,214,92,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(61,214,92,0.025) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);
 }
 
-/* ── CURSOR ── */
-@media(hover:hover){body{cursor:none}}
-#cursor{position:fixed;top:0;left:0;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .22s,height .22s;mix-blend-mode:difference}
-#cursor-ring{position:fixed;top:0;left:0;width:27px;height:27px;border:1px solid rgba(13,61,20,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .25s}
-body.cur-hover #cursor{width:35px;height:35px}
-body.cur-hover #cursor-ring{opacity:0}
+/* Noise texture */
+#noise{
+  position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.022;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px;
+}
 
-/* ── LAYOUT ── */
-.page{
+/* ── CUSTOM CURSOR ───────────────────────────────────────────── */
+#cur{
+  position:fixed;top:0;left:0;z-index:9999;pointer-events:none;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);transform:translate(-50%,-50%);
+  transition:width .2s,height .2s,opacity .2s;
+  mix-blend-mode:screen;
+}
+#cur-ring{
+  position:fixed;top:0;left:0;z-index:9998;pointer-events:none;
+  width:32px;height:32px;border-radius:50%;
+  border:1px solid rgba(61,214,92,0.35);
+  transform:translate(-50%,-50%);
+  transition:width .35s cubic-bezier(.4,0,.2,1),
+             height .35s cubic-bezier(.4,0,.2,1),
+             opacity .25s,border-color .25s;
+}
+body.hov #cur{width:42px;height:42px}
+body.hov #cur-ring{opacity:0}
+body.click #cur{width:16px;height:16px;background:var(--accent2)}
+
+/* ── NAV ─────────────────────────────────────────────────────── */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:64px;
+  background:linear-gradient(to bottom,rgba(6,15,7,0.95),transparent);
+  backdrop-filter:blur(0px);
+  transition:backdrop-filter .4s,background .4s;
+}
+#nav.scrolled{
+  background:rgba(6,15,7,0.92);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border2);
+}
+.nav-brand{display:flex;align-items:center;gap:12px}
+.nav-logo-box{
+  width:32px;height:32px;background:var(--accent);border-radius:4px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.nav-brand-text{
+  display:flex;flex-direction:column;gap:1px;
+}
+.nav-brand-name{
+  font-family:var(--ff);font-size:11px;font-weight:700;
+  letter-spacing:2px;color:var(--text);text-transform:uppercase;
+}
+.nav-brand-sub{
+  font-family:var(--ff);font-size:8px;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;
+}
+.nav-links-right{display:flex;align-items:center;gap:6px}
+.nav-pill{
+  padding:6px 16px;border-radius:2px;font-family:var(--ff);
+  font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text2);border:1px solid transparent;
+  text-decoration:none;transition:all .2s;cursor:none;
+}
+.nav-pill:hover{color:var(--accent);border-color:var(--border)}
+.nav-pill.cta{
+  background:var(--accent);color:var(--g0);border-color:var(--accent);
+}
+.nav-pill.cta:hover{background:transparent;color:var(--accent)}
+
+/* ── HERO SECTION ────────────────────────────────────────────── */
+#hero{
   position:relative;z-index:2;
   min-height:100vh;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:40px 24px 60px;
+  padding:120px 48px 80px;
+  scroll-snap-align:start;
 }
-
-/* ── TOP NAV ── */
-.top-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  height:56px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;border-bottom:1px solid var(--border);
-  background:rgba(5,5,5,0.85);backdrop-filter:blur(12px);
-}
-.nav-logo{
-  font-family:var(--font-display);font-size:13px;font-weight:800;
-  letter-spacing:3px;color:var(--text);text-transform:uppercase;
-  display:flex;align-items:center;gap:10px;
-}
-.nav-logo-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse-dot 2s ease-in-out infinite}
-@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
-.nav-time{font-family:var(--font-display);font-size:11px;color:var(--muted);letter-spacing:2px}
-
-/* ── HERO ── */
-.hero{text-align:center;margin-bottom:64px;margin-top:56px}
 .hero-eyebrow{
-  font-family:var(--font-display);font-size:10px;font-weight:600;
-  letter-spacing:5px;text-transform:uppercase;color:var(--accent);
-  margin-bottom:20px;opacity:0;animation:fadeUp .6s .1s ease forwards;
+  display:flex;align-items:center;gap:12px;margin-bottom:32px;
+  opacity:0;transform:translateY(20px);
+  animation:fadeUp .8s cubic-bezier(.16,1,.3,1) .2s forwards;
+}
+.eyebrow-line{width:40px;height:1px;background:var(--accent)}
+.eyebrow-text{
+  font-family:var(--ff);font-size:10px;font-weight:700;
+  letter-spacing:4px;color:var(--accent);text-transform:uppercase;
 }
 .hero-title{
-  font-family:var(--font-display);font-size:clamp(3rem,8vw,7rem);
-  font-weight:900;line-height:.95;letter-spacing:-.04em;
-  color:var(--text);margin-bottom:16px;
-  opacity:0;animation:fadeUp .7s .25s ease forwards;
+  font-family:var(--ff);
+  font-size:clamp(3.5rem,9vw,8.5rem);
+  font-weight:700;line-height:.95;letter-spacing:-.03em;
+  text-align:center;max-width:1000px;
+  opacity:0;transform:translateY(30px);
+  animation:fadeUp .9s cubic-bezier(.16,1,.3,1) .35s forwards;
 }
-.hero-title span{color:var(--accent)}
-.hero-sub{
-  font-family:var(--font-display);font-size:clamp(.75rem,1.5vw,1rem);
-  color:var(--muted);letter-spacing:.05em;max-width:500px;margin:0 auto;
-  opacity:0;animation:fadeUp .7s .4s ease forwards;
-}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero-title .hl{color:var(--accent)}
+.hero-title .dim{color:rgba(232,245,233,0.2)}
+.hero-title .or{color:var(--accent2)}
 
-/* ── SECTOR CARDS ── */
-.sectors{
-  display:grid;grid-template-columns:1fr 1fr;gap:16px;
-  width:100%;max-width:900px;margin:0 auto 48px;
-  opacity:0;animation:fadeUp .8s .5s ease forwards;
+.hero-sub{
+  font-family:var(--fs);font-size:clamp(1rem,1.8vw,1.2rem);
+  color:var(--text2);margin-top:28px;text-align:center;
+  max-width:520px;line-height:1.7;font-weight:300;
+  opacity:0;transform:translateY(20px);
+  animation:fadeUp .8s cubic-bezier(.16,1,.3,1) .55s forwards;
 }
-.sector-card{
+
+.hero-cta{
+  display:flex;align-items:center;gap:12px;margin-top:48px;
+  opacity:0;transform:translateY(20px);
+  animation:fadeUp .8s cubic-bezier(.16,1,.3,1) .7s forwards;
+}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 32px;border-radius:2px;
+  background:var(--accent);color:var(--g0);
+  font-family:var(--ff);font-size:12px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;text-decoration:none;
+  border:1px solid var(--accent);transition:all .25s;cursor:none;
   position:relative;overflow:hidden;
-  border:1px solid var(--border);background:var(--card);
-  border-radius:2px;padding:40px 36px 36px;
-  cursor:pointer;text-decoration:none;color:var(--text);
-  display:flex;flex-direction:column;
-  transition:border-color .25s,transform .25s,box-shadow .25s;
 }
-.sector-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--card-accent,var(--accent));
-  transform:scaleX(0);transform-origin:left;
+.btn-primary::after{
+  content:'';position:absolute;inset:0;
+  background:var(--g0);transform:translateX(-101%);
   transition:transform .3s cubic-bezier(.4,0,.2,1);
 }
-.sector-card:hover::before{transform:scaleX(1)}
-.sector-card:hover{
-  border-color:var(--border2);
-  transform:translateY(-3px);
-  box-shadow:0 16px 48px rgba(0,0,0,0.6);
+.btn-primary:hover::after{transform:translateX(0)}
+.btn-primary:hover{color:var(--accent)}
+.btn-primary span{position:relative;z-index:1}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 28px;border-radius:2px;
+  background:transparent;color:var(--text2);
+  font-family:var(--ff);font-size:12px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;text-decoration:none;
+  border:1px solid var(--border);transition:all .25s;cursor:none;
 }
-.sector-card.oee{--card-accent:#3dd65c}
-.sector-card.mtn{--card-accent:#22c55e}
+.btn-ghost:hover{color:var(--accent);border-color:var(--accent)}
 
-.sector-icon{
-  width:52px;height:52px;margin-bottom:24px;border-radius:2px;
+/* Hero stats ticker */
+.hero-stats{
+  display:flex;align-items:center;gap:0;margin-top:80px;
+  border:1px solid var(--border2);border-radius:2px;
+  overflow:hidden;
+  opacity:0;transform:translateY(20px);
+  animation:fadeUp .8s cubic-bezier(.16,1,.3,1) .9s forwards;
+}
+.stat-item{
+  padding:18px 36px;display:flex;flex-direction:column;gap:4px;
+  border-right:1px solid var(--border2);
+}
+.stat-item:last-child{border-right:none}
+.stat-val{
+  font-family:var(--ff);font-size:24px;font-weight:700;
+  color:var(--text);letter-spacing:-.5px;
+}
+.stat-val .unit{font-size:14px;color:var(--accent);margin-left:2px}
+.stat-lbl{
+  font-family:var(--ff);font-size:9px;font-weight:700;
+  color:var(--muted);letter-spacing:2px;text-transform:uppercase;
+}
+
+/* Scroll indicator */
+.scroll-hint{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:0;animation:fadeUp .6s .ease 1.3s forwards;
+}
+.scroll-hint-line{
+  width:1px;height:48px;background:linear-gradient(to bottom,transparent,var(--accent));
+  animation:scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse{0%,100%{opacity:.3}50%{opacity:1}}
+.scroll-hint-text{
+  font-family:var(--ff);font-size:9px;letter-spacing:3px;
+  color:var(--muted);text-transform:uppercase;
+}
+
+/* ── MODULES SECTION ─────────────────────────────────────────── */
+#modules{
+  position:relative;z-index:2;padding:120px 48px;
+  scroll-snap-align:start;
+}
+.section-label{
+  display:flex;align-items:center;gap:16px;margin-bottom:64px;
+}
+.section-label-line{width:32px;height:1px;background:var(--accent)}
+.section-label-text{
+  font-family:var(--ff);font-size:10px;font-weight:700;
+  letter-spacing:4px;color:var(--accent);text-transform:uppercase;
+}
+.section-num{
+  font-family:var(--ff);font-size:10px;color:var(--muted);
+  letter-spacing:2px;margin-left:auto;
+}
+
+/* Module grid */
+.module-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1px;background:var(--border2);
+  border:1px solid var(--border2);
+}
+
+.module-card{
+  background:var(--g0);padding:48px 40px;
+  position:relative;overflow:hidden;
+  cursor:none;text-decoration:none;
+  display:block;
+  transition:background .3s;
+}
+.module-card::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:2px;
+  background:var(--mc-accent,var(--accent));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+}
+.module-card:hover::before{transform:scaleX(1)}
+.module-card:hover{background:var(--g2)}
+
+/* Accent corner glow */
+.module-card::after{
+  content:'';position:absolute;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,var(--mc-glow,rgba(61,214,92,0.06)) 0%,transparent 70%);
+  bottom:-60px;right:-60px;
+  opacity:0;transition:opacity .4s;
+}
+.module-card:hover::after{opacity:1}
+
+.mc-num{
+  font-family:var(--ff);font-size:10px;font-weight:700;
+  letter-spacing:3px;color:var(--muted);text-transform:uppercase;
+  margin-bottom:24px;display:block;
+}
+.mc-icon{
+  width:48px;height:48px;border-radius:4px;
   display:flex;align-items:center;justify-content:center;
-  font-size:26px;flex-shrink:0;
+  margin-bottom:24px;font-size:22px;
+  border:1px solid var(--border);
+  background:rgba(61,214,92,0.04);
 }
-.sector-card.oee .sector-icon{background:rgba(192,57,43,0.1);border:1px solid rgba(13,61,20,0.2)}
-.sector-card.mtn .sector-icon{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15)}
+.mc-title{
+  font-family:var(--ff);font-size:20px;font-weight:700;
+  color:var(--text);letter-spacing:-.3px;margin-bottom:10px;
+}
+.mc-desc{
+  font-family:var(--fs);font-size:14px;color:var(--text2);
+  line-height:1.7;font-weight:300;max-width:340px;
+}
+.mc-links{
+  display:flex;flex-direction:column;gap:6px;margin-top:28px;
+}
+.mc-link{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--ff);font-size:11px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;
+  padding:6px 0;border-bottom:1px solid transparent;
+  transition:all .2s;cursor:none;width:fit-content;
+}
+.mc-link:hover{color:var(--mc-accent,var(--accent));border-bottom-color:currentColor}
+.mc-arrow{
+  font-size:10px;transition:transform .2s;
+}
+.mc-link:hover .mc-arrow{transform:translateX(4px)}
 
-.sector-label{
-  font-family:var(--font-display);font-size:10px;font-weight:700;
-  letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;
-}
-.sector-card.oee .sector-label{color:var(--accent)}
-.sector-card.mtn .sector-label{color:var(--green)}
+/* Module card accent variants */
+.mc-oee{--mc-accent:#3dd65c;--mc-glow:rgba(61,214,92,0.07)}
+.mc-mtn{--mc-accent:#e87c1e;--mc-glow:rgba(232,124,30,0.07)}
+.mc-line{--mc-accent:#4dcc6a;--mc-glow:rgba(77,204,106,0.07)}
+.mc-plan{--mc-accent:#f59a3f;--mc-glow:rgba(245,154,63,0.07)}
 
-.sector-title{
-  font-family:var(--font-display);font-size:clamp(1.4rem,2.5vw,2rem);
-  font-weight:800;letter-spacing:-.03em;line-height:1.1;
-  color:var(--text);margin-bottom:12px;
+/* Full-width module card */
+.module-card.full{grid-column:1/-1}
+
+/* ── QUALITY STATEMENT ───────────────────────────────────────── */
+#statement{
+  position:relative;z-index:2;
+  padding:120px 48px;
+  border-top:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:32px;
+  text-align:center;
+  scroll-snap-align:start;
 }
-.sector-desc{
-  font-size:14px;color:var(--text2);line-height:1.7;
-  margin-bottom:24px;flex:1;
+.statement-pre{
+  font-family:var(--ff);font-size:10px;font-weight:700;
+  letter-spacing:4px;color:var(--muted);text-transform:uppercase;
+}
+.statement-text{
+  font-family:var(--ff);font-size:clamp(1.8rem,4vw,3.5rem);
+  font-weight:700;color:var(--text);letter-spacing:-.02em;
+  max-width:800px;line-height:1.15;
+}
+.statement-text em{
+  font-style:normal;color:var(--accent);
+}
+.statement-sub{
+  font-family:var(--fs);font-size:14px;color:var(--muted);
+  letter-spacing:.5px;font-style:italic;
 }
 
-.sector-links{display:flex;flex-direction:column;gap:6px}
-.sector-link{
+/* ── FOOTER ──────────────────────────────────────────────────── */
+#footer{
+  position:relative;z-index:2;
+  padding:32px 48px;
+  border-top:1px solid var(--border2);
   display:flex;align-items:center;justify-content:space-between;
-  padding:8px 12px;border-radius:2px;
-  background:rgba(255,255,255,0.03);border:1px solid var(--border);
-  font-family:var(--font-display);font-size:11px;font-weight:600;
-  letter-spacing:.8px;text-transform:uppercase;color:var(--text2);
-  text-decoration:none;transition:all .15s;
+  flex-wrap:wrap;gap:16px;
 }
-.sector-link:hover{background:rgba(255,255,255,0.06);border-color:var(--border2);color:var(--text)}
-.sector-link .arrow{opacity:.4;transition:opacity .15s,transform .15s}
-.sector-link:hover .arrow{opacity:1;transform:translateX(3px)}
+.footer-brand{
+  display:flex;align-items:center;gap:10px;
+}
+.footer-brand-text{
+  font-family:var(--ff);font-size:10px;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;
+}
+.footer-right{
+  font-family:var(--ff);font-size:10px;letter-spacing:1.5px;
+  color:var(--muted2,#2d4430);text-transform:uppercase;
+}
+#footer-time{color:var(--accent)}
 
-.sector-card.oee .sector-link:hover{border-color:rgba(13,61,20,0.3);color:var(--accent)}
-.sector-card.mtn .sector-link:hover{border-color:rgba(34,197,94,0.25);color:var(--green)}
+/* ── ANIMATIONS ──────────────────────────────────────────────── */
+@keyframes fadeUp{
+  to{opacity:1;transform:translateY(0)}
+}
 
-/* ── STATUS ROW ── */
-.status-row{
-  display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap;
-  opacity:0;animation:fadeUp .8s .65s ease forwards;
-  margin-bottom:16px;
+/* Reveal on scroll */
+.reveal{
+  opacity:0;transform:translateY(32px);
+  transition:opacity .8s cubic-bezier(.16,1,.3,1),
+             transform .8s cubic-bezier(.16,1,.3,1);
 }
-.status-pill{
-  display:flex;align-items:center;gap:7px;
-  font-family:var(--font-display);font-size:10px;font-weight:600;
-  letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);
-}
-.s-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse-dot 2s infinite}
-.s-dot.red{background:var(--accent)}
-.s-dot.amber{background:var(--amber)}
+.reveal.vis{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:.1s}
+.reveal-d2{transition-delay:.2s}
+.reveal-d3{transition-delay:.3s}
+.reveal-d4{transition-delay:.4s}
 
-/* ── FOOTER ── */
-.footer{
-  position:fixed;bottom:0;left:0;right:0;z-index:100;
-  height:36px;display:flex;align-items:center;justify-content:center;
-  border-top:1px solid var(--border);background:rgba(5,5,5,0.8);
-  font-family:var(--font-display);font-size:10px;color:var(--muted);
-  letter-spacing:2px;text-transform:uppercase;gap:20px;
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media(max-width:900px){
+  #nav{padding:0 24px}
+  #hero,#modules,#statement{padding-left:24px;padding-right:24px}
+  .module-grid{grid-template-columns:1fr}
+  .module-card.full{grid-column:auto}
+  .hero-stats{flex-direction:column;gap:0}
+  .stat-item{border-right:none;border-bottom:1px solid var(--border2)}
+  .stat-item:last-child{border-bottom:none}
+  #footer{padding:24px}
+  .nav-links-right{display:none}
 }
-.footer-sep{width:1px;height:12px;background:var(--border2)}
+@media(max-width:600px){
+  .hero-cta{flex-direction:column;width:100%}
+  .btn-primary,.btn-ghost{justify-content:center;width:100%}
+}
 
-/* ── RESPONSIVE ── */
-@media(max-width:768px){
-  .sectors{grid-template-columns:1fr;max-width:480px}
-  .sector-card{padding:30px 24px 26px}
-  .top-nav{padding:0 16px}
-  .hero-title{letter-spacing:-.03em}
-}
-@media(max-width:480px){
-  .sector-card{padding:24px 20px}
-  .hero{margin-bottom:36px}
-  .sectors{gap:12px}
+/* Reduce motion */
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
 }
 </style>
 </head>
 <body>
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
-<div id="noise"></div>
 
-<!-- Top Nav -->
-<nav class="top-nav">
-  <div class="nav-logo">
-    <div class="nav-logo-dot"></div>
-    PRODUCTION INTELLIGENCE
+<div id="ambient"></div>
+<div id="grid"></div>
+<div id="noise"></div>
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- ── NAV ────────────────────────────────────────────────────── -->
+<nav id="nav">
+  <div class="nav-brand">
+    <div class="nav-logo-box">
+      <svg width="16" height="15" viewBox="0 0 16 15" fill="none">
+        <path d="M8 1L15 14H1L8 1Z" fill="rgba(255,255,255,0.9)"/>
+        <path d="M8 5.5L12 14H4L8 5.5Z" fill="var(--accent)"/>
+      </svg>
+    </div>
+    <div class="nav-brand-text">
+      <div class="nav-brand-name">Thai Summit</div>
+      <div class="nav-brand-sub">VX Production System</div>
+    </div>
   </div>
-  <div class="nav-time" id="nav-time"></div>
+  <div class="nav-links-right">
+    <a class="nav-pill" href="overview.html">Overview</a>
+    <a class="nav-pill" href="summary.html">Summary</a>
+    <a class="nav-pill" href="jig_mtn.html">JIG MTN</a>
+    <a class="nav-pill" href="line_status.html">Line Status</a>
+    <a class="nav-pill cta" href="overview.html">Enter Dashboard →</a>
+  </div>
 </nav>
 
-<!-- Main Page -->
-<div class="page">
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-eyebrow">Dashboard Hub · PD3 + PD4</div>
-    <h1 class="hero-title">OEE<br><span>Intelligence</span></h1>
-    <p class="hero-sub">Production & Maintenance performance intelligence platform</p>
+<!-- ── HERO ───────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-eyebrow">
+    <div class="eyebrow-line"></div>
+    <div class="eyebrow-text">Production Intelligence · PD3 / PD4</div>
+    <div class="eyebrow-line"></div>
   </div>
 
-  <!-- Sector Cards -->
-  <div class="sectors">
-    <!-- OEE / Production -->
-    <a class="sector-card oee" href="overview.html">
-      <div class="sector-icon">⚙️</div>
-      <div class="sector-label">Production Performance</div>
-      <h2 class="sector-title">OEE Dashboard</h2>
-      <p class="sector-desc">ติดตาม Overall Equipment Effectiveness (OEE) แบบ Real-time — Availability, Performance, Quality รายวัน/เดือน/ปี</p>
-      <div class="sector-links">
-        <a class="sector-link" href="overview.html" onclick="event.stopPropagation()">
-          Combined Overview <span class="arrow">→</span>
+  <h1 class="hero-title">
+    <span class="dim">Real</span>time<br>
+    <span class="hl">OEE</span>
+    <span class="dim">·</span>
+    <span class="or">Analytics</span>
+  </h1>
+
+  <p class="hero-sub">
+    ระบบติดตามประสิทธิภาพการผลิตแบบเรียลไทม์<br>
+    สำหรับสายการผลิต PD3 และ PD4 ของ Thai Summit
+  </p>
+
+  <div class="hero-cta">
+    <a class="btn-primary" href="overview.html">
+      <span>Enter Dashboard</span>
+      <span>→</span>
+    </a>
+    <a class="btn-ghost" href="summary.html">Production Summary</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-val">2<span class="unit">Lines</span></div>
+      <div class="stat-lbl">Production Lines</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" id="s-oee">—<span class="unit">%</span></div>
+      <div class="stat-lbl">Target OEE</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val">24<span class="unit">h</span></div>
+      <div class="stat-lbl">Live Monitoring</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val">0<span class="unit">def</span></div>
+      <div class="stat-lbl">Defect Target</div>
+    </div>
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true">
+    <div class="scroll-hint-line"></div>
+    <div class="scroll-hint-text">Scroll</div>
+  </div>
+</section>
+
+<!-- ── MODULES ─────────────────────────────────────────────────── -->
+<section id="modules">
+  <div class="section-label reveal">
+    <div class="section-label-line"></div>
+    <div class="section-label-text">Dashboard Modules</div>
+    <div class="section-num">01 / 04</div>
+  </div>
+
+  <div class="module-grid">
+
+    <!-- OEE Overview -->
+    <a class="module-card mc-oee reveal reveal-d1" href="overview.html">
+      <span class="mc-num">01</span>
+      <div class="mc-icon">📊</div>
+      <div class="mc-title">Combined Overview</div>
+      <div class="mc-desc">
+        ภาพรวม OEE ทั้ง PD3 และ PD4 รวมกัน
+        พร้อม trend, pareto downtime และ flash alarm
+      </div>
+      <div class="mc-links">
+        <a class="mc-link" href="overview.html" onclick="event.stopPropagation()">
+          Combined Overview <span class="mc-arrow">→</span>
         </a>
-        <a class="sector-link" href="summary.html" onclick="event.stopPropagation()">
-          Summary Dashboard <span class="arrow">→</span>
+        <a class="mc-link" href="summary.html" onclick="event.stopPropagation()">
+          Production Summary <span class="mc-arrow">→</span>
         </a>
-        <a class="sector-link" href="oee_pd3.html" onclick="event.stopPropagation()">
-          PD3 Overview <span class="arrow">→</span>
+        <a class="mc-link" href="oee_pd3.html" onclick="event.stopPropagation()">
+          PD3 Deep Dive <span class="mc-arrow">→</span>
         </a>
-        <a class="sector-link" href="oee_pd4.html" onclick="event.stopPropagation()">
-          PD4 Overview <span class="arrow">→</span>
-        </a>
-        <a class="sector-link" href="oee_deep_pd3.html" onclick="event.stopPropagation()">
-          Deep Analysis PD3 <span class="arrow">→</span>
-        </a>
-        <a class="sector-link" href="oee_deep_pd4.html" onclick="event.stopPropagation()">
-          Deep Analysis PD4 <span class="arrow">→</span>
+        <a class="mc-link" href="oee_pd4.html" onclick="event.stopPropagation()">
+          PD4 Deep Dive <span class="mc-arrow">→</span>
         </a>
       </div>
     </a>
 
-    <!-- Maintenance -->
-    <a class="sector-card mtn" href="jig_mtn.html">
-      <div class="sector-icon">🔧</div>
-      <div class="sector-label">Maintenance Performance</div>
-      <h2 class="sector-title">JIG MTN Dashboard</h2>
-      <p class="sector-desc">วิเคราะห์ Maintenance Order, MTTR, MTBF, ปัญหาซ้ำ และ Predictive Maintenance สำหรับงาน JIG Maintenance</p>
-      <div class="sector-links">
-        <a class="sector-link" href="jig_mtn.html" onclick="event.stopPropagation()">
-          JIG MTN Intelligence <span class="arrow">→</span>
+    <!-- JIG Maintenance -->
+    <a class="module-card mc-mtn reveal reveal-d2" href="jig_mtn.html">
+      <span class="mc-num">02</span>
+      <div class="mc-icon">🔧</div>
+      <div class="mc-title">JIG Maintenance</div>
+      <div class="mc-desc">
+        ติดตาม MO, uptime timeline, MTBF/MTTR
+        และ KPI การซ่อมบำรุงของแผนก JIG
+      </div>
+      <div class="mc-links">
+        <a class="mc-link" href="jig_mtn.html" onclick="event.stopPropagation()">
+          JIG Intelligence <span class="mc-arrow">→</span>
         </a>
-        <a class="sector-link" href="masterplan .html" onclick="event.stopPropagation()">
-          Masterplan <span class="arrow">→</span>
+        <a class="mc-link" href="jig_kpi.html" onclick="event.stopPropagation()">
+          KPI Dashboard <span class="mc-arrow">→</span>
+        </a>
+        <a class="mc-link" href="oee_deep_pd3.html" onclick="event.stopPropagation()">
+          Deep Analysis PD3 <span class="mc-arrow">→</span>
+        </a>
+        <a class="mc-link" href="oee_deep_pd4.html" onclick="event.stopPropagation()">
+          Deep Analysis PD4 <span class="mc-arrow">→</span>
         </a>
       </div>
     </a>
-  </div>
 
-  <!-- Status Row -->
-  <div class="status-row">
-    <div class="status-pill"><div class="s-dot"></div>LIVE DATA</div>
-    <div class="footer-sep"></div>
-    <div class="status-pill"><div class="s-dot red"></div>PD3 + PD4</div>
-    <div class="footer-sep"></div>
-    <div class="status-pill"><div class="s-dot amber"></div>JIG MTN</div>
-  </div>
-</div>
+    <!-- Line Status -->
+    <a class="module-card mc-line reveal reveal-d3" href="line_status.html">
+      <span class="mc-num">03</span>
+      <div class="mc-icon">🏭</div>
+      <div class="mc-title">Line Status</div>
+      <div class="mc-desc">
+        สถานะสายการผลิตแบบ real-time
+        แสดง downtime, open MO และ uptime timeline ของทุกไลน์
+      </div>
+      <div class="mc-links">
+        <a class="mc-link" href="line_status.html" onclick="event.stopPropagation()">
+          Live Line Status <span class="mc-arrow">→</span>
+        </a>
+      </div>
+    </a>
 
-<!-- Footer -->
-<footer class="footer">
-  <span>OEE INTELLIGENCE PLATFORM</span>
-  <div class="footer-sep"></div>
-  <span id="footer-date"></span>
+    <!-- Masterplan + Parts -->
+    <a class="module-card mc-plan reveal reveal-d4" href="masterplan .html">
+      <span class="mc-num">04</span>
+      <div class="mc-icon">📋</div>
+      <div class="mc-title">Masterplan & Parts</div>
+      <div class="mc-desc">
+        แผนการผลิต masterplan รายสายและ
+        คลังรูปชิ้นงาน part images library
+      </div>
+      <div class="mc-links">
+        <a class="mc-link" href="masterplan .html" onclick="event.stopPropagation()">
+          Masterplan <span class="mc-arrow">→</span>
+        </a>
+        <a class="mc-link" href="part_images.html" onclick="event.stopPropagation()">
+          Part Images Library <span class="mc-arrow">→</span>
+        </a>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ── QUALITY STATEMENT ──────────────────────────────────────── -->
+<section id="statement">
+  <div class="statement-pre reveal">Quality Declaration</div>
+  <div class="statement-text reveal reveal-d1">
+    "<em>Zero defect</em> is possible"
+  </div>
+  <div class="statement-sub reveal reveal-d2">
+    ปัญหาคุณภาพเป็นศูนย์คือสิ่งที่เป็นไปได้
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────────────────────── -->
+<footer id="footer">
+  <div class="footer-brand">
+    <div class="nav-logo-box" style="width:24px;height:24px;opacity:.7">
+      <svg width="12" height="11" viewBox="0 0 12 11" fill="none">
+        <path d="M6 1L11 10H1L6 1Z" fill="rgba(255,255,255,0.9)"/>
+        <path d="M6 4.5L9 10H3L6 4.5Z" fill="var(--accent)"/>
+      </svg>
+    </div>
+    <div class="footer-brand-text">Thai Summit Group · VX Production Intelligence</div>
+  </div>
+  <div class="footer-right">
+    <span id="footer-time"></span>
+  </div>
 </footer>
 
 <script>
-// Clock
-function updateTime(){
-  const now=new Date();
-  document.getElementById('nav-time').textContent=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' น.';
-  document.getElementById('footer-date').textContent=now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
-}
-updateTime();setInterval(updateTime,1000);
-
-// Custom cursor
-(function(){
-  const dot=document.getElementById('cursor');
-  const ring=document.getElementById('cursor-ring');
-  if(!dot||!ring)return;
-  if(!window.matchMedia('(hover:hover)').matches)return;
-  let mx=0,my=0,rx=0,ry=0;
-  document.addEventListener('mousemove',e=>{
-    mx=e.clientX;my=e.clientY;
-    dot.style.left=mx+'px';dot.style.top=my+'px';
-  });
-  (function animRing(){
-    rx+=(mx-rx)*.11;ry+=(my-ry)*.11;
-    ring.style.left=rx+'px';ring.style.top=ry+'px';
-    requestAnimationFrame(animRing);
-  })();
-  document.querySelectorAll('a,.sector-card,.sector-link').forEach(el=>{
-    el.addEventListener('mouseenter',()=>document.body.classList.add('cur-hover'));
-    el.addEventListener('mouseleave',()=>document.body.classList.remove('cur-hover'));
-  });
+// ── Custom cursor
+const cur = document.getElementById('cur');
+const ring = document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+});
+(function animRing(){
+  rx+=(mx-rx)*.12;ry+=(my-ry)*.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
 })();
+document.querySelectorAll('a,.module-card,.btn-primary,.btn-ghost,.nav-pill').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
+});
+document.addEventListener('mousedown',()=>document.body.classList.add('click'));
+document.addEventListener('mouseup',()=>document.body.classList.remove('click'));
+
+// ── Scroll nav style
+const nav = document.getElementById('nav');
+window.addEventListener('scroll',()=>{
+  nav.classList.toggle('scrolled',window.scrollY>40);
+},{ passive:true });
+
+// ── Scroll reveal
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('vis'); });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ── Footer clock
+function tick(){
+  const d=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  document.getElementById('footer-time').textContent=
+    `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} — ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+tick(); setInterval(tick,1000);
+
+// ── Stat counter animate
+function countUp(el,target,decimals=0,suffix=''){
+  let start=0;const dur=1600;const step=16;
+  const inc=target/(dur/step);
+  const t=setInterval(()=>{
+    start=Math.min(start+inc,target);
+    el.innerHTML=start.toFixed(decimals)+suffix+'<span class="unit">%</span>';
+    if(start>=target)clearInterval(t);
+  },step);
+}
+setTimeout(()=>countUp(document.getElementById('s-oee'),85,0),1000);
 </script>
 </body>
 </html>
