@@ -4,28 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>JIG MTN · KPI Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
- --bg:#f5f7f5;--bg2:#ffffff;--bg3:#eef3ee;--card:#ffffff;
- --border:#d0ddd0;--border2:#b8ccb8;
- --accent:#0d3d14;--accent-dim:rgba(13,61,20,0.07);
- --cyan:#0066cc;--green:#22c55e;--red:#3dd65c;--purple:#a855f7;--amber:#f59e0b;
- --text:#0a1f0c;--text2:#2d4a30;--muted:#6a8a6d;--muted2:#9ab09c;
- --pd3:#1a6d2e;--pd3-bg:rgba(13,61,20,0.06);--pd3-border:rgba(13,61,20,0.18);
- --pd4:#e87c1e;--pd4-bg:rgba(232,124,30,0.07);--pd4-border:rgba(232,124,30,0.22);
+ --bg:#f2f2f2;--bg2:#ffffff;--bg3:#f7f7f7;--card:#ffffff;
+ --border:#e0e0e0;--border2:#cccccc;
+ --accent:#e31937;--accent-dim:rgba(227,25,55,0.08);
+ --cyan:#0066cc;--green:#22c55e;--red:#e31937;--purple:#a855f7;--amber:#f59e0b;
+ --text:#121212;--text2:#404040;--muted:#7a7a7a;--muted2:#a0a0a0;
+ --pd3:#1a6dcc;--pd3-bg:#f0f5ff;--pd3-border:#d0e2fc;
+ --pd4:#cc8800;--pd4-bg:#fdf6ee;--pd4-border:#f0ddb0;
  --sidebar:252px;--radius:4px;--radius-sm:3px;
- --font-body:'Sarabun','Tahoma',sans-serif;--font-display:'Tahoma','Sarabun',sans-serif;
+ --font-body:'Sarabun',sans-serif;--font-display:'Inter',sans-serif;
 }
 [data-theme="dark"]{
- --bg:#060f07;--bg2:#091209;--bg3:#0f1a10;--card:#0c1a0d;
- --border:#1a2e1c;--border2:#243626;
- --accent:#3dd65c;--accent-dim:rgba(61,214,92,0.09);
- --text:#e8f5e9;--text2:#a5c9a8;--muted:#4a6e4d;--muted2:#2d4430;
- --pd3:#4dcc6a;--pd3-bg:rgba(77,204,106,0.08);--pd3-border:rgba(77,204,106,0.22);
- --pd4:#f59a3f;--pd4-bg:rgba(245,154,63,0.08);--pd4-border:rgba(245,154,63,0.22);
- --green:#3dd65c;--amber:#f59a3f;--red:#e05c4a;
+ --bg:#050505;--bg2:#0a0a0a;--bg3:#111111;--card:#0d0d0d;
+ --border:#1e1e1e;--border2:#2a2a2a;
+ --accent:#e31937;--accent-dim:rgba(227,25,55,0.10);
+ --text:#ffffff;--text2:#a8a8a8;--muted:#555555;--muted2:#333333;
+ --pd3:#4d9fff;--pd3-bg:rgba(77,159,255,0.08);--pd3-border:rgba(77,159,255,0.22);
+ --pd4:#ffaa40;--pd4-bg:rgba(255,170,64,0.08);--pd4-border:rgba(255,170,64,0.22);
+ --green:#22c55e;--amber:#f59e0b;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -309,7 +309,7 @@ main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
 }
 #cursor-ring{
   position:fixed;top:0;left:0;width:34px;height:34px;
-  border:1px solid rgba(13,61,20,0.4);border-radius:50%;
+  border:1px solid rgba(227,25,55,0.4);border-radius:50%;
   pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
   transition:width .3s,height .3s,opacity .25s;
 }
@@ -325,9 +325,7 @@ body.cur-hover #cursor-ring{opacity:0}
 <!-- HEADER -->
 <header class="header">
  <div class="header-logo">
- <div style="width:28px;height:28px;background:var(--accent);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-   <svg width="14" height="13" viewBox="0 0 14 13" fill="none"><path d="M7 1L13 12H1L7 1Z" fill="rgba(255,255,255,0.9)"/><path d="M7 5L10 12H4L7 5Z" fill="var(--accent)"/></svg>
- </div>
+ <div class="logo-icon"></div>
  <h1>JIG MTN <span>· KPI DASHBOARD</span></h1>
  </div>
  <div class="header-right">
