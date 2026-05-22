@@ -520,47 +520,46 @@ body.click #cur{background:var(--accent2);width:14px;height:14px}
 
       <div id="logo-3d">
 
-        <!-- LAYER 1: Extrusion depth for orange (background) -->
-        <div class="logo-extrude-orange logo-face">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Orange S = full rounded-rect background -->
-            <rect x="0" y="0" width="200" height="200" rx="26" fill="#7a3200"/>
-          </svg>
-        </div>
-
-        <!-- LAYER 1b: Extrusion depth for green T (on top of orange) -->
+        <!-- EXTRUSION: green depth layers -->
         <div class="logo-extrude-green logo-face">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Green T: top crossbar -->
-            <rect x="8" y="8" width="184" height="58" rx="22" fill="#051a08"/>
-            <!-- Green T: vertical stem -->
-            <rect x="84" y="50" width="32" height="142" rx="16" fill="#051a08"/>
+          <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Green arch (top bar with center notch) -->
+            <path d="M20 20 Q20 0 40 0 L160 0 Q180 0 180 20 L180 80 Q180 100 160 100 L130 100 L130 70 Q130 55 115 55 L85 55 Q70 55 70 70 L70 100 L40 100 Q20 100 20 80 Z" fill="#041408"/>
+            <!-- Green stem (fills the notch gap + continues down) -->
+            <rect x="78" y="48" width="44" height="172" rx="22" fill="#041408"/>
           </svg>
         </div>
 
-        <!-- LAYER 2: Main face (front) -->
+        <!-- EXTRUSION: orange depth layers -->
+        <div class="logo-extrude-orange logo-face">
+          <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M70 120 L160 120 Q190 120 190 150 L190 180 Q190 210 160 210 L110 210 L110 180 L150 180 Q165 180 165 165 Q165 150 150 150 L70 150 Q40 150 40 120 L40 90 Q40 100 40 100 L70 100 Z" fill="#4a1c00"/>
+          </svg>
+        </div>
+
+        <!-- FACE: front face with gradients -->
         <div class="logo-face" style="transform:translateZ(0)">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <linearGradient id="orangeGrad" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+              <linearGradient id="gArchGrad" x1="20" y1="0" x2="180" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#3dc060"/>
+                <stop offset="100%" stop-color="#0d4a1a"/>
+              </linearGradient>
+              <linearGradient id="gStemGrad" x1="100" y1="48" x2="100" y2="220" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#2ea84e"/>
+                <stop offset="100%" stop-color="#0b3a12"/>
+              </linearGradient>
+              <linearGradient id="oGrad" x1="40" y1="90" x2="190" y2="210" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stop-color="#f0893a"/>
                 <stop offset="100%" stop-color="#b84e08"/>
               </linearGradient>
-              <linearGradient id="greenGrad" x1="8" y1="8" x2="192" y2="66" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#2ea84e"/>
-                <stop offset="100%" stop-color="#0d4a18"/>
-              </linearGradient>
-              <linearGradient id="greenGrad2" x1="84" y1="50" x2="116" y2="192" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#2ea84e"/>
-                <stop offset="100%" stop-color="#0d3d14"/>
-              </linearGradient>
             </defs>
-            <!-- Orange S = full logo background -->
-            <rect x="0" y="0" width="200" height="200" rx="26" fill="url(#orangeGrad)"/>
-            <!-- Green T: crossbar -->
-            <rect x="8" y="8" width="184" height="58" rx="22" fill="url(#greenGrad)"/>
-            <!-- Green T: stem -->
-            <rect x="84" y="50" width="32" height="142" rx="16" fill="url(#greenGrad2)"/>
+            <!-- Orange S bracket -->
+            <path d="M70 120 L160 120 Q190 120 190 150 L190 180 Q190 210 160 210 L110 210 L110 180 L150 180 Q165 180 165 165 Q165 150 150 150 L70 150 Q40 150 40 120 L40 90 Q40 100 40 100 L70 100 Z" fill="url(#oGrad)"/>
+            <!-- Green arch on top -->
+            <path d="M20 20 Q20 0 40 0 L160 0 Q180 0 180 20 L180 80 Q180 100 160 100 L130 100 L130 70 Q130 55 115 55 L85 55 Q70 55 70 70 L70 100 L40 100 Q20 100 20 80 Z" fill="url(#gArchGrad)"/>
+            <!-- Green stem (fills notch + extends down) -->
+            <rect x="78" y="48" width="44" height="172" rx="22" fill="url(#gStemGrad)"/>
           </svg>
         </div>
 
@@ -620,13 +619,13 @@ body.click #cur{background:var(--accent2);width:14px;height:14px}
       </div>
     </a>
 
-    <a class="mod-card mc-plan reveal reveal-d4" href="masterplan .html">
+    <a class="mod-card mc-plan reveal reveal-d4" href="masterplan.html">
       <span class="mc-n">04</span>
       <span class="mc-icon">📋</span>
       <div class="mc-title">Plan & Parts</div>
       <div class="mc-desc">Masterplan รายสาย + Part Images Library</div>
       <div class="mc-links">
-        <a class="mc-link" href="masterplan .html" onclick="event.stopPropagation()">Masterplan <span>→</span></a>
+        <a class="mc-link" href="masterplan.html" onclick="event.stopPropagation()">Masterplan <span>→</span></a>
         <a class="mc-link" href="part_images.html" onclick="event.stopPropagation()">Part Images <span>→</span></a>
       </div>
     </a>
