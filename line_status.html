@@ -420,7 +420,7 @@ function parseCSV(text){
     const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
     const statusMO=g(row,'Status MO').toLowerCase();
     const isClosed=!!dateClose||statusMO.includes('เสร็จ')||statusMO.includes('close')||statusMO.includes('done');
-    if(!isClosed&&(Date.now()-dateOpen.getTime())>24*60*60*1000)continue;
+    if(!g(row,'วันที่รับงาน')&&(Date.now()-dateOpen.getTime())>24*60*60*1000)continue;
     const lineDt=(dateClose&&dateClose>dateOpen)?Math.round((dateClose-dateOpen)/60000):0;
     rows.push({
       date:dateOpen,dateClose,isClosed,isAdjust,
