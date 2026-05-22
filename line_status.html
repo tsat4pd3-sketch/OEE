@@ -403,6 +403,7 @@ function parseCSV(text){
   const hdr=csvLineParse(lines[0]);
   const idx={};hdr.forEach((h,i)=>idx[h.trim().replace(/\r/g,'')]=i);
   const g=(row,name)=>{const i=idx[name];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim().replace(/\r/g,''):''};
+  const rcvColKey=Object.keys(idx).find(k=>k.includes('วันที่รับงาน'))||null;
   const rows=[];
   for(let r=1;r<lines.length;r++){
     const row=csvLineParse(lines[r]);
@@ -420,7 +421,7 @@ function parseCSV(text){
     const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
     const statusMO=g(row,'Status MO').toLowerCase();
     const isClosed=!!dateClose||statusMO.includes('เสร็จ')||statusMO.includes('close')||statusMO.includes('done');
-    if(!g(row,'วันที่รับงาน')&&(Date.now()-dateOpen.getTime())>24*60*60*1000)continue;
+    if(rcvColKey&&!g(row,rcvColKey)&&(Date.now()-dateOpen.getTime())>24*60*60*1000)continue;
     const lineDt=(dateClose&&dateClose>dateOpen)?Math.round((dateClose-dateOpen)/60000):0;
     rows.push({
       date:dateOpen,dateClose,isClosed,isAdjust,

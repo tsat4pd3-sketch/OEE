@@ -645,6 +645,7 @@ function parseMOSummary(text){
   const headers=csvLine(lines[0]).map(h=>h.trim().replace(/^"|"$/g,''));
   const idx={};headers.forEach((h,i)=>{idx[h]=i;});
   const g=(row,col)=>{const i=idx[col];return i!==undefined?(row[i]||'').trim().replace(/^"|"$/g,''):''};
+  const rcvColKey=Object.keys(idx).find(k=>k.includes('วันที่รับงาน'))||null;
   const rows=[];
   for(let i=1;i<lines.length;i++){
     const row=csvLine(lines[i]); // proper CSV parse — handles quoted commas
@@ -662,7 +663,7 @@ function parseMOSummary(text){
     if(probType.toLowerCase().includes('reject'))continue;
     const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
     const isClosed=!!dateClose;
-    if(!g(row,'วันที่รับงาน')&&(Date.now()-dateOpen.getTime())>24*60*60*1000)continue;
+    if(rcvColKey&&!g(row,rcvColKey)&&(Date.now()-dateOpen.getTime())>24*60*60*1000)continue;
     const line=(g(row,'Line การผลิต')||'').trim().toUpperCase();
     rows.push({date:dateOpen,dateClose,line,mcNo:g(row,'Mc No.')||g(row,'Machine No.'),
       probType,lineDt:dateClose&&dateClose>dateOpen?Math.round((dateClose-dateOpen)/60000):0});

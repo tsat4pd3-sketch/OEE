@@ -1285,6 +1285,7 @@ function parseMOCSV(text) {
   const idx = {}; hdr.forEach((h, i) => idx[h.trim().replace(/\r/g,"")] = i);
   const g = (row, name) => { const i = idx[name]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim().replace(/\r/g,"") : ""; };
   const n = v => { if (!v) return 0; const x = parseFloat(v.replace(/,/g, "")); return isNaN(x) ? 0 : x; };
+  const rcvColKey = Object.keys(idx).find(k => k.includes("วันที่รับงาน")) || null;
   const rows = [];
   for (let r = 1; r < lines.length; r++) {
     const row = csvLineMO(lines[r]);
@@ -1299,7 +1300,7 @@ function parseMOCSV(text) {
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
     // Skip stuck MOs: แจ้งมาแต่ไม่มีวันที่รับงาน >24h = gsheet bug
-    if (!g(row, "วันที่รับงาน") && (Date.now() - dateOpen.getTime()) > 24 * 60 * 60 * 1000) continue;
+    if (rcvColKey && !g(row, rcvColKey) && (Date.now() - dateOpen.getTime()) > 24 * 60 * 60 * 1000) continue;
     rows.push({
       date: dateOpen,
       dateClose: dateClose,
