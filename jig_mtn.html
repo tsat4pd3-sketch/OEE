@@ -1325,7 +1325,8 @@ function rUptimeTimeline(mo) {
   const lineNames = Object.keys(lineMap).sort();
   lineNames.forEach((lineName, li) => {
     const mcMap = lineMap[lineName];
-    const allLineEvents = Object.values(mcMap).flat();
+    const allLineEvents = Object.values(mcMap).flat()
+      .filter(ev => !(ev.probType||"").toLowerCase().includes("improvement"));
 
     // Line-level aggregate bar
     const { segHtml: lSegHtml, uptimePct: lPct, uptimeColor: lColor } = _tlSegHtml(allLineEvents, tlStart, tlEnd, tlMs, tlEffective, tlPrevWin);
@@ -1349,7 +1350,8 @@ function rUptimeTimeline(mo) {
 
     let mcHtml = '';
     mcNames.forEach(mcNo => {
-      const { segHtml, uptimePct, uptimeColor } = _tlSegHtml(mcMap[mcNo], tlStart, tlEnd, tlMs, tlEffective, tlPrevWin);
+      const mcEvents = mcMap[mcNo].filter(ev => !(ev.probType||"").toLowerCase().includes("improvement"));
+      const { segHtml, uptimePct, uptimeColor } = _tlSegHtml(mcEvents, tlStart, tlEnd, tlMs, tlEffective, tlPrevWin);
       mcHtml += `<div class="tl-row">
         <div class="tl-lbl" title="${mcNo}">${mcNo}</div>
         <div class="tl-bar">${segHtml}${tickHtml}</div>
