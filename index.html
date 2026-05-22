@@ -207,7 +207,7 @@ body.click #cur{background:var(--accent2);width:14px;height:14px}
   transform:rotateX(8deg) rotateY(-12deg);
   transition:transform .08s linear;
   position:relative;
-  width:240px;height:260px;
+  width:280px;height:280px;
 }
 
 /* Glow behind logo */
@@ -236,9 +236,19 @@ body.click #cur{background:var(--accent2);width:14px;height:14px}
   transform-style:preserve-3d;
 }
 
-/* The actual SVG layers at different Z depths for 3D extrusion */
-.logo-face{position:absolute;inset:0}
-.logo-face svg{width:100%;height:100%}
+/* Logo image */
+#logo-img{
+  width:100%;height:100%;
+  object-fit:contain;
+  mix-blend-mode:multiply;
+  filter:
+    drop-shadow(-3px 3px 0 rgba(100,40,0,0.7))
+    drop-shadow(-6px 6px 0 rgba(80,30,0,0.5))
+    drop-shadow(-9px 9px 0 rgba(60,20,0,0.35))
+    drop-shadow(-12px 12px 0 rgba(40,10,0,0.2))
+    drop-shadow(0 0 40px rgba(232,124,30,0.25));
+  display:block;
+}
 
 /* Extrusion sides — generated via JS box-shadow trick */
 .logo-extrude-green{
@@ -433,12 +443,7 @@ body.click #cur{background:var(--accent2);width:14px;height:14px}
 <!-- NAV -->
 <nav id="nav">
   <a class="nav-brand" href="#">
-    <svg class="nav-logo-svg" viewBox="0 0 40 44" fill="none">
-      <!-- Green top piece -->
-      <path d="M4 4 Q4 0 8 0 L32 0 Q36 0 36 4 L36 16 Q36 20 32 20 L26 20 L26 14 Q26 11 23 11 L17 11 Q14 11 14 14 L14 20 L8 20 Q4 20 4 16 Z" fill="#0d3d14"/>
-      <!-- Orange S piece -->
-      <path d="M14 24 L32 24 Q38 24 38 30 L38 36 Q38 42 32 42 L22 42 L22 36 L30 36 Q33 36 33 33 Q33 30 30 30 L14 30 Q8 30 8 24 L8 18 Q8 20 8 20 L14 20 Z" fill="#e87c1e"/>
-    </svg>
+    <img class="nav-logo-svg" src="TS logo.png" alt="Thai Summit" style="mix-blend-mode:multiply;object-fit:contain;"/>
     <div>
       <div class="nav-brand-name">Thai Summit</div>
       <div class="nav-brand-sub">VX Production System</div>
@@ -519,54 +524,7 @@ body.click #cur{background:var(--accent2);width:14px;height:14px}
       <div id="logo-glow"></div>
 
       <div id="logo-3d">
-
-        <!-- EXTRUSION: green depth layers -->
-        <div class="logo-extrude-green logo-face">
-          <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Green arch (top bar with center notch) -->
-            <path d="M20 20 Q20 0 40 0 L160 0 Q180 0 180 20 L180 80 Q180 100 160 100 L130 100 L130 70 Q130 55 115 55 L85 55 Q70 55 70 70 L70 100 L40 100 Q20 100 20 80 Z" fill="#041408"/>
-            <!-- Green stem (fills the notch gap + continues down) -->
-            <rect x="78" y="48" width="44" height="172" rx="22" fill="#041408"/>
-          </svg>
-        </div>
-
-        <!-- EXTRUSION: orange depth layers -->
-        <div class="logo-extrude-orange logo-face">
-          <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M70 120 L160 120 Q190 120 190 150 L190 180 Q190 210 160 210 L110 210 L110 180 L150 180 Q165 180 165 165 Q165 150 150 150 L70 150 Q40 150 40 120 L40 90 Q40 100 40 100 L70 100 Z" fill="#4a1c00"/>
-          </svg>
-        </div>
-
-        <!-- FACE: front face with gradients -->
-        <div class="logo-face" style="transform:translateZ(0)">
-          <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="gArchGrad" x1="20" y1="0" x2="180" y2="100" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#3dc060"/>
-                <stop offset="100%" stop-color="#0d4a1a"/>
-              </linearGradient>
-              <linearGradient id="gStemGrad" x1="100" y1="48" x2="100" y2="220" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#2ea84e"/>
-                <stop offset="100%" stop-color="#0b3a12"/>
-              </linearGradient>
-              <linearGradient id="oGrad" x1="40" y1="90" x2="190" y2="210" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#f0893a"/>
-                <stop offset="100%" stop-color="#b84e08"/>
-              </linearGradient>
-            </defs>
-            <!-- Orange S bracket -->
-            <path d="M70 120 L160 120 Q190 120 190 150 L190 180 Q190 210 160 210 L110 210 L110 180 L150 180 Q165 180 165 165 Q165 150 150 150 L70 150 Q40 150 40 120 L40 90 Q40 100 40 100 L70 100 Z" fill="url(#oGrad)"/>
-            <!-- Green arch on top -->
-            <path d="M20 20 Q20 0 40 0 L160 0 Q180 0 180 20 L180 80 Q180 100 160 100 L130 100 L130 70 Q130 55 115 55 L85 55 Q70 55 70 70 L70 100 L40 100 Q20 100 20 80 Z" fill="url(#gArchGrad)"/>
-            <!-- Green stem (fills notch + extends down) -->
-            <rect x="78" y="48" width="44" height="172" rx="22" fill="url(#gStemGrad)"/>
-          </svg>
-        </div>
-
-        <!-- Sheen overlay -->
-        <div class="logo-sheen"></div>
-        <div class="logo-reflect"></div>
-
+        <img id="logo-img" src="TS logo.png" alt="Thai Summit Logo"/>
       </div><!-- /logo-3d -->
 
       <div id="logo-shadow"></div>
