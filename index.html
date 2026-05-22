@@ -520,36 +520,47 @@ body.click #cur{background:var(--accent2);width:14px;height:14px}
 
       <div id="logo-3d">
 
-        <!-- LAYER 1: Extrusion depth (behind) -->
-        <div class="logo-extrude-green logo-face">
-          <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 20 Q20 0 40 0 L160 0 Q180 0 180 20 L180 80 Q180 100 160 100 L130 100 L130 70 Q130 55 115 55 L85 55 Q70 55 70 70 L70 100 L40 100 Q20 100 20 80 Z" fill="#0d3d14"/>
+        <!-- LAYER 1: Extrusion depth for orange (background) -->
+        <div class="logo-extrude-orange logo-face">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Orange S = full rounded-rect background -->
+            <rect x="0" y="0" width="200" height="200" rx="26" fill="#7a3200"/>
           </svg>
         </div>
 
-        <div class="logo-extrude-orange logo-face">
-          <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M70 120 L160 120 Q190 120 190 150 L190 180 Q190 210 160 210 L110 210 L110 180 L150 180 Q165 180 165 165 Q165 150 150 150 L70 150 Q40 150 40 120 L40 90 Q40 100 40 100 L70 100 Z" fill="#e87c1e"/>
+        <!-- LAYER 1b: Extrusion depth for green T (on top of orange) -->
+        <div class="logo-extrude-green logo-face">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Green T: top crossbar -->
+            <rect x="8" y="8" width="184" height="58" rx="22" fill="#051a08"/>
+            <!-- Green T: vertical stem -->
+            <rect x="84" y="50" width="32" height="142" rx="16" fill="#051a08"/>
           </svg>
         </div>
 
         <!-- LAYER 2: Main face (front) -->
         <div class="logo-face" style="transform:translateZ(0)">
-          <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-
-            <path d="M20 20 Q20 0 40 0 L160 0 Q180 0 180 20 L180 80 Q180 100 160 100 L130 100 L130 70 Q130 55 115 55 L85 55 Q70 55 70 70 L70 100 L40 100 Q20 100 20 80 Z" fill="url(#greenGrad)"/>
-            <path d="M70 120 L160 120 Q190 120 190 150 L190 180 Q190 210 160 210 L110 210 L110 180 L150 180 Q165 180 165 165 Q165 150 150 150 L70 150 Q40 150 40 120 L40 90 Q40 100 40 100 L70 100 Z" fill="url(#orangeGrad)"/>
-
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <linearGradient id="greenGrad" x1="20" y1="0" x2="180" y2="100" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#2d9e4f"/>
+              <linearGradient id="orangeGrad" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#f0893a"/>
+                <stop offset="100%" stop-color="#b84e08"/>
+              </linearGradient>
+              <linearGradient id="greenGrad" x1="8" y1="8" x2="192" y2="66" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#2ea84e"/>
+                <stop offset="100%" stop-color="#0d4a18"/>
+              </linearGradient>
+              <linearGradient id="greenGrad2" x1="84" y1="50" x2="116" y2="192" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#2ea84e"/>
                 <stop offset="100%" stop-color="#0d3d14"/>
               </linearGradient>
-              <linearGradient id="orangeGrad" x1="40" y1="100" x2="190" y2="210" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#f59a3f"/>
-                <stop offset="100%" stop-color="#c45e08"/>
-              </linearGradient>
             </defs>
+            <!-- Orange S = full logo background -->
+            <rect x="0" y="0" width="200" height="200" rx="26" fill="url(#orangeGrad)"/>
+            <!-- Green T: crossbar -->
+            <rect x="8" y="8" width="184" height="58" rx="22" fill="url(#greenGrad)"/>
+            <!-- Green T: stem -->
+            <rect x="84" y="50" width="32" height="142" rx="16" fill="url(#greenGrad2)"/>
           </svg>
         </div>
 
