@@ -680,23 +680,28 @@ function parseMOCSV(text) {
   const idx = {}; hdr.forEach((h, i) => idx[h.trim().replace(/\r/g,"")] = i);
   const g = (row, name) => { const i = idx[name]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim().replace(/\r/g,"") : ""; };
   const n = v => { if (!v) return 0; const x = parseFloat(v.replace(/,/g, "")); return isNaN(x) ? 0 : x; };
-  const rcvColKey = Object.keys(idx).find(k => k.includes("วันที่รับงาน")) || null;
+  // Resolve column keys with partial match (columns may have number prefix e.g. "2.ประเภทงานซ่อม")
+  const findCol = sub => Object.keys(idx).find(k => k.includes(sub)) || null;
+  const rcvColKey    = findCol("วันเวลาที่รับงาน");
+  const probTypeKey  = findCol("ประเภทงานซ่อม");
+  const closeColKey  = findCol("วันเวลาที่ซ่อมเสร็จ") || findCol("เวลาซ่อมเสร็จ");
   const rows = [];
   for (let r = 1; r < lines.length; r++) {
     const row = csvLineMO(lines[r]);
     if (row.length < 8) continue;
-    const dateOpen = parseMODate(g(row, "เวลาเปิด MO"));
+    const dateOpen = parseMODate(g(row, "เวลาเปิด MO") || (findCol("วันเวลาที่แจ้ง") ? g(row, findCol("วันเวลาที่แจ้ง")) : ""));
     if (!dateOpen) continue;
     const dept = g(row, "แผนก");
     const mcType = g(row, "Mc Type");
     // Filter: only JIG rows
     if (dept && !dept.toUpperCase().includes("JIG") && !mcType.toUpperCase().includes("JIG")) continue;
     // Skip rejected MOs
-    if (g(row, "ประเภทงานซ่อม").toLowerCase().includes("reject")) continue;
-    const dateClose = parseMODate(g(row, "วันเวลาที่ซ่อมเสร็จ-")) || parseMODate(g(row, "เวลาซ่อมเสร็จ"));
+    const probTypeVal = probTypeKey ? g(row, probTypeKey) : g(row, "ประเภทงานซ่อม");
+    if (probTypeVal.toLowerCase().includes("reject")) continue;
+    const dateClose = closeColKey ? parseMODate(g(row, closeColKey)) : (parseMODate(g(row, "วันเวลาที่ซ่อมเสร็จ-")) || parseMODate(g(row, "เวลาซ่อมเสร็จ")));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
-    // Skip stuck MOs: แจ้งมาแต่ไม่มีวันที่รับงาน >24h = gsheet bug
+    // Skip stuck MOs: แจ้งมาแต่ไม่มีวันเวลาที่รับงาน >24h = gsheet bug
     if (rcvColKey && !g(row, rcvColKey) && (Date.now() - dateOpen.getTime()) > 24 * 60 * 60 * 1000) continue;
     const responseTime = n(g(row, "ระยะเวลาเข้าดำเนินการ"));
     const repairTime   = n(g(row, "ระยะเวลาในการซ่อมงาน"));
@@ -710,7 +715,7 @@ function parseMOCSV(text) {
       line: g(row, "Line การผลิต"),
       mcType: mcType,
       mcNo: g(row, "Mc No."),
-      probType: g(row, "Problem Type"),
+      probType: probTypeVal || g(row, "Problem Type"),
       symptom: g(row, "อาการ/สาเหตุ"),
       solution: g(row, "แนวทางการแก้ไข"),
       // ttr = actual repair time (รับงาน → ซ่อมเสร็จ), not including waiting

@@ -363,6 +363,7 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
 // ── Data ─────────────────────────────────────────────────────────────
 const MO_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSVDNHyOb2LrXosMZG09quorOkfI9aLs8Hg_6ek8glxEQRQYL6F1rWl_cZ12A_f7SC2yDkyWroXHtM1/pub?gid=785568377&single=true&output=csv";
 let MO_ALL=[];
+let ALL_LINE_NAMES=new Set(); // all unique line names seen in raw CSV (for full 13-line display)
 let _range=1;
 let _reloadTimer=null;
 
@@ -403,22 +404,37 @@ function parseCSV(text){
   const hdr=csvLineParse(lines[0]);
   const idx={};hdr.forEach((h,i)=>idx[h.trim().replace(/\r/g,'')]=i);
   const g=(row,name)=>{const i=idx[name];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim().replace(/\r/g,''):''};
-  const rcvColKey=Object.keys(idx).find(k=>k.includes('วันที่รับงาน'))||null;
+  const findCol=sub=>Object.keys(idx).find(k=>k.includes(sub))||null;
+  const rcvColKey   =findCol('วันเวลาที่รับงาน');
+  const probTypeKey =findCol('ประเภทงานซ่อม');
+  const closeColKey =findCol('วันเวลาที่ซ่อมเสร็จ')||findCol('เวลาซ่อมเสร็จ');
+  const openColKey  =findCol('วันเวลาที่แจ้ง')||findCol('เวลาเปิด MO');
+  // First pass: collect all JIG line names before any filter
+  const lineColKey=findCol('Line การผลิต')||'Line การผลิต';
+  for(let r=1;r<lines.length;r++){
+    const row=csvLineParse(lines[r]);
+    if(row.length<4)continue;
+    const dept=g(row,'แผนก'),mcType=g(row,'Mc Type');
+    if(dept&&!dept.toUpperCase().includes('JIG')&&!mcType.toUpperCase().includes('JIG'))continue;
+    const ln=(g(row,lineColKey)||'').trim().toUpperCase();
+    if(ln)ALL_LINE_NAMES.add(ln);
+  }
   const rows=[];
   for(let r=1;r<lines.length;r++){
     const row=csvLineParse(lines[r]);
     if(row.length<4)continue;
-    const dateOpen=parseMODate(g(row,'เวลาเปิด MO'));
+    const dateOpen=parseMODate(openColKey?g(row,openColKey):g(row,'เวลาเปิด MO'));
     if(!dateOpen)continue;
     const dept=g(row,'แผนก'),mcType=g(row,'Mc Type');
     if(dept&&!dept.toUpperCase().includes('JIG')&&!mcType.toUpperCase().includes('JIG'))continue;
-    if(g(row,'ประเภทงานซ่อม').toLowerCase().includes('reject'))continue;
+    const probTypeVal=probTypeKey?g(row,probTypeKey):g(row,'ประเภทงานซ่อม');
+    if(probTypeVal.toLowerCase().includes('reject'))continue;
     const onOff=g(row,'Online/Offline');
-    const probType=g(row,'Problem Type')||g(row,'ประเภทงานซ่อม');
+    const probType=probTypeVal||g(row,'Problem Type');
     // Exclude offline MOs; keep ปรับจิ๊ก but tag separately (used for WATCH status only)
     if(isOfflineMO(onOff))continue;
     const isAdjust=isAdjustMO(probType);
-    const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
+    const dateClose=closeColKey?parseMODate(g(row,closeColKey)):(parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ')));
     const statusMO=g(row,'Status MO').toLowerCase();
     const isClosed=!!dateClose||statusMO.includes('เสร็จ')||statusMO.includes('close')||statusMO.includes('done');
     if(rcvColKey&&!g(row,rcvColKey)&&(Date.now()-dateOpen.getTime())>24*60*60*1000)continue;
@@ -492,8 +508,9 @@ function render(){
   const winMs=winEnd-winStart;
   const elapsedMs=effectiveEnd-winStart;
 
-  // Group by line
+  // Seed lineMap with ALL known line names so lines with no active MOs still show as UP
   const lineMap={};
+  ALL_LINE_NAMES.forEach(ln=>{lineMap[ln]=[];});
   MO_ALL.forEach(d=>{
     if(!d.line)return;
     if(!lineMap[d.line])lineMap[d.line]=[];
