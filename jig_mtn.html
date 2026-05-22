@@ -695,6 +695,8 @@ function parseMOCSV(text) {
     const dateClose = parseMODate(g(row, "วันเวลาที่ซ่อมเสร็จ-")) || parseMODate(g(row, "เวลาซ่อมเสร็จ"));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
+    // Skip stuck MOs: open >24h with no close = gsheet bug (ช่างรับงานไม่ได้)
+    if (!isClosed && (Date.now() - dateOpen.getTime()) > 24 * 60 * 60 * 1000) continue;
     const responseTime = n(g(row, "ระยะเวลาเข้าดำเนินการ"));
     const repairTime   = n(g(row, "ระยะเวลาในการซ่อมงาน"));
     // lineDt = full line downtime (report → repair done), used for Uptime/Downtime Timeline

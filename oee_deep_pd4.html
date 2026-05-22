@@ -1281,6 +1281,7 @@ function parseMOCSV(text) {
     const dateClose = parseMODate(g(row, "เวลาซ่อมเสร็จ"));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
+    if (!isClosed && (Date.now() - dateOpen.getTime()) > 24 * 60 * 60 * 1000) continue;
     rows.push({
       date: dateOpen,
       dateClose: dateClose,

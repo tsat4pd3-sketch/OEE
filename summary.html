@@ -661,6 +661,8 @@ function parseMOSummary(text){
     if(probType.includes('ปรับจิ๊ก'))continue;
     if(probType.toLowerCase().includes('reject'))continue;
     const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
+    const isClosed=!!dateClose;
+    if(!isClosed&&(Date.now()-dateOpen.getTime())>24*60*60*1000)continue;
     const line=(g(row,'Line การผลิต')||'').trim().toUpperCase();
     rows.push({date:dateOpen,dateClose,line,mcNo:g(row,'Mc No.')||g(row,'Machine No.'),
       probType,lineDt:dateClose&&dateClose>dateOpen?Math.round((dateClose-dateOpen)/60000):0});
