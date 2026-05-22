@@ -523,69 +523,13 @@ body.click #cur{background:var(--accent2);width:14px;height:14px}
         <!-- LAYER 1: Extrusion depth (behind) -->
         <div class="logo-extrude-green logo-face">
           <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Green top piece: arch/bridge shape -->
-            <path d="
-              M 28 6
-              Q 6 6 6 28
-              L 6 76
-              Q 6 98 28 98
-              L 72 98
-              L 72 74
-              Q 72 64 82 64
-              L 118 64
-              Q 128 64 128 74
-              L 128 98
-              L 172 98
-              Q 194 98 194 76
-              L 194 28
-              Q 194 6 172 6
-              Z
-            " fill="#0d3d14"/>
+            <path d="M20 20 Q20 0 40 0 L160 0 Q180 0 180 20 L180 80 Q180 100 160 100 L130 100 L130 70 Q130 55 115 55 L85 55 Q70 55 70 70 L70 100 L40 100 Q20 100 20 80 Z" fill="#0d3d14"/>
           </svg>
         </div>
 
         <div class="logo-extrude-orange logo-face">
           <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Orange S-curve piece -->
-            <path d="
-              M 72 108
-              L 172 108
-              Q 194 108 194 130
-              L 194 148
-              Q 194 170 172 170
-              L 118 170
-              L 118 150
-              Q 118 140 128 140
-              L 155 140
-              Q 165 140 165 130
-              Q 165 120 155 120
-              L 72 120
-              Q 50 120 50 142
-              L 50 164
-              Q 50 186 72 186
-              L 172 186
-              Q 194 186 194 208
-              L 6 208
-              L 6 186
-              Q 6 164 28 164
-              L 82 164
-              L 82 180
-              Q 82 190 72 190
-              L 45 190
-              Q 35 190 35 200
-              Q 35 210 45 210
-              L 128 210
-              Q 150 210 150 188
-              L 150 168
-              Q 150 146 128 146
-              L 45 146
-              Q 35 146 35 136
-              Q 35 126 45 126
-              L 172 126
-              Q 194 126 194 108
-              L 72 108
-              Z
-            " fill="#e87c1e"/>
+            <path d="M70 120 L160 120 Q190 120 190 150 L190 180 Q190 210 160 210 L110 210 L110 180 L150 180 Q165 180 165 165 Q165 150 150 150 L70 150 Q40 150 40 120 L40 90 Q40 100 40 100 L70 100 Z" fill="#e87c1e"/>
           </svg>
         </div>
 
@@ -593,58 +537,15 @@ body.click #cur{background:var(--accent2);width:14px;height:14px}
         <div class="logo-face" style="transform:translateZ(0)">
           <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
 
-            <!-- Green top piece: arch/bridge shape -->
-            <path d="
-              M 28 6
-              Q 6 6 6 28
-              L 6 76
-              Q 6 98 28 98
-              L 72 98
-              L 72 74
-              Q 72 64 82 64
-              L 118 64
-              Q 128 64 128 74
-              L 128 98
-              L 172 98
-              Q 194 98 194 76
-              L 194 28
-              Q 194 6 172 6
-              Z
-            "
-            fill="url(#greenGrad)"/>
+            <path d="M20 20 Q20 0 40 0 L160 0 Q180 0 180 20 L180 80 Q180 100 160 100 L130 100 L130 70 Q130 55 115 55 L85 55 Q70 55 70 70 L70 100 L40 100 Q20 100 20 80 Z" fill="url(#greenGrad)"/>
+            <path d="M70 120 L160 120 Q190 120 190 150 L190 180 Q190 210 160 210 L110 210 L110 180 L150 180 Q165 180 165 165 Q165 150 150 150 L70 150 Q40 150 40 120 L40 90 Q40 100 40 100 L70 100 Z" fill="url(#orangeGrad)"/>
 
-            <!-- Orange S piece — simplified clean S -->
-            <path d="
-              M 28 108
-              L 172 108
-              Q 194 108 194 130
-              Q 194 152 172 152
-              L 82 152
-              Q 70 152 70 164
-              Q 70 176 82 176
-              L 172 176
-              Q 194 176 194 198
-              Q 194 218 172 218
-              L 28 218
-              Q 6 218 6 196
-              Q 6 174 28 174
-              L 120 174
-              Q 132 174 132 162
-              Q 132 150 120 150
-              L 28 150
-              Q 6 150 6 128
-              Q 6 108 28 108
-              Z
-            "
-            fill="url(#orangeGrad)"/>
-
-            <!-- Gradient defs -->
             <defs>
-              <linearGradient id="greenGrad" x1="6" y1="6" x2="194" y2="98" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#1a6d2e"/>
+              <linearGradient id="greenGrad" x1="20" y1="0" x2="180" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#2d9e4f"/>
                 <stop offset="100%" stop-color="#0d3d14"/>
               </linearGradient>
-              <linearGradient id="orangeGrad" x1="6" y1="108" x2="194" y2="218" gradientUnits="userSpaceOnUse">
+              <linearGradient id="orangeGrad" x1="40" y1="100" x2="190" y2="210" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stop-color="#f59a3f"/>
                 <stop offset="100%" stop-color="#c45e08"/>
               </linearGradient>
