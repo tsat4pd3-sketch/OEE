@@ -1285,21 +1285,26 @@ function parseMOCSV(text) {
   const idx = {}; hdr.forEach((h, i) => idx[h.trim().replace(/\r/g,"")] = i);
   const g = (row, name) => { const i = idx[name]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim().replace(/\r/g,"") : ""; };
   const n = v => { if (!v) return 0; const x = parseFloat(v.replace(/,/g, "")); return isNaN(x) ? 0 : x; };
-  const rcvColKey = Object.keys(idx).find(k => k.includes("วันที่รับงาน")) || null;
+  const findCol = sub => Object.keys(idx).find(k => k.includes(sub)) || null;
+  const rcvColKey   = findCol("วันเวลาที่รับงาน");
+  const probTypeKey = findCol("ประเภทงานซ่อม");
+  const closeColKey = findCol("วันเวลาที่ซ่อมเสร็จ") || findCol("เวลาซ่อมเสร็จ");
+  const openColKey  = findCol("วันเวลาที่แจ้ง") || findCol("เวลาเปิด MO");
   const rows = [];
   for (let r = 1; r < lines.length; r++) {
     const row = csvLineMO(lines[r]);
     if (row.length < 8) continue;
-    const dateOpen = parseMODate(g(row, "เวลาเปิด MO"));
+    const dateOpen = parseMODate(openColKey ? g(row, openColKey) : g(row, "เวลาเปิด MO"));
     if (!dateOpen) continue;
     // Filter by แผนก — only load rows matching this dashboard's dept
     const dept = g(row, "แผนก");
     if (dept && !dept.toUpperCase().includes("PD3")) continue;
-    if (g(row, "ประเภทงานซ่อม").toLowerCase().includes("reject")) continue;
-    const dateClose = parseMODate(g(row, "เวลาซ่อมเสร็จ"));
+    const probTypeVal = probTypeKey ? g(row, probTypeKey) : g(row, "ประเภทงานซ่อม");
+    if (probTypeVal.toLowerCase().includes("reject")) continue;
+    const dateClose = closeColKey ? parseMODate(g(row, closeColKey)) : parseMODate(g(row, "เวลาซ่อมเสร็จ"));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
-    // Skip stuck MOs: แจ้งมาแต่ไม่มีวันที่รับงาน >24h = gsheet bug
+    // Skip stuck MOs: แจ้งมาแต่ไม่มีวันเวลาที่รับงาน >24h = gsheet bug
     if (rcvColKey && !g(row, rcvColKey) && (Date.now() - dateOpen.getTime()) > 24 * 60 * 60 * 1000) continue;
     rows.push({
       date: dateOpen,
