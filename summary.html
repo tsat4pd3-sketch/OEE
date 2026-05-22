@@ -659,6 +659,7 @@ function parseMOSummary(text){
     const s=(onOff||'').toLowerCase().trim();
     if(s.includes('นอก')||s==='offline'||s==='off')continue;
     if(probType.includes('ปรับจิ๊ก'))continue;
+    if(probType.toLowerCase().includes('reject'))continue;
     const dateClose=parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ'));
     const line=(g(row,'Line การผลิต')||'').trim().toUpperCase();
     rows.push({date:dateOpen,dateClose,line,mcNo:g(row,'Mc No.')||g(row,'Machine No.'),
@@ -716,7 +717,7 @@ function renderProdTimelines(){
   </div>`;
 
   PRODUCTS.forEach(prod=>{
-    const mo=MO_SUM.filter(d=>PROD_LINE_KW[prod.id]&&PROD_LINE_KW[prod.id](d.line)&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=rangeStart));
+    const mo=MO_SUM.filter(d=>PROD_LINE_KW[prod.id]&&PROD_LINE_KW[prod.id](d.line)&&!(d.probType||'').toLowerCase().includes('improvement')&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=rangeStart));
     const el=document.getElementById('pc-tl-'+prod.id);
     if(!el){return;}
 
