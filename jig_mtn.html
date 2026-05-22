@@ -680,7 +680,9 @@ function parseMOCSV(text) {
   const idx = {}; hdr.forEach((h, i) => idx[h.trim().replace(/\r/g,"")] = i);
   const g = (row, name) => { const i = idx[name]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim().replace(/\r/g,"") : ""; };
   const n = v => { if (!v) return 0; const x = parseFloat(v.replace(/,/g, "")); return isNaN(x) ? 0 : x; };
-  const rcvColKey = Object.keys(idx).find(k => k.includes("วันที่รับงาน")) || null;
+  const rcvColKey = Object.keys(idx).find(k => k.includes("รับงาน")) || null;
+  console.log('[jig_mtn] CSV headers:', Object.keys(idx));
+  console.log('[jig_mtn] rcvColKey found:', rcvColKey);
   const rows = [];
   for (let r = 1; r < lines.length; r++) {
     const row = csvLineMO(lines[r]);
