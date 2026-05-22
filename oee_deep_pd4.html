@@ -1277,6 +1277,7 @@ function parseMOCSV(text) {
     // Filter by แผนก — only load rows matching this dashboard's dept
     const dept = g(row, "แผนก");
     if (dept && !dept.toUpperCase().includes("PD4")) continue;
+    if (g(row, "ประเภทงานซ่อม").toLowerCase().includes("reject")) continue;
     const dateClose = parseMODate(g(row, "เวลาซ่อมเสร็จ"));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");

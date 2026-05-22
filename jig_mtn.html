@@ -690,6 +690,8 @@ function parseMOCSV(text) {
     const mcType = g(row, "Mc Type");
     // Filter: only JIG rows
     if (dept && !dept.toUpperCase().includes("JIG") && !mcType.toUpperCase().includes("JIG")) continue;
+    // Skip rejected MOs
+    if (g(row, "ประเภทงานซ่อม").toLowerCase().includes("reject")) continue;
     const dateClose = parseMODate(g(row, "วันเวลาที่ซ่อมเสร็จ-")) || parseMODate(g(row, "เวลาซ่อมเสร็จ"));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");

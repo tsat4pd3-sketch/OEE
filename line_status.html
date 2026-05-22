@@ -411,6 +411,7 @@ function parseCSV(text){
     if(!dateOpen)continue;
     const dept=g(row,'แผนก'),mcType=g(row,'Mc Type');
     if(dept&&!dept.toUpperCase().includes('JIG')&&!mcType.toUpperCase().includes('JIG'))continue;
+    if(g(row,'ประเภทงานซ่อม').toLowerCase().includes('reject'))continue;
     const onOff=g(row,'Online/Offline');
     const probType=g(row,'Problem Type')||g(row,'ประเภทงานซ่อม');
     // Exclude offline MOs; keep ปรับจิ๊ก but tag separately (used for WATCH status only)
