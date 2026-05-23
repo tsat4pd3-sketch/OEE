@@ -1049,16 +1049,44 @@ function setProbParetoTab(tab, btn) {
   rMOProbPareto(_probParetoMO);
 }
 
+// Order matters: more specific patterns first to avoid false matches
 const PROB_CHAR_KEYWORDS = [
-  { label: 'เซนเซอร์ ชำรุด',     keys: ['เซนเซอร์','sensor','reed','proximity','inductive','photoelectric','photo'] },
-  { label: 'โลเคเตอร์ ชำรุด',    keys: ['โลเคเตอร์','locator','locate','ล็อคเกต'] },
-  { label: 'แคลมป์ ชำรุด',        keys: ['แคลมป์','clamp','คลาม'] },
-  { label: 'กระบอกลม ชำรุด',     keys: ['กระบอกลม','cylinder','pneumatic'] },
-  { label: 'สต็อปเปอร์ ชำรุด',   keys: ['สต็อป','stopper','stop pin'] },
-  { label: 'เครื่องมาร์ค ชำรุด', keys: ['มาร์ค','marking','printer','พิมพ์'] },
-  { label: 'ระบบไฟฟ้า ชำรุด',    keys: ['ไฟฟ้า','electric','สายไฟ','solenoid','โซลินอยด์','relay','รีเลย์'] },
-  { label: 'โรบ็อต ชำรุด',        keys: ['robot','โรบ็อต','แขนกล','alarm'] },
-  { label: 'ปรับจิ๊ก/Poka-Yoke',  keys: ['ปรับจิ๊ก','poka','yoke'] },
+  // Robot damage (check before clamp — gripper is robot part)
+  { label: 'โรบ็อต ชำรุด',
+    keys: ['robot','โรบอท','โรบ็อต','แขนกล','gripper','alarm','อราม'] },
+  // Sensor (Prox, Reed, Senser, สัญญาณ)
+  { label: 'เซนเซอร์ ชำรุด',
+    keys: ['เซนเซอร์','เซ็นเซอร์','sensor','senser','reed','prox','proximity',
+           'limit switch','photo','กระจกสะท้อน','สัญญาณค้าง','สัญญาณหลุด',
+           'สัญญาณไม่เข้า','สัญญาณ clamp','สัญญาณ clamp','หรีด'] },
+  // Pneumatic/Air (Fitting, ลม, วาล์ว, solenoid, unclamp)
+  { label: 'กระบอกลม ชำรุด',
+    keys: ['กระบอกลม','fitting','ฟิตติ้ง','ลมรั่ว','สายลม','unclamp','un clamp',
+           'cylinder','pneumatic','วาล์ว','valve','โซลินอยด์','solenoid',
+           'แกนกระบอก','เกลียวกระบอก','แม่เหล็กกระบอก','ชุดสั่งลม'] },
+  // Stopper
+  { label: 'สต็อปเปอร์ ชำรุด',
+    keys: ['สต็อป','สต้อป','stopper','stepper','stop pin'] },
+  // Locator/Pin/Datum/บูท
+  { label: 'โลเคเตอร์ ชำรุด',
+    keys: ['โลเคเตอร์','locator','locate','locating','pin','datum','บูท','รางประคอง'] },
+  // Clamp fixture (not pneumatic)
+  { label: 'แคลมป์ ชำรุด',
+    keys: ['แคลมป์','แคมป์','clamp'] },
+  // Marking machine
+  { label: 'เครื่องมาร์ค ชำรุด',
+    keys: ['มาร์ค','marking','หัวมาค','ตัวเลขไม่ชัด'] },
+  // Electrical/wiring
+  { label: 'ระบบไฟฟ้า ชำรุด',
+    keys: ['ไฟฟ้า','electric','สายไฟ','สายขาด','สายหลุด','connector',
+           'cc-link','cc link','plc','กราวด์','สายแพ','บอร์ดช็อต',
+           'สายสัญญาณ','สายprox','สาย prox','relay','รีเลย์','ไม่ปล่อยไฟ'] },
+  // Spring
+  { label: 'สปริง ชำรุด',
+    keys: ['สปริง','spring'] },
+  // ปรับจิ๊ก
+  { label: 'ปรับจิ๊ก/Poka-Yoke',
+    keys: ['ปรับจิ๊ก','poka','yoke'] },
 ];
 
 function classifyProbChar(probChar, symptom, knownChars) {
