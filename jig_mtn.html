@@ -1048,14 +1048,35 @@ function setProbParetoTab(tab, btn) {
   rMOProbPareto(_probParetoMO);
 }
 
+function classifyProbChar(probChar, symptom) {
+  const pc  = (probChar || '').toLowerCase();
+  const sym = (symptom  || '').toLowerCase();
+  // Group 1: ชำรุด
+  if (pc.includes('ชำรุด') || (pc.includes('อื่น') && sym.includes('ชำรุด'))) return 'ชำรุด';
+  // Group 2: ปรับจิ๊ก/Poka-Yoke
+  if (pc.includes('ปรับจิ๊ก') || pc.includes('poka') ||
+      (pc.includes('อื่น') && (sym.includes('ปรับจิ๊ก') || sym.includes('poka') || sym.includes('ปรับ jig')))) return 'ปรับจิ๊ก/Poka-Yoke';
+  // Group 3: อื่นๆ cross-check with symptom for known keywords
+  if (pc.includes('อื่น') || pc === '—' || !probChar) {
+    if (sym.includes('ชำรุด'))                                             return 'ชำรุด';
+    if (sym.includes('ปรับจิ๊ก') || sym.includes('poka'))                 return 'ปรับจิ๊ก/Poka-Yoke';
+    if (sym.includes('sensor') || sym.includes('เซนเซอร์'))               return 'เซนเซอร์ ชำรุด';
+    if (sym.includes('cylinder') || sym.includes('กระบอกลม'))             return 'กระบอกลม ชำรุด';
+    if (sym.includes('solenoid') || sym.includes('โซลินอยด์'))            return 'โซลินอยด์ ชำรุด';
+    if (sym.includes('สายไฟ') || sym.includes('electric') || sym.includes('ไฟฟ้า')) return 'ระบบไฟฟ้า ชำรุด';
+    return 'อื่นๆ';
+  }
+  return probChar; // keep original if specific enough
+}
+
 function rMOProbPareto(mo) {
   _probParetoMO = mo;
   const tab = _probParetoTab;
 
-  // Aggregate per problem characteristic (ลักษณะปัญหา)
+  // Aggregate per problem characteristic group
   const agg = {};
   mo.forEach(d => {
-    const key = d.probChar || '—';
+    const key = classifyProbChar(d.probChar, d.symptom);
     if (!agg[key]) agg[key] = { count: 0, dtSum: 0, ttrSum: 0, ttrN: 0 };
     agg[key].count++;
     if (d.lineDt > 0) agg[key].dtSum += d.lineDt;
