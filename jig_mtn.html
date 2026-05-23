@@ -695,9 +695,9 @@ function parseMOCSV(text) {
     const mcType = g(row, "Mc Type");
     // Filter: only JIG rows
     if (dept && !dept.toUpperCase().includes("JIG") && !mcType.toUpperCase().includes("JIG")) continue;
-    // Skip rejected MOs
+    // Skip blank/null or Reject MO rows entirely
     const probTypeVal = probTypeKey ? g(row, probTypeKey) : g(row, "ประเภทงานซ่อม");
-    if (probTypeVal.toLowerCase().includes("reject")) continue;
+    if (!probTypeVal || probTypeVal.toLowerCase().includes("reject")) continue;
     const dateClose = closeColKey ? parseMODate(g(row, closeColKey)) : (parseMODate(g(row, "วันเวลาที่ซ่อมเสร็จ-")) || parseMODate(g(row, "เวลาซ่อมเสร็จ")));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
@@ -736,6 +736,7 @@ function parseMOCSV(text) {
       dept: dept,
       statusMO: statusMO,
       isClosed: isClosed,
+      isBreakdown: probTypeVal.toLowerCase() === 'breakdown maintenance',
     });
   }
   return rows;
@@ -924,8 +925,9 @@ function rMOKPI(mo) {
   const recurring = Object.values(mcProb).filter(v => v > 1).length;
 
   const monthly = _kpiMode === 'monthly';
-  const mttr = monthly ? _calcMTTR_monthly(mo) : _calcMTTR_overall(mo);
-  const mtbf = monthly ? _calcMTBF_monthly(mo) : _calcMTBF_overall(mo);
+  const bdMO = mo.filter(d => d.isBreakdown); // MTTR/MTBF = Breakdown Maintenance only
+  const mttr = monthly ? _calcMTTR_monthly(bdMO) : _calcMTTR_overall(bdMO);
+  const mtbf = monthly ? _calcMTBF_monthly(bdMO) : _calcMTBF_overall(bdMO);
   const modeLabel = monthly ? 'Monthly Avg' : 'Overall Avg';
 
   const set = (id, v, s) => {
@@ -1131,7 +1133,8 @@ function rMonthlyTrend(mo) {
     if (!mm[ym]) mm[ym] = { issued:0, closed:0, ttrSum:0, ttrN:0, dtSum:0 };
     mm[ym].issued++;
     if (d.isClosed) mm[ym].closed++;
-    if (d.ttr > 0) { mm[ym].ttrSum += d.ttr; mm[ym].ttrN++; mm[ym].dtSum += d.ttr; }
+    if (d.ttr > 0) { mm[ym].ttrSum += d.ttr; mm[ym].ttrN++; }
+    if (d.isBreakdown && d.lineDt > 0) mm[ym].dtSum += d.lineDt; // DT = Breakdown only
   });
   const months = Object.keys(mm).sort().slice(-12);
   if (months.length < 2) return;
@@ -1334,7 +1337,7 @@ function rUptimeTimeline(mo) {
   lineNames.forEach((lineName, li) => {
     const mcMap = lineMap[lineName];
     const allLineEvents = Object.values(mcMap).flat()
-      .filter(ev => !(ev.probType||"").toLowerCase().includes("improvement"));
+      .filter(ev => ev.isBreakdown); // downtime timeline: Breakdown Maintenance only
 
     // Line-level aggregate bar
     const { segHtml: lSegHtml, uptimePct: lPct, uptimeColor: lColor } = _tlSegHtml(allLineEvents, tlStart, tlEnd, tlMs, tlEffective, tlPrevWin);
@@ -1358,7 +1361,7 @@ function rUptimeTimeline(mo) {
 
     let mcHtml = '';
     mcNames.forEach(mcNo => {
-      const mcEvents = mcMap[mcNo].filter(ev => !(ev.probType||"").toLowerCase().includes("improvement"));
+      const mcEvents = mcMap[mcNo].filter(ev => ev.isBreakdown); // downtime: Breakdown only
       const { segHtml, uptimePct, uptimeColor } = _tlSegHtml(mcEvents, tlStart, tlEnd, tlMs, tlEffective, tlPrevWin);
       mcHtml += `<div class="tl-row">
         <div class="tl-lbl" title="${mcNo}">${mcNo}</div>
