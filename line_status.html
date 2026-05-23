@@ -407,24 +407,18 @@ function parseCSV(text){
   const idx={};hdr.forEach((h,i)=>idx[h.trim().replace(/\r/g,'')]=i);
   const g=(row,k)=>{const i=idx[k];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim().replace(/\r/g,''):''};
   const findCol=sub=>Object.keys(idx).find(k=>k.includes(sub))||null;
-  // DEBUG — remove after fix
-  console.log('[DEBUG] raw line[0]:', lines[0].substring(0,200));
-  console.log('[DEBUG] parsed headers (first 20):', Object.keys(idx).slice(0,20));
-  console.log('[DEBUG] total rows:', lines.length-1);
   const C={
-    open:    findCol('วันเวลาที่แจ้ง'),
+    open:    findCol('เวลาเปิด MO')    ||findCol('วันเวลาที่แจ้ง'),
     dept:    findCol('แผนก'),
-    line:    findCol('ไลน์การผลิต'),
-    mcNo:    findCol('หมายเลข'),
-    mcName:  findCol('ชื่อรายการ'),
-    probType:findCol('ประเภทงานซ่อม'),   // 2.ประเภทงานซ่อม
-    rcv:     findCol('วันเวลาที่รับงาน'), // 2.วันเวลาที่รับงาน
-    close:   findCol('วันเวลาที่ซ่อมเสร็จ'),
-    status:  findCol('สถานะรวม'),
-    symptom: findCol('สาเหตุปัญหา')||findCol('ลักษณะปัญหา'),
+    line:    findCol('Line การผลิต')   ||findCol('ไลน์การผลิต'),
+    mcNo:    findCol('Mc No')          ||findCol('หมายเลข'),
+    mcName:  findCol('MC Type')        ||findCol('ชื่อรายการ'),
+    probType:findCol('Problem Type')   ||findCol('ประเภทงานซ่อม'),
+    rcv:     findCol('ช่างเริ่มดำเนินงาน')||findCol('วันเวลาที่รับงาน'),
+    close:   findCol('เวลาส่งมอบ')    ||findCol('ตรวจสอบงานหลังซ่อม')||findCol('วันเวลาที่ซ่อมเสร็จ'),
+    status:  findCol('Status MO')      ||findCol('สถานะรวม'),
+    symptom: findCol('อาการ/สาเหตุ') ||findCol('สาเหตุปัญหา')||findCol('ลักษณะปัญหา'),
   };
-  console.log('[DEBUG] column map C:', JSON.stringify(C));
-  console.log('[DEBUG] row[1] sample:', csvLineParse(lines[1]).slice(0,12));
   // First pass: collect all JIG line names before any filter
   for(let r=1;r<lines.length;r++){
     const row=csvLineParse(lines[r]);
