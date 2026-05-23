@@ -689,8 +689,8 @@ function parseMOCSV(text) {
   // Resolve column keys with partial match (columns may have number prefix e.g. "2.ประเภทงานซ่อม")
   const findCol = sub => Object.keys(idx).find(k => k.includes(sub)) || null;
   const rcvColKey      = findCol("วันเวลาที่รับงาน");
-  const probTypeKey    = findCol("2.ประเภทงานซ่อม") || findCol("ประเภทงานซ่อม"); // Breakdown/Corrective/etc.
-  const probCharKey    = findCol("1.ลักษณะปัญหา")   || findCol("Problem Type");    // ปรับจิ๊ก/กระบอกลม etc.
+  const probTypeKey    = findCol("2.ประเภทงานซ่อม") || findCol("ประเภทงานซ่อม") || findCol("Problem Type"); // Breakdown/Corrective/etc.
+  const probCharKey    = findCol("1.ลักษณะปัญหา");    // ปรับจิ๊ก/กระบอกลม etc. (separate from Problem Type)
   console.log("[MO] probTypeKey=", probTypeKey, "| probCharKey=", probCharKey, "| headers=", Object.keys(idx).slice(0,20));
   const closeColKey    = findCol("วันเวลาที่ซ่อมเสร็จ") || findCol("เวลาซ่อมเสร็จ");
   const rows = [];
