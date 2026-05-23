@@ -1241,13 +1241,12 @@ let MO_ALL = [], MO_LOADED = false;
 // Parse thai buddhist date "30/10/2568 11:36:21" → JS Date
 function parseMODate(s) {
   if (!s) return null;
-  s = s.trim();
-  const parts = s.split(" ");
-  const dp = parts[0].split("/");
-  if (dp.length !== 3) return null;
-  const d = +dp[0], m = +dp[1] - 1, y = +dp[2];
-  const ce = y > 2400 ? y - 543 : y;
-  return new Date(ce, m, d, ...((parts[1] || "00:00:00").split(":").map(Number)));
+  s = s.trim().replace(/\r/g, '');
+  const dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (dmy) { const ce = +dmy[3] > 2400 ? +dmy[3] - 543 : +dmy[3]; return new Date(ce, +dmy[2]-1, +dmy[1], +(dmy[4]||0), +(dmy[5]||0), +(dmy[6]||0)); }
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
+  if (iso) { const ce = +iso[1] > 2400 ? +iso[1] - 543 : +iso[1]; return new Date(ce, +iso[2]-1, +iso[3], +(iso[4]||0), +(iso[5]||0), +(iso[6]||0)); }
+  return null;
 }
 
 function csvLineMO(l) {
