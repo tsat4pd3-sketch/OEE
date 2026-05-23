@@ -1049,6 +1049,18 @@ function setProbParetoTab(tab, btn) {
   rMOProbPareto(_probParetoMO);
 }
 
+const PROB_CHAR_KEYWORDS = [
+  { label: 'เซนเซอร์ ชำรุด',     keys: ['เซนเซอร์','sensor','reed','proximity','inductive','photoelectric','photo'] },
+  { label: 'โลเคเตอร์ ชำรุด',    keys: ['โลเคเตอร์','locator','locate','ล็อคเกต'] },
+  { label: 'แคลมป์ ชำรุด',        keys: ['แคลมป์','clamp','คลาม'] },
+  { label: 'กระบอกลม ชำรุด',     keys: ['กระบอกลม','cylinder','pneumatic'] },
+  { label: 'สต็อปเปอร์ ชำรุด',   keys: ['สต็อป','stopper','stop pin'] },
+  { label: 'เครื่องมาร์ค ชำรุด', keys: ['มาร์ค','marking','printer','พิมพ์'] },
+  { label: 'ระบบไฟฟ้า ชำรุด',    keys: ['ไฟฟ้า','electric','สายไฟ','solenoid','โซลินอยด์','relay','รีเลย์'] },
+  { label: 'โรบ็อต ชำรุด',        keys: ['robot','โรบ็อต','แขนกล','alarm'] },
+  { label: 'ปรับจิ๊ก/Poka-Yoke',  keys: ['ปรับจิ๊ก','poka','yoke'] },
+];
+
 function classifyProbChar(probChar, symptom, knownChars) {
   const pc  = (probChar || '').toLowerCase().trim();
   const sym = (symptom  || '').toLowerCase();
@@ -1056,18 +1068,21 @@ function classifyProbChar(probChar, symptom, knownChars) {
   const isPokaGroup = s => s.includes('ปรับจิ๊ก') || s.includes('poka');
   // Group 2: ปรับจิ๊ก + Poka-Yoke รวมเป็นกลุ่มเดียว
   if (isPokaGroup(pc)) return POKA_LABEL;
-  // Group 1: probChar specific (เช่น "เซนเซอร์ ชำรุด") → คงเดิม แยกชัดเจน
+  // Group 1: probChar specific → คงเดิม แยกชัดเจน
   if (probChar && !pc.includes('อื่น')) return probChar;
-  // Group 3: อื่นๆ/ว่าง → cross-check symptom กับ probChar ที่มีอยู่จริง
-  if (knownChars && knownChars.length && sym) {
-    for (const k of knownChars) {
-      const kl = k.toLowerCase();
-      const stem = kl.replace(/\s*ชำรุด\s*$/, '').trim();
-      if (stem && sym.includes(stem)) {
-        return isPokaGroup(kl) ? POKA_LABEL : k;
+  // Group 3: อื่นๆ/ว่าง → cross-check symptom
+  if (sym) {
+    // 3a: keyword map (explicit — covers common patterns)
+    for (const { label, keys } of PROB_CHAR_KEYWORDS) {
+      if (keys.some(k => sym.includes(k))) return label;
+    }
+    // 3b: dynamic stems from actual data probChar list
+    if (knownChars && knownChars.length) {
+      for (const k of knownChars) {
+        const stem = k.toLowerCase().replace(/\s*ชำรุด\s*$/, '').trim();
+        if (stem && sym.includes(stem)) return isPokaGroup(k.toLowerCase()) ? POKA_LABEL : k;
       }
     }
-    if (isPokaGroup(sym)) return POKA_LABEL;
   }
   return 'อื่นๆ';
 }
