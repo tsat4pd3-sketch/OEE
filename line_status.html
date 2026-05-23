@@ -407,7 +407,10 @@ function parseCSV(text){
   const idx={};hdr.forEach((h,i)=>idx[h.trim().replace(/\r/g,'')]=i);
   const g=(row,k)=>{const i=idx[k];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim().replace(/\r/g,''):''};
   const findCol=sub=>Object.keys(idx).find(k=>k.includes(sub))||null;
-  // Map actual sheet columns (all have number prefix e.g. "1.วันเวลาที่แจ้ง")
+  // DEBUG — remove after fix
+  console.log('[DEBUG] raw line[0]:', lines[0].substring(0,200));
+  console.log('[DEBUG] parsed headers (first 20):', Object.keys(idx).slice(0,20));
+  console.log('[DEBUG] total rows:', lines.length-1);
   const C={
     open:    findCol('วันเวลาที่แจ้ง'),
     dept:    findCol('แผนก'),
@@ -420,6 +423,8 @@ function parseCSV(text){
     status:  findCol('สถานะรวม'),
     symptom: findCol('สาเหตุปัญหา')||findCol('ลักษณะปัญหา'),
   };
+  console.log('[DEBUG] column map C:', JSON.stringify(C));
+  console.log('[DEBUG] row[1] sample:', csvLineParse(lines[1]).slice(0,12));
   // First pass: collect all JIG line names before any filter
   for(let r=1;r<lines.length;r++){
     const row=csvLineParse(lines[r]);
