@@ -406,7 +406,8 @@ function parseCSV(text){
   const g=(row,name)=>{const i=idx[name];return(i!==undefined&&row[i]!==undefined)?String(row[i]).trim().replace(/\r/g,''):''};
   const findCol=sub=>Object.keys(idx).find(k=>k.includes(sub))||null;
   const rcvColKey   =findCol('วันเวลาที่รับงาน');
-  const probTypeKey =findCol('ประเภทงานซ่อม');
+  const probTypeKey =findCol('Problem Type')||findCol('ประเภทงานซ่อม');
+  const probCharKey =findCol('Problem Characteristic')||findCol('1.ลักษณะปัญหา');
   const closeColKey =findCol('วันเวลาที่ซ่อมเสร็จ')||findCol('เวลาซ่อมเสร็จ');
   const openColKey  =findCol('วันเวลาที่แจ้ง')||findCol('เวลาเปิด MO');
   // First pass: collect all JIG line names before any filter
@@ -427,23 +428,26 @@ function parseCSV(text){
     if(!dateOpen)continue;
     const dept=g(row,'แผนก'),mcType=g(row,'Mc Type');
     if(dept&&!dept.toUpperCase().includes('JIG')&&!mcType.toUpperCase().includes('JIG'))continue;
-    const probTypeVal=probTypeKey?g(row,probTypeKey):g(row,'ประเภทงานซ่อม');
+    const probTypeVal=probTypeKey?g(row,probTypeKey):'';
+    const probCharVal=probCharKey?g(row,probCharKey):'';
     if(probTypeVal.toLowerCase().includes('reject'))continue;
     const onOff=g(row,'Online/Offline');
-    const probType=probTypeVal||g(row,'Problem Type');
+    const probType=probTypeVal;
+    const probChar=probCharVal;
     // Exclude offline MOs; keep ปรับจิ๊ก but tag separately (used for WATCH status only)
     if(isOfflineMO(onOff))continue;
-    const isAdjust=isAdjustMO(probType);
+    const isAdjust=isAdjustMO(probChar||probType);
+    const isBreakdown=probTypeVal.toLowerCase().includes('breakdown');
     const dateClose=closeColKey?parseMODate(g(row,closeColKey)):(parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ')));
     const statusMO=g(row,'Status MO').toLowerCase();
     const isClosed=!!dateClose||statusMO.includes('เสร็จ')||statusMO.includes('close')||statusMO.includes('done');
     if(rcvColKey&&!g(row,rcvColKey)&&(Date.now()-dateOpen.getTime())>24*60*60*1000)continue;
     const lineDt=(dateClose&&dateClose>dateOpen)?Math.round((dateClose-dateOpen)/60000):0;
     rows.push({
-      date:dateOpen,dateClose,isClosed,isAdjust,
+      date:dateOpen,dateClose,isClosed,isAdjust,isBreakdown,
       line:(g(row,'Line การผลิต')||'').trim().toUpperCase(),
       mcNo:g(row,'Mc No.'),
-      probType,
+      probType,probChar,
       symptom:g(row,'อาการ/สาเหตุ'),
       lineDt,
     });
@@ -558,8 +562,8 @@ function render(){
   const grid=document.getElementById('status-grid');
   grid.innerHTML=lines.map(ln=>{
     const st=lineStatus[ln];
-    // Timeline shows only normal MOs (exclude ปรับจิ๊ก and improvement)
-    const events=(lineMap[ln]||[]).filter(d=>!d.isAdjust&&!(d.probType||'').toLowerCase().includes('improvement')&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
+    // Timeline shows Breakdown Maintenance only (same as jig_mtn)
+    const events=(lineMap[ln]||[]).filter(d=>d.isBreakdown&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
     const sorted=[...events].sort((a,b)=>a.date-b.date);
 
     // Segments — recent open MO extends to now; old open MO gets 1-min marker only
@@ -673,7 +677,7 @@ function render(){
   // Update avg uptime
   if(lines.length){
     const allPcts=lines.map(ln=>{
-      const ev=(lineMap[ln]||[]).filter(d=>!d.isAdjust&&!(d.probType||'').toLowerCase().includes('improvement')&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
+      const ev=(lineMap[ln]||[]).filter(d=>d.isBreakdown&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=winStart));
       const dn=ev.reduce((s,e)=>{if(e.dateClose&&e.dateClose>e.date){const d=Math.min(e.dateClose,effectiveEnd)-Math.max(e.date,winStart);return s+Math.max(0,d);}return s;},0);
       return elapsedMs>0?Math.max(0,Math.round((1-dn/elapsedMs)*100)):100;
     });
