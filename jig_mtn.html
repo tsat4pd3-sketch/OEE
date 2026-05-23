@@ -1049,35 +1049,42 @@ function setProbParetoTab(tab, btn) {
   rMOProbPareto(_probParetoMO);
 }
 
-function classifyProbChar(probChar, symptom) {
-  const pc  = (probChar || '').toLowerCase();
+function classifyProbChar(probChar, symptom, knownChars) {
+  const pc  = (probChar || '').toLowerCase().trim();
   const sym = (symptom  || '').toLowerCase();
-  // Group 1: ชำรุด
-  if (pc.includes('ชำรุด') || (pc.includes('อื่น') && sym.includes('ชำรุด'))) return 'ชำรุด';
-  // Group 2: ปรับจิ๊ก/Poka-Yoke
-  if (pc.includes('ปรับจิ๊ก') || pc.includes('poka') ||
-      (pc.includes('อื่น') && (sym.includes('ปรับจิ๊ก') || sym.includes('poka') || sym.includes('ปรับ jig')))) return 'ปรับจิ๊ก/Poka-Yoke';
-  // Group 3: อื่นๆ cross-check with symptom for known keywords
-  if (pc.includes('อื่น') || pc === '—' || !probChar) {
-    if (sym.includes('ชำรุด'))                                             return 'ชำรุด';
-    if (sym.includes('ปรับจิ๊ก') || sym.includes('poka'))                 return 'ปรับจิ๊ก/Poka-Yoke';
-    if (sym.includes('sensor') || sym.includes('เซนเซอร์'))               return 'เซนเซอร์ ชำรุด';
-    if (sym.includes('cylinder') || sym.includes('กระบอกลม'))             return 'กระบอกลม ชำรุด';
-    if (sym.includes('solenoid') || sym.includes('โซลินอยด์'))            return 'โซลินอยด์ ชำรุด';
-    if (sym.includes('สายไฟ') || sym.includes('electric') || sym.includes('ไฟฟ้า')) return 'ระบบไฟฟ้า ชำรุด';
-    return 'อื่นๆ';
+  const POKA_LABEL = 'ปรับจิ๊ก/Poka-Yoke';
+  const isPokaGroup = s => s.includes('ปรับจิ๊ก') || s.includes('poka');
+  // Group 2: ปรับจิ๊ก + Poka-Yoke รวมเป็นกลุ่มเดียว
+  if (isPokaGroup(pc)) return POKA_LABEL;
+  // Group 1: probChar specific (เช่น "เซนเซอร์ ชำรุด") → คงเดิม แยกชัดเจน
+  if (probChar && !pc.includes('อื่น')) return probChar;
+  // Group 3: อื่นๆ/ว่าง → cross-check symptom กับ probChar ที่มีอยู่จริง
+  if (knownChars && knownChars.length && sym) {
+    for (const k of knownChars) {
+      const kl = k.toLowerCase();
+      const stem = kl.replace(/\s*ชำรุด\s*$/, '').trim();
+      if (stem && sym.includes(stem)) {
+        return isPokaGroup(kl) ? POKA_LABEL : k;
+      }
+    }
+    if (isPokaGroup(sym)) return POKA_LABEL;
   }
-  return probChar; // keep original if specific enough
+  return 'อื่นๆ';
 }
 
 function rMOProbPareto(mo) {
   _probParetoMO = mo;
   const tab = _probParetoTab;
 
+  // Build known probChar list (exclude อื่นๆ/blank) — used for symptom cross-check
+  const knownChars = [...new Set(
+    mo.map(d => (d.probChar || '').trim())
+      .filter(c => c && !c.toLowerCase().includes('อื่น'))
+  )];
   // Aggregate per problem characteristic group
   const agg = {};
   mo.forEach(d => {
-    const key = classifyProbChar(d.probChar, d.symptom);
+    const key = classifyProbChar(d.probChar, d.symptom, knownChars);
     if (!agg[key]) agg[key] = { count: 0, dtSum: 0, ttrSum: 0, ttrN: 0 };
     agg[key].count++;
     if (d.lineDt > 0) agg[key].dtSum += d.lineDt;
