@@ -480,6 +480,12 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
         <span class="tog-track"></span>
       </label>
     </div>
+    <div style="padding:8px 0 4px">
+      <span class="tog-lbl" style="font-size:12px;font-weight:600;color:var(--muted)">ประเภทงานซ่อม</span>
+      <select id="sel-probtype" onchange="renderMO()" style="width:100%;margin-top:6px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;cursor:pointer;outline:none;transition:border-color .2s">
+        <option value="">ทั้งหมด</option>
+      </select>
+    </div>
   </div>
   <button class="btn-refresh" onclick="loadMO()">🔄 โหลดข้อมูลใหม่</button>
   <div class="auto-info">JIG MTN — PD3 + PD4<br>Maintenance Intelligence</div>
@@ -772,6 +778,14 @@ async function loadMO() {
       if (_dfrom && !_dfrom.value) _dfrom.value = _fmtISO(_fromD);
       if (_dto && !_dto.value) _dto.value = _fmtISO(_latestDate);
     }
+    // Populate ประเภทงานซ่อม dropdown with unique values from data
+    const sel = document.getElementById('sel-probtype');
+    if (sel) {
+      const types = [...new Set(MO_ALL.map(d => d.probType).filter(Boolean))].sort();
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">ทั้งหมด</option>' +
+        types.map(t => `<option value="${t}"${t===cur?' selected':''}>${t}</option>`).join('');
+    }
     renderMO();
     // runMOAI(); // AI MAINTENANCE INTELLIGENCE (disabled)
   } catch (e) {
@@ -796,11 +810,13 @@ function getMOFiltered() {
   const to = _tv.length === 3 ? new Date(+_tv[0], +_tv[1]-1, +_tv[2], 23, 59, 59) : new Date(9999, 0, 1);
   const inclOffline = document.getElementById("tog-offline")?.checked ?? false;
   const inclAdjust  = document.getElementById("tog-adjust")?.checked ?? false;
+  const selProbType = (document.getElementById("sel-probtype")?.value || "").trim();
 
   const filtered = MO_ALL.filter(d => {
     if (d.date < from || d.date > to) return false;
     if (!inclOffline && isOfflineMO(d.onOff)) return false;
     if (!inclAdjust  && isAdjustMO(d.probType)) return false;
+    if (selProbType && d.probType !== selProbType) return false;
     return true;
   });
 
@@ -813,6 +829,7 @@ function getMOFiltered() {
     const tags = [];
     if (!inclOffline) tags.push('ในไลน์');
     if (!inclAdjust)  tags.push('ไม่รวมปรับจิ๊ก');
+    if (selProbType)  tags.push(selProbType);
     const tagStr = tags.length ? ` · ${tags.join(' · ')}` : '';
     document.getElementById("mo-status").textContent = `แสดง ${filtered.length} MO${tagStr}`;
   }
