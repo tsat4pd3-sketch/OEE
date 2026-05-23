@@ -473,8 +473,8 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     </div>
     <div class="tog-row">
       <div>
-        <span class="tog-lbl">รวมปรับจิ๊ก</span>
-        <span class="tog-sub">1.ลักษณะปัญหา: ปรับจิ๊ก</span>
+        <span class="tog-lbl">รวมปรับจิ๊ก/อื่นๆ</span>
+        <span class="tog-sub">ปรับจิ๊ก · Poka-Yoke · ระบุไม่ได้</span>
       </div>
       <label class="tog-sw">
         <input type="checkbox" id="tog-adjust" onchange="renderMO()">
@@ -809,8 +809,13 @@ function isOfflineMO(v) {
   return s.includes('นอก') || s === 'offline' || s === 'off';
 }
 function isAdjustMO(d) {
-  // "ปรับจิ๊ก" is a 1.ลักษณะปัญหา value, not 2.ประเภทงานซ่อม
-  return (d.probChar || d.probType || '').includes('ปรับจิ๊ก');
+  const pc  = (d.probChar || d.probType || '').toLowerCase();
+  const sym = (d.symptom || '').toLowerCase();
+  // ปรับจิ๊ก / Poka-Yoke / อื่นๆ ที่ classify ไม่ได้
+  if (pc.includes('ปรับจิ๊ก') || pc.includes('poka')) return true;
+  // อื่นๆ ที่ยังระบุไม่ได้ = classifyProbChar คืนค่า 'อื่นๆ'
+  if (classifyProbChar(d.probChar, d.symptom, null) === 'อื่นๆ') return true;
+  return false;
 }
 
 function getMOFiltered() {
@@ -838,7 +843,7 @@ function getMOFiltered() {
   } else if (MO_LOADED) {
     const tags = [];
     if (!inclOffline) tags.push('ในไลน์');
-    if (!inclAdjust)  tags.push('ไม่รวมปรับจิ๊ก');
+    if (!inclAdjust)  tags.push('ไม่รวมปรับจิ๊ก/อื่นๆ');
     if (selProbType)  tags.push(selProbType);
     const tagStr = tags.length ? ` · ${tags.join(' · ')}` : '';
     document.getElementById("mo-status").textContent = `แสดง ${filtered.length} MO${tagStr}`;
