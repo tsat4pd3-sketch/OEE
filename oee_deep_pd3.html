@@ -667,7 +667,7 @@ let ALL=[],FD=[],PARTS=[],CH={};
 const DT_KEYS={"เครื่องจักรหลัก":"เครื่องจักรหลักเบรคดาวน์","เครื่องจักรรอง":"เครื่องจักรรองเบรคดาวน์","แม่พิมพ์/จิ๊ก":"แม่พิมพ์,จิ๊ก,กริ๊ปเปอร์ ชำรุด","PLC/Sensor":"ระบบ PLC / ระบบ เซนเซอร์ มีปัญหา","Robot":"โรบอทเบรคดาวน์","แก้คุณภาพ":"แก้ไขปัญหาคุณภาพ","รอภาชนะ":"รอภาชนะ","รอ QA":"รอQAคอนเฟิร์มคุณภาพ","อื่นๆ":"อื่นๆ"};
 const DT_COLORS=["#f43f5e","#f59e0b","#a855f7","#38bdf8","#22c55e","#fb923c","#3dd65c","#e879f9","#34d399","#fbbf24"];
 
-function csvLine(l){const sep=l.includes('	')?'	':',';const r=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===sep&&!q){r.push(c);c="";}else c+=ch;}r.push(c);return r;}
+function csvLine(l){const r=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(c);c="";}else c+=ch;}r.push(c);return r;}
 function parsePD3Date(s){if(!s)return null;s=s.trim().replace(/"/g,"");const p=s.split("/");if(p.length!==3)return null;const dd=+p[0],mm=+p[1]-1,yyyy=+p[2];if(isNaN(dd)||yyyy<2000)return null;return new Date(yyyy,mm,dd);}
 function fmtDate(d){if(!d)return"—";return`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;}
 function fmtIso(d){return d.toISOString().split("T")[0];}
@@ -1258,21 +1258,21 @@ let MO_ALL = [], MO_LOADED = false;
 // Parse thai buddhist date "30/10/2568 11:36:21" → JS Date
 function parseMODate(s) {
   if (!s) return null;
-  s = s.trim().replace(/\r/g, '');
-  const dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if (dmy) { const ce = +dmy[3] > 2400 ? +dmy[3] - 543 : +dmy[3]; return new Date(ce, +dmy[2]-1, +dmy[1], +(dmy[4]||0), +(dmy[5]||0), +(dmy[6]||0)); }
-  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
-  if (iso) { const ce = +iso[1] > 2400 ? +iso[1] - 543 : +iso[1]; return new Date(ce, +iso[2]-1, +iso[3], +(iso[4]||0), +(iso[5]||0), +(iso[6]||0)); }
-  return null;
+  s = s.trim();
+  const parts = s.split(" ");
+  const dp = parts[0].split("/");
+  if (dp.length !== 3) return null;
+  const d = +dp[0], m = +dp[1] - 1, y = +dp[2];
+  const ce = y > 2400 ? y - 543 : y;
+  return new Date(ce, m, d, ...((parts[1] || "00:00:00").split(":").map(Number)));
 }
 
 function csvLineMO(l) {
-  const sep = l.includes('\t') ? '\t' : ',';
   const r = []; let c = "", q = false;
   for (let i = 0; i < l.length; i++) {
     const ch = l[i];
     if (ch === '"') { if (q && l[i+1] === '"') { c += '"'; i++; } else q = !q; }
-    else if (ch === sep && !q) { r.push(c); c = ""; }
+    else if (ch === ',' && !q) { r.push(c); c = ""; }
     else c += ch;
   }
   r.push(c); return r;
@@ -1283,59 +1283,48 @@ function parseMOCSV(text) {
   if (lines.length < 2) return [];
   const hdr = csvLineMO(lines[0]);
   const idx = {}; hdr.forEach((h, i) => idx[h.trim().replace(/\r/g,"")] = i);
-  const g = (row, k) => { const i = idx[k]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim().replace(/\r/g,"") : ""; };
+  const g = (row, name) => { const i = idx[name]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim().replace(/\r/g,"") : ""; };
   const n = v => { if (!v) return 0; const x = parseFloat(v.replace(/,/g, "")); return isNaN(x) ? 0 : x; };
   const findCol = sub => Object.keys(idx).find(k => k.includes(sub)) || null;
-  const C = {
-    open:     findCol("วันเวลาที่แจ้ง"),
-    dept:     findCol("แผนก"),
-    line:     findCol("ไลน์การผลิต"),
-    mcNo:     findCol("หมายเลข"),
-    mcName:   findCol("ชื่อรายการ"),
-    probType: findCol("ประเภทงานซ่อม"),
-    rcv:      findCol("วันเวลาที่รับงาน"),
-    close:    findCol("วันเวลาที่ซ่อมเสร็จ"),
-    status:   findCol("สถานะรวม"),
-    symptom:  findCol("สาเหตุปัญหา") || findCol("ลักษณะปัญหา"),
-    solution: findCol("วิธีการแก้ไข"),
-    tech:     findCol("ชื่อผู้ซ่อมหลัก"),
-  };
+  const rcvColKey   = findCol("วันเวลาที่รับงาน");
+  const probTypeKey = findCol("ประเภทงานซ่อม");
+  const closeColKey = findCol("วันเวลาที่ซ่อมเสร็จ") || findCol("เวลาซ่อมเสร็จ");
+  const openColKey  = findCol("วันเวลาที่แจ้ง") || findCol("เวลาเปิด MO");
   const rows = [];
   for (let r = 1; r < lines.length; r++) {
     const row = csvLineMO(lines[r]);
     if (row.length < 8) continue;
-    const dateOpen = C.open ? parseMODate(g(row, C.open)) : null;
+    const dateOpen = parseMODate(openColKey ? g(row, openColKey) : g(row, "เวลาเปิด MO"));
     if (!dateOpen) continue;
-    const dept = C.dept ? g(row, C.dept) : "";
+    // Filter by แผนก — only load rows matching this dashboard's dept
+    const dept = g(row, "แผนก");
     if (dept && !dept.toUpperCase().includes("PD3")) continue;
-    const probTypeVal = C.probType ? g(row, C.probType) : "";
+    const probTypeVal = probTypeKey ? g(row, probTypeKey) : g(row, "ประเภทงานซ่อม");
     if (probTypeVal.toLowerCase().includes("reject")) continue;
-    const dateClose = C.close ? parseMODate(g(row, C.close)) : null;
-    const statusVal = (C.status ? g(row, C.status) : "").toLowerCase();
-    const isClosed = !!dateClose || statusVal.includes("เสร็จ") || statusVal.includes("close") || statusVal.includes("done") || statusVal.includes("ปิด");
-    if (C.rcv && !g(row, C.rcv) && (Date.now() - dateOpen.getTime()) > 24 * 60 * 60 * 1000) continue;
-    const rcvDate = C.rcv ? parseMODate(g(row, C.rcv)) : null;
-    const lineDt = (dateClose && dateClose > dateOpen) ? Math.round((dateClose - dateOpen) / 60000) : 0;
-    const ttr = (rcvDate && dateClose && dateClose > rcvDate) ? Math.round((dateClose - rcvDate) / 60000) : lineDt;
+    const dateClose = closeColKey ? parseMODate(g(row, closeColKey)) : parseMODate(g(row, "เวลาซ่อมเสร็จ"));
+    const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
+    const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
+    // Skip stuck MOs: แจ้งมาแต่ไม่มีวันเวลาที่รับงาน >24h = gsheet bug
+    if (rcvColKey && !g(row, rcvColKey) && (Date.now() - dateOpen.getTime()) > 24 * 60 * 60 * 1000) continue;
     rows.push({
       date: dateOpen,
-      dateClose,
+      dateClose: dateClose,
       dateStr: fmtDate ? fmtDate(dateOpen) : dateOpen.toLocaleDateString("th-TH"),
-      line: C.line ? (g(row, C.line) || "").trim().toUpperCase() : "",
-      mcType: C.mcName ? g(row, C.mcName) : "",
-      mcNo: C.mcNo ? g(row, C.mcNo) : "",
-      probType: probTypeVal,
-      symptom: C.symptom ? g(row, C.symptom) : "",
-      solution: C.solution ? g(row, C.solution) : "",
-      ttr,
-      moWait: 0,
-      tech: C.tech ? g(row, C.tech) : "",
-      onOff: "",
-      repairTime: ttr,
-      responseTime: rcvDate && dateOpen ? Math.round((rcvDate - dateOpen) / 60000) : 0,
-      dept,
-      statusMO: statusVal,
-      isClosed,
+      line: g(row, "Line การผลิต"),
+      mcType: g(row, "Mc Type"),
+      mcNo: g(row, "Mc No."),
+      probType: g(row, "Problem Type"),
+      symptom: g(row, "อาการ/สาเหตุ"),        // col 9 — symptom
+      solution: g(row, "แนวทางการแก้ไข"),      // col 15 — fix method
+      ttr: n(g(row, "TTR")),
+      moWait: n(g(row, "MO รอการแก้ไข")),
+      tech: g(row, "ช่างที่รับการแก้ไข"),
+      onOff: g(row, "Online/Offline"),
+      repairTime: n(g(row, "ระยะเวลาในการซ่อมงาน")),
+      responseTime: n(g(row, "ระยะเวลาเข้าดำเนินการ")),
+      dept: g(row, "แผนก"),
+      statusMO: statusMO,
+      isClosed: isClosed,
     });
   }
   return rows;
