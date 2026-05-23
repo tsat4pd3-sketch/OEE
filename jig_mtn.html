@@ -689,8 +689,8 @@ function parseMOCSV(text) {
   // Resolve column keys with partial match (columns may have number prefix e.g. "2.ประเภทงานซ่อม")
   const findCol = sub => Object.keys(idx).find(k => k.includes(sub)) || null;
   const rcvColKey      = findCol("วันเวลาที่รับงาน");
-  const probTypeKey    = findCol("2.ประเภทงานซ่อม") || findCol("ประเภทงานซ่อม") || findCol("Problem Type"); // Breakdown/Corrective/etc.
-  const probCharKey    = findCol("1.ลักษณะปัญหา");    // ปรับจิ๊ก/กระบอกลม etc. (separate from Problem Type)
+  const probTypeKey    = findCol("2.ประเภทงานซ่อม") || findCol("ประเภทงานซ่อม"); // Breakdown/Corrective (not in current CSV)
+  const probCharKey    = findCol("1.ลักษณะปัญหา") || findCol("Problem Type"); // ปรับจิ๊ก/กระบอกลม/Reject MO etc.
   console.log("[MO] probTypeKey=", probTypeKey, "| probCharKey=", probCharKey, "| headers=", Object.keys(idx).slice(0,20));
   const closeColKey    = findCol("วันเวลาที่ซ่อมเสร็จ") || findCol("เวลาซ่อมเสร็จ");
   const rows = [];
@@ -703,9 +703,10 @@ function parseMOCSV(text) {
     const mcType = g(row, "Mc Type");
     // Filter: only JIG rows
     if (dept && !dept.toUpperCase().includes("JIG") && !mcType.toUpperCase().includes("JIG")) continue;
-    // Skip Reject MO only — all other types (including blank) are imported
-    const probTypeVal = probTypeKey ? g(row, probTypeKey) : g(row, "ประเภทงานซ่อม");
-    if (probTypeVal.toLowerCase().includes("reject")) continue;
+    // Skip Reject MO only — check Problem Type / probChar column for "Reject"
+    const probTypeVal = probTypeKey ? g(row, probTypeKey) : "";
+    const probCharVal = probCharKey ? g(row, probCharKey) : "";
+    if (probCharVal.toLowerCase().includes("reject") || probTypeVal.toLowerCase().includes("reject")) continue;
     const dateClose = closeColKey ? parseMODate(g(row, closeColKey)) : (parseMODate(g(row, "วันเวลาที่ซ่อมเสร็จ-")) || parseMODate(g(row, "เวลาซ่อมเสร็จ")));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
@@ -724,7 +725,7 @@ function parseMOCSV(text) {
       mcType: mcType,
       mcNo: g(row, "Mc No."),
       probType: probTypeVal,                                   // 2.ประเภทงานซ่อม (Breakdown/Corrective/etc.)
-      probChar: probCharKey ? g(row, probCharKey) : "",        // 1.ลักษณะปัญหา (ปรับจิ๊ก/กระบอกลม etc.)
+      probChar: probCharVal,                                   // 1.ลักษณะปัญหา / Problem Type (ปรับจิ๊ก/กระบอกลม etc.)
       symptom: g(row, "อาการ/สาเหตุ"),
       solution: g(row, "แนวทางการแก้ไข"),
       // ttr = actual repair time (รับงาน → ซ่อมเสร็จ), not including waiting
