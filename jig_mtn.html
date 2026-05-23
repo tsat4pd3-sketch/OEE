@@ -695,9 +695,9 @@ function parseMOCSV(text) {
     const mcType = g(row, "Mc Type");
     // Filter: only JIG rows
     if (dept && !dept.toUpperCase().includes("JIG") && !mcType.toUpperCase().includes("JIG")) continue;
-    // Skip blank/null or Reject MO rows entirely
+    // Skip Reject MO only — all other types (including blank) are imported
     const probTypeVal = probTypeKey ? g(row, probTypeKey) : g(row, "ประเภทงานซ่อม");
-    if (!probTypeVal || probTypeVal.toLowerCase().includes("reject")) continue;
+    if (probTypeVal.toLowerCase().includes("reject")) continue;
     const dateClose = closeColKey ? parseMODate(g(row, closeColKey)) : (parseMODate(g(row, "วันเวลาที่ซ่อมเสร็จ-")) || parseMODate(g(row, "เวลาซ่อมเสร็จ")));
     const statusMO = g(row, "Status MO").replace(/\r/g,"").trim();
     const isClosed = !!dateClose || statusMO.toLowerCase().includes("เสร็จ") || statusMO.toLowerCase().includes("close") || statusMO.toLowerCase().includes("done");
@@ -914,18 +914,19 @@ function _calcMTBF_monthly(mo) {
 
 function rMOKPI(mo) {
   _kpiMO = mo;
-  const totalMO = mo.length;
-  const closedMO = mo.filter(d => d.isClosed);
+  // All KPI metrics use Breakdown Maintenance only
+  const bdMO = mo.filter(d => d.isBreakdown);
+  const totalMO = bdMO.length;
+  const closedMO = bdMO.filter(d => d.isClosed);
   const closedCount = closedMO.length;
   const openCount = totalMO - closedCount;
   const closedPct = totalMO > 0 ? Math.round(closedCount / totalMO * 100) : 0;
-  const uniqMc = new Set(mo.map(d => d.mcNo)).size;
+  const uniqMc = new Set(bdMO.map(d => d.mcNo)).size;
   const mcProb = {};
-  mo.forEach(d => { const k = d.mcNo + "|" + d.probType; if (!mcProb[k]) mcProb[k] = 0; mcProb[k]++; });
+  bdMO.forEach(d => { const k = d.mcNo + "|" + d.probType; if (!mcProb[k]) mcProb[k] = 0; mcProb[k]++; });
   const recurring = Object.values(mcProb).filter(v => v > 1).length;
 
   const monthly = _kpiMode === 'monthly';
-  const bdMO = mo.filter(d => d.isBreakdown); // MTTR/MTBF = Breakdown Maintenance only
   const mttr = monthly ? _calcMTTR_monthly(bdMO) : _calcMTTR_overall(bdMO);
   const mtbf = monthly ? _calcMTBF_monthly(bdMO) : _calcMTBF_overall(bdMO);
   const modeLabel = monthly ? 'Monthly Avg' : 'Overall Avg';
