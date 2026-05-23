@@ -689,8 +689,8 @@ function parseMOCSV(text) {
   // Resolve column keys with partial match (columns may have number prefix e.g. "2.ประเภทงานซ่อม")
   const findCol = sub => Object.keys(idx).find(k => k.includes(sub)) || null;
   const rcvColKey      = findCol("วันเวลาที่รับงาน");
-  const probTypeKey    = findCol("2.ประเภทงานซ่อม") || findCol("ประเภทงานซ่อม"); // Breakdown/Corrective (not in current CSV)
-  const probCharKey    = findCol("1.ลักษณะปัญหา") || findCol("Problem Type"); // ปรับจิ๊ก/กระบอกลม/Reject MO etc.
+  const probTypeKey    = findCol("Problem Type") || findCol("2.ประเภทงานซ่อม") || findCol("ประเภทงานซ่อม"); // Breakdown/Corrective/Improvement
+  const probCharKey    = findCol("Problem Characteristic") || findCol("1.ลักษณะปัญหา"); // ปรับจิ๊ก/กระบอกลม etc.
   console.log("[MO] probTypeKey=", probTypeKey, "| probCharKey=", probCharKey, "| headers=", Object.keys(idx).slice(0,20));
   const closeColKey    = findCol("วันเวลาที่ซ่อมเสร็จ") || findCol("เวลาซ่อมเสร็จ");
   const rows = [];
@@ -1050,13 +1050,14 @@ function rMOProbPareto(mo) {
   _probParetoMO = mo;
   const tab = _probParetoTab;
 
-  // Aggregate per problem type
+  // Aggregate per problem characteristic (ลักษณะปัญหา)
   const agg = {};
   mo.forEach(d => {
-    if (!agg[d.probType]) agg[d.probType] = { count: 0, dtSum: 0, ttrSum: 0, ttrN: 0 };
-    agg[d.probType].count++;
-    if (d.lineDt > 0) agg[d.probType].dtSum += d.lineDt;
-    if (d.ttr > 0) { agg[d.probType].ttrSum += d.ttr; agg[d.probType].ttrN++; }
+    const key = d.probChar || '—';
+    if (!agg[key]) agg[key] = { count: 0, dtSum: 0, ttrSum: 0, ttrN: 0 };
+    agg[key].count++;
+    if (d.lineDt > 0) agg[key].dtSum += d.lineDt;
+    if (d.ttr > 0) { agg[key].ttrSum += d.ttr; agg[key].ttrN++; }
   });
 
   let rows;
