@@ -788,7 +788,9 @@ async function loadMO() {
     const sel = document.getElementById('sel-probtype');
     if (sel) {
       const types = [...new Set(MO_ALL.map(d => d.probType).filter(Boolean))].sort();
-      const cur = sel.value;
+      // Default to "Breakdown Maintenance" if available, otherwise keep current selection
+      const bd = types.find(t => t.toLowerCase().includes('breakdown'));
+      const cur = sel.value || bd || '';
       sel.innerHTML = '<option value="">ทั้งหมด</option>' +
         types.map(t => `<option value="${t}"${t===cur?' selected':''}>${t}</option>`).join('');
     }
