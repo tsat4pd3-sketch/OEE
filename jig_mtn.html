@@ -689,7 +689,7 @@ function parseMOCSV(text) {
   // Resolve column keys with partial match (columns may have number prefix e.g. "2.ประเภทงานซ่อม")
   const findCol = sub => Object.keys(idx).find(k => k.includes(sub)) || null;
   const rcvColKey    = findCol("วันเวลาที่รับงาน");
-  const probTypeKey  = findCol("ประเภทงานซ่อม");
+  const probTypeKey  = findCol("2.ประเภทงานซ่อม") || findCol("ประเภทงานซ่อม");
   const closeColKey  = findCol("วันเวลาที่ซ่อมเสร็จ") || findCol("เวลาซ่อมเสร็จ");
   const rows = [];
   for (let r = 1; r < lines.length; r++) {
@@ -721,7 +721,7 @@ function parseMOCSV(text) {
       line: g(row, "Line การผลิต"),
       mcType: mcType,
       mcNo: g(row, "Mc No."),
-      probType: probTypeVal || g(row, "Problem Type"),
+      probType: probTypeVal,
       symptom: g(row, "อาการ/สาเหตุ"),
       solution: g(row, "แนวทางการแก้ไข"),
       // ttr = actual repair time (รับงาน → ซ่อมเสร็จ), not including waiting
