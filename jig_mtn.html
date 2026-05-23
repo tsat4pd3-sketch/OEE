@@ -663,11 +663,13 @@ function parseMODate(s) {
 }
 
 function csvLineMO(l) {
+  // Auto-detect delimiter: TSV if line contains tab, else CSV
+  const sep = l.includes('\t') ? '\t' : ',';
   const r = []; let c = "", q = false;
   for (let i = 0; i < l.length; i++) {
     const ch = l[i];
     if (ch === '"') { if (q && l[i+1] === '"') { c += '"'; i++; } else q = !q; }
-    else if (ch === ',' && !q) { r.push(c); c = ""; }
+    else if (ch === sep && !q) { r.push(c); c = ""; }
     else c += ch;
   }
   r.push(c); return r;

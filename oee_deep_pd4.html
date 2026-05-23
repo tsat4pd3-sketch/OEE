@@ -664,7 +664,7 @@ const PD4_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSs034o0M970g62tL
 let ALL=[],FD=[],PARTS=[],CH={};
 const DT_COLORS=["#f43f5e","#f59e0b","#a855f7","#38bdf8","#22c55e","#fb923c","#3dd65c","#e879f9","#34d399","#fbbf24"];
 
-function csvLine(l){const r=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(c);c="";}else c+=ch;}r.push(c);return r;}
+function csvLine(l){const sep=l.includes('	')?'	':',';const r=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===sep&&!q){r.push(c);c="";}else c+=ch;}r.push(c);return r;}
 function parseThaiDate(s){if(!s)return null;s=s.trim().split(" ")[0];const p=s.split("/");if(p.length!==3)return null;const d=+p[0],m=+p[1]-1,y=+p[2];return new Date(y>2400?y-543:y,m,d);}
 function fmtDate(d){if(!d)return"—";return`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;}
 function fmtIso(d){return d.toISOString().split("T")[0];}
@@ -1251,11 +1251,12 @@ function parseMODate(s) {
 }
 
 function csvLineMO(l) {
+  const sep = l.includes('\t') ? '\t' : ',';
   const r = []; let c = "", q = false;
   for (let i = 0; i < l.length; i++) {
     const ch = l[i];
     if (ch === '"') { if (q && l[i+1] === '"') { c += '"'; i++; } else q = !q; }
-    else if (ch === ',' && !q) { r.push(c); c = ""; }
+    else if (ch === sep && !q) { r.push(c); c = ""; }
     else c += ch;
   }
   r.push(c); return r;
