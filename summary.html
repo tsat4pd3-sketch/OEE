@@ -647,7 +647,8 @@ function parseMOSummary(text){
   const g=(row,col)=>{const i=idx[col];return i!==undefined?(row[i]||'').trim().replace(/^"|"$/g,''):''};
   const findCol=sub=>Object.keys(idx).find(k=>k.includes(sub))||null;
   const rcvColKey  =findCol('วันเวลาที่รับงาน');
-  const probTypeKey=findCol('ประเภทงานซ่อม');
+  const probTypeKey=findCol('Problem Type')||findCol('ประเภทงานซ่อม');
+  const probCharKey=findCol('Problem Characteristic')||findCol('1.ลักษณะปัญหา');
   const closeColKey=findCol('วันเวลาที่ซ่อมเสร็จ')||findCol('เวลาซ่อมเสร็จ');
   const openColKey =findCol('วันเวลาที่แจ้ง')||findCol('เวลาเปิด MO');
   const rows=[];
@@ -657,20 +658,21 @@ function parseMOSummary(text){
     const dateOpen=parseMODate(openColKey?g(row,openColKey):(g(row,'เวลาเปิด MO')||g(row,'วันเวลาที่แจ้ง')));
     if(!dateOpen)continue;
     const onOff=g(row,'Online/Offline');
-    const probType=(probTypeKey?g(row,probTypeKey):'')||g(row,'ประเภทงานซ่อม')||g(row,'Problem Type');
-    // Filter: JIG dept/mc only (same as line_status) + exclude offline + ปรับจิ๊ก
+    const probType=probTypeKey?g(row,probTypeKey):'';
+    const probChar=probCharKey?g(row,probCharKey):'';
+    // Filter: JIG dept/mc only (same as line_status) + exclude offline + Reject MO
     const dept=g(row,'แผนก');const mcType=g(row,'Mc Type');
     if(dept&&!dept.toUpperCase().includes('JIG')&&!mcType.toUpperCase().includes('JIG'))continue;
     const s=(onOff||'').toLowerCase().trim();
     if(s.includes('นอก')||s==='offline'||s==='off')continue;
-    if(probType.includes('ปรับจิ๊ก'))continue;
     if(probType.toLowerCase().includes('reject'))continue;
+    const isBreakdown=probType.toLowerCase().includes('breakdown');
     const dateClose=closeColKey?parseMODate(g(row,closeColKey)):(parseMODate(g(row,'วันเวลาที่ซ่อมเสร็จ-'))||parseMODate(g(row,'เวลาซ่อมเสร็จ')));
     const isClosed=!!dateClose;
     if(rcvColKey&&!g(row,rcvColKey)&&(Date.now()-dateOpen.getTime())>24*60*60*1000)continue;
     const line=(g(row,'Line การผลิต')||'').trim().toUpperCase();
     rows.push({date:dateOpen,dateClose,line,mcNo:g(row,'Mc No.')||g(row,'Machine No.'),
-      probType,lineDt:dateClose&&dateClose>dateOpen?Math.round((dateClose-dateOpen)/60000):0});
+      probType,probChar,isBreakdown,lineDt:dateClose&&dateClose>dateOpen?Math.round((dateClose-dateOpen)/60000):0});
   }
   return rows;
 }
@@ -724,7 +726,7 @@ function renderProdTimelines(){
   </div>`;
 
   PRODUCTS.forEach(prod=>{
-    const mo=MO_SUM.filter(d=>PROD_LINE_KW[prod.id]&&PROD_LINE_KW[prod.id](d.line)&&!(d.probType||'').toLowerCase().includes('improvement')&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=rangeStart));
+    const mo=MO_SUM.filter(d=>PROD_LINE_KW[prod.id]&&PROD_LINE_KW[prod.id](d.line)&&d.isBreakdown&&d.date<=effectiveEnd&&(!d.dateClose||d.dateClose>=rangeStart));
     const el=document.getElementById('pc-tl-'+prod.id);
     if(!el){return;}
 
