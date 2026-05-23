@@ -667,7 +667,7 @@ let ALL=[],FD=[],PARTS=[],CH={};
 const DT_KEYS={"เครื่องจักรหลัก":"เครื่องจักรหลักเบรคดาวน์","เครื่องจักรรอง":"เครื่องจักรรองเบรคดาวน์","แม่พิมพ์/จิ๊ก":"แม่พิมพ์,จิ๊ก,กริ๊ปเปอร์ ชำรุด","PLC/Sensor":"ระบบ PLC / ระบบ เซนเซอร์ มีปัญหา","Robot":"โรบอทเบรคดาวน์","แก้คุณภาพ":"แก้ไขปัญหาคุณภาพ","รอภาชนะ":"รอภาชนะ","รอ QA":"รอQAคอนเฟิร์มคุณภาพ","อื่นๆ":"อื่นๆ"};
 const DT_COLORS=["#f43f5e","#f59e0b","#a855f7","#38bdf8","#22c55e","#fb923c","#3dd65c","#e879f9","#34d399","#fbbf24"];
 
-function csvLine(l){const r=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===','&&!q){r.push(c);c="";}else c+=ch;}r.push(c);return r;}
+function csvLine(l){const sep=l.includes('	')?'	':',';const r=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++;}else q=!q;}else if(ch===sep&&!q){r.push(c);c="";}else c+=ch;}r.push(c);return r;}
 function parsePD3Date(s){if(!s)return null;s=s.trim().replace(/"/g,"");const p=s.split("/");if(p.length!==3)return null;const dd=+p[0],mm=+p[1]-1,yyyy=+p[2];if(isNaN(dd)||yyyy<2000)return null;return new Date(yyyy,mm,dd);}
 function fmtDate(d){if(!d)return"—";return`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;}
 function fmtIso(d){return d.toISOString().split("T")[0];}
@@ -1268,11 +1268,12 @@ function parseMODate(s) {
 }
 
 function csvLineMO(l) {
+  const sep = l.includes('\t') ? '\t' : ',';
   const r = []; let c = "", q = false;
   for (let i = 0; i < l.length; i++) {
     const ch = l[i];
     if (ch === '"') { if (q && l[i+1] === '"') { c += '"'; i++; } else q = !q; }
-    else if (ch === ',' && !q) { r.push(c); c = ""; }
+    else if (ch === sep && !q) { r.push(c); c = ""; }
     else c += ch;
   }
   r.push(c); return r;
