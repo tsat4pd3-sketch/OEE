@@ -937,21 +937,22 @@ function _calcMTBF_monthly(mo) {
 
 function rMOKPI(mo) {
   _kpiMO = mo;
-  // All KPI metrics use Breakdown Maintenance only
+  // Use breakdown MO if available, fallback to all MO when probType column missing from CSV
   const bdMO = mo.filter(d => d.isBreakdown);
-  const totalMO = bdMO.length;
-  const closedMO = bdMO.filter(d => d.isClosed);
+  const kpiMO = bdMO.length > 0 ? bdMO : mo; // fallback: use all when CSV has no probType column
+  const totalMO = kpiMO.length;
+  const closedMO = kpiMO.filter(d => d.isClosed);
   const closedCount = closedMO.length;
   const openCount = totalMO - closedCount;
   const closedPct = totalMO > 0 ? Math.round(closedCount / totalMO * 100) : 0;
-  const uniqMc = new Set(bdMO.map(d => d.mcNo)).size;
+  const uniqMc = new Set(kpiMO.map(d => d.mcNo)).size;
   const mcProb = {};
-  bdMO.forEach(d => { const k = d.mcNo + "|" + d.probType; if (!mcProb[k]) mcProb[k] = 0; mcProb[k]++; });
+  kpiMO.forEach(d => { const k = d.mcNo + "|" + d.probType; if (!mcProb[k]) mcProb[k] = 0; mcProb[k]++; });
   const recurring = Object.values(mcProb).filter(v => v > 1).length;
 
   const monthly = _kpiMode === 'monthly';
-  const mttr = monthly ? _calcMTTR_monthly(bdMO) : _calcMTTR_overall(bdMO);
-  const mtbf = monthly ? _calcMTBF_monthly(bdMO) : _calcMTBF_overall(bdMO);
+  const mttr = monthly ? _calcMTTR_monthly(kpiMO) : _calcMTTR_overall(kpiMO);
+  const mtbf = monthly ? _calcMTBF_monthly(kpiMO) : _calcMTBF_overall(kpiMO);
   const modeLabel = monthly ? 'Monthly Avg' : 'Overall Avg';
 
   const set = (id, v, s) => {
