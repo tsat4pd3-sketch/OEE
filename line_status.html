@@ -425,7 +425,8 @@ function parseCSV(text){
     const row=csvLineParse(lines[r]);
     if(row.length<4)continue;
     const dept=C.dept?g(row,C.dept):'';
-    if(dept&&!dept.toUpperCase().includes('JIG'))continue;
+    const mcName=C.mcName?g(row,C.mcName):'';
+    if(mcName?!mcName.toUpperCase().includes('JIG'):dept&&!dept.toUpperCase().includes('JIG'))continue;
     const ln=C.line?(g(row,C.line)||'').trim().toUpperCase():'';
     if(ln)ALL_LINE_NAMES.add(ln);
   }
@@ -436,7 +437,8 @@ function parseCSV(text){
     const dateOpen=C.open?parseMODate(g(row,C.open)):null;
     if(!dateOpen)continue;
     const dept=C.dept?g(row,C.dept):'';
-    if(dept&&!dept.toUpperCase().includes('JIG'))continue;
+    const mcName=C.mcName?g(row,C.mcName):'';
+    if(mcName?!mcName.toUpperCase().includes('JIG'):dept&&!dept.toUpperCase().includes('JIG'))continue;
     const probTypeVal=C.probType?g(row,C.probType):'';
     if(probTypeVal.toLowerCase().includes('reject'))continue;
     const probType=probTypeVal;
