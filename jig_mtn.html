@@ -1275,7 +1275,8 @@ function rMonthlyTrend(mo) {
 }
 
 // effectiveEnd: optional — segments stop here (future zone stays gray); uptime% uses elapsed time
-// prevWinStart: optional — open MOs from this point onward extend to capEnd (shows line is still down)
+// prevWinStart: optional — open MOs from this window onward show as still-down (capped at 8h if no close)
+const MAX_OPEN_DT_MS = 8 * 60 * 60 * 1000; // 8h cap for unclosed MOs (1 shift)
 function _tlSegHtml(events, rangeStart, rangeEnd, totalMs, effectiveEnd, prevWinStart) {
   const capEnd = effectiveEnd || rangeEnd;
   const elapsedMs = capEnd - rangeStart;
@@ -1286,9 +1287,16 @@ function _tlSegHtml(events, rangeStart, rangeEnd, totalMs, effectiveEnd, prevWin
   sorted.forEach(ev => {
     const evOpen  = Math.max(ev.date.getTime(), rangeStart.getTime());
     const isRecentOpen = !ev.dateClose && prevWinStart && ev.date >= prevWinStart;
-    const evClose = ev.dateClose
-      ? Math.min(ev.dateClose.getTime(), capEnd.getTime())
-      : isRecentOpen ? capEnd.getTime() : evOpen;
+    let evClose;
+    if (ev.dateClose) {
+      evClose = Math.min(ev.dateClose.getTime(), capEnd.getTime());
+    } else if (isRecentOpen) {
+      // Unclosed MO: use TTR if available, else cap at MAX_OPEN_DT_MS (sheet bug guard)
+      const ttrMs = ev.ttr > 0 ? ev.ttr * 60000 : MAX_OPEN_DT_MS;
+      evClose = Math.min(ev.date.getTime() + ttrMs, capEnd.getTime());
+    } else {
+      evClose = evOpen; // outside prevWin and no close — treat as zero-width
+    }
     if (evOpen > cursor) segs.push({ type:'up', s: cursor, e: evOpen });
     const dnEnd = Math.max(evClose, evOpen + 60000);
     segs.push({ type:'dn', s: evOpen, e: Math.min(dnEnd, capEnd.getTime()), ev });
@@ -1299,7 +1307,15 @@ function _tlSegHtml(events, rangeStart, rangeEnd, totalMs, effectiveEnd, prevWin
 
   const totalDn = sorted.reduce((s, ev) => {
     const isRecentOpen = !ev.dateClose && prevWinStart && ev.date >= prevWinStart;
-    const closeT = ev.dateClose ? ev.dateClose.getTime() : isRecentOpen ? capEnd.getTime() : null;
+    let closeT;
+    if (ev.dateClose) {
+      closeT = ev.dateClose.getTime();
+    } else if (isRecentOpen) {
+      const ttrMs = ev.ttr > 0 ? ev.ttr * 60000 : MAX_OPEN_DT_MS;
+      closeT = ev.date.getTime() + ttrMs;
+    } else {
+      closeT = null;
+    }
     if (closeT && closeT > ev.date.getTime()) {
       const dn = Math.min(closeT, capEnd.getTime()) - Math.max(ev.date.getTime(), rangeStart.getTime());
       return s + Math.max(0, dn);
