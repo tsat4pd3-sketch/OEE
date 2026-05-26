@@ -1,444 +1,510 @@
-# Landing Page Skill — Thai Summit OEE Dashboard
+# Landing Page Skill — Thai Summit VX
 
-**Use this file** when building any new dashboard page in this project.
-Replicate every pattern below exactly. Do not improvise.
-
----
-
-## 1. HTML Boilerplate
-
-```html
-<!DOCTYPE html>
-<html lang="th" data-theme="dark">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PAGE TITLE · Thai Summit</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* ALL CSS INLINE — no external stylesheet */
-  </style>
-</head>
-<body>
-  <!-- sidebar-edge (mobile swipe zone) -->
-  <div id="sidebar-edge"></div>
-
-  <!-- sidebar toggle button -->
-  <button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">&#9664;</button>
-
-  <!-- mobile overlay -->
-  <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
-
-  <!-- SIDEBAR -->
-  <aside id="sidebar">
-    <!-- logo + badge -->
-    <!-- nav links -->
-    <!-- filter controls -->
-  </aside>
-
-  <!-- MAIN CONTENT -->
-  <main id="main">
-    <!-- marquee bar (optional) -->
-    <!-- page content cards -->
-  </main>
-
-  <script>/* ALL JS INLINE */</script>
-</body>
-</html>
-```
+**Reference file:** `index.html`
+Copy patterns below verbatim. Do not change color scheme, animation timing, or layout structure.
 
 ---
 
-## 2. CSS Variables (copy verbatim)
+## 1. Color System
 
 ```css
 :root {
-  --bg:#f0f2f5; --bg2:#ffffff; --bg3:#f7f8fa; --card:#ffffff;
-  --border:#e2e8f0; --border2:#cbd5e1;
-  --accent:#e31937; --accent2:#b91c2e;
-  --text:#0f172a; --text2:#475569; --muted:#94a3b8;
-  --green:#16a34a; --amber:#d97706; --red:#dc2626;
-  --font-body:'Sarabun',sans-serif;
-  --font-display:'Inter',sans-serif;
-  --sidebar:252px; --radius:4px; --radius-sm:3px;
-}
-[data-theme="dark"] {
-  --bg:#070d1a; --bg2:#0d1525; --bg3:#111b2e; --card:#0d1525;
-  --border:#1c2640; --border2:#243050;
-  --accent:#e31937; --accent2:#ff2d4a;
-  --text:#dce4f0; --text2:#8899bb; --muted:#526080;
-  --green:#22c55e; --amber:#f59e0b; --red:#ef4444;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:var(--font-body); background:var(--bg); color:var(--text);
-  display:flex; min-height:100vh; font-size:14px;
+  --g0:#060f07; --g1:#091209; --g2:#0c1a0d; --g3:#0f1e10;
+  --accent:#3dd65c;   /* green — primary */
+  --accent2:#e87c1e;  /* orange — secondary */
+  --green-brand:#0d3d14; --green-mid:#1a6d2e;
+  --border:rgba(61,214,92,0.12); --border2:rgba(61,214,92,0.06);
+  --text:#e8f5e9; --text2:#a5c9a8; --muted:#4a6e4d;
+  --ff:'Tahoma','Sarabun',sans-serif;   /* headings / numbers */
+  --fs:'Sarabun',sans-serif;            /* body Thai */
 }
 ```
 
 ---
 
-## 3. Sidebar Layout
+## 2. Background Layers (copy all 4 in order)
 
-### CSS
-```css
-#sidebar {
-  width:var(--sidebar); background:var(--bg2); border-right:1px solid var(--border);
-  display:flex; flex-direction:column; padding:0; position:fixed; top:0; left:0;
-  height:100vh; z-index:200; overflow-y:auto; overflow-x:hidden;
-  transition:transform .28s cubic-bezier(.4,0,.2,1);
-}
-#sidebar-toggle {
-  position:fixed; top:16px; left:calc(var(--sidebar) - 1px); z-index:201;
-  background:var(--bg2); border:1px solid var(--border); border-left:none;
-  color:var(--muted); cursor:pointer; padding:6px 5px; border-radius:0 4px 4px 0;
-  font-size:10px; line-height:1; transition:all .2s;
-}
-body.sidebar-collapsed #sidebar-toggle { left:0px }
-body.sidebar-collapsed #sidebar { transform:translateX(calc(-1 * var(--sidebar))); position:fixed }
-#main { margin-left:var(--sidebar); flex:1; padding:24px; transition:margin-left .28s }
-body.sidebar-collapsed #main { margin-left:0 }
-
-/* Mobile */
-@media(max-width:768px){
-  #sidebar { transform:translateX(calc(-1 * var(--sidebar))); position:fixed }
-  body.sidebar-open #sidebar { transform:translateX(0) }
-  body.sidebar-open #sidebar-overlay { display:block }
-  body.sidebar-open #sidebar-toggle { left:calc(var(--sidebar) - 1px) }
-  body:not(.sidebar-open) #sidebar-toggle { left:0px }
-  #main { margin-left:0 !important; padding:16px }
-  #sidebar-overlay {
-    display:none; position:fixed; inset:0; background:#00000066; z-index:199;
-  }
-}
-```
-
-### HTML — Sidebar interior
 ```html
-<aside id="sidebar">
-  <!-- Logo block -->
-  <div style="padding:16px 18px 10px;border-bottom:1px solid var(--border)">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-      <img src="TS_logo.png" style="height:28px">
-      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);line-height:1.3">
-        MAINTENANCE<br>PAGE SUBTITLE
-      </div>
-    </div>
-    <div style="font-size:16px;font-weight:800;color:var(--text);font-family:var(--font-display)">
-      PAGE NAME
-    </div>
-    <!-- live badge -->
-    <span id="mo-badge" class="badge bx" style="margin-top:6px">...</span>
-  </div>
-
-  <!-- Nav links -->
-  <div class="nav-links" style="padding:10px 10px 0">
-    <a class="nav-btn" href="index.html"><span class="ni">🏠</span>Home</a>
-    <a class="nav-btn" href="overview.html"><span class="ni">📊</span>Combined Overview</a>
-    <a class="nav-btn" href="summary.html"><span class="ni">📈</span>Summary Dashboard</a>
-    <a class="nav-btn" href="oee_pd3.html"><span class="ni">⚙️</span>PD3 Overview</a>
-    <a class="nav-btn" href="oee_pd4.html"><span class="ni">⚙️</span>PD4 Overview</a>
-    <a class="nav-btn" href="oee_deep_pd3.html"><span class="ni">🔬</span>Deep Analysis PD3</a>
-    <a class="nav-btn" href="oee_deep_pd4.html"><span class="ni">🔬</span>Deep Analysis PD4</a>
-    <a class="nav-btn active" href="THIS_PAGE.html"><span class="ni">🔧</span>THIS PAGE</a>
-    <a class="nav-btn" href="line_status.html"><span class="ni">🟢</span>Line Status</a>
-    <a class="nav-btn" href="part_images.html"><span class="ni">🖼️</span>Part Images</a>
-    <a class="nav-btn" href="masterplan.html"><span class="ni">📋</span>Masterplan</a>
-  </div>
-
-  <!-- Date range filter -->
-  <div style="padding:14px 14px 0;border-top:1px solid var(--border);margin-top:10px">
-    <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:8px">ช่วงวันที่</div>
-    <div style="display:flex;flex-direction:column;gap:6px">
-      <input type="date" id="date-from" onchange="renderPage()" style="...date-input-style...">
-      <input type="date" id="date-to"   onchange="renderPage()" style="...date-input-style...">
-    </div>
-  </div>
-
-  <!-- Toggle filters -->
-  <div style="padding:14px;border-top:1px solid var(--border);margin-top:10px">
-    <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:8px">ตัวกรองข้อมูล</div>
-    <!-- Toggle row template -->
-    <label class="tog-row">
-      <div>
-        <span class="tog-lbl">LABEL</span>
-        <span class="tog-sub">SUBLABEL</span>
-      </div>
-      <input type="checkbox" id="tog-ID" onchange="renderPage()">
-    </label>
-  </div>
-
-  <!-- Dropdown filter -->
-  <div style="padding:0 14px 14px">
-    <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:6px">DROPDOWN LABEL</div>
-    <select id="sel-ID" onchange="renderPage()" style="width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;cursor:pointer;outline:none">
-      <option value="">ทั้งหมด</option>
-    </select>
-  </div>
-
-  <!-- Reload button -->
-  <div style="padding:14px;border-top:1px solid var(--border);margin-top:auto">
-    <button onclick="loadData()" style="width:100%;padding:9px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-size:13px">
-      🔄 โหลดข้อมูลใหม่
-    </button>
-  </div>
-</aside>
+<div id="ambient"></div>   <!-- radial green + orange glow -->
+<div id="grid"></div>      <!-- 80px dot-grid, masked to ellipse -->
+<div id="noise"></div>     <!-- SVG fractalNoise texture -->
+<div id="cur"></div>       <!-- custom cursor dot -->
+<div id="cur-ring"></div>  <!-- cursor ring -->
 ```
 
-### CSS — Nav, Toggle, Badge
 ```css
-.nav-links { display:flex; flex-direction:column; gap:2px }
-.nav-btn {
-  display:flex; align-items:center; gap:9px; padding:9px 10px;
-  border-radius:var(--radius-sm); color:var(--text2); text-decoration:none;
-  font-size:13px; font-weight:500; transition:all .15s;
+/* Ambient */
+#ambient{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#ambient::before{
+  content:'';position:absolute;width:1100px;height:1100px;border-radius:50%;
+  background:radial-gradient(circle,rgba(13,61,20,0.18) 0%,transparent 65%);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  animation:breathe 8s ease-in-out infinite alternate;
 }
-.nav-btn:hover { background:var(--bg3); color:var(--text) }
-.nav-btn.active { background:var(--accent); color:#fff; font-weight:700 }
-.ni { font-size:15px; width:20px; text-align:center }
+#ambient::after{
+  content:'';position:absolute;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(232,124,30,0.08) 0%,transparent 70%);
+  bottom:10%;right:10%;animation:drift2 20s ease-in-out infinite alternate;
+}
+@keyframes breathe{to{transform:translate(-50%,-50%) scale(1.15)}}
+@keyframes drift2{to{transform:translate(-40px,-30px)}}
 
-.tog-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:8px 0; border-bottom:1px solid var(--border); cursor:pointer;
+/* Grid */
+#grid{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(61,214,92,0.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(61,214,92,0.028) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,black 40%,transparent 100%);
 }
-.tog-row:last-child { border-bottom:none }
-.tog-lbl { font-size:12px; font-weight:600; color:var(--text) }
-.tog-sub { font-size:10px; color:var(--muted); display:block; margin-top:1px }
-input[type=checkbox] { width:32px; height:18px; cursor:pointer; accent-color:var(--accent) }
 
-.badge {
-  display:inline-flex; align-items:center; gap:5px;
-  padding:3px 8px; border-radius:20px; font-size:10px; font-weight:700;
-  letter-spacing:.4px; font-family:var(--font-display);
+/* Noise */
+#noise{
+  position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.022;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px;
 }
-.bx  { background:#1a2a1a; color:#22c55e; border:1px solid #22c55e44 }
-.bam { background:#2a1a00; color:#f59e0b; border:1px solid #f59e0b44 }
-.err { background:#2a0a0a; color:#ef4444; border:1px solid #ef444444 }
 ```
 
 ---
 
-## 4. Sidebar JS (toggleSidebar)
+## 3. Custom Cursor
+
+```css
+#cur{
+  position:fixed;top:0;left:0;z-index:9999;pointer-events:none;
+  width:8px;height:8px;border-radius:50%;background:var(--accent);
+  transform:translate(-50%,-50%);mix-blend-mode:screen;
+  transition:width .18s,height .18s,background .2s;
+}
+#cur-ring{
+  position:fixed;top:0;left:0;z-index:9998;pointer-events:none;
+  width:30px;height:30px;border-radius:50%;
+  border:1px solid rgba(61,214,92,0.4);transform:translate(-50%,-50%);
+  transition:width .35s cubic-bezier(.4,0,.2,1),height .35s,opacity .25s,border-color .3s;
+}
+body.hov   #cur{width:44px;height:44px}
+body.hov   #cur-ring{opacity:0}
+body.click #cur{background:var(--accent2);width:14px;height:14px}
+```
 
 ```js
-function toggleSidebar() {
-  const isMobile = window.innerWidth < 769;
-  if (isMobile) {
-    document.body.classList.toggle('sidebar-open');
-  } else {
-    document.body.classList.toggle('sidebar-collapsed');
-    const btn = document.getElementById('sidebar-toggle');
-    btn.innerHTML = document.body.classList.contains('sidebar-collapsed') ? '&#9654;' : '&#9664;';
-  }
-}
-window.addEventListener('resize', () => {
-  if (window.innerWidth >= 769) {
-    document.body.classList.remove('sidebar-open');
-  }
+// Cursor JS
+const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.cssText+=`;left:${mx}px;top:${my}px`;
 });
+(function loop(){
+  rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(loop);
+})();
+document.querySelectorAll('a,.mod-card,.btn-p,.btn-g,.np').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
+});
+document.addEventListener('mousedown',()=>document.body.classList.add('click'));
+document.addEventListener('mouseup',()=>document.body.classList.remove('click'));
+// Set cursor:none on all interactive elements
 ```
 
 ---
 
-## 5. KPI Cards (6-card row)
+## 4. Top Nav
 
-### CSS
-```css
-.kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:24px }
-@media(max-width:600px){ .kpi-row { grid-template-columns:repeat(2,1fr) } }
-.kpi {
-  background:var(--card); border:1px solid var(--border);
-  border-radius:var(--radius); padding:16px 18px 14px; position:relative;
-  overflow:hidden; transition:box-shadow .2s;
-}
-.kpi::after {
-  content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
-}
-.k1::after{background:var(--accent)}
-.k2::after{background:#22c55e}
-.k3::after{background:#f59e0b}
-.k4::after{background:#8b5cf6}
-.k5::after{background:#06b6d4}
-.k6::after{background:#3b82f6}
-.kpi-lbl { font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.8px; text-transform:uppercase; margin-bottom:6px }
-.kpi-val { font-size:28px; font-weight:800; color:var(--text); font-family:var(--font-display); line-height:1 }
-.kpi-sub { font-size:11px; color:var(--muted); margin-top:5px }
-```
-
-### HTML
 ```html
-<div class="kpi-row">
-  <div class="kpi k1">
-    <div class="kpi-lbl">LABEL 1</div>
-    <div class="kpi-val" id="kv-1">—</div>
-    <div class="kpi-sub" id="ks-1">subtext</div>
+<nav id="nav">
+  <a class="nav-brand" href="#">
+    <img class="nav-logo-svg" src="TS_logo.png" alt="Thai Summit" style="object-fit:contain"/>
+    <div>
+      <div class="nav-brand-name">Thai Summit</div>
+      <div class="nav-brand-sub">VX Production System</div>
+    </div>
+  </a>
+  <div class="nav-r">
+    <a class="np" href="overview.html">Overview</a>
+    <a class="np" href="summary.html">Summary</a>
+    <a class="np" href="jig_mtn.html">JIG MTN</a>
+    <a class="np" href="line_status.html">Line Status</a>
+    <a class="np cta" href="overview.html">Enter →</a>
   </div>
-  <!-- repeat k2..k6 -->
-</div>
+</nav>
+```
+
+```css
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:60px;
+  transition:background .4s,backdrop-filter .4s,border-color .4s;
+  border-bottom:1px solid transparent;
+}
+#nav.scrolled{background:rgba(6,15,7,0.9);backdrop-filter:blur(24px);border-bottom-color:var(--border2)}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-svg{width:28px;height:28px}
+.nav-brand-name{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--text);text-transform:uppercase}
+.nav-brand-sub{font-size:8px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.np{
+  padding:6px 14px;border-radius:2px;font-size:11px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);
+  border:1px solid transparent;text-decoration:none;transition:all .2s;cursor:none;
+}
+.np:hover{color:var(--accent);border-color:var(--border)}
+.np.cta{background:var(--accent);color:var(--g0);border-color:var(--accent)}
+.np.cta:hover{background:transparent;color:var(--accent)}
+```
+
+```js
+// Nav scroll glass effect
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>40),{passive:true});
 ```
 
 ---
 
-## 6. Marquee Bar (live scrolling stats)
+## 5. Hero Section (2-column grid)
 
 ```html
-<div id="marquee-bar" style="display:none;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 0;overflow:hidden;background:var(--bg2);margin-bottom:22px">
-  <div style="display:flex;gap:0;width:max-content;animation:marquee 28s linear infinite" id="mq-track"></div>
-</div>
+<section id="hero">
+  <!-- LEFT: text -->
+  <div class="hero-left">
+    <div class="hero-eyebrow">
+      <div class="ey-line"></div>
+      <div class="ey-text">YOUR EYEBROW TEXT</div>
+      <div class="ey-line"></div>
+    </div>
+    <h1 class="hero-title">
+      LINE 1<br>
+      <span class="hl">HL</span>
+      <span class="dim"> · </span>
+      <span class="or">ORANGE</span>
+    </h1>
+    <p class="hero-sub">Body text Thai / English here</p>
+    <div class="hero-cta">
+      <a class="btn-p" href="TARGET.html"><span>Enter Dashboard</span><span>→</span></a>
+      <a class="btn-g" href="OTHER.html">Secondary</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hs">
+        <div class="hs-val">VALUE<span class="u">UNIT</span></div>
+        <div class="hs-lbl">LABEL</div>
+      </div>
+      <div class="hs-div"></div>
+      <!-- repeat hs blocks -->
+    </div>
+  </div>
+
+  <!-- RIGHT: 3D Logo -->
+  <div class="hero-right">
+    <div class="orbit-ring or1"></div>
+    <div class="orbit-ring or2"></div>
+    <!-- floating particles (4 divs) -->
+    <div id="logo-scene">
+      <div id="logo-glow"></div>
+      <div id="logo-3d">
+        <img id="logo-img" src="TS_logo.png" alt="Thai Summit Logo"/>
+      </div>
+      <div id="logo-shadow"></div>
+    </div>
+  </div>
+</section>
 ```
+
 ```css
-@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.mq-item { display:flex; align-items:center; gap:8px; padding:0 22px; font-size:12px; white-space:nowrap }
-.mq-dot  { width:6px; height:6px; border-radius:50%; flex-shrink:0 }
-.mq-val  { font-weight:700; font-family:var(--font-display); color:var(--text) }
-```
-```js
-function updateMarquee(items) {
-  // items = [{ label, val }, ...]
-  const track = document.getElementById('mq-track');
-  const bar   = document.getElementById('marquee-bar');
-  if (!items.length) return;
-  const html = [...items, ...items].map(it =>
-    `<div class="mq-item"><div class="mq-dot" style="background:var(--accent)"></div><span>${it.label}</span><span class="mq-val">${it.val}</span></div>`
-  ).join('');
-  track.innerHTML = html;
-  bar.style.display = 'block';
+#hero{
+  position:relative;z-index:2;min-height:100vh;
+  display:grid;grid-template-columns:1fr 1fr;
+  align-items:center;padding:80px 48px;overflow:hidden;
 }
+.hero-left{display:flex;flex-direction:column;gap:0;padding-right:64px}
+.hero-eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:28px;
+  opacity:0;transform:translateX(-24px);
+  animation:slideR .8s cubic-bezier(.16,1,.3,1) .2s forwards}
+.ey-line{width:32px;height:1px;background:var(--accent)}
+.ey-text{font-size:10px;font-weight:700;letter-spacing:4px;color:var(--accent);text-transform:uppercase}
+.hero-title{
+  font-size:clamp(2.8rem,5.5vw,5.5rem);font-weight:700;line-height:.92;letter-spacing:-.03em;
+  opacity:0;transform:translateX(-32px);
+  animation:slideR .9s cubic-bezier(.16,1,.3,1) .35s forwards}
+.hero-title .hl{color:var(--accent)}
+.hero-title .or{color:var(--accent2)}
+.hero-title .dim{color:rgba(232,245,233,0.18)}
+.hero-sub{font-size:15px;color:var(--text2);margin-top:24px;line-height:1.75;font-weight:300;max-width:400px;
+  opacity:0;transform:translateX(-24px);
+  animation:slideR .8s cubic-bezier(.16,1,.3,1) .55s forwards}
+.hero-cta{display:flex;align-items:center;gap:10px;margin-top:40px;
+  opacity:0;transform:translateX(-24px);
+  animation:slideR .8s cubic-bezier(.16,1,.3,1) .7s forwards}
+.hero-stats{display:flex;gap:32px;margin-top:56px;
+  opacity:0;transform:translateX(-24px);
+  animation:slideR .8s cubic-bezier(.16,1,.3,1) .88s forwards}
+.hs{display:flex;flex-direction:column;gap:4px}
+.hs-val{font-size:26px;font-weight:700;color:var(--text);letter-spacing:-.5px}
+.hs-val .u{font-size:14px;color:var(--accent);margin-left:2px}
+.hs-lbl{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.hs-div{width:1px;background:var(--border2);align-self:stretch}
+@keyframes slideR{to{opacity:1;transform:translateX(0)}}
+
+/* Primary button */
+.btn-p{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:13px 28px;border-radius:2px;background:var(--accent);color:var(--g0);
+  font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  text-decoration:none;border:1px solid var(--accent);
+  transition:background .25s,color .25s;cursor:none;position:relative;overflow:hidden;
+}
+.btn-p::after{content:'';position:absolute;inset:0;background:var(--g0);
+  transform:translateX(-101%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.btn-p:hover::after{transform:translateX(0)}
+.btn-p:hover{color:var(--accent)}
+.btn-p span{position:relative;z-index:1}
+/* Ghost button */
+.btn-g{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:13px 22px;border-radius:2px;background:transparent;
+  font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  text-decoration:none;color:var(--text2);border:1px solid var(--border);
+  transition:all .25s;cursor:none;
+}
+.btn-g:hover{color:var(--accent);border-color:var(--accent)}
 ```
 
 ---
 
-## 7. Card Container
+## 6. 3D Logo Scene
 
 ```css
-.card {
-  background:var(--card); border:1px solid var(--border);
-  border-radius:var(--radius); padding:20px; margin-bottom:20px;
-}
-.card-hdr {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border);
-}
-.card-hdr h3 { font-size:14px; font-weight:700; color:var(--text); font-family:var(--font-display) }
+.hero-right{display:flex;align-items:center;justify-content:center;
+  position:relative;opacity:0;animation:fadeIn .6s ease .4s forwards}
+@keyframes fadeIn{to{opacity:1}}
+
+#logo-scene{perspective:900px;perspective-origin:50% 50%;
+  width:360px;height:360px;display:flex;align-items:center;justify-content:center;position:relative}
+#logo-3d{transform-style:preserve-3d;transform:rotateX(8deg) rotateY(-12deg);
+  transition:transform .08s linear;position:relative;width:280px;height:280px}
+#logo-glow{position:absolute;inset:-60px;border-radius:50%;
+  background:radial-gradient(circle,rgba(61,214,92,0.18) 0%,rgba(232,124,30,0.08) 50%,transparent 70%);
+  animation:glowPulse 4s ease-in-out infinite alternate;filter:blur(20px)}
+@keyframes glowPulse{to{opacity:.6;transform:scale(1.15)}}
+#logo-shadow{position:absolute;bottom:-50px;left:50%;transform:translateX(-50%);
+  width:180px;height:20px;border-radius:50%;background:rgba(0,0,0,0.5);
+  filter:blur(16px);animation:shadowPulse 4s ease-in-out infinite alternate}
+@keyframes shadowPulse{to{width:160px;opacity:.7}}
+#logo-img{width:100%;height:100%;object-fit:contain;
+  filter:
+    drop-shadow(-3px 3px 0 rgba(100,40,0,0.8))
+    drop-shadow(-6px 6px 0 rgba(70,25,0,0.6))
+    drop-shadow(-9px 9px 0 rgba(40,12,0,0.4))
+    drop-shadow(-12px 12px 0 rgba(20,5,0,0.25))
+    drop-shadow(0 0 48px rgba(232,124,30,0.3));}
+
+/* Orbit rings */
+.orbit-ring{position:absolute;border-radius:50%;border:1px solid;pointer-events:none}
+.or1{width:300px;height:300px;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotateX(75deg);
+  border-color:rgba(61,214,92,0.12);animation:orbitSpin1 18s linear infinite}
+.or2{width:380px;height:380px;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotateX(75deg) rotateZ(45deg);
+  border-color:rgba(232,124,30,0.08);animation:orbitSpin2 28s linear infinite reverse}
+@keyframes orbitSpin1{to{transform:translate(-50%,-50%) rotateX(75deg) rotateZ(360deg)}}
+@keyframes orbitSpin2{to{transform:translate(-50%,-50%) rotateX(75deg) rotateZ(-360deg)}}
+
+/* Floating particles (add 4 divs with inline style) */
+.particle{position:absolute;border-radius:50%;pointer-events:none;
+  animation:float var(--pd,6s) ease-in-out infinite alternate}
+@keyframes float{to{transform:translateY(var(--fy,-12px)) translateX(var(--fx,6px))}}
+```
+
+```js
+// 3D logo mouse tracking
+const scene=document.getElementById('logo-scene');
+const logo3d=document.getElementById('logo-3d');
+let targetRX=8,targetRY=-12,curRX=8,curRY=-12;
+document.addEventListener('mousemove',e=>{
+  const rect=scene.getBoundingClientRect();
+  const dx=(e.clientX-(rect.left+rect.width/2))/window.innerWidth;
+  const dy=(e.clientY-(rect.top+rect.height/2))/window.innerHeight;
+  targetRY=dx*28-4; targetRX=-dy*20+6;
+});
+(function animLogo(){
+  curRX+=(targetRX-curRX)*.06;curRY+=(targetRY-curRY)*.06;
+  logo3d.style.transform=`rotateX(${curRX}deg) rotateY(${curRY}deg)`;
+  const sh=document.getElementById('logo-shadow');
+  sh.style.transform=`translateX(calc(-50% + ${curRY*0.6}px))`;
+  sh.style.opacity=0.3+Math.abs(curRX)/60;
+  requestAnimationFrame(animLogo);
+})();
 ```
 
 ---
 
-## 8. Data Table
+## 7. Module Cards Grid
+
+```html
+<section id="modules">
+  <div class="sec-label reveal">
+    <div class="sec-line"></div>
+    <div class="sec-text">Dashboard Modules</div>
+    <div class="sec-num">01 / 04</div>
+  </div>
+  <div class="mod-grid">
+    <a class="mod-card mc-oee reveal reveal-d1" href="overview.html">
+      <span class="mc-n">01</span>
+      <span class="mc-icon">📊</span>
+      <div class="mc-title">TITLE</div>
+      <div class="mc-desc">Description text</div>
+      <div class="mc-links">
+        <a class="mc-link" href="PAGE.html" onclick="event.stopPropagation()">LABEL <span>→</span></a>
+      </div>
+    </a>
+    <!-- repeat for mc-mtn, mc-ls, mc-plan -->
+  </div>
+</section>
+```
 
 ```css
-.tbl-wrap { overflow-x:auto; max-height:360px; overflow-y:auto }
-.dt-tbl   { width:100%; border-collapse:collapse; font-size:13px }
-.dt-tbl th {
-  background:var(--bg3); color:var(--muted); font-weight:700;
-  padding:10px 13px; text-align:left; font-size:12px;
-  position:sticky; top:0; letter-spacing:.3px; border-bottom:2px solid var(--border2);
+#modules{position:relative;z-index:2;padding:100px 48px;border-top:1px solid var(--border2)}
+.sec-label{display:flex;align-items:center;gap:16px;margin-bottom:60px}
+.sec-line{width:32px;height:1px;background:var(--accent)}
+.sec-text{font-size:10px;font-weight:700;letter-spacing:4px;color:var(--accent);text-transform:uppercase}
+.sec-num{font-size:10px;color:var(--muted);letter-spacing:2px;margin-left:auto}
+
+.mod-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border2);border:1px solid var(--border2)}
+.mod-card{
+  background:var(--g0);padding:40px 32px;
+  position:relative;overflow:hidden;cursor:none;text-decoration:none;display:block;transition:background .3s;
 }
-.dt-tbl th.num { text-align:right }   /* IMPORTANT: override specificity */
-.dt-tbl td     { padding:10px 13px; border-bottom:1px solid var(--border); color:var(--text2) }
-.dt-tbl tr:hover td { background:#f8faff }
-[data-theme="dark"] .dt-tbl th        { background:var(--bg2) }
-[data-theme="dark"] .dt-tbl tr:hover td { background:#ffffff04 }
-.num { text-align:right; font-variant-numeric:tabular-nums }
+.mod-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--mc,var(--accent));transform:scaleX(0);transform-origin:left;
+  transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.mod-card:hover::before{transform:scaleX(1)}
+.mod-card:hover{background:var(--g2)}
+.mod-card::after{content:'';position:absolute;width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,var(--mc-glow,rgba(61,214,92,0.06)) 0%,transparent 70%);
+  bottom:-60px;right:-40px;opacity:0;transition:opacity .4s}
+.mod-card:hover::after{opacity:1}
+.mc-n{font-size:9px;font-weight:700;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:20px;display:block}
+.mc-icon{font-size:28px;margin-bottom:20px;display:block}
+.mc-title{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.2px;margin-bottom:10px}
+.mc-desc{font-size:13px;color:var(--text2);line-height:1.7;font-weight:300}
+.mc-links{margin-top:24px;display:flex;flex-direction:column;gap:4px}
+.mc-link{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;padding:4px 0;
+  border-bottom:1px solid transparent;transition:all .2s;cursor:none;
+  display:inline-flex;align-items:center;gap:6px;width:fit-content}
+.mc-link:hover{color:var(--mc,var(--accent));border-bottom-color:currentColor}
+
+/* Card color variants */
+.mc-oee{--mc:#3dd65c;--mc-glow:rgba(61,214,92,0.07)}
+.mc-mtn{--mc:#e87c1e;--mc-glow:rgba(232,124,30,0.07)}
+.mc-ls{--mc:#4dcc6a;--mc-glow:rgba(77,204,106,0.07)}
+.mc-plan{--mc:#f59a3f;--mc-glow:rgba(245,154,63,0.07)}
 ```
 
 ---
 
-## 9. GSheet CSV Pattern
+## 8. Statement + Footer
+
+```html
+<!-- Statement -->
+<section id="statement">
+  <div class="stmt-pre reveal">Quality Declaration · Thai Summit Group</div>
+  <div class="stmt-q reveal reveal-d1">"<em>Zero defect</em> is possible"</div>
+  <div class="stmt-th reveal reveal-d2">"ปัญหาคุณภาพเป็นศูนย์คือสิ่งที่เป็นไปได้"</div>
+</section>
+
+<!-- Footer -->
+<footer id="footer">
+  <div class="ft-brand">
+    <!-- SVG Thai Summit logo mark (inline) -->
+    <div class="ft-text">Thai Summit Group · VX Production Intelligence</div>
+  </div>
+  <div class="ft-clock" id="ft-clock">—</div>
+</footer>
+```
+
+```css
+#statement{position:relative;z-index:2;padding:100px 48px;border-top:1px solid var(--border2);
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px}
+.stmt-q{font-size:clamp(2rem,4vw,3.8rem);font-weight:700;color:var(--text);
+  letter-spacing:-.02em;max-width:720px;line-height:1.1}
+.stmt-q em{font-style:normal;color:var(--accent)}
+.stmt-th{font-size:15px;color:var(--muted);font-weight:300;font-style:italic}
+
+#footer{position:relative;z-index:2;padding:28px 48px;border-top:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.ft-text{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.ft-clock span{color:var(--accent)}
+```
 
 ```js
-const DATA_URL = "https://docs.google.com/spreadsheets/d/e/PUBLISHED_ID/pub?gid=SHEET_GID&single=true&output=csv";
-
-// CSV parser (handles quoted commas)
-function csvLineParse(line) {
-  const result = []; let cur = ''; let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    if (line[i] === '"') { inQ = !inQ; }
-    else if (line[i] === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
-    else cur += line[i];
-  }
-  result.push(cur.trim()); return result;
+// Live clock
+function tick(){
+  const d=new Date(),p=n=>String(n).padStart(2,'0');
+  document.getElementById('ft-clock').innerHTML=
+    `<span>${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())}</span> — ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 }
-
-async function loadData() {
-  try {
-    const res  = await fetch(DATA_URL + '&t=' + Date.now(), { cache: 'no-store' });
-    const text = await res.text();
-    const lines = text.split('\n').filter(l => l.trim());
-    const hdr = csvLineParse(lines[0]);
-    const idx = {}; hdr.forEach((h, i) => idx[h.trim().replace(/\r/g, '')] = i);
-    const g = (row, name) => { const i = idx[name]; return (i !== undefined && row[i] !== undefined) ? String(row[i]).trim().replace(/\r/g, '') : ''; };
-    const findCol = sub => Object.keys(idx).find(k => k.includes(sub)) || null;
-
-    // Resolve column keys
-    const dateColKey = findCol('วันเวลา') || findCol('Date');
-    // ... resolve other keys
-
-    const rows = [];
-    for (let r = 1; r < lines.length; r++) {
-      const row = csvLineParse(lines[r]);
-      if (row.length < 4) continue;
-      // parse & push rows
-    }
-    return rows;
-  } catch (e) {
-    console.error('loadData failed', e);
-    return [];
-  }
-}
+tick();setInterval(tick,1000);
 ```
 
-### Thai Buddhist Era date parser
+---
+
+## 9. Scroll Reveal
+
+```css
+.reveal{opacity:0;transform:translateY(28px);
+  transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal.vis{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:.1s}.reveal-d2{transition-delay:.2s}
+.reveal-d3{transition-delay:.3s}.reveal-d4{transition-delay:.4s}
+```
+
 ```js
-function parseThaiDate(str) {
-  if (!str) return null;
-  const s = str.trim().replace(/\//g, '-');
-  const m = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
-  if (!m) { const d = new Date(s); return isNaN(d) ? null : d; }
-  let [, dd, mo, yy] = m;
-  let y = parseInt(yy);
-  if (y < 100) y += 2000;
-  if (y > 2400) y -= 543; // Buddhist Era → CE
-  const d = new Date(y, +mo - 1, +dd);
-  return isNaN(d.getTime()) ? null : d;
+const obs=new IntersectionObserver(
+  es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')}),
+  {threshold:.12}
+);
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+```
+
+---
+
+## 10. Responsive
+
+```css
+@media(max-width:1100px){
+  #hero{grid-template-columns:1fr;padding:100px 32px 60px;text-align:center}
+  .hero-left{padding-right:0;align-items:center}
+  .hero-right{margin-top:48px}
+  .mod-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:700px){
+  #nav{padding:0 20px}.nav-r{display:none}
+  #hero,#modules,#statement,#footer{padding-left:20px;padding-right:20px}
+  .mod-grid{grid-template-columns:1fr}
+  #logo-scene{width:260px;height:260px}
+  #logo-3d{width:180px;height:200px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
 }
 ```
 
 ---
 
-## 10. Column Mapping Convention
+## 11. Rules
 
-| Field | findCol() search | Fallback |
-|---|---|---|
-| ประเภทงานซ่อม | `"Problem Type"` or `"2.ประเภทงานซ่อม"` | — |
-| ลักษณะปัญหา | `"Problem Characteristic"` or `"1.ลักษณะปัญหา"` | — |
-| วันเปิด MO | `"วันเวลาที่แจ้ง"` or `"เวลาเปิด MO"` | — |
-| วันปิด MO | `"วันเวลาที่ซ่อมเสร็จ"` or `"เวลาซ่อมเสร็จ"` | — |
-
-- Skip rows where `Problem Type` includes `"reject"` (case-insensitive)
-- `isBreakdown = probType.toLowerCase().includes('breakdown')`
-- Unclosed MO downtime cap: `ttr * 60000` ms or `8 * 60 * 60 * 1000` ms (whichever smaller)
-
----
-
-## 11. GSheet URL
-
-```
-https://docs.google.com/spreadsheets/d/e/2PACX-1vSVDNHyOb2LrXosMZG09quorOkfI9aLs8Hg_6ek8glxEQRQYL6F1rWl_cZ12A_f7SC2yDkyWroXHtM1/pub?gid=785568377&single=true&output=csv
-```
-
----
-
-## 12. Rules
-
-1. **ทุก CSS และ JS อยู่ inline ในไฟล์เดียว** — ไม่มี external file
-2. **ไม่ใช้ framework** — vanilla JS เท่านั้น
-3. **Dark mode default** — `<html data-theme="dark">`
-4. **Thai font** — Sarabun สำหรับ body, Inter สำหรับ numbers/display
-5. **Sidebar collapsible** — desktop: toggle collapsed, mobile: slide-in overlay
-6. **Date input** — always ISO format `YYYY-MM-DD`; default range = last 30 days
-7. **findCol()** — partial match column names เสมอ (ชีทอาจมี prefix ตัวเลข)
-8. **Skip MO** — Reject MO only; import all other types
-9. **KPI** — Breakdown Maintenance only (`isBreakdown`); fallback ใช้ทุก MO ถ้า isBreakdown=0
-10. **Problem Char grouping** — ใช้ `classifyProbChar(probChar, symptom, knownChars)` function จาก jig_mtn.html
+1. `body{cursor:none}` — custom cursor บน desktop เสมอ
+2. ทุก `<a>` และ interactive element ต้องมี `cursor:none`
+3. โลโก้ = `TS_logo.png` (อยู่ใน root) — ไม่ใช้ SVG แทน
+4. 3D logo ใช้ CSS `drop-shadow` หลายชั้น — ไม่ใช้ canvas หรือ WebGL
+5. Module card สีตาม `--mc` CSS variable — เพิ่ม variant ใหม่ด้วย pattern เดิม
+6. Reveal animation ใช้ IntersectionObserver — ไม่ใช้ scroll event listener
+7. ไม่มี external JS library ทั้งสิ้น — vanilla only
+8. Font: `Sarabun` (Google Fonts) สำหรับ Thai, `Tahoma` fallback สำหรับ heading
+9. ทุก section มี `position:relative;z-index:2` เพื่อ stack เหนือ background layers
+10. `@media(prefers-reduced-motion)` ต้อง disable animation ทั้งหมด
