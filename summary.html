@@ -698,12 +698,15 @@ function renderProdTimelines(){
   const now=new Date();
   let rangeStart,rangeEnd,effectiveEnd;
 
+  function _shiftWin(now){
+    const h=now.getHours(),Y=now.getFullYear(),Mo=now.getMonth(),D=now.getDate();
+    if(h>=8&&h<20)return{s:new Date(Y,Mo,D,8,0,0),  e:new Date(Y,Mo,D,20,0,0)};
+    if(h>=20)     return{s:new Date(Y,Mo,D,20,0,0), e:new Date(Y,Mo,D+1,8,0,0)};
+    return{s:new Date(Y,Mo,D-1,20,0,0), e:new Date(Y,Mo,D,8,0,0)};
+  }
   if(_pcTlRange===1){
-    // Shift window: 08:00 today (or yesterday if before 08:00) → +24h
-    const isAfter8=now.getHours()>=8;
-    const shiftDate=isAfter8?now:new Date(now.getTime()-86400000);
-    rangeStart=new Date(shiftDate.getFullYear(),shiftDate.getMonth(),shiftDate.getDate(),8,0,0);
-    rangeEnd=new Date(rangeStart.getTime()+24*3600000); // 08:00 next day
+    const sw=_shiftWin(now);
+    rangeStart=sw.s; rangeEnd=sw.e;
     effectiveEnd=new Date(Math.min(now.getTime(),rangeEnd.getTime()));
   } else {
     rangeStart=new Date(now.getTime()-3*86400000);
@@ -712,7 +715,7 @@ function renderProdTimelines(){
   }
   const totalMs=rangeEnd-rangeStart;       // full window — for pixel positioning
   const elapsedMs=effectiveEnd-rangeStart; // elapsed — for uptime %
-  const prevWinStart=new Date(rangeStart.getTime()-24*3600000); // start of previous shift (for open-MO extension)
+  const prevWinStart=new Date(rangeStart.getTime()-12*3600000); // previous 12h shift (for open-MO extension)
   if(totalMs<=0)return;
 
   const pad=n=>String(n).padStart(2,'0');
@@ -775,11 +778,10 @@ function renderProdTimelines(){
     // Hourly tick marks for 1D view (every 1h), day ticks for 3D
     let tickHtml='';
     if(_pcTlRange===1){
-      // 24 ticks, one per hour — skip first and last (edges)
-      for(let h=1;h<24;h++){
+      const tlH=Math.round(totalMs/3600000); // 12 for shift window
+      for(let h=1;h<tlH;h++){
         const left=(h*3600000/totalMs*100).toFixed(2);
-        // Every 4h = brighter tick (08:00,12:00,16:00,20:00,00:00,04:00)
-        const isMain=h%4===0;
+        const isMain=h%3===0;
         tickHtml+=`<div style="position:absolute;top:0;left:${left}%;width:1px;height:100%;background:${isMain?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.1)'};pointer-events:none;z-index:2"></div>`;
       }
     } else {
@@ -793,6 +795,23 @@ function renderProdTimelines(){
 
     // Axis always spans the full window (rangeStart → rangeEnd) so future gray is labeled
     const midDate=new Date(rangeStart.getTime()+totalMs/2);
+    // Axis: for 1D show every 2h across 12h shift; for 3D keep start/mid/end
+    let axisHtml;
+    if(_pcTlRange===1){
+      const tlH=Math.round(totalMs/3600000);
+      const axItems=[];
+      const pad2=n=>String(n).padStart(2,'0');
+      for(let h=0;h<=tlH;h+=2){
+        const d=new Date(rangeStart.getTime()+h*3600000);
+        const pct=(h/tlH*100).toFixed(2);
+        const minor=h%4!==0;
+        const xf=h===0?'':h===tlH?'transform:translateX(-100%)':'transform:translateX(-50%)';
+        axItems.push(`<span${minor?' class="pc-tl-ax-2h"':''} style="left:${pct}%;${xf}">${pad2(d.getHours())}:${pad2(d.getMinutes())}</span>`);
+      }
+      axisHtml=`<div class="pc-tl-axis" style="position:relative">${axItems.join('')}</div>`;
+    }else{
+      axisHtml=`<div class="pc-tl-axis"><span>${fmtAxis(rangeStart)}</span><span>${fmtAxis(midDate)}</span><span>${fmtAxis(rangeEnd)}</span></div>`;
+    }
     el.style.display='';
     el.innerHTML=`
       <div class="pc-tl-hdr">
@@ -800,7 +819,7 @@ function renderProdTimelines(){
         ${tabHtml}
       </div>
       <div class="pc-tl-bar">${segHtml}${tickHtml}</div>
-      <div class="pc-tl-axis"><span>${fmtAxis(rangeStart)}</span><span>${fmtAxis(midDate)}</span><span>${fmtAxis(rangeEnd)}</span></div>`;
+      ${axisHtml}`;
 
     // Tooltips
     let tip=document.getElementById('pc-tl-tip');
@@ -1176,7 +1195,7 @@ function renderTable(allStats){
 function applyFilter(){
  const from=document.getElementById('f-from').value;
  const to=document.getElementById('f-to').value;
- const fDate=from?new Date(from):new Date(0);
+ const fDate=from?new Date(from+'T00:00:00'):new Date(0);
  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
  const sh=document.getElementById('shift-sel').value;
  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
@@ -1467,7 +1486,7 @@ function fmtPeriodLabel(key){
 function renderTrendChart(){
  const from=document.getElementById('f-from').value;
  const to=document.getElementById('f-to').value;
- const fDate=from?new Date(from):new Date(0);
+ const fDate=from?new Date(from+'T00:00:00'):new Date(0);
  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
  const sh=document.getElementById('shift-sel').value;
  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
@@ -1592,7 +1611,7 @@ function buildDataSummary(){
  // สร้าง context จากข้อมูลจริง สั้น compact สำหรับ API
  const from=document.getElementById('f-from').value;
  const to=document.getElementById('f-to').value;
- const fDate=from?new Date(from):new Date(0);
+ const fDate=from?new Date(from+'T00:00:00'):new Date(0);
  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
  const sh=document.getElementById('shift-sel').value;
  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));

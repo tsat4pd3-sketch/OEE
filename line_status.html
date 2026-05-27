@@ -497,12 +497,16 @@ function render(){
   const pad=n=>String(n).padStart(2,'0');
 
   // Compute window
+  function _shiftWin(now){
+    const h=now.getHours(),Y=now.getFullYear(),Mo=now.getMonth(),D=now.getDate();
+    if(h>=8&&h<20)return{s:new Date(Y,Mo,D,8,0,0),  e:new Date(Y,Mo,D,20,0,0)};
+    if(h>=20)     return{s:new Date(Y,Mo,D,20,0,0), e:new Date(Y,Mo,D+1,8,0,0)};
+    return{s:new Date(Y,Mo,D-1,20,0,0), e:new Date(Y,Mo,D,8,0,0)};
+  }
   let winStart,winEnd,effectiveEnd;
   if(_range===1){
-    const isAfter8=now.getHours()>=8;
-    const sd=isAfter8?now:new Date(now-86400000);
-    winStart=new Date(sd.getFullYear(),sd.getMonth(),sd.getDate(),8,0,0);
-    winEnd=new Date(winStart.getTime()+24*3600000);
+    const sw=_shiftWin(now);
+    winStart=sw.s; winEnd=sw.e;
     effectiveEnd=new Date(Math.min(now.getTime(),winEnd.getTime()));
   }else{
     winStart=new Date(now.getTime()-_range*86400000);
@@ -526,7 +530,7 @@ function render(){
   // DOWN  = unclosed MO opened within last 2 shifts (48h from prevWinStart) — includes carryover
   // WATCH = unclosed MO older than 2 shifts but within 7 days — chronic/managed situation
   // UP    = no unresolved MOs
-  const prevWinStart=new Date(winStart.getTime()-24*3600000); // start of previous shift
+  const prevWinStart=new Date(winStart.getTime()-12*3600000); // previous 12h shift
   const lineStatus={};
   lines.forEach(ln=>{
     // DOWN: normal (non-ปรับจิ๊ก) unclosed MO from last 2 shifts
@@ -593,9 +597,10 @@ function render(){
     // Tick marks (1D only)
     let tickHtml='';
     if(_range===1){
-      for(let h=1;h<24;h++){
+      const tlH=Math.round(winMs/3600000);
+      for(let h=1;h<tlH;h++){
         const left=(h*3600000/winMs*100).toFixed(2);
-        const bright=h%4===0;
+        const bright=h%3===0;
         tickHtml+=`<div style="position:absolute;top:0;left:${left}%;width:1px;height:100%;background:${bright?'rgba(255,255,255,0.2)':'rgba(255,255,255,0.08)'};pointer-events:none;z-index:2"></div>`;
       }
     }
@@ -617,12 +622,13 @@ function render(){
     // Axis
     let axisHtml;
     if(_range===1){
+      const tlH=Math.round(winMs/3600000);
       const axItems=[];
-      for(let h=0;h<=24;h+=4){
+      for(let h=0;h<=tlH;h+=2){
         const d=new Date(winStart.getTime()+h*3600000);
-        const pct=(h/24*100).toFixed(2);
-        const minor=h%8!==0; // hide every-4h on mobile, keep every-8h
-        const xf=h===0?'':h===24?'transform:translateX(-100%)':'transform:translateX(-50%)';
+        const pct=(h/tlH*100).toFixed(2);
+        const minor=h%4!==0;
+        const xf=h===0?'':h===tlH?'transform:translateX(-100%)':'transform:translateX(-50%)';
         axItems.push(`<span class="${minor?'ls-ax-2h':''}" style="left:${pct}%;${xf}">${fmtHM(d)}</span>`);
       }
       axisHtml=`<div class="ls-tl-axis-1d">${axItems.join('')}</div>`;
