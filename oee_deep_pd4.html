@@ -640,7 +640,7 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
         <h3 style="color:var(--green)">AI MAINTENANCE INTELLIGENCE</h3>
         <span>Root Cause, แนวทางแก้ไขที่ Effective, Predictive Maintenance</span>
       </div>
-      <button onclick="runMOAI()" style="margin-left:auto;padding:6px 14px;background:linear-gradient(135deg,#166534,#22c55e);border:none;border-radius:7px;color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font-body)"> วิเคราะห์ใหม่</button>
+      <button onclick="/* runMOAI() */" style="margin-left:auto;padding:6px 14px;background:linear-gradient(135deg,#166534,#22c55e);border:none;border-radius:7px;color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font-body)"> วิเคราะห์ใหม่</button>
     </div>
     <div id="mo-ai-out"><p class="pulse" style="color:var(--muted);font-size:13px">กำลังรอข้อมูล MO...</p></div>
   </div>
@@ -985,7 +985,7 @@ function setChartView(mode, btn){
   document.querySelectorAll('.chart-toggle button').forEach(b=>{if(b.textContent===btn.textContent)b.classList.add('active');});
   rDailyOutput(); rDTTrend(); rPPMTrend();
 }
-function render(){rKPI();rDailyOutput();rDTPareto();rDefPareto();rDTTrend();rPPMTrend();rDTHeat();rPPMHeat();rDTByPart();rDTTable();runAI();}
+function render(){rKPI();rDailyOutput();rDTPareto();rDefPareto();rDTTrend();rPPMTrend();rDTHeat();rPPMHeat();rDTByPart();rDTTable();/* runAI(); */}
 
 function rKPI(){
   if(!FD.length)return;
@@ -1151,6 +1151,7 @@ function _aiHeaders(){return{'Content-Type':'application/json','x-api-key':_aiKe
 function _setAiKey(){const k=prompt('กรุณาใส่ Anthropic API Key:\n(จะเก็บไว้ใน localStorage ของเบราว์เซอร์นี้เท่านั้น)');if(k&&k.trim().startsWith('sk-')){localStorage.setItem('oee_api_key',k.trim());return true;}if(k)alert('API Key ไม่ถูกต้อง ต้องขึ้นต้นด้วย sk-ant-...');return false;}
 
 async function runAI(){
+  return; // AI disabled
   if(!FD.length)return;
   document.getElementById("ai-out").innerHTML='<p class="pulse" style="color:var(--muted);font-size:12px">🤖 AI กำลังวิเคราะห์...</p>';
   const totDT=FD.reduce((s,d)=>s+(d.dtMin||0),0);
@@ -1756,6 +1757,7 @@ function rMOTable(mo) {
 
 // ─── MO AI ANALYSIS ───
 async function runMOAI() {
+  return; // AI disabled
   if (!MO_LOADED || !MO_ALL.length) {
     document.getElementById("mo-ai-out").innerHTML = '<p style="color:var(--muted);font-size:12px">กรุณาโหลด MO data ก่อน</p>';
     return;
@@ -2037,6 +2039,7 @@ window.addEventListener("load",()=>setTimeout(loadMO, 2000));
 // PRODUCTIVITY IMPACT ANALYSIS
 // ════════════════════════════════════════════════════════
 async function runProductivityImpact() {
+  return; // AI disabled
   const el = document.getElementById("prod-impact-out");
   if (!MO_LOADED || !MO_ALL.length) { el.innerHTML='<p style="color:var(--muted);font-size:12px">กรุณาโหลด MO data ก่อน</p>'; return; }
   if (!ALL.length) { el.innerHTML='<p style="color:var(--muted);font-size:12px">กรุณาโหลด OEE data ก่อนด้วย (ต้องใช้ข้อมูล Production)</p>'; return; }

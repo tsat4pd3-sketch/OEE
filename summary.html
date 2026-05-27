@@ -1661,6 +1661,7 @@ function updateMsg(id,text){
  document.getElementById('qa-messages').scrollTop=9999;
 }
 
+/* AI_SECTION_START — commented out for performance
 // ── AI Key Management ──────────────────────────────────────────────────
 function _aiKey(){return localStorage.getItem('oee_api_key')||'';}
 function _aiHeaders(){return{'Content-Type':'application/json','x-api-key':_aiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};}
@@ -1719,6 +1720,7 @@ ${ctx}
  sendBtn.disabled=false;
  inp.focus();
 }
+AI_SECTION_END */
 
 function askPreset(el){
  document.getElementById('qa-input').value=el.textContent.trim();
