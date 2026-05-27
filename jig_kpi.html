@@ -1089,6 +1089,10 @@ function renderHeatmap() {
 // ════════════════════════════════════════════════════════
 // AI ANALYSIS
 // ════════════════════════════════════════════════════════
+function _aiKey(){return localStorage.getItem('oee_api_key')||'';}
+function _aiHeaders(){return{'Content-Type':'application/json','x-api-key':_aiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};}
+function _setAiKey(){const k=prompt('กรุณาใส่ Anthropic API Key:\n(จะเก็บไว้ใน localStorage ของเบราว์เซอร์นี้เท่านั้น)');if(k&&k.trim().startsWith('sk-')){localStorage.setItem('oee_api_key',k.trim());return true;}if(k)alert('API Key ไม่ถูกต้อง ต้องขึ้นต้นด้วย sk-ant-...');return false;}
+
 async function runAI() {
  switchTab('ai');
  const el = document.getElementById('ai-out');
@@ -1154,9 +1158,10 @@ ${monthly.map(m=>`${m.label}: MO=${m.total}, Close=${m.closeRate.toFixed(0)}%, M
  "summary": "สรุปภาพรวม JIG MTN Performance 2-3 ประโยค"
 }`;
 
+ if(!_aiKey()){_setAiKey();fallbackAI(m,topProbs,topMc,open,techs);return;}
  try {
  const r = await fetch('https://api.anthropic.com/v1/messages', {
- method:'POST', headers:{'Content-Type':'application/json'},
+ method:'POST', headers:_aiHeaders(),
  body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2500,messages:[{role:'user',content:prompt}]})
  });
  const data = await r.json();

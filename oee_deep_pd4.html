@@ -1145,6 +1145,11 @@ function rDTTable(){
   }).join("")||'<tr><td colspan="20" style="text-align:center;padding:16px;color:var(--muted)">ไม่มีข้อมูล</td></tr>';
 }
 
+// ── AI Key Management ──────────────────────────────────────────────────
+function _aiKey(){return localStorage.getItem('oee_api_key')||'';}
+function _aiHeaders(){return{'Content-Type':'application/json','x-api-key':_aiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};}
+function _setAiKey(){const k=prompt('กรุณาใส่ Anthropic API Key:\n(จะเก็บไว้ใน localStorage ของเบราว์เซอร์นี้เท่านั้น)');if(k&&k.trim().startsWith('sk-')){localStorage.setItem('oee_api_key',k.trim());return true;}if(k)alert('API Key ไม่ถูกต้อง ต้องขึ้นต้นด้วย sk-ant-...');return false;}
+
 async function runAI(){
   if(!FD.length)return;
   document.getElementById("ai-out").innerHTML='<p class="pulse" style="color:var(--muted);font-size:12px">🤖 AI กำลังวิเคราะห์...</p>';
@@ -1172,8 +1177,9 @@ Top Defect: ${topDef.map(([k,v])=>k+":"+v).join(", ")}
 
 {"summary":"สรุป 2 ประโยค","dt_issues":["3 issues"],"quality_issues":["2 issues"],"actions":[{"pri":"HIGH|MED|LOW","action":"action","result":"expected"},{"pri":"HIGH|MED|LOW","action":"action","result":"expected"},{"pri":"HIGH|MED|LOW","action":"action","result":"expected"}],"status":"good|warning|critical"}`;
 
+  if(!_aiKey()){_setAiKey();fallbackAI(oee,totDT,ppm,topDT,partStats);return;}
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:_aiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
     const data=await r.json();const txt=data.content?.map(c=>c.text||"").join("").replace(/```json|```/g,"").trim();
     let ai;try{ai=JSON.parse(txt);}catch{ai=null;}
     ai?renderAI(ai):fallbackAI(oee,totDT,ppm,topDT,partStats);
@@ -1893,9 +1899,10 @@ ${topTechs.map(t=>`${t.n}: ${t.count}งาน, avgTTR ${t.avgTTR}m, ปิด M
   ]
 }`;
 
+  if(!_aiKey()){fallbackMOAI(topProbs,recurring,highTTR,avgTTR);return;}
   try {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method:"POST", headers:{"Content-Type":"application/json"},
+      method:"POST", headers:_aiHeaders(),
       body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2500, messages:[{role:"user",content:prompt}] })
     });
     const data = await r.json();
@@ -2128,9 +2135,10 @@ ${impactSummary}
   "total_oee_impact": "ประมาณการว่า downtime จาก MO ทำให้ OEE ลดลงเท่าไร"
 }`;
 
+  if(!_aiKey()){fallbackProductivityImpact(ranked,overallOEE,totalTTRHours,totalProdLost);return;}
   try {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method:"POST", headers:{"Content-Type":"application/json"},
+      method:"POST", headers:_aiHeaders(),
       body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2000,
         messages:[{role:"user",content:prompt}] })
     });

@@ -1661,6 +1661,11 @@ function updateMsg(id,text){
  document.getElementById('qa-messages').scrollTop=9999;
 }
 
+// ── AI Key Management ──────────────────────────────────────────────────
+function _aiKey(){return localStorage.getItem('oee_api_key')||'';}
+function _aiHeaders(){return{'Content-Type':'application/json','x-api-key':_aiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};}
+function _setAiKey(){const k=prompt('กรุณาใส่ Anthropic API Key:\n(จะเก็บไว้ใน localStorage ของเบราว์เซอร์นี้เท่านั้น)');if(k&&k.trim().startsWith('sk-')){localStorage.setItem('oee_api_key',k.trim());return true;}if(k)alert('API Key ไม่ถูกต้อง ต้องขึ้นต้นด้วย sk-ant-...');return false;}
+
 async function sendQA(){
  const inp=document.getElementById('qa-input');
  const q=inp.value.trim();
@@ -1689,14 +1694,10 @@ ${ctx}
  const historyToSend=_qaHistory.slice(-6);
  const messages=[...historyToSend];
 
- // ใช้ Anthropic API ผ่าน fetch พร้อม CORS header ที่ถูกต้อง
+ if(!_aiKey()){_setAiKey();appendQA('assistant','⚠️ กรุณาตั้งค่า API Key ก่อนใช้งาน AI Chat');return;}
  const res=await fetch('https://api.anthropic.com/v1/messages',{
  method:'POST',
- headers:{
- 'Content-Type':'application/json',
- 'anthropic-version':'2023-06-01',
- 'anthropic-dangerous-direct-browser-access':'true'
- },
+ headers:_aiHeaders(),
  body:JSON.stringify({
  model:'claude-sonnet-4-20250514',
  max_tokens:800,
