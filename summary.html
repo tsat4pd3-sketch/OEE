@@ -1195,7 +1195,7 @@ function renderTable(allStats){
 function applyFilter(){
  const from=document.getElementById('f-from').value;
  const to=document.getElementById('f-to').value;
- const fDate=from?new Date(from):new Date(0);
+ const fDate=from?new Date(from+'T00:00:00'):new Date(0);
  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
  const sh=document.getElementById('shift-sel').value;
  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
@@ -1486,7 +1486,7 @@ function fmtPeriodLabel(key){
 function renderTrendChart(){
  const from=document.getElementById('f-from').value;
  const to=document.getElementById('f-to').value;
- const fDate=from?new Date(from):new Date(0);
+ const fDate=from?new Date(from+'T00:00:00'):new Date(0);
  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
  const sh=document.getElementById('shift-sel').value;
  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
@@ -1611,7 +1611,7 @@ function buildDataSummary(){
  // สร้าง context จากข้อมูลจริง สั้น compact สำหรับ API
  const from=document.getElementById('f-from').value;
  const to=document.getElementById('f-to').value;
- const fDate=from?new Date(from):new Date(0);
+ const fDate=from?new Date(from+'T00:00:00'):new Date(0);
  const tDate=to?new Date(to+'T23:59:59'):new Date(9999,0,1);
  const sh=document.getElementById('shift-sel').value;
  const all=[...PD3_ALL,...PD4_ALL].filter(d=>d.date>=fDate&&d.date<=tDate&&(sh==='all'||d.shift===sh));
