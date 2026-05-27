@@ -1,0 +1,26 @@
+name: OEE Telegram Notification
+
+on:
+  schedule:
+    # หลังกะกลางวัน: 20:00 Bangkok (UTC+7) = 13:00 UTC  จ-ส
+    - cron: '0 13 * * 1-6'
+    # หลังกะดึก:      08:00 Bangkok (UTC+7) = 01:00 UTC  จ-ส
+    - cron: '0 1 * * 1-6'
+  workflow_dispatch:   # trigger manual สำหรับ test
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run OEE check & notify
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/check_oee_notify.py
