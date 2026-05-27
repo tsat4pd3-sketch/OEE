@@ -1035,7 +1035,15 @@ function dtIcon(t) {
   return '🔧';
 }
 
-let _tlRangeDays = 1; // default: today's shift window (08:00→08:00)
+let _tlRangeDays = 1; // default: current shift window (Day 08:00→20:00 / Night 20:00→08:00)
+
+function _currentShiftWindow(now) {
+  const h = now.getHours(), Y = now.getFullYear(), M = now.getMonth(), D = now.getDate();
+  if (h >= 8 && h < 20) return { start: new Date(Y,M,D,8,0,0),   end: new Date(Y,M,D,20,0,0) };
+  if (h >= 20)           return { start: new Date(Y,M,D,20,0,0),  end: new Date(Y,M,D+1,8,0,0) };
+  /* 00:00–07:59: night shift started yesterday 20:00 */
+  return { start: new Date(Y,M,D-1,20,0,0), end: new Date(Y,M,D,8,0,0) };
+}
 
 function setTlRange(days, btn) {
   _tlRangeDays = days;
@@ -1397,11 +1405,9 @@ function rUptimeTimeline(mo) {
   const now = new Date();
   let tlStart, tlEnd, tlEffective;
   if (_tlRangeDays === 1) {
-    // Shift window: 08:00 shift day → 08:00+24h (same logic as Summary Dashboard)
-    const isAfter8 = now.getHours() >= 8;
-    const shiftDate = isAfter8 ? now : new Date(now.getTime() - 86400000);
-    tlStart = new Date(shiftDate.getFullYear(), shiftDate.getMonth(), shiftDate.getDate(), 8, 0, 0);
-    tlEnd   = new Date(tlStart.getTime() + 24 * 3600000);
+    // Current shift window: Day 08:00→20:00 / Night 20:00→08:00 next day
+    const { start: tlS, end: tlE } = _currentShiftWindow(now);
+    tlStart = tlS; tlEnd = tlE;
     tlEffective = new Date(Math.min(now.getTime(), tlEnd.getTime()));
   } else {
     tlStart = _tlRangeDays > 0
@@ -1411,7 +1417,7 @@ function rUptimeTimeline(mo) {
     tlEffective = null; // no future zone for non-1D
   }
   const tlMs = tlEnd - tlStart;
-  const tlPrevWin = new Date(tlStart.getTime() - 24 * 3600000); // for open-MO extension
+  const tlPrevWin = new Date(tlStart.getTime() - 12 * 3600000); // previous 12h shift (for open-MO extension)
 
   // Group by line → machine
   const lineMap = {};
@@ -1431,22 +1437,24 @@ function rUptimeTimeline(mo) {
   // Tick marks for 1D (hourly) — rendered inside each bar
   let tickHtml = '';
   if (_tlRangeDays === 1) {
-    for (let h = 1; h < 24; h++) {
+    const tlTotalH = Math.round(tlMs / 3600000); // 12 for shift window
+    for (let h = 1; h < tlTotalH; h++) {
       const left = (h * 3600000 / tlMs * 100).toFixed(2);
-      const bright = h % 4 === 0;
+      const bright = h % 3 === 0;
       tickHtml += `<div style="position:absolute;top:0;left:${left}%;width:1px;height:100%;background:${bright?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.1)'};pointer-events:none;z-index:2"></div>`;
     }
   }
 
   let axisHtml;
   if (_tlRangeDays === 1) {
-    // Every 2h labels; odd multiples (10:00,14:00,18:00,22:00,02:00,06:00) hidden on mobile
+    // Every 2h labels across the 12h shift window
+    const tlTotalH = Math.round(tlMs / 3600000);
     const axItems = [];
-    for (let h = 0; h <= 24; h += 2) {
+    for (let h = 0; h <= tlTotalH; h += 2) {
       const d = new Date(tlStart.getTime() + h * 3600000);
-      const pct = (h / 24 * 100).toFixed(2);
+      const pct = (h / tlTotalH * 100).toFixed(2);
       const minor = h % 4 !== 0;
-      const xf = h === 0 ? '' : h === 24 ? 'transform:translateX(-100%)' : 'transform:translateX(-50%)';
+      const xf = h === 0 ? '' : h === tlTotalH ? 'transform:translateX(-100%)' : 'transform:translateX(-50%)';
       axItems.push(`<span class="${minor ? 'tl-ax-2h' : ''}" style="left:${pct}%;${xf}">${pad(d.getHours())}:${pad(d.getMinutes())}</span>`);
     }
     axisHtml = `<div class="tl-axis-1d">${axItems.join('')}</div>`;
