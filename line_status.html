@@ -533,10 +533,11 @@ function render(){
   const prevWinStart=new Date(winStart.getTime()-12*3600000); // previous 12h shift
   const lineStatus={};
   lines.forEach(ln=>{
-    // DOWN: Breakdown-type unclosed MO within last 2 shifts (consistent with timeline filter)
+    // DOWN: Breakdown-type unclosed MO within last 2 shifts → consistent with timeline (isBreakdown only)
     const freshDown=lineMap[ln].filter(d=>d.isBreakdown&&!d.isAdjust&&!d.isClosed&&!d.dateClose&&d.date>=prevWinStart&&d.date<=effectiveEnd);
-    // WATCH: unclosed ปรับจิ๊ก MO, OR non-breakdown unclosed MO (running but unresolved)
-    const crossWatch=lineMap[ln].filter(d=>!d.isClosed&&!d.dateClose&&d.date<=effectiveEnd&&!freshDown.includes(d));
+    // WATCH: ปรับจิ๊ก/Poka-Yoke unclosed only — no time limit (ongoing adjustment)
+    // Old breakdown MOs (sheet bug, >2 shifts unclosed) are ignored here intentionally
+    const crossWatch=lineMap[ln].filter(d=>d.isAdjust&&!d.isClosed&&!d.dateClose&&d.date<=effectiveEnd);
     const status=freshDown.length>0?'down':crossWatch.length>0?'watch':'up';
     lineStatus[ln]={status,down:status==='down',watch:status==='watch',events:freshDown.length>0?freshDown:crossWatch};
   });
