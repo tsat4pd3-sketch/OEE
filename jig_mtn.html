@@ -629,20 +629,37 @@ body.sidebar-collapsed #sidebar-edge{pointer-events:auto}
     </div>
   </div>
 
-  <!-- AI MAINTENANCE INTELLIGENCE (disabled)
-  <div class="ai-wrap" style="border-color:#1a3a1a">
-    <div class="ai-hdr">
-      <div class="ai-orb"></div>
-      <div>
-        <h3>AI MAINTENANCE INTELLIGENCE — JIG MTN</h3>
-        <span>Root Cause, Effective Solutions, Predictive Maintenance สำหรับ JIG</span>
-      </div>
-      <button onclick="runMOAI()" style="margin-left:auto;padding:6px 14px;background:linear-gradient(135deg,#166534,#22c55e);border:none;border-radius:7px;color:#fff;font-size:12px;cursor:pointer;font-family:var(--font-body);font-weight:600">🤖 วิเคราะห์</button>
-    </div>
-    <div id="mo-ai-out"><p class="pulse" style="color:var(--muted);font-size:13px">กำลังรอข้อมูล MO...</p></div>
+  <!-- AI Analysis Button -->
+  <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+    <button onclick="openAIModal()" style="display:flex;align-items:center;gap:8px;padding:9px 18px;background:linear-gradient(135deg,#166534,#22c55e);border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;font-family:var(--font-body);font-weight:600;box-shadow:0 2px 8px #22c55e30;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <span style="font-size:16px">🤖</span> AI วิเคราะห์ Maintenance
+    </button>
   </div>
-  -->
 </main>
+
+<!-- AI Analysis Modal -->
+<div id="ai-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:#00000070;backdrop-filter:blur(3px)" onclick="if(event.target===this)closeAIModal()">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(860px,95vw);max-height:90vh;background:var(--card);border:1px solid var(--border2);border-radius:12px;display:flex;flex-direction:column;box-shadow:0 24px 80px #00000040">
+    <div style="display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <span style="font-size:22px">🤖</span>
+      <div style="flex:1">
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text)">AI MAINTENANCE INTELLIGENCE — JIG MTN</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Root Cause · Effective Solutions · Predictive Maintenance</div>
+      </div>
+      <button onclick="closeAIModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1" title="ปิด">✕</button>
+    </div>
+    <div id="ai-mode-bar" style="display:flex;align-items:center;gap:10px;padding:14px 22px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--muted);font-weight:600">วิเคราะห์ข้อมูล:</span>
+      <button id="ai-btn-shift" onclick="runAIMode('shift')" style="padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:var(--font-body);transition:all .15s">Shift ปัจจุบัน</button>
+      <button id="ai-btn-range" onclick="runAIMode('range')" style="padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;border:2px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--font-body);transition:all .15s">Date Range ที่เลือก</button>
+      <span id="ai-mode-label" style="font-size:11px;color:var(--muted);margin-left:4px"></span>
+      <button onclick="_setAiKey()&&runAIMode(window._aiCurrentMode||'shift')" style="margin-left:auto;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--font-body)">🔑 API Key</button>
+    </div>
+    <div id="ai-modal-body" style="flex:1;overflow-y:auto;padding:20px 22px;min-height:200px">
+      <p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">เลือก mode ด้านบนเพื่อเริ่มวิเคราะห์</p>
+    </div>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════════════════════
@@ -1703,15 +1720,53 @@ function _aiKey(){return localStorage.getItem('oee_api_key')||'';}
 function _aiHeaders(){return{'Content-Type':'application/json','x-api-key':_aiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};}
 function _setAiKey(){const k=prompt('กรุณาใส่ Anthropic API Key:\n(จะเก็บไว้ใน localStorage ของเบราว์เซอร์นี้เท่านั้น)');if(k&&k.trim().startsWith('sk-')){localStorage.setItem('oee_api_key',k.trim());return true;}if(k)alert('API Key ไม่ถูกต้อง ต้องขึ้นต้นด้วย sk-ant-...');return false;}
 
-/* AI MAINTENANCE INTELLIGENCE (disabled)
-async function runMOAI() {
+// ── AI Modal ───────────────────────────────────────────
+function openAIModal(){
+  document.getElementById('ai-modal').style.display='block';
+  document.body.style.overflow='hidden';
+  runAIMode('shift');
+}
+function closeAIModal(){
+  document.getElementById('ai-modal').style.display='none';
+  document.body.style.overflow='';
+}
+window._aiCurrentMode='shift';
+
+function runAIMode(mode){
+  window._aiCurrentMode=mode;
+  const bs=document.getElementById('ai-btn-shift');
+  const br=document.getElementById('ai-btn-range');
+  if(mode==='shift'){
+    bs.style.background='var(--accent)';bs.style.color='#fff';bs.style.borderColor='var(--accent)';
+    br.style.background='transparent';br.style.color='var(--muted)';br.style.borderColor='var(--border2)';
+  } else {
+    br.style.background='var(--accent)';br.style.color='#fff';br.style.borderColor='var(--accent)';
+    bs.style.background='transparent';bs.style.color='var(--muted)';bs.style.borderColor='var(--border2)';
+  }
+  runMOAI(mode);
+}
+
+async function runMOAI(mode) {
+  const out = document.getElementById('ai-modal-body');
   if (!MO_LOADED || !MO_ALL.length) {
-    document.getElementById("mo-ai-out").innerHTML = '<p style="color:var(--muted);font-size:12px">กรุณาโหลด MO data ก่อน</p>';
+    out.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:40px 0">กรุณาโหลด MO data ก่อน</p>';
     return;
   }
-  document.getElementById("mo-ai-out").innerHTML = '<p class="pulse" style="color:var(--green);font-size:12px">🔧 AI กำลังวิเคราะห์ JIG Maintenance data...</p>';
-  const mo = getMOFiltered();
-  if (!mo.length) { document.getElementById("mo-ai-out").innerHTML = '<p style="color:var(--muted)">ไม่มีข้อมูลในช่วงที่เลือก</p>'; return; }
+  out.innerHTML = '<p class="pulse" style="color:var(--green);font-size:13px;text-align:center;padding:40px 0">🔧 AI กำลังวิเคราะห์ JIG Maintenance data...</p>';
+
+  let mo;
+  if(mode==='shift'){
+    const {start:sS,end:sE}=_currentShiftWindow(new Date());
+    const effectiveEnd=new Date(Math.min(Date.now(),sE.getTime()));
+    mo=MO_ALL.filter(d=>d.date>=sS&&d.date<=effectiveEnd);
+    const label=`Shift ${sS.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}–${sE.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} (${sS.toLocaleDateString('th-TH')})`;
+    document.getElementById('ai-mode-label').textContent=`📅 ${label} · ${mo.length} MO`;
+  } else {
+    mo = getMOFiltered();
+    document.getElementById('ai-mode-label').textContent=`📅 ${mo.length} MO ใน date range`;
+  }
+
+  if (!mo.length) { out.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">ไม่มีข้อมูล MO ในช่วงที่เลือก</p>'; return; }
 
   const totalMO = mo.length;
   const closedMO = mo.filter(d => d.isClosed);
@@ -1771,11 +1826,14 @@ ${topTechs.map(t=>`${t.n}: ${t.count}งาน, avgTTR ${t.avgTTR}m, ปิด M
   "critical_actions": [{"priority":"1","action":"action ด่วนที่สุด","impact":"ผลที่คาดหวัง"}]
 }`;
 
+  if(!_aiKey()){
+    if(_setAiKey()) runMOAI(mode); else fallbackMOAI(topProbs,recurring,highTTR,avgTTR);
+    return;
+  }
   try {
-  if(!_aiKey()){fallbackMOAI(topProbs,recurring,highTTR,avgTTR);return;}
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method:"POST", headers:_aiHeaders(),
-      body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2500, messages:[{role:"user",content:prompt}] })
+      body:JSON.stringify({ model:"claude-haiku-4-5-20251001", max_tokens:2500, messages:[{role:"user",content:prompt}] })
     });
     const data = await r.json();
     const txt = data.content?.map(c=>c.text||"").join("").replace(/```json|```/g,"").trim();
@@ -1824,12 +1882,12 @@ function renderMOAI(a) {
       <div><div style="font-size:12px;font-weight:700;color:var(--text)">${ac.action}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:2px">→ ${ac.impact}</div></div>
     </div>`).join("");
-  document.getElementById("mo-ai-out").innerHTML = `
+  document.getElementById("ai-modal-body").innerHTML = `
     <div style="background:#22c55e12;border-left:3px solid #22c55e;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px">
       <p style="color:var(--green);font-size:13px;font-weight:700;margin-bottom:4px">📋 สรุปภาพรวม JIG MTN</p>
       <p style="color:var(--text2);font-size:12px;line-height:1.7">${a.summary||""}</p>
     </div>
-    <div class="ai-grid" style="margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div><h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔴 Root Causes</h4>${rcHtml}</div>
       <div>
         <h4 style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">✅ Effective Solutions</h4>${solHtml}
@@ -1860,13 +1918,8 @@ function fallbackMOAI(topProbs,recurring,highTTR,avgTTR) {
     return `<li class="${c.count>=5?"w":"y"}"><b>${c.prob}</b>${c.symptom?` — <span style="color:var(--amber)">อาการ: ${c.symptom}</span>`:""}
       <div style="color:var(--green);font-size:11px;margin-top:2px">✓ วิธีแก้: ${sol} (avg ${solAvgTTR})</div></li>`;
   }).join("");
-  document.getElementById("mo-ai-out").innerHTML = `
-    <div style="background:#f59e0b15;border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px">
-      <span style="font-size:20px">⚠️</span>
-      <div><p style="color:#fcd34d;font-size:13px;font-weight:700;margin-bottom:4px">AI API ต้องการ Web Server</p>
-      <p style="color:var(--muted);font-size:11px;line-height:1.6">อัปโหลดไฟล์ขึ้น <b style="color:var(--text)">GitHub Pages</b> หรือ <b style="color:var(--text)">Netlify</b> เพื่อใช้งาน AI Analysis</p></div>
-    </div>
-    <div class="ai-grid">
+  document.getElementById("ai-modal-body").innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div class="ai-sec">
         <h4>🔴 Top JIG Problems + วิธีแก้ไข</h4>
         <ul>${csList||topProbs.map(([k,v],i)=>`<li class="${i===0?"w":"y"}">${k}: ${v}ครั้ง</li>`).join("")}</ul>
@@ -1879,7 +1932,6 @@ function fallbackMOAI(topProbs,recurring,highTTR,avgTTR) {
       </div>
     </div>`;
 }
-*/
 </script>
 
 <!-- Theme + Sidebar Scripts -->
