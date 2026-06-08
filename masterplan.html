@@ -11,14 +11,13 @@
   --bg:#f5f7f5;--bg2:#ffffff;--bg3:#eef3ee;--card:#ffffff;
   --border:#d0ddd0;--border2:#b8ccb8;
   --accent:#0d3d14;--accent-dim:rgba(13,61,20,0.07);
-  --cyan:#0066cc;--green:#22c55e;--red:#3dd65c;--purple:#a855f7;--amber:#f59e0b;
+  --cyan:#0066cc;--green:#22c55e;--red:#dc2626;--purple:#a855f7;--amber:#f59e0b;
   --text:#0a1f0c;--text2:#2d4a30;--muted:#6a8a6d;--muted2:#9ab09c;
   --pd3:#1a6d2e;--pd3-bg:rgba(13,61,20,0.06);--pd3-border:rgba(13,61,20,0.18);
   --pd4:#e87c1e;--pd4-bg:rgba(232,124,30,0.07);--pd4-border:rgba(232,124,30,0.22);
   --sidebar:252px;--radius:4px;--radius-sm:3px;
   --font-body:'Sarabun','Tahoma',sans-serif;--font-display:'Tahoma','Sarabun',sans-serif;
 
-  /* legacy aliases used throughout file */
   --s1:var(--bg3);--s2:var(--card);--s3:#f0f0f0;
   --bd:var(--border);--bd2:var(--border2);
   --txt:var(--text);--acc:var(--accent);
@@ -26,7 +25,7 @@
 
   --proj-h:64px;
   --phase-h:52px;
-  --task-h:42px;
+  --task-h:48px;
   --lbl-w:340px;
 }
 
@@ -72,14 +71,15 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .btn-grn{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);}
 .btn-sm{padding:7px 14px;font-size:15px;}
 
-/* ══ API BANNER ══ */
-.api-bar{background:var(--accent-dim);border:1px solid rgba(227,25,55,.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.api-bar.hidden{display:none;}
-.api-bar input{flex:1;min-width:200px;background:var(--bg);border:1px solid var(--bd);color:var(--txt);padding:6px 9px;border-radius:4px;font-size:14px;font-family:var(--font-display);outline:none;}
-.api-bar input:focus{border-color:var(--accent);}
+/* ══ CONFIG BARS ══ */
+.cfg-bar{background:var(--accent-dim);border:1px solid rgba(61,214,92,.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.cfg-bar.hidden{display:none;}
+.cfg-bar input,.cfg-bar select{background:var(--bg);border:1px solid var(--bd);color:var(--txt);padding:6px 9px;border-radius:4px;font-size:14px;font-family:var(--font-display);outline:none;}
+.cfg-bar input:focus,.cfg-bar select:focus{border-color:var(--accent);}
+.cfg-bar label{font-size:13px;color:var(--muted);white-space:nowrap;}
 
 /* ══ SUMMARY ══ */
-.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:18px;}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:7px;margin-bottom:18px;}
 .kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;}
 .kpi .n{font-size:36px;font-weight:700;font-family:var(--font-display);line-height:1;}
 .kpi .l{font-size:15px;color:var(--muted);margin-top:4px;letter-spacing:.3px;}
@@ -87,7 +87,6 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 /* ══ TOOLBAR ══ */
 .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
 .toolbar-left{display:flex;gap:6px;}
-.week-label-row{font-size:11px;color:var(--muted);font-family:var(--font-display);}
 
 /* ══ GANTT WRAPPER ══ */
 .gantt-outer{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg3);}
@@ -125,8 +124,9 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .row-name{flex:1;font-size:18px;line-height:1.3;overflow:hidden;}
 .proj .row-name{font-size:20px;font-weight:700;color:var(--txt);}
 .phase .row-name{font-size:17px;font-weight:600;color:var(--blu);}
-.task-row .row-name{font-size:16px;color:var(--muted);font-weight:400;}
-.row-owner{font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.task-row .row-name{font-size:16px;color:var(--txt);font-weight:500;}
+.row-meta{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.row-next{font-size:13px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;font-style:italic;}
 .row-actions-g{display:flex;gap:2px;opacity:0;transition:opacity .15s;flex-shrink:0;}
 .g-lbl:hover .row-actions-g{opacity:1;}
 .icon-btn{background:none;border:none;cursor:pointer;color:var(--muted);padding:3px 5px;border-radius:3px;font-size:16px;line-height:1;}
@@ -139,22 +139,23 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
   background:repeating-linear-gradient(90deg,transparent,transparent calc(100%/var(--wks) - 1px),var(--bd) calc(100%/var(--wks) - 1px),var(--bd) calc(100%/var(--wks)));
   opacity:.4;
 }
-.cur-vline{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);opacity:.4;z-index:1;pointer-events:none;}
+.cur-vline{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);opacity:.5;z-index:1;pointer-events:none;}
+.cur-vline-label{position:absolute;top:2px;font-size:10px;font-family:var(--font-display);color:var(--accent);background:var(--bg3);padding:1px 4px;border-radius:2px;z-index:2;pointer-events:none;white-space:nowrap;transform:translateX(-50%);}
 
 /* bars */
 .bar{position:absolute;border-radius:3px;display:flex;align-items:center;padding:0 8px;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2;cursor:default;top:50%;transform:translateY(-50%);}
 .bar:hover{filter:brightness(1.25);z-index:5;}
 
-.bar-proj{height:22px;background:var(--accent-dim);border:1px solid rgba(227,25,55,.35);color:var(--accent);font-size:14px;}
+.bar-proj{height:22px;background:var(--accent-dim);border:1px solid rgba(61,214,92,.25);color:var(--accent);font-size:14px;}
 .bar-phase{height:16px;background:var(--pd3-bg);border:1px solid var(--pd3-border);color:var(--pd3);font-size:14px;}
 .bar-done   {height:26px;background:rgba(34,197,94,.2);border:1px solid rgba(34,197,94,.5);color:var(--green);}
 .bar-inprog {height:26px;
   background:repeating-linear-gradient(45deg,var(--accent-dim),var(--accent-dim) 4px,transparent 4px,transparent 8px);
-  border:1px solid rgba(227,25,55,.4);color:var(--accent);}
+  border:1px solid rgba(61,214,92,.3);color:var(--accent);}
 .bar-pending{height:26px;background:var(--pd3-bg);border:1px solid var(--pd3-border);color:var(--pd3);}
-.bar-blocked{height:26px;background:var(--accent-dim);border:1px solid rgba(227,25,55,.3);color:var(--red);}
+.bar-blocked{height:26px;background:rgba(224,92,74,.1);border:1px solid rgba(224,92,74,.35);color:var(--red);}
 
-.mstone{position:absolute;width:14px;height:14px;transform:translate(-50%,-50%) rotate(45deg);background:var(--accent);border:1px solid rgba(227,25,55,.8);z-index:4;}
+.mstone{position:absolute;width:14px;height:14px;transform:translate(-50%,-50%) rotate(45deg);background:var(--accent);border:1px solid rgba(61,214,92,.8);z-index:4;}
 
 /* progress fill inside summary bars */
 .bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:3px;opacity:.35;}
@@ -164,9 +165,9 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 /* status badge */
 .sbadge{display:inline-block;font-size:10px;font-family:var(--font-display);padding:1px 4px;border-radius:2px;flex-shrink:0;}
 .sb-done   {background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3);}
-.sb-inprog {background:var(--accent-dim);color:var(--accent);border:1px solid rgba(227,25,55,.3);}
+.sb-inprog {background:var(--accent-dim);color:var(--accent);border:1px solid rgba(61,214,92,.25);}
 .sb-pending{background:var(--pd3-bg);color:var(--pd3);border:1px solid var(--pd3-border);}
-.sb-blocked{background:var(--accent-dim);color:var(--red);border:1px solid rgba(227,25,55,.3);}
+.sb-blocked{background:rgba(224,92,74,.1);color:var(--red);border:1px solid rgba(224,92,74,.3);}
 
 /* row heights */
 .g-row.proj    { min-height:var(--proj-h); }
@@ -175,6 +176,9 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 
 /* collapsed */
 .g-row.collapsed-child{display:none;}
+
+/* out-of-range indicator */
+.out-range{font-size:12px;color:var(--muted2);padding:0 8px;opacity:.7;font-style:italic;}
 
 /* ══ MODAL ══ */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:flex;align-items:center;justify-content:center;padding:14px;}
@@ -224,7 +228,7 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 .nav-section{padding:12px 14px 6px;font-size:11px;letter-spacing:1.5px;color:var(--muted);font-family:var(--font-display);text-transform:uppercase}
 .nav-btn{display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:15px;color:var(--muted);text-decoration:none;border:1px solid transparent;transition:all .18s;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
 .nav-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--border)}
-.nav-btn.active{background:var(--accent-dim);border-color:rgba(227,25,55,.2);color:var(--accent);font-weight:600}
+.nav-btn.active{background:var(--accent-dim);border-color:rgba(61,214,92,.2);color:var(--accent);font-weight:600}
 .nav-btn .ni{
   flex-shrink:0;width:20px;text-align:center;line-height:1;
   font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
@@ -237,7 +241,7 @@ body.sidebar-collapsed #sidebar-overlay{display:none}
 #main-wrap{flex:1;overflow:auto;min-width:0;padding:24px 20px 80px}
 #noise-overlay{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px;}[data-theme="light"] #noise-overlay{opacity:.014}
 
-/* ── CUSTOM CURSOR ────────────────────────────────────────────── */
+/* ── CUSTOM CURSOR ── */
 @media(hover:hover){body{cursor:none}}
 #cursor{
   position:fixed;top:0;left:0;width:10px;height:10px;
@@ -267,117 +271,10 @@ body.cur-hover #cursor-ring{opacity:0}
   #sidebar-toggle{display:flex}
 }
 @media(max-width:600px){
-  .kpi-row{grid-template-columns:repeat(3,1fr)}
+  .kpi-row{grid-template-columns:repeat(4,1fr)}
   .gantt-outer{font-size:15px}
   body{font-size:18px}
 }
-
-/* Mobile Responsiveness Improvements */
-@media (max-width: 768px) {
-  #main { padding: 24px 20px 48px !important; }
-  .topbar { flex-direction: column; gap: 8px; }
-  .topbar h2 { font-size: 26px; }
-  .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
-  .card { padding: 16px 18px; }
-  .sec-hdr { flex-wrap: wrap; }
-  .chart-toggle { flex-wrap: wrap; gap: 6px; }
-  .chart-toggle button { font-size: 12px; padding: 6px 10px; }
-  table { font-size: 13px; }
-  input[type="date"], input[type="text"], select { font-size: 16px; padding: 10px; }
-  .ch { height: 220px !important; }
-  .marquee { font-size: 13px; }
-}
-
-@media (max-width: 480px) {
-  #main { padding: 18px 14px 36px !important; }
-  .topbar { flex-direction: column; gap: 8px; }
-  .topbar h2 { font-size: 22px; }
-  .kpi-val { font-size: 28px; }
-  .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
-  .card { padding: 14px 14px; }
-  .sec-hdr h3 { font-size: 10px; letter-spacing: 1.5px; }
-  .ch { height: 180px !important; }
-  .marquee { font-size: 12px; }
-  table { font-size: 12px; }
-}
-
-@media (max-width: 375px) {
-  #main { padding: 14px 10px 32px !important; }
-  .topbar h2 { font-size: 18px; }
-  .kpi-val { font-size: 24px; }
-  .kpi-grid { grid-template-columns: 1fr; }
-  .ch { height: 160px !important; }
-  .marquee { font-size: 11px; }
-}
-
-
-/* Date Picker Styling */
-.date-picker-container {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.date-picker-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.date-picker-group label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-family: var(--font-display);
-}
-
-.date-picker-group input[type="date"] {
-  padding: 8px 12px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: 13px;
-  font-family: var(--font-body);
-  transition: border-color 0.2s;
-  cursor: pointer;
-}
-
-.date-picker-group input[type="date"]:focus {
-  border-color: var(--accent);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(227, 25, 55, 0.1);
-}
-
-.date-apply-btn {
-  padding: 8px 16px;
-  background: var(--accent);
-  border: none;
-  border-radius: var(--radius);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: var(--font-body);
-  letter-spacing: 0.5px;
-}
-
-.date-apply-btn:hover {
-  background: rgba(227, 25, 55, 0.9);
-  box-shadow: 0 4px 12px rgba(227, 25, 55, 0.3);
-}
-
-@media (max-width: 480px) {
-  .date-picker-container { flex-direction: column; align-items: stretch; gap: 8px; }
-  .date-picker-group input[type="date"] { width: 100%; font-size: 16px; }
-  .date-apply-btn { width: 100%; }
-}
-
 </style>
 </head>
 <body>
@@ -420,31 +317,50 @@ body.cur-hover #cursor-ring{opacity:0}
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-brand">
-    <div class="hdr-icon"></div>
+    <div class="hdr-icon">📋</div>
     <div class="hdr-text">
       <h1>Project <em>Masterplan</em></h1>
       <div class="hdr-meta">
         <span id="sync-pill" class="sync-pill idle"><span class="sdot"></span><span id="sync-txt">Offline</span></span>
+        <span id="sprint-range-label" style="font-size:14px;color:var(--muted);"></span>
         <span id="updated-at"></span>
       </div>
     </div>
   </div>
   <div class="hdr-btns">
-    <button class="btn btn-ghost btn-sm" onclick="toggleApiBar()">Sheets</button>
+    <button class="btn btn-ghost btn-sm" onclick="toggleCfgBar('api-bar')">Sheets</button>
     <button class="btn btn-ghost btn-sm" id="btn-pull" onclick="pullSheets()" style="display:none">↓ Pull</button>
     <button class="btn btn-grn btn-sm"   id="btn-push" onclick="pushSheets()" style="display:none">↑ Push</button>
-    <button class="btn btn-ghost btn-sm" onclick="collapseAll()">− ย่อทั้งหมด</button>
-    <button class="btn btn-ghost btn-sm" onclick="expandAll()">+ ขยายทั้งหมด</button>
+    <button class="btn btn-ghost btn-sm" onclick="toggleCfgBar('week-cfg-bar')">📅 Timeline</button>
+    <button class="btn btn-ghost btn-sm" onclick="collapseAll()">− ย่อ</button>
+    <button class="btn btn-ghost btn-sm" onclick="expandAll()">+ ขยาย</button>
     <button class="btn btn-acc" onclick="openModal('project')">+ Project</button>
   </div>
 </div>
 
 <!-- API BAR -->
-<div class="api-bar hidden" id="api-bar">
+<div class="cfg-bar hidden" id="api-bar">
   <span style="font-size:13px;color:var(--accent);white-space:nowrap;">Apps Script URL:</span>
-  <input id="api-url-inp" type="text" placeholder="https://script.google.com/macros/s/…/exec">
+  <input id="api-url-inp" type="text" placeholder="https://script.google.com/macros/s/…/exec" style="flex:1;min-width:200px;">
   <button class="btn btn-acc btn-sm" onclick="saveApiUrl()">เชื่อมต่อ</button>
-  <button class="btn btn-ghost btn-sm" onclick="toggleApiBar()">✕</button>
+  <button class="btn btn-ghost btn-sm" onclick="toggleCfgBar('api-bar')">✕</button>
+</div>
+
+<!-- WEEK CONFIG BAR -->
+<div class="cfg-bar hidden" id="week-cfg-bar">
+  <label>เริ่มต้น Sprint:</label>
+  <input id="cfg-start-date" type="date">
+  <label>จำนวนสัปดาห์:</label>
+  <select id="cfg-num-weeks">
+    <option value="4">4 wk</option>
+    <option value="6" selected>6 wk</option>
+    <option value="8">8 wk</option>
+    <option value="10">10 wk</option>
+    <option value="12">12 wk</option>
+  </select>
+  <button class="btn btn-acc btn-sm" onclick="applyWeekCfg()">ใช้งาน</button>
+  <button class="btn btn-ghost btn-sm" onclick="resetWeekCfg()">Reset วันนี้</button>
+  <button class="btn btn-ghost btn-sm" onclick="toggleCfgBar('week-cfg-bar')">✕</button>
 </div>
 
 <!-- KPI -->
@@ -500,7 +416,7 @@ body.cur-hover #cursor-ring{opacity:0}
               <option value="done">เสร็จแล้ว</option>
               <option value="inprog" selected>กำลังดำเนินการ</option>
               <option value="pending">รอดำเนินการ</option>
-              <option value="blocked">รอข้อมูล</option>
+              <option value="blocked">รอข้อมูล / บล็อก</option>
             </select>
           </div>
           <div class="field"><label>Owner</label><input id="f-owner" placeholder="คุณโฮม"></div>
@@ -510,25 +426,14 @@ body.cur-hover #cursor-ring{opacity:0}
         <div class="sec-lbl">Timeline (สัปดาห์)</div>
         <div class="row2">
           <div class="field"><label>เริ่มสัปดาห์ที่</label>
-            <select id="f-start">
-              <option value="1">W1 — 21 Apr</option><option value="2">W2 — 28 Apr</option>
-              <option value="3">W3 — 5 May</option><option value="4">W4 — 12 May</option>
-              <option value="5">W5 — 19 May</option><option value="6">W6 — 26 May</option>
-            </select>
+            <select id="f-start"></select>
           </div>
           <div class="field"><label>ระยะเวลา (wk)</label>
-            <select id="f-dur">
-              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-            </select>
+            <select id="f-dur"></select>
           </div>
         </div>
         <div class="field"><label>Milestone สัปดาห์ที่</label>
-          <select id="f-mile">
-            <option value="0">ไม่มี</option>
-            <option value="1">W1</option><option value="2">W2</option><option value="3">W3</option>
-            <option value="4">W4</option><option value="5">W5</option><option value="6">W6</option>
-          </select>
+          <select id="f-mile"></select>
         </div>
       </div>
     </div>
@@ -543,23 +448,109 @@ body.cur-hover #cursor-ring{opacity:0}
 
 <script>
 // ══════════════════════════════════════════════════════
-// CONSTANTS
+// WEEK CONFIG — dynamic, stored in localStorage
 // ══════════════════════════════════════════════════════
-const WEEKS       = 6;
-const CUR_WEEK    = 0; // 0-based (W17 = 0)
-const WEEK_LABELS = [
-  {w:'W17',d:'21 Apr'},{w:'W18',d:'28 Apr'},{w:'W19',d:'5 May'},
-  {w:'W20',d:'12 May'},{w:'W21',d:'19 May'},{w:'W22',d:'26 May'}
-];
-const STATUS_MAP  = {
-  done:    {label:'เสร็จ',    cls:'sb-done',    bar:'bar-done'},
-  inprog:  {label:'ดำเนินการ',cls:'sb-inprog',  bar:'bar-inprog'},
-  pending: {label:'รอ',       cls:'sb-pending', bar:'bar-pending'},
-  blocked: {label:'บล็อก',   cls:'sb-blocked', bar:'bar-blocked'},
+function getMonday(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  date.setDate(diff);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function isoWeek(d) {
+  const date = new Date(d.getTime());
+  date.setHours(0,0,0,0);
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  const w1 = new Date(date.getFullYear(), 0, 4);
+  return 1 + Math.round(((date - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
+}
+
+function toDateStr(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+function defaultWeekCfg() {
+  return { startDate: toDateStr(getMonday(new Date())), numWeeks: 6 };
+}
+
+let weekCfg = JSON.parse(localStorage.getItem('mp_week_cfg') || 'null') || defaultWeekCfg();
+
+// Computed each render
+let WEEKS, CUR_WEEK, WEEK_LABELS;
+
+function refreshWeekConfig() {
+  WEEKS = weekCfg.numWeeks;
+  const start = new Date(weekCfg.startDate + 'T00:00:00');
+  WEEK_LABELS = [];
+  for (let i = 0; i < WEEKS; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i * 7);
+    const day = d.getDate();
+    const mon = d.toLocaleString('en-GB', {month:'short'});
+    WEEK_LABELS.push({w: `W${isoWeek(d)}`, d: `${day} ${mon}`});
+  }
+  // Find current week (0-based)
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const diffDays = Math.floor((today - start) / 86400000);
+  const w = Math.floor(diffDays / 7);
+  CUR_WEEK = (w >= 0 && w < WEEKS) ? w : -1;
+
+  // Update sprint range label in header
+  const endDate = new Date(start);
+  endDate.setDate(endDate.getDate() + WEEKS * 7 - 1);
+  const fmtOpts = {day:'numeric', month:'short', year:'numeric'};
+  const startStr = start.toLocaleDateString('th-TH', fmtOpts);
+  const endStr   = endDate.toLocaleDateString('th-TH', fmtOpts);
+  const el = document.getElementById('sprint-range-label');
+  if (el) el.textContent = `· ${startStr} – ${endStr}`;
+
+  // Sync the week-cfg-bar inputs
+  const inp = document.getElementById('cfg-start-date');
+  if (inp) inp.value = weekCfg.startDate;
+  const sel = document.getElementById('cfg-num-weeks');
+  if (sel) sel.value = String(weekCfg.numWeeks);
+}
+
+function toggleCfgBar(id) {
+  document.getElementById(id).classList.toggle('hidden');
+}
+
+function applyWeekCfg() {
+  const startDate = document.getElementById('cfg-start-date').value;
+  const numWeeks  = parseInt(document.getElementById('cfg-num-weeks').value);
+  if (!startDate) { toast('⚠ กรุณาเลือกวันเริ่มต้น'); return; }
+  weekCfg = { startDate, numWeeks };
+  localStorage.setItem('mp_week_cfg', JSON.stringify(weekCfg));
+  toggleCfgBar('week-cfg-bar');
+  refreshWeekConfig();
+  render();
+  toast('📅 อัปเดต Timeline แล้ว');
+}
+
+function resetWeekCfg() {
+  weekCfg = defaultWeekCfg();
+  localStorage.setItem('mp_week_cfg', JSON.stringify(weekCfg));
+  toggleCfgBar('week-cfg-bar');
+  refreshWeekConfig();
+  render();
+  toast('📅 Reset Timeline เป็นสัปดาห์นี้แล้ว');
+}
+
+// ══════════════════════════════════════════════════════
+// STATUS MAP
+// ══════════════════════════════════════════════════════
+const STATUS_MAP = {
+  done:    {label:'เสร็จ',     cls:'sb-done',    bar:'bar-done'},
+  inprog:  {label:'ดำเนินการ', cls:'sb-inprog',  bar:'bar-inprog'},
+  pending: {label:'รอ',        cls:'sb-pending', bar:'bar-pending'},
+  blocked: {label:'บล็อก',    cls:'sb-blocked', bar:'bar-blocked'},
 };
 
 // ══════════════════════════════════════════════════════
-// DEFAULT DATA  (Project → Phase → Task)
+// DEFAULT DATA
 // ══════════════════════════════════════════════════════
 const DEFAULT_DATA = {
   projects: [
@@ -674,9 +665,9 @@ const DEFAULT_DATA = {
 // ══════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════
-let data    = {projects:[]};
-let apiUrl  = localStorage.getItem('mp_api_url') || '';
-let editCtx = null; // {type, id, projId, phaseId}
+let data   = {projects:[]};
+let apiUrl = localStorage.getItem('mp_api_url') || '';
+let editCtx = null;
 let addType = 'project';
 
 // ══════════════════════════════════════════════════════
@@ -690,6 +681,7 @@ function init() {
     showSyncBtns(true);
     pullSheets(true);
   }
+  refreshWeekConfig();
   render();
 }
 
@@ -729,21 +721,21 @@ function render() {
 function renderKPI() {
   const allTasks = data.projects.flatMap(p=>p.phases.flatMap(ph=>ph.tasks));
   const c = {done:0,inprog:0,pending:0,blocked:0};
-  allTasks.forEach(t=>c[t.status]++);
-  const pct100 = allTasks.length ? Math.round((c.done/allTasks.length)*100) : 0;
+  allTasks.forEach(t=>{ if(c[t.status]!==undefined) c[t.status]++; });
+  const complete = allTasks.length ? Math.round((c.done/allTasks.length)*100) : 0;
   document.getElementById('kpi-row').innerHTML = `
     <div class="kpi"><div class="n" style="color:var(--txt)">${data.projects.length}</div><div class="l">PROJECTS</div></div>
     <div class="kpi"><div class="n" style="color:var(--txt)">${allTasks.length}</div><div class="l">TASKS</div></div>
     <div class="kpi"><div class="n" style="color:var(--grn)">${c.done}</div><div class="l">DONE</div></div>
-    <div class="kpi"><div class="n" style="color:var(--acc)">${c.inprog}</div><div class="l">IN PROGRESS</div></div>
+    <div class="kpi"><div class="n" style="color:var(--acc)">${c.inprog}</div><div class="l">IN PROG</div></div>
     <div class="kpi"><div class="n" style="color:var(--blu)">${c.pending}</div><div class="l">PENDING</div></div>
-    <div class="kpi"><div class="n" style="color:var(--grn)">${pct100}%</div><div class="l">COMPLETE</div></div>`;
+    <div class="kpi"><div class="n" style="color:var(--red)">${c.blocked}</div><div class="l">BLOCKED</div></div>
+    <div class="kpi"><div class="n" style="color:var(--grn)">${complete}%</div><div class="l">COMPLETE</div></div>`;
 }
 
 function renderGantt() {
-  const curLinePct = pct(CUR_WEEK, 0.5).toFixed(2);
+  const curLinePct = CUR_WEEK >= 0 ? pct(CUR_WEEK, 0.5).toFixed(2) : null;
 
-  // header
   const wkCols = WEEK_LABELS.map((w,i)=>
     `<div class="g-wk${i===CUR_WEEK?' cur':''}">${w.w}<br><span style="font-size:10px">${w.d}</span></div>`
   ).join('');
@@ -754,12 +746,17 @@ function renderGantt() {
       <div class="g-head-weeks" style="display:grid;grid-template-columns:repeat(${WEEKS},1fr);">${wkCols}</div>
     </div>`;
 
-  data.projects.forEach((proj, pi) => {
+  // "today" vline shown only when current date is within sprint range
+  const todayLine = curLinePct !== null
+    ? `<div class="cur-vline" style="left:${curLinePct}%"></div>
+       <div class="cur-vline-label" style="left:${curLinePct}%">วันนี้</div>`
+    : '';
+
+  data.projects.forEach(proj => {
     const pSpan  = projectSpan(proj);
     const pProg  = taskProgress(proj.phases.flatMap(ph=>ph.tasks));
     const pStart = pct(pSpan.start - 1).toFixed(2);
     const pDur   = pct(0, pSpan.dur).toFixed(2);
-    const projId = `proj-${proj.id}`;
 
     html += `
       <div class="g-row proj" id="row-${proj.id}" onclick="toggleProject('${proj.id}')">
@@ -767,7 +764,7 @@ function renderGantt() {
           <span class="expand-arrow ${proj.collapsed?'':'open'}" id="arr-${proj.id}">▶</span>
           <div style="flex:1;min-width:0;">
             <div class="row-name">${proj.name}</div>
-            ${proj.sub?`<div class="row-owner">${proj.sub}</div>`:''}
+            ${proj.sub?`<div class="row-meta">${proj.sub}</div>`:''}
           </div>
           <div class="row-actions-g" onclick="event.stopPropagation()">
             <button class="icon-btn" title="เพิ่ม Phase" onclick="openModal('phase','${proj.id}')">+Ph</button>
@@ -776,7 +773,7 @@ function renderGantt() {
           </div>
         </div>
         <div class="g-bars" style="--wks:${WEEKS};min-height:var(--proj-h);">
-          <div class="cur-vline" style="left:${curLinePct}%"></div>
+          ${todayLine}
           ${pSpan.dur > 0 ? `
           <div class="bar bar-proj" style="left:${pStart}%;width:${pDur}%;">
             <div class="bar-fill fill-acc" style="width:${pProg}%"></div>
@@ -785,12 +782,12 @@ function renderGantt() {
         </div>
       </div>`;
 
-    proj.phases.forEach((phase, phi) => {
-      const phSpan  = phaseSpan(phase);
-      const phProg  = taskProgress(phase.tasks);
-      const phStart = pct(phSpan.start - 1).toFixed(2);
-      const phDur   = pct(0, phSpan.dur).toFixed(2);
-      const childCls= proj.collapsed ? 'collapsed-child' : '';
+    proj.phases.forEach(phase => {
+      const phSpan   = phaseSpan(phase);
+      const phProg   = taskProgress(phase.tasks);
+      const phStart  = pct(phSpan.start - 1).toFixed(2);
+      const phDur    = pct(0, phSpan.dur).toFixed(2);
+      const childCls = proj.collapsed ? 'collapsed-child' : '';
 
       html += `
         <div class="g-row phase ${childCls}" id="row-${phase.id}" data-proj="${proj.id}" onclick="togglePhase('${proj.id}','${phase.id}')">
@@ -806,7 +803,7 @@ function renderGantt() {
             </div>
           </div>
           <div class="g-bars" style="--wks:${WEEKS};min-height:var(--phase-h);">
-            <div class="cur-vline" style="left:${curLinePct}%"></div>
+            ${todayLine}
             ${phSpan.dur > 0 ? `
             <div class="bar bar-phase" style="left:${phStart}%;width:${phDur}%;">
               <div class="bar-fill fill-grn" style="width:${phProg}%"></div>
@@ -821,13 +818,20 @@ function renderGantt() {
         const td     = pct(0, task.dur).toFixed(2);
         const milePct= task.mile ? pct(task.mile - 0.5).toFixed(2) : null;
         const taskChildCls = (proj.collapsed || phase.collapsed) ? 'collapsed-child' : '';
+        // warn if task extends beyond sprint
+        const outRange = (task.start + task.dur - 1) > WEEKS;
 
         html += `
           <div class="g-row task-row ${taskChildCls}" data-proj="${proj.id}" data-phase="${phase.id}">
             <div class="g-lbl" style="min-height:var(--task-h)">
               <div style="flex:1;min-width:0;">
                 <div class="row-name">${task.name}</div>
-                <div class="row-owner">${task.owner||''} ${task.owner&&task.status?'·':''} <span class="sbadge ${sm.cls}">${sm.label}</span></div>
+                <div class="row-meta">
+                  ${task.owner ? `<span>${task.owner}</span><span>·</span>` : ''}
+                  <span class="sbadge ${sm.cls}">${sm.label}</span>
+                  ${outRange ? `<span class="sbadge" style="background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);">เกิน sprint</span>` : ''}
+                </div>
+                ${task.next ? `<div class="row-next">${task.next}</div>` : ''}
               </div>
               <div class="row-actions-g">
                 <button class="icon-btn" onclick="openEdit('task','${proj.id}','${phase.id}','${task.id}')">✏</button>
@@ -835,9 +839,9 @@ function renderGantt() {
               </div>
             </div>
             <div class="g-bars" style="--wks:${WEEKS};min-height:var(--task-h);">
-              <div class="cur-vline" style="left:${curLinePct}%"></div>
-              <div class="bar ${sm.bar}" style="left:${ts}%;width:${td}%;" title="${task.name}${task.next?' · '+task.next:''}">
-                ${task.name.length>20?task.name.slice(0,18)+'…':task.name}
+              ${todayLine}
+              <div class="bar ${sm.bar}" style="left:${ts}%;width:${Math.min(td, (100-parseFloat(ts))).toFixed(2)}%;" title="${task.name}${task.note?' · '+task.note:''}${task.next?' · '+task.next:''}">
+                ${task.name.length>22?task.name.slice(0,20)+'…':task.name}
               </div>
               ${milePct!==null?`<div class="mstone" style="left:${milePct}%;top:50%;"></div>`:''}
             </div>
@@ -873,26 +877,41 @@ function expandAll() {
 }
 
 // ══════════════════════════════════════════════════════
-// MODAL
+// MODAL — week select population
 // ══════════════════════════════════════════════════════
+function populateWeekSelects(currentStart, currentDur, currentMile) {
+  const startSel = document.getElementById('f-start');
+  const durSel   = document.getElementById('f-dur');
+  const mileSel  = document.getElementById('f-mile');
+
+  startSel.innerHTML = WEEK_LABELS.map((w,i)=>
+    `<option value="${i+1}" ${(currentStart===i+1)?'selected':''}>${w.w} — ${w.d}</option>`
+  ).join('');
+
+  durSel.innerHTML = Array.from({length:WEEKS},(_, i)=>
+    `<option value="${i+1}" ${(currentDur===i+1)?'selected':''}>${i+1}</option>`
+  ).join('');
+
+  mileSel.innerHTML = `<option value="0" ${(!currentMile)?'selected':''}>ไม่มี</option>`
+    + WEEK_LABELS.map((w,i)=>
+      `<option value="${i+1}" ${(currentMile===i+1)?'selected':''}>${w.w}</option>`
+    ).join('');
+}
+
 function openModal(type, projId='', phaseId='') {
   editCtx = null;
   document.getElementById('modal-title').textContent = 'เพิ่มรายการใหม่';
   document.getElementById('f-id').value = '';
   document.getElementById('f-parent-proj').value  = projId;
   document.getElementById('f-parent-phase').value = phaseId;
-  // clear fields
   ['f-name','f-sub','f-owner','f-next','f-note'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-status').value='pending';
-  document.getElementById('f-start').value='1';
-  document.getElementById('f-dur').value='1';
-  document.getElementById('f-mile').value='0';
 
-  // chooser
+  populateWeekSelects(1, 1, 0);
+
   document.getElementById('type-chooser').classList.remove('hidden');
   setType(type);
   populateParentSelects(projId, phaseId);
-
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
 
@@ -901,7 +920,7 @@ function openEdit(type, projId, phaseId='', taskId='') {
   document.getElementById('type-chooser').classList.add('hidden');
   document.getElementById('modal-title').textContent = 'แก้ไข ' + (type==='project'?'Project':type==='phase'?'Phase':'Task');
 
-  const proj  = data.projects.find(p=>p.id===projId);
+  const proj = data.projects.find(p=>p.id===projId);
   let target;
   if (type==='project') target=proj;
   else if (type==='phase') target=proj.phases.find(ph=>ph.id===phaseId);
@@ -913,11 +932,9 @@ function openEdit(type, projId, phaseId='', taskId='') {
   document.getElementById('f-owner').value  = target.owner||'';
   document.getElementById('f-next').value   = target.next||'';
   document.getElementById('f-note').value   = target.note||'';
-  document.getElementById('f-start').value  = target.start||1;
-  document.getElementById('f-dur').value    = target.dur||1;
-  document.getElementById('f-mile').value   = target.mile||0;
 
-  // show/hide sections
+  populateWeekSelects(target.start||1, target.dur||1, target.mile||0);
+
   setTypeUI(type);
   document.getElementById('f-proj-wrap').classList.add('hidden');
   document.getElementById('f-phase-wrap').classList.add('hidden');
@@ -935,7 +952,6 @@ function setType(t) {
 function setTypeUI(t) {
   document.getElementById('task-fields').classList.toggle('hidden', t!=='task');
   document.getElementById('f-sub-wrap').classList.toggle('hidden', t==='phase');
-  // parent selects for add-new
   if (!editCtx) {
     document.getElementById('f-proj-wrap').classList.toggle('hidden', t!=='phase');
     document.getElementById('f-phase-wrap').classList.toggle('hidden', t!=='task');
@@ -946,8 +962,7 @@ function setTypeUI(t) {
 function populateParentSelects(projId, phaseId) {
   const projSel  = document.getElementById('f-proj-sel');
   const phaseSel = document.getElementById('f-phase-sel');
-  projSel.innerHTML  = data.projects.map(p=>`<option value="${p.id}" ${p.id===projId?'selected':''}>${p.name}</option>`).join('');
-  // populate phases based on selected project
+  projSel.innerHTML = data.projects.map(p=>`<option value="${p.id}" ${p.id===projId?'selected':''}>${p.name}</option>`).join('');
   function refreshPhases() {
     const pid = projSel.value;
     const proj = data.projects.find(p=>p.id===pid);
@@ -963,12 +978,11 @@ function closeModal() {
 }
 
 function saveItem() {
-  const type   = document.getElementById('f-type').value;
-  const name   = document.getElementById('f-name').value.trim();
+  const type = document.getElementById('f-type').value;
+  const name = document.getElementById('f-name').value.trim();
   if (!name) { alert('กรุณากรอกชื่อ'); return; }
 
   if (editCtx) {
-    // EDIT existing
     const proj = data.projects.find(p=>p.id===editCtx.projId);
     if (type==='project') {
       proj.name = name;
@@ -981,7 +995,6 @@ function saveItem() {
       Object.assign(task, taskFormData(name));
     }
   } else {
-    // ADD new
     if (type==='project') {
       data.projects.push({id:'p'+Date.now(), name, sub:document.getElementById('f-sub').value.trim(), collapsed:false, phases:[]});
     } else if (type==='phase') {
@@ -1030,7 +1043,7 @@ function deleteItem(type, projId, phaseId='', taskId='') {
 }
 
 // ══════════════════════════════════════════════════════
-// GOOGLE SHEETS SYNC — JSONP (แก้ CORS)
+// GOOGLE SHEETS SYNC — JSONP
 // ══════════════════════════════════════════════════════
 function setSyncStatus(state, msg) {
   const pill = document.getElementById('sync-pill');
@@ -1042,20 +1055,16 @@ function showSyncBtns(v) {
   document.getElementById('btn-pull').style.display = v?'':'none';
   document.getElementById('btn-push').style.display = v?'':'none';
 }
-function toggleApiBar() {
-  document.getElementById('api-bar').classList.toggle('hidden');
-}
 function saveApiUrl() {
   const url = document.getElementById('api-url-inp').value.trim();
   if (!url) { alert('กรุณากรอก URL'); return; }
   apiUrl = url;
   localStorage.setItem('mp_api_url', apiUrl);
   showSyncBtns(true);
-  toggleApiBar();
+  toggleCfgBar('api-bar');
   pullSheets();
 }
 
-// JSONP helper — ใช้แทน fetch เพื่อหลีกเลี่ยง CORS
 function jsonp(url) {
   return new Promise((resolve, reject) => {
     const cbName = '_mp_cb_' + Date.now();
@@ -1102,7 +1111,6 @@ function pullSheets(silent=false) {
 function pushSheets() {
   if (!apiUrl) { alert('ตั้ง API URL ก่อน'); return; }
   setSyncStatus('loading','กำลัง push…');
-  // เข้ารหัส data เป็น payload ใน URL (JSONP ส่งได้แค่ GET)
   const payload = encodeURIComponent(JSON.stringify({data, updatedBy:'app'}));
   jsonp(apiUrl + '?action=save&payload=' + payload)
     .then(json => {
@@ -1135,31 +1143,16 @@ document.getElementById('modal-overlay').addEventListener('click', function(e) {
 
 init();
 
-// Initialize alarm visibility from localStorage
 (function(){
-  const alarmSection = document.getElementById('alarm-section');
-  const alarmBtn = document.getElementById('alarm-toggle-btn');
-  if (alarmSection && alarmBtn) {
-    const savedState = localStorage.getItem('alarmVisible');
-    if (savedState === 'true') {
-      alarmSection.classList.add('alarm-visible');
-      alarmBtn.textContent = '📊 Hide Flash Alarm';
-    } else {
-      alarmSection.classList.remove('alarm-visible');
-      alarmBtn.textContent = '📊 View Flash Alarm';
-    }
-  }
-  
-  // Restore sidebar toggle state
   const sidebarPinned = localStorage.getItem('sidebarPinned') === '1';
   if (sidebarPinned && window.innerWidth > 768) {
     document.body.classList.remove('sidebar-collapsed');
   }
 })();
-
 </script>
 </div><!-- /main-wrap -->
 </div><!-- /app -->
+
 <script>
 (function(){
   var closeTimer=null;var pinned=localStorage.getItem('sidebarPinned')==='1';
@@ -1175,7 +1168,7 @@ init();
   const icon=document.getElementById('toggle-icon');if(icon)icon.textContent=document.body.classList.contains('sidebar-collapsed')?'▶':'◀';
 })();
 </script>
-<!-- ── Custom Cursor ─────────────────────────────────────────────── -->
+
 <script>
 (function(){
   const dot=document.getElementById('cursor');
@@ -1192,69 +1185,11 @@ init();
     ring.style.left=rx+'px';ring.style.top=ry+'px';
     requestAnimationFrame(animRing);
   })();
-  document.querySelectorAll('a,button,.card,.kpi,.src-pill,.tg-btn,.enter-btn').forEach(el=>{
+  document.querySelectorAll('a,button,.card,.kpi,.icon-btn,.btn').forEach(el=>{
     el.addEventListener('mouseenter',()=>document.body.classList.add('cur-hover'));
     el.addEventListener('mouseleave',()=>document.body.classList.remove('cur-hover'));
   });
 })();
-
-// Helper function to add today line to charts
-function addTodayLineToChart(chartInstance, xAxisKey) {
-  if (!chartInstance || !chartInstance.ctx || !chartInstance.chartArea) return;
-  
-  const ctx = chartInstance.ctx;
-  const xScale = chartInstance.scales[xAxisKey || 'x'];
-  if (!xScale) return;
-  
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  // Find today position in the x-axis
-  let todayIndex = -1;
-  const labels = chartInstance.data.labels || [];
-  for (let i = 0; i < labels.length; i++) {
-    const label = labels[i];
-    let labelDate;
-    
-    if (typeof label === 'string') {
-      labelDate = new Date(label);
-    } else if (label instanceof Date) {
-      labelDate = label;
-    } else {
-      continue;
-    }
-    
-    labelDate.setHours(0, 0, 0, 0);
-    if (labelDate.getTime() === today.getTime()) {
-      todayIndex = i;
-      break;
-    }
-  }
-  
-  if (todayIndex === -1) return;
-  
-  // Calculate the x pixel position
-  const xPixel = xScale.getPixelForValue(todayIndex);
-  if (isNaN(xPixel)) return;
-  
-  // Draw the line
-  ctx.save();
-  ctx.strokeStyle = 'rgba(227, 25, 55, 0.4)';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([5, 5]);
-  ctx.beginPath();
-  ctx.moveTo(xPixel, chartInstance.chartArea.top);
-  ctx.lineTo(xPixel, chartInstance.chartArea.bottom);
-  ctx.stroke();
-  
-  // Draw label badge
-  const badgeY = chartInstance.chartArea.top - 20;
-  ctx.font = '11px Inter, sans-serif';
-  ctx.fillStyle = 'rgba(227, 25, 55, 0.8)';
-  ctx.fillText('Today', xPixel - 15, badgeY);
-  ctx.restore();
-}
-
 </script>
 </body>
 </html>
